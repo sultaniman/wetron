@@ -41,6 +41,7 @@ export type FlowEdge = {
     readonly sourceNodeName: string;
     readonly targetOpType: string;
     readonly targetNodeName: string;
+    readonly bypassX?: number;
   };
 };
 
@@ -172,6 +173,35 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
   for (const fn of flowNodes) {
     const pos = g.node(fn.id);
     if (pos) fn.position = { x: pos.x - NODE_W / 2, y: pos.y - pos.height / 2 };
+  }
+
+  // Compute bypass routing for skip connections (edges that span multiple ranks).
+  // The edge component can't see other nodes, so we pre-compute the detour X here
+  // where all dagre positions are available.
+  const BYPASS_PAD = 40;
+  let graphLeft = Infinity, graphRight = -Infinity;
+  for (const fn of flowNodes) {
+    const pos = g.node(fn.id);
+    if (pos) {
+      graphLeft = Math.min(graphLeft, pos.x - pos.width / 2);
+      graphRight = Math.max(graphRight, pos.x + pos.width / 2);
+    }
+  }
+  if (isFinite(graphLeft)) {
+    const leftBypassX = graphLeft - BYPASS_PAD;
+    const rightBypassX = graphRight + BYPASS_PAD;
+    for (let i = 0; i < flowEdges.length; i++) {
+      const fe = flowEdges[i];
+      const srcPos = g.node(fe.source);
+      const tgtPos = g.node(fe.target);
+      if (!srcPos || !tgtPos) continue;
+      const gap = (tgtPos.y - tgtPos.height / 2) - (srcPos.y + srcPos.height / 2);
+      // Adjacent ranks have gap === ranksep (60). Skip connections span ≥ 2 ranks.
+      if (gap > 90) {
+        const bypassX = tgtPos.x <= srcPos.x ? leftBypassX : rightBypassX;
+        flowEdges[i] = { ...fe, data: { ...fe.data, bypassX } };
+      }
+    }
   }
 
   return { nodes: flowNodes, edges: flowEdges };
