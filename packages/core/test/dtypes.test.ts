@@ -9,9 +9,6 @@ import {
   readUint4,
   readIntBits,
   readUintBits,
-  readInt128,
-  readFloat80,
-  readFloat128,
 } from "../src/dtypes.ts";
 
 test("readBfloat16 decodes 1.0", () => {
@@ -109,17 +106,3 @@ test("readFloat4e2m1 decodes from lookup table", () => {
   expect(readFloat4e2m1(view, 0, true)).toBe(2.0);
 });
 
-test("readInt128 throws RangeError", () => {
-  const view = new DataView(new ArrayBuffer(16));
-  expect(() => readInt128(view, 0)).toThrow(RangeError);
-});
-
-test("readFloat80 throws RangeError", () => {
-  const view = new DataView(new ArrayBuffer(10));
-  expect(() => readFloat80(view, 0)).toThrow(RangeError);
-});
-
-test("readFloat128 throws RangeError", () => {
-  const view = new DataView(new ArrayBuffer(16));
-  expect(() => readFloat128(view, 0)).toThrow(RangeError);
-});

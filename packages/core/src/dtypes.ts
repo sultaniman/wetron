@@ -128,16 +128,3 @@ export function bigIntToNumber(v: bigint): number {
 
   return Number(v);
 }
-
-// Tier-3 stubs
-export function readInt128(_view: DataView, _offset: number): never {
-  throw new RangeError("int128 is not supported");
-}
-
-export function readFloat80(_view: DataView, _offset: number): never {
-  throw new RangeError("float80 is not supported");
-}
-
-export function readFloat128(_view: DataView, _offset: number): never {
-  throw new RangeError("float128 is not supported");
-}
