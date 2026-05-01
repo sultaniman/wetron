@@ -235,9 +235,18 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     const dir = isLeft ? -1 : 1;
     const lanes = isLeft ? leftLanes : rightLanes;
 
-    // Find the first lane with no Y-overlapping bypass from a different source.
-    // Same-source edges on the same side share a lane (they travel together and
-    // branch at the bottom); edges from different sources get separate lanes.
+    // If this source already has a lane on this side, reuse its bypassX exactly.
+    // Different skip lengths from the same source compute slightly different bands,
+    // which would give different bypassX values and cause a staircase appearance.
+    const sameSourceLane = lanes.find(l => l.source === fe.source);
+    if (sameSourceLane) {
+      lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX: sameSourceLane.bypassX, source: fe.source });
+      flowEdges[i] = { ...fe, data: { ...fe.data, bypassX: sameSourceLane.bypassX } };
+      continue;
+    }
+
+    // New source on this side: find the first lane with no Y-overlapping bypass
+    // from a different source. Edges from different sources get separate lanes.
     let laneIdx = 0;
     while (lanes.some(l =>
       l.source !== fe.source &&
