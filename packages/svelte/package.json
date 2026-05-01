@@ -1,0 +1,20 @@
+{
+  "name": "@wetron/svelte",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*",
+    "@wetron/tokens": "workspace:*"
+  },
+  "devDependencies": {
+    "phosphor-svelte": "^3.1.0"
+  },
+  "peerDependencies": {
+    "@xyflow/svelte": "^1.5.2",
+    "phosphor-svelte": ">=3",
+    "svelte": "^5.55.5"
+  }
+}
