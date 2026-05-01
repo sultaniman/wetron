@@ -1,16 +1,7 @@
-import { type MouseEvent, useMemo, useEffect, useCallback } from "react";
-import {
-  useNodesState,
-  useReactFlow,
-  MarkerType,
-  type Edge,
-  type Node,
-  type NodeMouseHandler,
-} from "@xyflow/react";
+import { useMemo, useEffect } from "react";
+import { useNodesState, type Edge, type Node } from "@xyflow/react";
 import { modelGraphToFlow, type GraphNodeData } from "@wetron/core/transform";
 import type { ModelGraph } from "@wetron/core/ir";
-import type { PanelTarget } from "../node-property-panel/node-property-panel.tsx";
-import { EDGE_THEME } from "../theme.ts";
 
 type FlowEdgeData = {
   tensorName: string;
