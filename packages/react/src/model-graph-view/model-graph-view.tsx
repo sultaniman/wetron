@@ -6,7 +6,6 @@ import {
   Background,
   ReactFlowProvider,
   useReactFlow,
-  useNodesState,
   MarkerType,
   PanOnScrollMode,
   type Node,
@@ -16,7 +15,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./model-graph-view.css";
-import { modelGraphToFlow, type GraphNodeData } from "@wetron/core/transform";
+import type { GraphNodeData } from "@wetron/core/transform";
 import type { ModelGraph } from "@wetron/core/ir";
 import { GraphNodeComponent } from "../nodes/graph-node.tsx";
 import { IoNodeComponent } from "../nodes/io-node.tsx";
@@ -24,6 +23,7 @@ import { ModelEdge } from "../edges/model-edge.tsx";
 import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
 import { ColorModeContext, useColorMode, type ColorMode } from "../color-mode-context.ts";
 import { MINIMAP_THEME, EDGE_THEME } from "../theme.ts";
+import { useModelNodes } from "./hooks.ts";
 
 const nodeTypes: NodeTypes = {
   graphNode: GraphNodeComponent as NodeTypes[string],
@@ -54,14 +54,7 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
     () => (isDark ? { stroke: "#7a7a9a", opacity: 0.55 } : { stroke: "rgba(60,60,100,0.55)" }),
     [isDark],
   );
-  const { nodes: layoutNodes, edges: layoutEdges } = useMemo(
-    () => modelGraphToFlow(graph),
-    [graph],
-  );
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutNodes as Node<GraphNodeData>[]);
-  useEffect(() => {
-    setNodes(layoutNodes as Node<GraphNodeData>[]);
-  }, [layoutNodes, setNodes]);
+  const { nodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
 
   const edges = useMemo(
     () =>
