@@ -1,0 +1,28 @@
+{
+  "name": "@wetron/react",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*",
+    "@wetron/tokens": "workspace:*"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20.9.0",
+    "@phosphor-icons/react": "^2.1.10",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@wetron/onnx": "workspace:*",
+    "@xyflow/react": "^12.10.2",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "peerDependencies": {
+    "@phosphor-icons/react": ">=2",
+    "@xyflow/react": ">=12",
+    "react": ">=18",
+    "react-dom": ">=18"
+  }
+}
