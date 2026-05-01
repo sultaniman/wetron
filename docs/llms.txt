@@ -1,0 +1,105 @@
+# wetron
+
+Browser-only neural network model visualizer. Parses ONNX, TFLite, and Keras files into a shared IR and renders the computation graph. Graph structure only — no weight data is read or stored anywhere in the stack.
+
+## Packages
+
+- `@wetron/core` — shared IR types, format detection, dtype utilities, Dagre layout, unified `parseModel` entry point
+- `@wetron/onnx` — ONNX parser (protobufjs)
+- `@wetron/tflite` — TFLite parser (flatbuffers)
+- `@wetron/keras` — Keras `.keras` archive parser (fflate)
+- `@wetron/react` — React components: `ModelGraphView`, `NodePropertyPanel` (peer: react 18+, @xyflow/react 12+, @phosphor-icons/react 2+)
+- `@wetron/svelte` — Svelte components: `ModelGraphView`, `NodePropertyPanel` (peer: svelte 5+, @xyflow/svelte 1.5+, phosphor-svelte 3+)
+- `@wetron/tokens` — design tokens: category colors, CSS vars — zero dependencies, all types inlined
+
+## Core IR types (`@wetron/core/ir`)
+
+```ts
+type AttributeValue = string | number | boolean | readonly number[] | readonly string[];
+
+interface GraphValue {
+  readonly name: string;
+  readonly shape: readonly number[] | null;
+  readonly dtype: string | null;
+}
+
+interface GraphNode {
+  readonly name: string;
+  readonly opType: string;
+  readonly inputs: readonly string[];   // tensor names
+  readonly outputs: readonly string[];  // tensor names
+  readonly attributes: Readonly<Record<string, AttributeValue>>;
+}
+
+interface ModelGraph {
+  readonly name: string;
+  readonly inputs: readonly GraphValue[];
+  readonly outputs: readonly GraphValue[];
+  readonly nodes: readonly GraphNode[];
+  readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
+  readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
+}
+
+class ParseError extends Error {
+  readonly format: string;   // "onnx" | "tflite" | "keras" | "unknown"
+  readonly context: string;  // human-readable description of failure
+}
+```
+
+## Public API (`@wetron/core`)
+
+```ts
+// Unified entry — detects format from magic bytes, dispatches to parser
+async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>
+
+// Format detection — never throws, returns "unknown" on no match
+type Format = "onnx" | "tflite" | "keras" | "unknown";
+function detectFormat(bytes: Uint8Array, filename?: string): Format
+
+// IR → ReactFlow / SvelteFlow nodes and edges with Dagre layout applied
+function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] }
+
+// Op category classification
+type OpCategory = "input" | "output" | "conv" | "activation" | "normalization" | "pooling"
+  | "reshape" | "math" | "reduction" | "merge" | "attention" | "recurrent"
+  | "quantization" | "constant" | "logic" | "unknown";
+function opCategory(opType: string): OpCategory
+```
+
+## Parser APIs
+
+```ts
+// @wetron/onnx
+async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph>
+
+// @wetron/tflite
+function parseTflite(bytes: Uint8Array): ModelGraph  // sync
+
+// @wetron/keras
+function parseKeras(bytes: Uint8Array): ModelGraph
+```
+
+## Architecture rules
+
+- All IR types live in `@wetron/core/src/ir.ts` — parsers import from there.
+- Exotic dtype readers (bfloat16, float8, int4, etc.) live in `@wetron/core/src/dtypes.ts` — never inline in parsers.
+- `detectFormat` must always return a `Format` string, never throw.
+- No weight deserialization anywhere — graph structure only.
+- No patching of `DataView.prototype` or `BigInt.prototype`.
+- Use `bigIntToNumber(v)` from `@wetron/core/dtypes` for BigInt → number (throws RangeError if out of safe range).
+
+## Platform constraints (browser-only)
+
+- Binary reads: `DataView` methods only
+- File input: `file.arrayBuffer()`
+- Remote fetch: `fetch().arrayBuffer()`
+- Text: `TextDecoder` / `TextEncoder`
+- Decompression: `DecompressionStream`
+- No `FileReader`, `XMLHttpRequest`, Node.js APIs, or manual UTF-8 loops
+
+## Adding a parser
+
+1. Create `packages/<format>/src/parse.ts` — export a single parse function returning `ModelGraph`.
+2. Import IR types from `@wetron/core/ir`, dtype readers from `@wetron/core/dtypes`.
+3. Register magic bytes in `@wetron/core/src/detect.ts` and add a dynamic import branch in `@wetron/core/src/index.ts`.
+4. Test against real model files in `test-models/` — node count must match netron's UI for the same file.

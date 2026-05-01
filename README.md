@@ -49,6 +49,7 @@ cd apps/demo-svelte && bun dev   # Svelte
 
 - [Usage](docs/usage.md) — parsing models, rendering with React/Svelte, core types
 - [Extending](docs/extending.md) — adding a new parser
+- [llms.txt](docs/llms.txt) — machine-readable summary for LLM context
 
 ## Constraints
 
