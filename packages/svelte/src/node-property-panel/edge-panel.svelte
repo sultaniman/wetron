@@ -55,20 +55,20 @@
 
 <style>
   .header {
-    padding: 12px 38px 10px 14px;
+    padding: 10px 38px 9px 11px;
     border-bottom: 1px solid var(--panel-header-border);
     display: flex;
     align-items: center;
     gap: 8px;
   }
   .section {
-    padding: 9px 14px;
+    padding: 7px 11px;
     border-bottom: 1px solid var(--panel-section-border);
   }
-  .sectionLast { padding: 9px 14px; }
+  .sectionLast { padding: 7px 11px; }
   .iconBox {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -86,5 +86,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    margin-top: 4px;
   }
 </style>

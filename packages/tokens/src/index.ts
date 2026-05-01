@@ -16,6 +16,8 @@ export const CATEGORY_THEME = {
   attention:     { light: '#00695c', dark: '#4db6ac' },
   recurrent:     { light: '#558b2f', dark: '#aed581' },
   quantization:  { light: '#795548', dark: '#bcaaa4' },
+  constant:      { light: '#0277bd', dark: '#4fc3f7' },
+  logic:         { light: '#00838f', dark: '#4dd0e1' },
   unknown:       { light: '#757575', dark: '#9e9e9e' },
 } as const satisfies Record<OpCategory, CategoryColors>;
 

@@ -11,6 +11,7 @@
     pill: string;
     subtitle?: string;
     cat: OpCategory;
+    op?: string;
     color: string;
     bg: string;
     border: string;
@@ -28,6 +29,7 @@
     pill,
     subtitle,
     cat,
+    op,
     color,
     bg,
     border,
@@ -72,15 +74,13 @@
   <div class="header-row">
     <span class="pill">{pill}</span>
     <span class="icon">
-      <CategoryIcon {cat} size={16} />
+      <CategoryIcon {cat} {op} size={16} />
     </span>
   </div>
   {#if subtitle}
     <div class="subtitle">{subtitle}</div>
   {/if}
-  {#if children}
-    <div class="meta">{@render children()}</div>
-  {/if}
+  {@render children?.()}
   {#if bottomHandle}
     <Handle type="source" position={Position.Bottom} />
   {/if}
@@ -130,13 +130,5 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-family: monospace;
-  }
-  .meta {
-    font-size: 10px;
-    color: var(--node-muted);
-    margin-top: 5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 </style>

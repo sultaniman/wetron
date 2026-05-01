@@ -35,9 +35,9 @@
   .clickable { cursor: pointer; }
   .clickable:hover {
     background: color-mix(in oklch, var(--panel-label) 5%, transparent);
-    margin: 1px -14px;
-    padding-left: 14px;
-    padding-right: 14px;
+    margin: 1px -11px;
+    padding-left: 11px;
+    padding-right: 11px;
   }
   .label {
     color: var(--panel-label);

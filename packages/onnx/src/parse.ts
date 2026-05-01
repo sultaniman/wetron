@@ -42,8 +42,22 @@ const ONNX_DTYPE: Record<number, string> = {
   16: "bfloat16",
 };
 
+// protobufjs .toJSON() serializes enum fields as string names ("FLOAT", "INT", …)
+// Normalize to the numeric AttributeType used in switch cases.
+const ATTR_TYPE_NUM: Record<string, number> = {
+  FLOAT: 1, INT: 2, STRING: 3, TENSOR: 4, GRAPH: 5,
+  FLOATS: 6, INTS: 7, STRINGS: 8, TENSORS: 9, GRAPHS: 10,
+  SPARSE_TENSOR: 11, TYPE_PROTO: 13,
+};
+
+function attrTypeNumber(raw: unknown): number {
+  if (typeof raw === "number") return raw;
+  if (typeof raw === "string") return ATTR_TYPE_NUM[raw] ?? 0;
+  return 0;
+}
+
 function mapAttribute(a: Record<string, unknown>): AttributeValue {
-  const type = a["type"] as number;
+  const type = attrTypeNumber(a["type"]);
   switch (type) {
     case 1:
       return Number(a["f"] ?? 0);
@@ -52,6 +66,10 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
     case 3: {
       const s = a["s"];
       if (s instanceof Uint8Array) return _decoder.decode(s);
+      // protobufjs .toJSON() encodes bytes fields as base64 strings
+      if (typeof s === "string") {
+        try { return _decoder.decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0))); } catch { return s; }
+      }
       return String(s ?? "");
     }
     case 6:
@@ -59,7 +77,13 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
     case 7:
       return ((a["ints"] as unknown[] | null) ?? []).map(longToNumber);
     case 8:
-      return ((a["strings"] as Uint8Array[] | null) ?? []).map((b) => _decoder.decode(b));
+      return ((a["strings"] as Array<unknown> | null) ?? []).map((b) => {
+        if (b instanceof Uint8Array) return _decoder.decode(b);
+        if (typeof b === "string") {
+          try { return _decoder.decode(Uint8Array.from(atob(b), (c) => c.charCodeAt(0))); } catch { return b; }
+        }
+        return String(b);
+      });
     // TENSOR, GRAPH, SPARSE_TENSOR, TYPE_PROTO and list variants are skipped —
     // wetron only deserializes graph structure, not tensor data or subgraphs
     default:
@@ -99,18 +123,62 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
   if (!graph) throw new ParseError("onnx", "Model has no graph");
 
   const rawNodes = (graph["node"] as Array<Record<string, unknown>> | null) ?? [];
-  const nodes: GraphNode[] = rawNodes.map((n) => ({
-    name: String(n["name"] ?? ""),
-    opType: String(n["opType"] ?? ""),
-    inputs: ((n["input"] as string[] | null) ?? []).map(String),
-    outputs: ((n["output"] as string[] | null) ?? []).map(String),
-    attributes: Object.fromEntries(
-      ((n["attribute"] as Array<Record<string, unknown>> | null) ?? []).map((a) => [
-        String(a["name"] ?? ""),
-        mapAttribute(a),
-      ]),
-    ),
-  }));
+
+  // Fold Constant nodes: opType=Constant, no inputs, 1 output consumed exactly once,
+  // 1 attribute named 'value' (TENSOR type=4). Matches Netron's folding logic.
+  const inputUseCount = new Map<string, number>();
+  for (const n of rawNodes) {
+    for (const inp of (n["input"] as string[] | null) ?? []) {
+      if (inp) inputUseCount.set(inp, (inputUseCount.get(inp) ?? 0) + 1);
+    }
+  }
+
+  const foldedConstants = new Map<string, { shape: number[]; dtype: string }>();
+  for (const n of rawNodes) {
+    if (String(n["opType"] ?? "") !== "Constant") continue;
+    if (((n["input"] as unknown[] | null) ?? []).length !== 0) continue;
+
+    const outputs = (n["output"] as string[] | null) ?? [];
+    if (outputs.length !== 1) continue;
+
+    const outputName = String(outputs[0] ?? "");
+    if (!outputName || inputUseCount.get(outputName) !== 1) continue;
+
+    const attrs = (n["attribute"] as Array<Record<string, unknown>> | null) ?? [];
+    if (attrs.length !== 1) continue;
+
+    const attr = attrs[0];
+    if (String(attr["name"] ?? "") !== "value" || attrTypeNumber(attr["type"]) !== 4) continue;
+
+    const t = attr["t"] as Record<string, unknown> | null;
+    if (!t) continue;
+
+    const dims = (t["dims"] as Array<unknown> | null) ?? [];
+    const dataType = t["dataType"] as number | undefined;
+    foldedConstants.set(outputName, {
+      shape: dims.map((d) => longToNumber(d)),
+      dtype: ONNX_DTYPE[dataType ?? 0] ?? "unknown",
+    });
+  }
+
+  const nodes: GraphNode[] = rawNodes
+    .filter((n) => {
+      if (String(n["opType"] ?? "") !== "Constant") return true;
+      const outputs = (n["output"] as string[] | null) ?? [];
+      return outputs.length !== 1 || !foldedConstants.has(String(outputs[0] ?? ""));
+    })
+    .map((n) => ({
+      name: String(n["name"] ?? ""),
+      opType: String(n["opType"] ?? ""),
+      inputs: ((n["input"] as string[] | null) ?? []).map(String),
+      outputs: ((n["output"] as string[] | null) ?? []).map(String),
+      attributes: Object.fromEntries(
+        ((n["attribute"] as Array<Record<string, unknown>> | null) ?? []).map((a) => [
+          String(a["name"] ?? ""),
+          mapAttribute(a),
+        ]),
+      ),
+    }));
 
   const rawInputs = (graph["input"] as Array<Record<string, unknown>> | null) ?? [];
   const rawOutputs = (graph["output"] as Array<Record<string, unknown>> | null) ?? [];
@@ -135,16 +203,23 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
     }),
   );
 
+  // Folded Constant outputs become initializers
+  for (const [name, info] of foldedConstants) {
+    initializers.set(name, info);
+  }
+
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>();
   // Initializers always have shape
   for (const [name, init] of initializers) {
     tensorShapes.set(name, { shape: init.shape, dtype: init.dtype });
   }
+
   // Graph inputs and outputs
   for (const vi of [...filteredInputs, ...rawOutputs]) {
     const gv = mapValueInfo(vi);
     tensorShapes.set(gv.name, { shape: gv.shape, dtype: gv.dtype });
   }
+
   // Intermediate tensors — only present if the model has been shape-inferred
   const rawValueInfo = (graph["valueInfo"] as Array<Record<string, unknown>> | null) ?? [];
   for (const vi of rawValueInfo) {

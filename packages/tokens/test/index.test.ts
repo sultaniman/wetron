@@ -1,8 +1,8 @@
 import { test, expect } from 'bun:test';
 import { CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME, CANVAS_VARS, PANEL_VARS } from '../src/index.ts';
 
-test('CATEGORY_THEME has all 14 categories with light and dark', () => {
-  const expected = ['input','output','conv','activation','normalization','pooling','reshape','math','reduction','merge','attention','recurrent','quantization','unknown'];
+test('CATEGORY_THEME has all categories with light and dark', () => {
+  const expected = ['input','output','conv','activation','normalization','pooling','reshape','math','reduction','merge','attention','recurrent','quantization','constant','logic','unknown'];
   expect(Object.keys(CATEGORY_THEME)).toEqual(expected);
   for (const v of Object.values(CATEGORY_THEME)) {
     expect(typeof v.light).toBe('string');

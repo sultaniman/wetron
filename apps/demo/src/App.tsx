@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { ArrowUpIcon } from "@phosphor-icons/react";
 import { parseModel } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
 import type { ModelGraph } from "@wetron/core";
@@ -316,7 +317,7 @@ function DropZone({
         transition: "all 0.15s",
       }}
     >
-      <div style={{ fontSize: 40 }}>&#x2B06;</div>
+      <div style={{ color: isDark ? "#e0e0e0" : "#333" }}><ArrowUpIcon size={48} /></div>
       <div style={{ fontWeight: 600, color: isDark ? "#e0e0e0" : "#333" }}>
         Drop a model file here
       </div>

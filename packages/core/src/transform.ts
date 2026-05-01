@@ -96,15 +96,13 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     const node = graph.nodes[i];
     const id = `node::${node.name || `${node.opType}_${i}`}`;
     const labels = opInputLabels(node.opType);
-    const weightInputs =
-      labels.length === 0
-        ? undefined
-        : node.inputs
-            .map((name, slot) => {
-              const init = graph.initializers.get(name);
-              return init ? { slot, label: labels[slot] ?? `in_${slot}`, name, ...init } : null;
-            })
-            .filter((w): w is NonNullable<typeof w> => w !== null);
+    const weightInputsRaw = node.inputs
+      .map((name, slot) => {
+        const init = graph.initializers.get(name);
+        return init ? { slot, label: labels[slot] ?? `in_${slot}`, name, ...init } : null;
+      })
+      .filter((w): w is NonNullable<typeof w> => w !== null);
+    const weightInputs = weightInputsRaw.length > 0 ? weightInputsRaw : undefined;
     const hasSubtitle = !!(node.name && !/^op_\d+$/.test(node.name));
     const nWeights = weightInputs?.length ?? 0;
     const nodeH = CARD_BASE

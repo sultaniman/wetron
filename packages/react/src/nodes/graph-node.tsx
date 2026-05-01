@@ -2,7 +2,7 @@ import React from "react";
 import type { Node, NodeProps } from "@xyflow/react";
 import type { GraphNodeData } from "@wetron/core/transform";
 import { opCategory } from "@wetron/core";
-import { CATEGORY_THEME, CATEGORY_ICON } from "../theme.ts";
+import { CATEGORY_THEME, CATEGORY_ICON, OP_ICON } from "../theme.ts";
 import { useColorMode } from "../color-mode-context.ts";
 import { NodeCard } from "./node-card/node-card.tsx";
 import css from "./node-card/node-card.module.css";
@@ -21,7 +21,7 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
       pill={data.opType}
       subtitle={data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined}
       cat={cat}
-      iconEntry={CATEGORY_ICON[cat]}
+      iconEntry={OP_ICON[data.opType] ?? CATEGORY_ICON[cat]}
       tinted={!hasWeights}
       selected={selected}
       colors={{

@@ -13,6 +13,7 @@
   --panel-close-hover: #f0f0f0;
 
   position: relative;
+  width: 260px;
   background: var(--panel-bg);
   border-radius: 8px;
   overflow: hidden;
@@ -38,7 +39,7 @@
 }
 
 .header {
-  padding: 12px 38px 10px 14px;
+  padding: 10px 38px 9px 11px;
   border-bottom: 1px solid var(--panel-header-border);
   display: flex;
   align-items: center;
@@ -46,17 +47,17 @@
 }
 
 .section {
-  padding: 9px 14px;
+  padding: 7px 11px;
   border-bottom: 1px solid var(--panel-section-border);
 }
 
 .sectionLast {
-  padding: 9px 14px;
+  padding: 7px 11px;
 }
 
 .iconBox {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -119,6 +120,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  margin-top: 4px;
 }
 
 /* Option A: lighter weight, no uppercase */
@@ -130,6 +132,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .row {
@@ -147,9 +151,9 @@
 
 .rowClickable:hover {
   background: color-mix(in oklch, var(--panel-label) 5%, transparent);
-  margin: 1px -14px;
-  padding-left: 14px;
-  padding-right: 14px;
+  margin: 1px -11px;
+  padding-left: 11px;
+  padding-right: 11px;
 }
 
 .rowLabel {

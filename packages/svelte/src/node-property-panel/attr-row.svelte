@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { AttributeValue } from '@wetron/core/ir';
   import Chip from './chip.svelte';
-  import { attrChipLabel, formatAttr, formatAttrBrief } from './panel-utils.ts';
+  import { attrChipLabel, formatAttr, formatAttrBrief } from '@wetron/core/panel-utils';
 
   let { name, value }: { name: string; value: AttributeValue } = $props();
 

@@ -32,6 +32,17 @@
   {selected}
 >
   {#if meta}
-    {meta}
+    <div class="meta">{meta}</div>
   {/if}
 </NodeCard>
+
+<style>
+  .meta {
+    font-size: 10px;
+    color: var(--node-muted);
+    margin-top: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>

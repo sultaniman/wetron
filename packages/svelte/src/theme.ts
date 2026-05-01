@@ -23,5 +23,7 @@ export const CATEGORY_THEME: Record<OpCategory, CategoryTheme> = {
   attention:     { ...CATEGORY_COLORS.attention,     icon: '⊙' },
   recurrent:     { ...CATEGORY_COLORS.recurrent,     icon: '↺' },
   quantization:  { ...CATEGORY_COLORS.quantization,  icon: 'Q' },
+  constant:      { ...CATEGORY_COLORS.constant,      icon: '◇' },
+  logic:         { ...CATEGORY_COLORS.logic,         icon: '=' },
   unknown:       { ...CATEGORY_COLORS.unknown,       icon: '?' },
 };

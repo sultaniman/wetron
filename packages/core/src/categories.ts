@@ -12,6 +12,8 @@ export type OpCategory =
   | "attention"
   | "recurrent"
   | "quantization"
+  | "constant"
+  | "logic"
   | "unknown";
 
 const CATEGORY_MAP: Record<string, OpCategory> = {
@@ -20,11 +22,11 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
   Conv: "conv",
   ConvTranspose: "conv",
   DepthwiseConv: "conv",
-  Gemm: "conv",
-  MatMul: "conv",
-  Linear: "conv",
+  Gemm: "math",
+  MatMul: "math",
+  Linear: "math",
   QLinearConv: "conv",
-  QLinearMatMul: "conv",
+  QLinearMatMul: "math",
   Relu: "activation",
   Relu6: "activation",
   Sigmoid: "activation",
@@ -67,6 +69,8 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
   Pad: "reshape",
   Shape: "reshape",
   Slice: "reshape",
+  Constant: "constant",
+  ConstantOfShape: "constant",
   Add: "math",
   Sub: "math",
   Mul: "math",
@@ -86,6 +90,20 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
   Min: "math",
   Mod: "math",
   Clip: "math",
+  Equal: "logic",
+  Less: "logic",
+  LessOrEqual: "logic",
+  Greater: "logic",
+  GreaterOrEqual: "logic",
+  Not: "math",
+  And: "math",
+  Or: "math",
+  Xor: "math",
+  BitShift: "math",
+  BitwiseAnd: "math",
+  BitwiseOr: "math",
+  BitwiseXor: "math",
+  BitwiseNot: "math",
   ReduceMean: "reduction",
   ReduceSum: "reduction",
   ReduceMax: "reduction",
@@ -105,7 +123,7 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
   ScatterElements: "merge",
   ScatterND: "merge",
   Where: "merge",
-  NonZero: "merge",
+  NonZero: "reduction",
   TopK: "merge",
   MultiHeadAttention: "attention",
   Attention: "attention",

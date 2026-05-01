@@ -18,5 +18,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 </style>

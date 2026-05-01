@@ -76,6 +76,7 @@
 <style>
   .panel {
     position: relative;
+    width: 260px;
     background: var(--panel-bg);
     border-radius: 8px;
     overflow: hidden;

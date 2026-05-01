@@ -3,8 +3,8 @@ import { opCategory } from "../src/categories.ts";
 
 test("Conv maps to conv", () => expect(opCategory("Conv")).toBe("conv"));
 test("ConvTranspose maps to conv", () => expect(opCategory("ConvTranspose")).toBe("conv"));
-test("Gemm maps to conv", () => expect(opCategory("Gemm")).toBe("conv"));
-test("MatMul maps to conv", () => expect(opCategory("MatMul")).toBe("conv"));
+test("Gemm maps to math", () => expect(opCategory("Gemm")).toBe("math"));
+test("MatMul maps to math", () => expect(opCategory("MatMul")).toBe("math"));
 test("Relu maps to activation", () => expect(opCategory("Relu")).toBe("activation"));
 test("Sigmoid maps to activation", () => expect(opCategory("Sigmoid")).toBe("activation"));
 test("Gelu maps to activation", () => expect(opCategory("Gelu")).toBe("activation"));

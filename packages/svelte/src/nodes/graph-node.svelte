@@ -21,6 +21,7 @@
   pill={data.opType}
   subtitle={data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined}
   {cat}
+  op={data.opType}
   {color}
   bg={isDark ? '#1e1e2e' : '#fff'}
   border={isDark ? '#333' : '#e0e0e0'}
@@ -30,21 +31,26 @@
   {selected}
 >
   {#if hasWeights && data.weightInputs}
-    {#each data.weightInputs as w}
-      <div
-        class="weight-row"
-        data-weight-name={w.name}
-        data-weight-dtype={w.dtype}
-        data-weight-shape={w.shape.join(',')}
-      >
-        <span class="weight-label">{w.label}</span>
-        <span class="weight-shape">〈{w.shape.join('×')}〉</span>
-      </div>
-    {/each}
+    <div class="meta">
+      {#each data.weightInputs as w}
+        <div
+          class="weight-row"
+          data-weight-name={w.name}
+          data-weight-dtype={w.dtype}
+          data-weight-shape={w.shape.join(',')}
+        >
+          <span class="weight-label">{w.label}</span>
+          <span class="weight-shape">〈{w.shape.join('×')}〉</span>
+        </div>
+      {/each}
+    </div>
   {/if}
 </NodeCard>
 
 <style>
+  .meta {
+    margin-top: 5px;
+  }
   .weight-row {
     display: flex;
     gap: 4px;
