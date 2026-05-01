@@ -1,0 +1,27 @@
+{
+  "name": "@wetron/demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*",
+    "@wetron/onnx": "workspace:*",
+    "@wetron/react": "workspace:*",
+    "@wetron/tflite": "workspace:*",
+    "@xyflow/react": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest"
+  }
+}
