@@ -16,9 +16,12 @@
     "url": "https://codeberg.org/askar/wetron.git",
     "directory": "packages/keras"
   },
+  "files": [
+    "src",
+    "llms.txt"
+  ],
   "type": "module",
   "sideEffects": false,
-  "files": ["src"],
   "exports": {
     ".": "./src/index.ts"
   },

@@ -1,0 +1,45 @@
+# @wetron/svelte
+
+Svelte components for neural network graph visualization. Renders a `ModelGraph` IR as an interactive node graph using SvelteFlow, with a property panel for inspecting selected nodes, edges, and tensors.
+
+## API
+
+```svelte
+<!-- Main graph view -->
+<ModelGraphView
+  graph={ModelGraph}
+  onTargetClick={(target: PanelTarget) => void}
+  colorMode={"light" | "dark" | "system"}
+/>
+
+<!-- Property panel -->
+<NodePropertyPanel
+  target={PanelTarget | null}
+  colorMode={"light" | "dark" | "system"}
+/>
+```
+
+## Types
+
+```ts
+type ColorMode = "light" | "dark" | "system";
+
+type PanelTarget =
+  | GraphNode
+  | { edge: { tensorName: string; sourceOpType: string; shape: readonly number[] | null; dtype: string | null } }
+  | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
+```
+
+## Peer dependencies
+
+- `svelte` ≥ 5
+- `@xyflow/svelte` ≥ 1.5.2
+- `phosphor-svelte` ≥ 3
+
+## Implementation notes
+
+- `ModelGraphView` calls `modelGraphToFlow` from `@wetron/core/transform` internally — consumers pass a `ModelGraph`, not raw flow nodes.
+- Uses Svelte 5 runes (`$state`, `$derived`, `$effect`).
+- `colorMode="system"` reads `prefers-color-scheme` via a media query listener.
+- Theme colors for node categories come from `@wetron/tokens`.
+- Layout is computed once on mount via Dagre (top-to-bottom); re-computed when `graph` prop changes.
