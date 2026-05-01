@@ -105,4 +105,3 @@ test("readFloat4e2m1 decodes from lookup table", () => {
   expect(readFloat4e2m1(view, 0, false)).toBe(1.0);
   expect(readFloat4e2m1(view, 0, true)).toBe(2.0);
 });
-

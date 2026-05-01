@@ -2,14 +2,20 @@
   "name": "@wetron/onnx",
   "version": "0.0.1",
   "description": "ONNX model parser — extracts graph structure (nodes, edges, shapes) from .onnx files",
-  "keywords": ["onnx", "neural-network", "model-parser", "graph", "visualization"],
+  "keywords": [
+    "graph",
+    "model-parser",
+    "neural-network",
+    "onnx",
+    "visualization"
+  ],
+  "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",
     "directory": "packages/onnx"
   },
-  "homepage": "https://codeberg.org/askar/wetron",
   "type": "module",
   "sideEffects": false,
   "exports": {

@@ -2,14 +2,20 @@
   "name": "@wetron/tokens",
   "version": "0.0.1",
   "description": "Design tokens — theme colors and CSS variables for wetron graph visualization components",
-  "keywords": ["design-tokens", "theme", "css-variables", "neural-network", "visualization"],
+  "keywords": [
+    "css-variables",
+    "design-tokens",
+    "neural-network",
+    "theme",
+    "visualization"
+  ],
+  "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",
     "directory": "packages/tokens"
   },
-  "homepage": "https://codeberg.org/askar/wetron",
   "type": "module",
   "sideEffects": false,
   "exports": {

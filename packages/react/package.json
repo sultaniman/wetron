@@ -2,14 +2,21 @@
   "name": "@wetron/react",
   "version": "0.0.1",
   "description": "React components for neural network graph visualization, built on ReactFlow",
-  "keywords": ["neural-network", "graph", "visualization", "react", "reactflow", "xyflow"],
+  "keywords": [
+    "graph",
+    "neural-network",
+    "react",
+    "reactflow",
+    "visualization",
+    "xyflow"
+  ],
+  "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",
     "directory": "packages/react"
   },
-  "homepage": "https://codeberg.org/askar/wetron",
   "type": "module",
   "sideEffects": false,
   "exports": {

@@ -34,7 +34,15 @@ test("Input maps to input", () => expect(opCategory("Input")).toBe("input"));
 test("Output maps to output", () => expect(opCategory("Output")).toBe("output"));
 
 test("Keras conv/dense layers → conv", () => {
-  for (const op of ["Conv1D", "Conv2D", "Conv3D", "Conv2DTranspose", "DepthwiseConv2D", "SeparableConv2D", "Dense"]) {
+  for (const op of [
+    "Conv1D",
+    "Conv2D",
+    "Conv3D",
+    "Conv2DTranspose",
+    "DepthwiseConv2D",
+    "SeparableConv2D",
+    "Dense",
+  ]) {
     expect(opCategory(op)).toBe("conv");
   }
 });
@@ -49,12 +57,26 @@ test("Keras normalization layers → normalization", () => {
   }
 });
 test("Keras pooling layers → pooling", () => {
-  for (const op of ["MaxPooling1D", "MaxPooling2D", "MaxPooling3D", "AveragePooling2D", "GlobalMaxPooling2D", "GlobalAveragePooling2D"]) {
+  for (const op of [
+    "MaxPooling1D",
+    "MaxPooling2D",
+    "MaxPooling3D",
+    "AveragePooling2D",
+    "GlobalMaxPooling2D",
+    "GlobalAveragePooling2D",
+  ]) {
     expect(opCategory(op)).toBe("pooling");
   }
 });
 test("Keras reshape layers → reshape", () => {
-  for (const op of ["Flatten", "Permute", "RepeatVector", "ZeroPadding2D", "Cropping2D", "UpSampling2D"]) {
+  for (const op of [
+    "Flatten",
+    "Permute",
+    "RepeatVector",
+    "ZeroPadding2D",
+    "Cropping2D",
+    "UpSampling2D",
+  ]) {
     expect(opCategory(op)).toBe("reshape");
   }
 });

@@ -2,14 +2,20 @@
   "name": "@wetron/keras",
   "version": "0.0.1",
   "description": "Keras model parser — extracts graph structure from .keras archive files",
-  "keywords": ["keras", "neural-network", "model-parser", "graph", "visualization"],
+  "keywords": [
+    "graph",
+    "keras",
+    "model-parser",
+    "neural-network",
+    "visualization"
+  ],
+  "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",
     "directory": "packages/keras"
   },
-  "homepage": "https://codeberg.org/askar/wetron",
   "type": "module",
   "sideEffects": false,
   "exports": {

@@ -99,14 +99,12 @@ function App() {
 
   return (
     <>
-      <input type="file" accept=".onnx,.tflite,.keras" onChange={(e) => handleFile(e.target.files![0])} />
-      {graph && (
-        <ModelGraphView
-          graph={graph}
-          onTargetClick={setSelected}
-          colorMode="system"
-        />
-      )}
+      <input
+        type="file"
+        accept=".onnx,.tflite,.keras"
+        onChange={(e) => handleFile(e.target.files![0])}
+      />
+      {graph && <ModelGraphView graph={graph} onTargetClick={setSelected} colorMode="system" />}
       <NodePropertyPanel target={selected} colorMode="system" />
     </>
   );

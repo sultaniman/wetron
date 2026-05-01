@@ -2,14 +2,22 @@
   "name": "@wetron/core",
   "version": "0.0.1",
   "description": "IR types, format detection, dtype utilities and layout transform for neural network graph visualization",
-  "keywords": ["neural-network", "model-viewer", "onnx", "tflite", "keras", "graph", "visualization"],
+  "keywords": [
+    "graph",
+    "keras",
+    "model-viewer",
+    "neural-network",
+    "onnx",
+    "tflite",
+    "visualization"
+  ],
+  "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",
     "directory": "packages/core"
   },
-  "homepage": "https://codeberg.org/askar/wetron",
   "type": "module",
   "sideEffects": false,
   "exports": {
