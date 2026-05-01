@@ -1,7 +1,17 @@
 {
   "name": "@wetron/svelte",
   "version": "0.0.1",
+  "description": "Svelte components for neural network graph visualization, built on SvelteFlow",
+  "keywords": ["neural-network", "graph", "visualization", "svelte", "svelteflow", "xyflow"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://codeberg.org/askar/wetron.git",
+    "directory": "packages/svelte"
+  },
+  "homepage": "https://codeberg.org/askar/wetron",
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"
   },
