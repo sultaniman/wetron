@@ -6,6 +6,7 @@ export const ColorModeContext = createContext<ColorMode>("system");
 
 export function resolveColorMode(mode: ColorMode): "light" | "dark" {
   if (mode !== "system") return mode;
+
   try {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   } catch {
@@ -21,16 +22,20 @@ export function useResolvedColorMode(mode: ColorMode): "light" | "dark" {
       return false;
     }
   });
+
   useEffect(() => {
     if (mode !== "system") return;
     try {
       const mq = window.matchMedia("(prefers-color-scheme: dark)");
       setSystemDark(mq.matches);
+
       const handler = (e: MediaQueryListEvent) => setSystemDark(e.matches);
+
       mq.addEventListener("change", handler);
       return () => mq.removeEventListener("change", handler);
     } catch {}
   }, [mode]);
+
   if (mode !== "system") return mode;
   return systemDark ? "dark" : "light";
 }

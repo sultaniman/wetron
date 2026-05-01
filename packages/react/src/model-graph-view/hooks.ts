@@ -74,6 +74,7 @@ export function useNodeClickHandler(
   return useCallback<NodeMouseHandler<Node<GraphNodeData>>>(
     (event, node) => {
       if (!onTargetClick) return;
+
       const weightRow = (event.target as Element).closest(
         "[data-weight-name]",
       ) as HTMLElement | null;
@@ -91,6 +92,7 @@ export function useNodeClickHandler(
         }
         return;
       }
+
       if (node.data.graphNode) {
         onTargetClick(node.data.graphNode);
       } else if (node.data.graphValue) {
@@ -111,6 +113,7 @@ export function useEdgeClickHandler(
   return useCallback(
     (_event: MouseEvent, edge: Edge) => {
       if (!onTargetClick || !edge.data) return;
+
       const d = edge.data as FlowEdgeData;
       const sameEdges = layoutEdges.filter(
         (e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
@@ -120,6 +123,7 @@ export function useEdgeClickHandler(
         opType: (e.data as FlowEdgeData).targetOpType,
         name: (e.data as FlowEdgeData).targetNodeName,
       }));
+
       onTargetClick({ edge: { tensorName: d.tensorName, from, to } });
     },
     [onTargetClick, layoutEdges],
