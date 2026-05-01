@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useCallback } from "react";
 import {
   useNodesState,
+  useReactFlow,
   MarkerType,
   type Node,
   type Edge,
@@ -123,4 +124,18 @@ export function useEdgeClickHandler(
     },
     [onTargetClick, layoutEdges],
   );
+}
+
+export function useFitOnGraphChange(
+  graph: ModelGraph,
+  layoutNodes: Node<GraphNodeData>[],
+): void {
+  const { fitView } = useReactFlow();
+  useEffect(() => {
+    const topNodes = [...layoutNodes]
+      .sort((a, b) => a.position.y - b.position.y)
+      .slice(0, 6)
+      .map((n) => ({ id: n.id }));
+    fitView({ nodes: topNodes, maxZoom: 1, padding: 0.15 });
+  }, [graph, fitView, layoutNodes]);
 }

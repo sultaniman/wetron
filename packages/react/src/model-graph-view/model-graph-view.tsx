@@ -1,11 +1,10 @@
-import React, { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import {
   ReactFlow,
   MiniMap,
   Controls,
   Background,
   ReactFlowProvider,
-  useReactFlow,
   MarkerType,
   PanOnScrollMode,
   type NodeTypes,
@@ -19,7 +18,13 @@ import { ModelEdge } from "../edges/model-edge.tsx";
 import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
 import { ColorModeContext, useColorMode, type ColorMode } from "../color-mode-context.ts";
 import { MINIMAP_THEME } from "../theme.ts";
-import { useModelNodes, useEdgeHighlight, useNodeClickHandler, useEdgeClickHandler } from "./hooks.ts";
+import {
+  useModelNodes,
+  useEdgeHighlight,
+  useNodeClickHandler,
+  useEdgeClickHandler,
+  useFitOnGraphChange,
+} from "./hooks.ts";
 
 const nodeTypes: NodeTypes = {
   graphNode: GraphNodeComponent as NodeTypes[string],
@@ -36,28 +41,16 @@ type Props = {
 };
 
 function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Props) {
-  const { fitView } = useReactFlow();
   const isDark = useColorMode() === "dark";
+  const { nodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
+  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName);
+  const handleNodeClick = useNodeClickHandler(onTargetClick);
+  const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
+  useFitOnGraphChange(graph, layoutNodes);
   const edgeDefaults = useMemo(
     () => (isDark ? { stroke: "#7a7a9a", opacity: 0.55 } : { stroke: "rgba(60,60,100,0.55)" }),
     [isDark],
   );
-  const { nodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
-
-  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName);
-
-  const handleNodeClick = useNodeClickHandler(onTargetClick);
-  const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
-
-  React.useEffect(() => {
-    // Fit to the topmost 6 nodes so the initial zoom is readable (~1.0 for
-    // sequential models). For graphs with ≤ 6 nodes this fits all of them.
-    const topNodes = [...layoutNodes]
-      .sort((a, b) => a.position.y - b.position.y)
-      .slice(0, 6)
-      .map((n) => ({ id: n.id }));
-    fitView({ nodes: topNodes, maxZoom: 1, padding: 0.15 });
-  }, [graph, fitView, layoutNodes]);
 
   return (
     <div data-theme={isDark ? "dark" : "light"} style={{ width: "100%", height: "100%" }}>
