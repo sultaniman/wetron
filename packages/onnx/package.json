@@ -1,0 +1,12 @@
+{
+  "name": "@wetron/onnx",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/parse.ts"
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*",
+    "protobufjs": "^8.0.3"
+  }
+}
