@@ -21,7 +21,7 @@
   let selected = $state<PanelTarget | null>(null);
   let history = $state<PanelTarget[]>([]);
   let selectedEdgeTensorName = $state<string | null>(null);
-  let colorMode = $state<ColorMode>('system');
+  let colorMode = $state<ColorMode>('light');
 
   function resolveMode(mode: ColorMode): 'light' | 'dark' {
     if (mode !== 'system') return mode;

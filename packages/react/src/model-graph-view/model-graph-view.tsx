@@ -20,6 +20,7 @@ import { modelGraphToFlow, type GraphNodeData } from "@wetron/core/transform";
 import type { ModelGraph } from "@wetron/core/ir";
 import { GraphNodeComponent } from "../nodes/graph-node.tsx";
 import { IoNodeComponent } from "../nodes/io-node.tsx";
+import { ModelEdge } from "../edges/model-edge.tsx";
 import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
 import { ColorModeContext, useColorMode, type ColorMode } from "../color-mode-context.ts";
 import { MINIMAP_THEME, EDGE_THEME } from "../theme.ts";
@@ -28,6 +29,8 @@ const nodeTypes: NodeTypes = {
   graphNode: GraphNodeComponent as NodeTypes[string],
   ioNode: IoNodeComponent as NodeTypes[string],
 };
+
+const edgeTypes = { modelEdge: ModelEdge } as const;
 
 type FlowEdgeData = {
   tensorName: string;
@@ -152,12 +155,15 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
         onNodesChange={onNodesChange}
         edges={edges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodeClick={handleNodeClick}
         onEdgeClick={handleEdgeClick}
         defaultEdgeOptions={{
           markerEnd: { type: MarkerType.ArrowClosed, width: 10, height: 10 },
           style: edgeDefaults,
         }}
+        nodesConnectable={false}
+        nodesDraggable={false}
         panOnScroll
         panOnScrollMode={PanOnScrollMode.Free}
         zoomOnScroll={false}

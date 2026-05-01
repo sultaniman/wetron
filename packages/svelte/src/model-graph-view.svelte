@@ -8,6 +8,7 @@
   import type { GraphNodeData } from '@wetron/core/transform';
   import GraphNodeComponent from './nodes/graph-node.svelte';
   import IoNodeComponent from './nodes/io-node.svelte';
+  import ModelEdgeComponent from './edges/model-edge.svelte';
   import { provideColorMode, resolveColorMode, type ColorMode } from './color-mode-context.ts';
   import type { PanelTarget } from './types.ts';
   import { CANVAS_VARS, MINIMAP_THEME, EDGE_THEME } from '@wetron/tokens';
@@ -29,14 +30,18 @@
 
   let { graph, onTargetClick, selectedEdgeTensorName = null, colorMode = 'system' }: Props = $props();
 
-  provideColorMode(colorMode);
   setContext('wetron:onTargetClick', () => onTargetClick);
 
   const isDark = $derived(resolveColorMode(colorMode) === 'dark');
+  provideColorMode(() => isDark ? 'dark' : 'light');
 
   const nodeTypes = {
     graphNode: GraphNodeComponent,
     ioNode: IoNodeComponent,
+  };
+
+  const edgeTypes = {
+    modelEdge: ModelEdgeComponent,
   };
 
   const edgeDefaults = $derived(
@@ -106,8 +111,11 @@
     nodes={flowNodes}
     edges={flowEdges}
     {nodeTypes}
+    {edgeTypes}
     onnodeclick={handleNodeClick}
     onedgeclick={handleEdgeClick}
+    nodesConnectable={false}
+    nodesDraggable={false}
     panOnScroll
     zoomOnScroll={false}
     zoomOnDoubleClick={false}
