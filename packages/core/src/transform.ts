@@ -184,7 +184,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
   //      bump to the next lane so the paths run parallel instead of overlapping.
   const BYPASS_PAD = 40;
   const LANE_SPACING = 10;
-  type BypassLane = { yTop: number; yBottom: number; bypassX: number };
+  type BypassLane = { yTop: number; yBottom: number; bypassX: number; source: string };
   const leftLanes: BypassLane[] = [];
   const rightLanes: BypassLane[] = [];
 
@@ -235,9 +235,12 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     const dir = isLeft ? -1 : 1;
     const lanes = isLeft ? leftLanes : rightLanes;
 
-    // Find the first lane with no Y-overlapping bypass already assigned.
+    // Find the first lane with no Y-overlapping bypass from a different source.
+    // Same-source edges on the same side share a lane (they travel together and
+    // branch at the bottom); edges from different sources get separate lanes.
     let laneIdx = 0;
     while (lanes.some(l =>
+      l.source !== fe.source &&
       Math.abs(l.bypassX - (baseX + dir * laneIdx * LANE_SPACING)) < LANE_SPACING * 0.8 &&
       l.yTop < tgtTop && l.yBottom > srcBottom
     )) {
@@ -245,7 +248,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     }
 
     const bypassX = baseX + dir * laneIdx * LANE_SPACING;
-    lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX });
+    lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX, source: fe.source });
     flowEdges[i] = { ...fe, data: { ...fe.data, bypassX } };
   }
 
