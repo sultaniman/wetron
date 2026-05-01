@@ -94,10 +94,10 @@ test("edges carry sourceOpType and targetOpType", () => {
   expect(convToRelu!.data.targetOpType).toBe("Relu");
 });
 
-test("edges have type default", () => {
+test("edges have type smoothstep", () => {
   const { edges } = modelGraphToFlow(SIMPLE_GRAPH);
   for (const e of edges) {
-    expect(e.type).toBe("default");
+    expect(e.type).toBe("smoothstep");
   }
 });
 

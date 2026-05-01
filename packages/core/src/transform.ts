@@ -34,7 +34,7 @@ export type FlowEdge = {
   id: string;
   source: string;
   target: string;
-  type: "default";
+  type: "smoothstep";
   data: {
     readonly tensorName: string;
     readonly sourceOpType: string;
@@ -153,7 +153,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
           id: `${srcId}=>${fn.id}::${inputName}`,
           source: srcId,
           target: fn.id,
-          type: "default",
+          type: "smoothstep",
           data: {
             tensorName: inputName,
             sourceOpType: nodeIdToOpType.get(srcId) ?? "",

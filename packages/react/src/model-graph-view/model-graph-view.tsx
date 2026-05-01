@@ -135,18 +135,13 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
   );
 
   React.useEffect(() => {
-    const TARGET = 12;
-    if (layoutNodes.length <= TARGET) {
-      fitView({ maxZoom: 1, padding: 0.15 });
-    } else {
-      // For large graphs: fit to the topmost TARGET nodes so the view starts
-      // at the inputs at a readable zoom rather than showing the whole graph
-      const topNodes = [...layoutNodes]
-        .sort((a, b) => a.position.y - b.position.y)
-        .slice(0, TARGET)
-        .map((n) => ({ id: n.id }));
-      fitView({ nodes: topNodes, maxZoom: 1, padding: 0.15 });
-    }
+    // Fit to the topmost 6 nodes so the initial zoom is readable (~1.0 for
+    // sequential models). For graphs with ≤ 6 nodes this fits all of them.
+    const topNodes = [...layoutNodes]
+      .sort((a, b) => a.position.y - b.position.y)
+      .slice(0, 6)
+      .map((n) => ({ id: n.id }));
+    fitView({ nodes: topNodes, maxZoom: 1, padding: 0.15 });
   }, [graph, fitView, layoutNodes]);
 
   return (
