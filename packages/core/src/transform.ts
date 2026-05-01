@@ -42,6 +42,7 @@ export type FlowEdge = {
     readonly targetOpType: string;
     readonly targetNodeName: string;
     readonly bypassX?: number;
+    readonly bypassStartY?: number;
   };
 };
 
@@ -176,15 +177,18 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
   }
 
   // Compute bypass routing for skip connections (edges spanning multiple ranks).
-  // The edge component can't see other nodes, so we pre-compute the detour X here.
-  // For each skip edge:
-  //   1. Build merged X intervals of every node in its Y travel range.
-  //   2. Find the band containing the source and route just outside it.
-  //   3. If another bypass already occupies that vertical lane (overlapping Y range),
-  //      bump to the next lane so the paths run parallel instead of overlapping.
+  // The edge component can't see other nodes, so we pre-compute the detour X and
+  // the Y at which the detour starts (bypassStartY) here.
+  //
+  // bypassStartY: path goes straight down from the source until just above the first
+  // blocking node, then turns horizontally. Avoids the wide horizontal bar at the
+  // source level when source and target are far apart vertically.
+  //
+  // Same-source same-side edges share one lane (bypassX + bypassStartY). If a later
+  // edge needs a wider or earlier bypass, all prior edges from that source are updated.
   const BYPASS_PAD = 40;
   const LANE_SPACING = 10;
-  type BypassLane = { yTop: number; yBottom: number; bypassX: number; source: string };
+  type BypassLane = { yTop: number; yBottom: number; bypassX: number; bypassStartY: number; source: string };
   const leftLanes: BypassLane[] = [];
   const rightLanes: BypassLane[] = [];
 
@@ -206,16 +210,22 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     // Adjacent ranks have gap === ranksep (60px). Skip connections span ≥ 2 ranks.
     if (tgtTop - srcBottom <= 90) continue;
 
-    // Collect X intervals (with padding) of nodes whose Y range overlaps the travel lane.
+    // Collect X intervals (with padding) and track the topmost blocking node.
     const intervals: [number, number][] = [];
+    let topBlockingY = Infinity;
     for (const box of nodeBoxes) {
       if (box.top < tgtTop && box.bottom > srcBottom) {
         intervals.push([box.left - BYPASS_PAD, box.right + BYPASS_PAD]);
+        if (box.top < topBlockingY) topBlockingY = box.top;
       }
     }
     if (intervals.length === 0) continue;
 
-    // Merge overlapping intervals so we find contiguous blocked bands.
+    // Start the detour just above the first blocking node instead of at the source,
+    // so the path descends straight before turning sideways.
+    const bypassStartY = Math.max(srcBottom + 20, topBlockingY - 20);
+
+    // Merge overlapping intervals to find contiguous blocked bands.
     intervals.sort((a, b) => a[0] - b[0]);
     const merged: [number, number][] = [];
     for (const [l, r] of intervals) {
@@ -235,13 +245,33 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     const dir = isLeft ? -1 : 1;
     const lanes = isLeft ? leftLanes : rightLanes;
 
-    // If this source already has a lane on this side, reuse its bypassX exactly.
-    // Different skip lengths from the same source compute slightly different bands,
-    // which would give different bypassX values and cause a staircase appearance.
+    // If this source already has a lane on this side, keep all same-source paths
+    // on the same lane. Use the outermost bypassX and the earliest bypassStartY
+    // so every path in the group clears all intermediate nodes and shares a trunk.
     const sameSourceLane = lanes.find(l => l.source === fe.source);
     if (sameSourceLane) {
-      lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX: sameSourceLane.bypassX, source: fe.source });
-      flowEdges[i] = { ...fe, data: { ...fe.data, bypassX: sameSourceLane.bypassX } };
+      const candidateX = isLeft ? band[0] : band[1];
+      const finalX = isLeft
+        ? Math.min(sameSourceLane.bypassX, candidateX)
+        : Math.max(sameSourceLane.bypassX, candidateX);
+      const finalStartY = Math.min(sameSourceLane.bypassStartY, bypassStartY);
+
+      if (finalX !== sameSourceLane.bypassX || finalStartY !== sameSourceLane.bypassStartY) {
+        // Retroactively widen/raise all prior edges and lane entries for this source.
+        for (const l of lanes) {
+          if (l.source === fe.source) { l.bypassX = finalX; l.bypassStartY = finalStartY; }
+        }
+        for (let j = 0; j < i; j++) {
+          const prev = flowEdges[j];
+          if (prev.source !== fe.source || prev.data.bypassX === undefined) continue;
+          const pt = g.node(prev.target), ps = g.node(prev.source);
+          if (!pt || !ps || (pt.x <= ps.x) !== isLeft) continue;
+          flowEdges[j] = { ...prev, data: { ...prev.data, bypassX: finalX, bypassStartY: finalStartY } };
+        }
+      }
+
+      lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX: finalX, bypassStartY: finalStartY, source: fe.source });
+      flowEdges[i] = { ...fe, data: { ...fe.data, bypassX: finalX, bypassStartY: finalStartY } };
       continue;
     }
 
@@ -257,8 +287,8 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     }
 
     const bypassX = baseX + dir * laneIdx * LANE_SPACING;
-    lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX, source: fe.source });
-    flowEdges[i] = { ...fe, data: { ...fe.data, bypassX } };
+    lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX, bypassStartY, source: fe.source });
+    flowEdges[i] = { ...fe, data: { ...fe.data, bypassX, bypassStartY } };
   }
 
   return { nodes: flowNodes, edges: flowEdges };
