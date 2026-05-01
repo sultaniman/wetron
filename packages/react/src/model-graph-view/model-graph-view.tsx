@@ -22,8 +22,8 @@ import { IoNodeComponent } from "../nodes/io-node.tsx";
 import { ModelEdge } from "../edges/model-edge.tsx";
 import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
 import { ColorModeContext, useColorMode, type ColorMode } from "../color-mode-context.ts";
-import { MINIMAP_THEME, EDGE_THEME } from "../theme.ts";
-import { useModelNodes } from "./hooks.ts";
+import { MINIMAP_THEME } from "../theme.ts";
+import { useModelNodes, useEdgeHighlight } from "./hooks.ts";
 
 const nodeTypes: NodeTypes = {
   graphNode: GraphNodeComponent as NodeTypes[string],
@@ -56,30 +56,7 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
   );
   const { nodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
 
-  const edges = useMemo(
-    () =>
-      layoutEdges.map((e) => {
-        const d = e.data as FlowEdgeData | undefined;
-        if (d?.tensorName === selectedEdgeTensorName) {
-          return {
-            ...e,
-            style: {
-              stroke: EDGE_THEME.selectedStroke,
-              strokeWidth: EDGE_THEME.selectedStrokeWidth,
-              opacity: 1,
-            },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              color: EDGE_THEME.selectedStroke,
-              width: 10,
-              height: 10,
-            },
-          };
-        }
-        return e;
-      }),
-    [layoutEdges, selectedEdgeTensorName],
-  );
+  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName);
 
   const handleNodeClick = useCallback<NodeMouseHandler<Node<GraphNodeData>>>(
     (event, node) => {
