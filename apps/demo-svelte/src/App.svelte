@@ -7,13 +7,16 @@
   type AppState =
     | { status: 'idle' }
     | { status: 'loading'; name: string }
-    | { status: 'ready'; graph: ModelGraph; name: string }
+    | { status: 'ready'; name: string }
     | { status: 'error'; message: string; name: string };
 
   const MODE_CYCLE: ColorMode[] = ['system', 'light', 'dark'];
   const MODE_LABEL: Record<ColorMode, string> = { system: 'System', light: 'Light', dark: 'Dark' };
 
   let appState = $state<AppState>({ status: 'idle' });
+  // $state.raw so the parsed graph is never wrapped in a deep-reactive proxy;
+  // SvelteFlow mutates node objects internally and would trigger an infinite loop otherwise.
+  let graph = $state.raw<ModelGraph | null>(null);
   let dragging = $state(false);
   let selected = $state<PanelTarget | null>(null);
   let history = $state<PanelTarget[]>([]);
@@ -38,20 +41,20 @@
   });
 
   const tensorSources = $derived.by(() => {
-    if (appState.status !== 'ready') return new Map<string, string>();
+    if (appState.status !== 'ready' || !graph) return new Map<string, string>();
     const map = new Map<string, string>();
-    for (const node of appState.graph.nodes) {
+    for (const node of graph.nodes) {
       for (const out of node.outputs) {
         if (out) map.set(out, node.opType);
       }
     }
-    for (const gv of appState.graph.inputs) {
+    for (const gv of graph.inputs) {
       map.set(gv.name, 'Input');
     }
     return map;
   });
 
-  const tensorShapes = $derived(appState.status === 'ready' ? appState.graph.tensorShapes : undefined);
+  const tensorShapes = $derived(appState.status === 'ready' && graph ? graph.tensorShapes : undefined);
 
   function cycleMode() {
     colorMode = MODE_CYCLE[(MODE_CYCLE.indexOf(colorMode) + 1) % MODE_CYCLE.length];
@@ -59,13 +62,15 @@
 
   async function loadFile(file: File) {
     appState = { status: 'loading', name: file.name };
+    graph = null;
     selected = null;
     history = [];
     selectedEdgeTensorName = null;
     try {
       const buf = await file.arrayBuffer();
-      const graph = await parseModel(new Uint8Array(buf), file.name);
-      appState = { status: 'ready', graph, name: file.name };
+      const parsed = await parseModel(new Uint8Array(buf), file.name);
+      graph = parsed;
+      appState = { status: 'ready', name: file.name };
     } catch (e) {
       appState = { status: 'error', message: e instanceof Error ? e.message : String(e), name: file.name };
     }
@@ -93,8 +98,8 @@
   }
 
   function handleTensorClick(name: string) {
-    if (appState.status !== 'ready') return;
-    const info = appState.graph.tensorShapes.get(name);
+    if (appState.status !== 'ready' || !graph) return;
+    const info = graph.tensorShapes.get(name);
     if (selected) history = [...history, selected];
     selected = { tensor: { name, shape: info?.shape ?? null, dtype: info?.dtype ?? null } };
     selectedEdgeTensorName = null;
@@ -119,9 +124,9 @@
     {#if appState.status !== 'idle'}
       <span style="color:{chrome.muted};font-size:14px">{appState.name}</span>
     {/if}
-    {#if appState.status === 'ready'}
+    {#if appState.status === 'ready' && graph}
       <span style="color:{chrome.faint};font-size:13px">
-        {appState.graph.nodes.length} nodes · {appState.graph.inputs.length} inputs · {appState.graph.outputs.length} outputs
+        {graph.nodes.length} nodes · {graph.inputs.length} inputs · {graph.outputs.length} outputs
       </span>
     {/if}
     <button
@@ -165,7 +170,7 @@
         <div style="color:#d93025;font-weight:600">Failed to parse {appState.name}</div>
         <div style="color:{chrome.muted};font-size:13px;max-width:480px;text-align:center">{appState.message}</div>
       </div>
-    {:else if appState.status === 'ready'}
+    {:else if appState.status === 'ready' && graph}
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
         style="position:relative;width:100%;height:100%"
@@ -174,7 +179,7 @@
         ondragleave={() => dragging = false}
       >
         <ModelGraphView
-          graph={appState.graph}
+          {graph}
           onTargetClick={handleTargetClick}
           {selectedEdgeTensorName}
           {colorMode}
