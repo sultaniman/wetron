@@ -1,0 +1,22 @@
+{
+  "name": "@wetron/demo-svelte",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*",
+    "@wetron/svelte": "workspace:*",
+    "@xyflow/svelte": "latest",
+    "svelte": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@sveltejs/vite-plugin-svelte": "latest",
+    "vite": "latest"
+  }
+}
