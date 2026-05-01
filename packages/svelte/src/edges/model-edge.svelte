@@ -7,13 +7,11 @@
 
   let { sourceX, sourceY, targetX, targetY, markerEnd, style, data }: EdgeProps = $props();
 
-  const edgeData = $derived(data as ModelEdgeData | undefined);
-  const bypassX = $derived(edgeData?.bypassX);
-  const bypassSlot = $derived(edgeData?.bypassSlot ?? 0);
+  const bypassX = $derived((data as ModelEdgeData | undefined)?.bypassX);
 
   const path = $derived(
     bypassX !== undefined
-      ? bypassPath(sourceX, sourceY, targetX, targetY, bypassX, bypassSlot)
+      ? bypassPath(sourceX, sourceY, targetX, targetY, bypassX)
       : getSmoothStepPath({
           sourceX,
           sourceY,

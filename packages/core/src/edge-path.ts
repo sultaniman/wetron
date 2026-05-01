@@ -2,12 +2,9 @@ export function bypassPath(
   sx: number, sy: number,
   tx: number, ty: number,
   bx: number,
-  slot = 0,
   r = 6,
 ): string {
-  // Stagger exit depth per slot so parallel skip edges from the same source
-  // detach at different Y levels and don't share a horizontal segment.
-  const exitY = sy + 15 + slot * 10;
+  const exitY = sy + 20;
   const entryY = ty - 20;
   const d1 = bx > sx ? 1 : -1;
   const d2 = tx > bx ? 1 : -1;

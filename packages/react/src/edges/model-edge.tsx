@@ -6,12 +6,10 @@ import { bypassPath } from "@wetron/core/edge-path";
 type ModelEdgeData = FlowEdge["data"];
 
 export function ModelEdge({ sourceX, sourceY, targetX, targetY, markerEnd, style, data }: EdgeProps) {
-  const edgeData = data as ModelEdgeData | undefined;
-  const bypassX = edgeData?.bypassX;
-  const bypassSlot = edgeData?.bypassSlot ?? 0;
+  const bypassX = (data as ModelEdgeData | undefined)?.bypassX;
 
   const path = bypassX !== undefined
-    ? bypassPath(sourceX, sourceY, targetX, targetY, bypassX, bypassSlot)
+    ? bypassPath(sourceX, sourceY, targetX, targetY, bypassX)
     : getSmoothStepPath({
         sourceX,
         sourceY,

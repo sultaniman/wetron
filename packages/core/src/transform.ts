@@ -42,7 +42,6 @@ export type FlowEdge = {
     readonly targetOpType: string;
     readonly targetNodeName: string;
     readonly bypassX?: number;
-    readonly bypassSlot?: number;
   };
 };
 
@@ -178,16 +177,22 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
 
   // Compute bypass routing for skip connections (edges spanning multiple ranks).
   // The edge component can't see other nodes, so we pre-compute the detour X here.
-  // For each skip edge we build the merged X intervals of every node in its Y travel
-  // range, find the band containing the source, and route just outside that band.
-  // This keeps the detour as narrow as possible instead of going to the graph edge.
+  // For each skip edge:
+  //   1. Build merged X intervals of every node in its Y travel range.
+  //   2. Find the band containing the source and route just outside it.
+  //   3. If another bypass already occupies that vertical lane (overlapping Y range),
+  //      bump to the next lane so the paths run parallel instead of overlapping.
   const BYPASS_PAD = 40;
-  const sourceBypassSlot = new Map<string, number>();
+  const LANE_SPACING = 10;
+  type BypassLane = { yTop: number; yBottom: number; bypassX: number };
+  const leftLanes: BypassLane[] = [];
+  const rightLanes: BypassLane[] = [];
+
   const nodeBoxes = flowNodes
     .map(fn => {
       const pos = g.node(fn.id);
       if (!pos) return null;
-      return { left: pos.x - pos.width / 2, right: pos.x + pos.width / 2, top: pos.y - pos.height / 2, bottom: pos.y + pos.height / 2, cx: pos.x };
+      return { left: pos.x - pos.width / 2, right: pos.x + pos.width / 2, top: pos.y - pos.height / 2, bottom: pos.y + pos.height / 2 };
     })
     .filter((b): b is NonNullable<typeof b> => b !== null);
 
@@ -225,11 +230,23 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     const band = merged.find(([l, r]) => srcPos.x >= l && srcPos.x <= r);
     if (!band) continue;
 
-    // Route left or right based on target direction; band edges already include padding.
-    const bypassX = tgtPos.x <= srcPos.x ? band[0] : band[1];
-    const bypassSlot = sourceBypassSlot.get(fe.source) ?? 0;
-    sourceBypassSlot.set(fe.source, bypassSlot + 1);
-    flowEdges[i] = { ...fe, data: { ...fe.data, bypassX, bypassSlot } };
+    const isLeft = tgtPos.x <= srcPos.x;
+    const baseX = isLeft ? band[0] : band[1];
+    const dir = isLeft ? -1 : 1;
+    const lanes = isLeft ? leftLanes : rightLanes;
+
+    // Find the first lane with no Y-overlapping bypass already assigned.
+    let laneIdx = 0;
+    while (lanes.some(l =>
+      Math.abs(l.bypassX - (baseX + dir * laneIdx * LANE_SPACING)) < LANE_SPACING * 0.8 &&
+      l.yTop < tgtTop && l.yBottom > srcBottom
+    )) {
+      laneIdx++;
+    }
+
+    const bypassX = baseX + dir * laneIdx * LANE_SPACING;
+    lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX });
+    flowEdges[i] = { ...fe, data: { ...fe.data, bypassX } };
   }
 
   return { nodes: flowNodes, edges: flowEdges };
