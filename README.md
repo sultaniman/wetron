@@ -87,12 +87,18 @@ import type { PanelTarget, ColorMode } from "@wetron/react";
 
 function App() {
   const [graph, setGraph] = useState<ModelGraph | null>(null);
-  const [selected, setSelected] = useState<PanelTarget>(null);
+  const [selected, setSelected] = useState<PanelTarget | null>(null);
 
   return (
     <>
-      {graph && <ModelGraphView graph={graph} onNodeClick={setSelected} />}
-      <NodePropertyPanel target={selected} />
+      {graph && (
+        <ModelGraphView
+          graph={graph}
+          onTargetClick={setSelected}
+          colorMode="system"
+        />
+      )}
+      <NodePropertyPanel target={selected} colorMode="system" />
     </>
   );
 }
@@ -110,12 +116,12 @@ Peer dependencies: `react` 18+, `@xyflow/react` 12+, `@phosphor-icons/react` 2+.
 </script>
 
 {#if graph}
-  <ModelGraphView {graph} onNodeClick={(node) => selected = node} />
+  <ModelGraphView {graph} onTargetClick={(t) => selected = t} colorMode="system" />
 {/if}
-<NodePropertyPanel target={selected} />
+<NodePropertyPanel target={selected} colorMode="system" />
 ```
 
-Peer dependencies: `svelte` 5.55+, `@xyflow/svelte` 1.5+, `@phosphor-icons/svelte` 3+.
+Peer dependencies: `svelte` 5+, `@xyflow/svelte` 1.5+, `phosphor-svelte` 3+.
 
 ### Convert graph to flow nodes manually
 
