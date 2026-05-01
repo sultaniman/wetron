@@ -1,6 +1,6 @@
 # wetron
 
-Parse and render neural network model graphs in the browser. Supports ONNX, TFLite, and Keras formats. Outputs an interactive node graph using React or Svelte.
+A browser-based neural network model visualizer — open a model and explore its computation graph interactively.
 
 Graph structure only — no weight data is read or stored.
 
