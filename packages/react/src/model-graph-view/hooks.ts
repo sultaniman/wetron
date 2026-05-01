@@ -1,12 +1,15 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useCallback } from "react";
 import {
   useNodesState,
   MarkerType,
   type Node,
   type Edge,
+  type NodeMouseHandler,
 } from "@xyflow/react";
+import type { MouseEvent } from "react";
 import { modelGraphToFlow, type GraphNodeData } from "@wetron/core/transform";
 import type { ModelGraph } from "@wetron/core/ir";
+import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
 import { EDGE_THEME } from "../theme.ts";
 
 type FlowEdgeData = {
@@ -61,5 +64,63 @@ export function useEdgeHighlight(
         return e;
       }),
     [layoutEdges, selectedEdgeTensorName],
+  );
+}
+
+export function useNodeClickHandler(
+  onTargetClick?: (target: PanelTarget) => void,
+): NodeMouseHandler<Node<GraphNodeData>> {
+  return useCallback<NodeMouseHandler<Node<GraphNodeData>>>(
+    (event, node) => {
+      if (!onTargetClick) return;
+      const weightRow = (event.target as Element).closest(
+        "[data-weight-name]",
+      ) as HTMLElement | null;
+      if (weightRow) {
+        const name = weightRow.dataset.weightName;
+        const shapeStr = weightRow.dataset.weightShape;
+        if (name && shapeStr) {
+          onTargetClick({
+            tensor: {
+              name,
+              shape: shapeStr.split(",").map(Number),
+              dtype: weightRow.dataset.weightDtype ?? null,
+            },
+          });
+        }
+        return;
+      }
+      if (node.data.graphNode) {
+        onTargetClick(node.data.graphNode);
+      } else if (node.data.graphValue) {
+        onTargetClick({
+          graphValue: node.data.graphValue,
+          direction: node.data.opType === "Input" ? "input" : "output",
+        });
+      }
+    },
+    [onTargetClick],
+  );
+}
+
+export function useEdgeClickHandler(
+  onTargetClick: ((target: PanelTarget) => void) | undefined,
+  layoutEdges: Edge[],
+): (event: MouseEvent, edge: Edge) => void {
+  return useCallback(
+    (_event: MouseEvent, edge: Edge) => {
+      if (!onTargetClick || !edge.data) return;
+      const d = edge.data as FlowEdgeData;
+      const sameEdges = layoutEdges.filter(
+        (e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
+      );
+      const from = { opType: d.sourceOpType, name: d.sourceNodeName };
+      const to = sameEdges.map((e) => ({
+        opType: (e.data as FlowEdgeData).targetOpType,
+        name: (e.data as FlowEdgeData).targetNodeName,
+      }));
+      onTargetClick({ edge: { tensorName: d.tensorName, from, to } });
+    },
+    [onTargetClick, layoutEdges],
   );
 }

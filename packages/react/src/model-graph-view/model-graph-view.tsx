@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useEffect } from "react";
+import React, { useMemo, useEffect } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -8,14 +8,10 @@ import {
   useReactFlow,
   MarkerType,
   PanOnScrollMode,
-  type Node,
-  type Edge,
-  type NodeMouseHandler,
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./model-graph-view.css";
-import type { GraphNodeData } from "@wetron/core/transform";
 import type { ModelGraph } from "@wetron/core/ir";
 import { GraphNodeComponent } from "../nodes/graph-node.tsx";
 import { IoNodeComponent } from "../nodes/io-node.tsx";
@@ -23,7 +19,7 @@ import { ModelEdge } from "../edges/model-edge.tsx";
 import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
 import { ColorModeContext, useColorMode, type ColorMode } from "../color-mode-context.ts";
 import { MINIMAP_THEME } from "../theme.ts";
-import { useModelNodes, useEdgeHighlight } from "./hooks.ts";
+import { useModelNodes, useEdgeHighlight, useNodeClickHandler, useEdgeClickHandler } from "./hooks.ts";
 
 const nodeTypes: NodeTypes = {
   graphNode: GraphNodeComponent as NodeTypes[string],
@@ -31,14 +27,6 @@ const nodeTypes: NodeTypes = {
 };
 
 const edgeTypes = { modelEdge: ModelEdge } as const;
-
-type FlowEdgeData = {
-  tensorName: string;
-  sourceOpType: string;
-  sourceNodeName: string;
-  targetOpType: string;
-  targetNodeName: string;
-};
 
 type Props = {
   graph: ModelGraph;
@@ -58,54 +46,8 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
 
   const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName);
 
-  const handleNodeClick = useCallback<NodeMouseHandler<Node<GraphNodeData>>>(
-    (event, node) => {
-      if (!onTargetClick) return;
-      const weightRow = (event.target as Element).closest(
-        "[data-weight-name]",
-      ) as HTMLElement | null;
-      if (weightRow) {
-        const name = weightRow.dataset.weightName;
-        const shapeStr = weightRow.dataset.weightShape;
-        if (name && shapeStr) {
-          onTargetClick({
-            tensor: {
-              name,
-              shape: shapeStr.split(",").map(Number),
-              dtype: weightRow.dataset.weightDtype ?? null,
-            },
-          });
-        }
-        return;
-      }
-      if (node.data.graphNode) {
-        onTargetClick(node.data.graphNode);
-      } else if (node.data.graphValue) {
-        onTargetClick({
-          graphValue: node.data.graphValue,
-          direction: node.data.opType === "Input" ? "input" : "output",
-        });
-      }
-    },
-    [onTargetClick],
-  );
-
-  const handleEdgeClick = useCallback(
-    (_event: React.MouseEvent, edge: Edge) => {
-      if (!onTargetClick || !edge.data) return;
-      const d = edge.data as FlowEdgeData;
-      const sameEdges = layoutEdges.filter(
-        (e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
-      );
-      const from = { opType: d.sourceOpType, name: d.sourceNodeName };
-      const to = sameEdges.map((e) => ({
-        opType: (e.data as FlowEdgeData).targetOpType,
-        name: (e.data as FlowEdgeData).targetNodeName,
-      }));
-      onTargetClick({ edge: { tensorName: d.tensorName, from, to } });
-    },
-    [onTargetClick, layoutEdges],
-  );
+  const handleNodeClick = useNodeClickHandler(onTargetClick);
+  const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
 
   React.useEffect(() => {
     // Fit to the topmost 6 nodes so the initial zoom is readable (~1.0 for
