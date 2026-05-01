@@ -1,26 +1,8 @@
 import React from "react";
-import { ArrowLeft, CaretRight, X } from "@phosphor-icons/react";
-import type { AttributeValue } from "@wetron/core/ir";
+import { ArrowLeftIcon, CaretRightIcon, XIcon } from "@phosphor-icons/react";
 import type { IconEntry } from "../theme.ts";
 import css from "./node-property-panel.module.css";
-
-export function attrChipLabel(value: AttributeValue): string {
-  if (typeof value === "boolean") return "bool";
-  if (typeof value === "number") return Number.isInteger(value) ? "int" : "float";
-  if (typeof value === "string") return "str";
-  if (value.length === 0) return "[]";
-  return typeof value[0] === "string"
-    ? "str[]"
-    : Number.isInteger(value[0] as number)
-      ? "int[]"
-      : "float[]";
-}
-
-export function formatAttr(value: AttributeValue): string {
-  if (typeof value === "boolean" || typeof value === "number") return String(value);
-  if (typeof value === "string") return value;
-  return `[${value.join(", ")}]`;
-}
+export { attrChipLabel, formatAttr } from "@wetron/core/panel-utils";
 
 export function renderIconEntry(entry: IconEntry): React.ReactNode {
   if (entry.kind === "glyph") {
@@ -68,7 +50,7 @@ export function Row({
       <Chip label={chip} color={chipColor} />
       {onClick && (
         <span className={css.rowCaret}>
-          <CaretRight size={9} />
+          <CaretRightIcon size={9} />
         </span>
       )}
     </div>
@@ -87,7 +69,7 @@ export function SectionLabel({ icon, title }: { icon: React.ReactNode; title: st
 export function BackButton({ onBack }: { onBack: () => void }) {
   return (
     <button className={css.backButton} onClick={onBack} aria-label="Back">
-      <ArrowLeft size={13} />
+      <ArrowLeftIcon size={13} />
     </button>
   );
 }
@@ -95,7 +77,7 @@ export function BackButton({ onBack }: { onBack: () => void }) {
 export function CloseButton({ onClose }: { onClose: () => void }) {
   return (
     <button className={css.closeButton} onClick={onClose} aria-label="Close">
-      <X size={13} />
+      <XIcon size={13} />
     </button>
   );
 }

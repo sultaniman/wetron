@@ -4,13 +4,13 @@ export type ColorMode = "light" | "dark" | "system";
 
 const KEY = Symbol("colorMode");
 
-export function provideColorMode(getter: () => "light" | "dark") {
-  setContext(KEY, getter);
+export function provideColorMode(ctx: { resolved: "light" | "dark" }) {
+  setContext(KEY, ctx);
 }
 
 export function consumeColorMode(): "light" | "dark" {
-  const fn = getContext<() => "light" | "dark">(KEY);
-  return fn ? fn() : resolveColorMode("system");
+  const ctx = getContext<{ resolved: "light" | "dark" }>(KEY);
+  return ctx?.resolved ?? resolveColorMode("system");
 }
 
 export function resolveColorMode(mode: ColorMode): "light" | "dark" {

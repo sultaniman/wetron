@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowsLeftRight } from "@phosphor-icons/react";
+import { ArrowsLeftRightIcon } from "@phosphor-icons/react";
 import { Row, SectionLabel, BackButton } from "./panel-ui.tsx";
 import css from "./node-property-panel.module.css";
 
@@ -26,7 +26,7 @@ export function EdgePanel({
       <div className={css.header}>
         {onBack && <BackButton onBack={onBack} />}
         <div className={css.iconBox} data-kind="edge">
-          <ArrowsLeftRight size={15} />
+          <ArrowsLeftRightIcon size={15} />
         </div>
         <div>
           <div className={css.nodeTitle}>Connection</div>

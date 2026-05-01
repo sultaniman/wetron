@@ -21,7 +21,23 @@
     tensorShapes?: ReadonlyMap<string, TensorInfo>;
   } = $props();
 
-  const isDark = $derived(resolveColorMode(colorMode ?? 'system') === 'dark');
+  let systemIsDark = $state(resolveColorMode('system') === 'dark');
+
+  $effect(() => {
+    const mode = colorMode ?? 'system';
+    if (mode !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    systemIsDark = mq.matches;
+    const handler = (e: MediaQueryListEvent) => { systemIsDark = e.matches; };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  });
+
+  const isDark = $derived(
+    (colorMode ?? 'system') === 'dark' ? true :
+    (colorMode ?? 'system') === 'light' ? false :
+    systemIsDark
+  );
   const theme = $derived(isDark ? 'dark' : 'light');
 
   function isGraphNode(t: PanelTarget): t is GraphNode {

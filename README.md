@@ -172,7 +172,6 @@ apps/
   demo-svelte/  # Svelte demo (Vite)
 test-models/    # .onnx and .tflite fixtures
 docs/specs/     # Architecture and design specs
-netron-main/    # Reference source — read-only
 ```
 
 ## Constraints

@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 import type { GraphNode, GraphValue } from "@wetron/core/ir";
-import { resolveColorMode, type ColorMode } from "../color-mode-context.ts";
+import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";
 import { OpPanel } from "./op-panel.tsx";
 import { IoPanel } from "./io-panel.tsx";
 import { EdgePanel } from "./edge-panel.tsx";
@@ -59,7 +59,7 @@ export function NodePropertyPanel({
   inputSources?: ReadonlyMap<string, string>;
   tensorShapes?: ReadonlyMap<string, TensorInfo>;
 }) {
-  const theme = useMemo(() => resolveColorMode(colorMode ?? "system"), [colorMode]);
+  const theme = useResolvedColorMode(colorMode ?? "system");
   const isDark = theme === "dark";
 
   if (!target) return null;

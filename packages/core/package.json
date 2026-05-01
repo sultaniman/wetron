@@ -7,7 +7,9 @@
     "./ir": "./src/ir.ts",
     "./dtypes": "./src/dtypes.ts",
     "./detect": "./src/detect.ts",
-    "./transform": "./src/transform.ts"
+    "./transform": "./src/transform.ts",
+    "./edge-path": "./src/edge-path.ts",
+    "./panel-utils": "./src/panel-utils.ts"
   },
   "dependencies": {
     "@wetron/keras": "workspace:*",

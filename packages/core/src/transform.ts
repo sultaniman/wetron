@@ -41,14 +41,20 @@ export type FlowEdge = {
     readonly sourceNodeName: string;
     readonly targetOpType: string;
     readonly targetNodeName: string;
-    readonly bypassX?: number;
-    readonly bypassStartY?: number;
+    readonly points?: readonly { x: number; y: number }[];
   };
 };
 
 const NODE_W = 220;
-const BASE_H = 42;
+// Heights derived from node-card CSS (border:2 + padding:14 + header:16 for 13px/1.2×).
+// SUBTITLE_H: margin-top(2) + line(13 for 11px/1.2×). META_MARGIN: .meta margin-top.
+// ROW_H: weight-row margin(3) + padding(4) + line(12 for 10px/1.2×).
+// ION_H: ioNode = base + meta-section (margin(5) + single text line(12)).
+const CARD_BASE = 32;
+const SUBTITLE_H = 15;
+const META_MARGIN = 5;
 const ROW_H = 19;
+const ION_H = CARD_BASE + META_MARGIN + 12; // 49
 
 export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] } {
   const g = new Dagre.graphlib.Graph();
@@ -78,9 +84,9 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
         graphValue: gv,
       },
       initialWidth: NODE_W,
-      initialHeight: BASE_H + ROW_H,
+      initialHeight: ION_H,
     });
-    g.setNode(id, { width: NODE_W, height: BASE_H + ROW_H });
+    g.setNode(id, { width: NODE_W, height: ION_H });
     outputToNodeId.set(gv.name, id);
     nodeIdToOpType.set(id, "Input");
     nodeIdToName.set(id, gv.name);
@@ -99,7 +105,11 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
               return init ? { slot, label: labels[slot] ?? `in_${slot}`, name, ...init } : null;
             })
             .filter((w): w is NonNullable<typeof w> => w !== null);
-    const nodeH = BASE_H + (weightInputs?.length ?? 0) * ROW_H;
+    const hasSubtitle = !!(node.name && !/^op_\d+$/.test(node.name));
+    const nWeights = weightInputs?.length ?? 0;
+    const nodeH = CARD_BASE
+      + (hasSubtitle ? SUBTITLE_H : 0)
+      + (nWeights > 0 ? META_MARGIN + nWeights * ROW_H : 0);
     flowNodes.push({
       id,
       type: "graphNode",
@@ -139,9 +149,9 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
         graphValue: gv,
       },
       initialWidth: NODE_W,
-      initialHeight: BASE_H + ROW_H,
+      initialHeight: ION_H,
     });
-    g.setNode(id, { width: NODE_W, height: BASE_H + ROW_H });
+    g.setNode(id, { width: NODE_W, height: ION_H });
     nodeIdToOpType.set(id, "Output");
     nodeIdToName.set(id, gv.name);
   }
@@ -176,119 +186,24 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     if (pos) fn.position = { x: pos.x - NODE_W / 2, y: pos.y - pos.height / 2 };
   }
 
-  // Compute bypass routing for skip connections (edges spanning multiple ranks).
-  // The edge component can't see other nodes, so we pre-compute the detour X and
-  // the Y at which the detour starts (bypassStartY) here.
-  //
-  // bypassStartY: path goes straight down from the source until just above the first
-  // blocking node, then turns horizontally. Avoids the wide horizontal bar at the
-  // source level when source and target are far apart vertically.
-  //
-  // Same-source same-side edges share one lane (bypassX + bypassStartY). If a later
-  // edge needs a wider or earlier bypass, all prior edges from that source are updated.
-  const BYPASS_PAD = 40;
-  const LANE_SPACING = 10;
-  type BypassLane = { yTop: number; yBottom: number; bypassX: number; bypassStartY: number; source: string };
-  const leftLanes: BypassLane[] = [];
-  const rightLanes: BypassLane[] = [];
-
-  const nodeBoxes = flowNodes
-    .map(fn => {
-      const pos = g.node(fn.id);
-      if (!pos) return null;
-      return { left: pos.x - pos.width / 2, right: pos.x + pos.width / 2, top: pos.y - pos.height / 2, bottom: pos.y + pos.height / 2 };
-    })
-    .filter((b): b is NonNullable<typeof b> => b !== null);
-
+  // Annotate each flow edge with Dagre's intermediate waypoints so the edge
+  // component can draw a catmull-rom spline that routes around intermediate nodes.
+  // Multiple flow edges sharing the same source→target pair reuse the same points.
+  const ptCache = new Map<string, readonly { x: number; y: number }[]>();
   for (let i = 0; i < flowEdges.length; i++) {
     const fe = flowEdges[i];
-    const srcPos = g.node(fe.source);
-    const tgtPos = g.node(fe.target);
-    if (!srcPos || !tgtPos) continue;
-    const srcBottom = srcPos.y + srcPos.height / 2;
-    const tgtTop = tgtPos.y - tgtPos.height / 2;
-    // Adjacent ranks have gap === ranksep (60px). Skip connections span ≥ 2 ranks.
-    if (tgtTop - srcBottom <= 90) continue;
-
-    // Collect X intervals (with padding) and track the topmost blocking node.
-    const intervals: [number, number][] = [];
-    let topBlockingY = Infinity;
-    for (const box of nodeBoxes) {
-      if (box.top < tgtTop && box.bottom > srcBottom) {
-        intervals.push([box.left - BYPASS_PAD, box.right + BYPASS_PAD]);
-        if (box.top < topBlockingY) topBlockingY = box.top;
-      }
+    const key = `${fe.source}::${fe.target}`;
+    let pts = ptCache.get(key);
+    if (pts === undefined) {
+      const raw = (g.edge(fe.source, fe.target) as { points?: { x: number; y: number }[] } | undefined)?.points;
+      // Slice off first and last — those are dagre's node-center estimates;
+      // the edge component uses xyflow's actual handle positions instead.
+      pts = raw && raw.length > 2 ? raw.slice(1, raw.length - 1) : [];
+      ptCache.set(key, pts);
     }
-    if (intervals.length === 0) continue;
-
-    // Start the detour just above the first blocking node instead of at the source,
-    // so the path descends straight before turning sideways.
-    const bypassStartY = Math.max(srcBottom + 20, topBlockingY - 20);
-
-    // Merge overlapping intervals to find contiguous blocked bands.
-    intervals.sort((a, b) => a[0] - b[0]);
-    const merged: [number, number][] = [];
-    for (const [l, r] of intervals) {
-      if (merged.length && l <= merged[merged.length - 1][1]) {
-        merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], r);
-      } else {
-        merged.push([l, r]);
-      }
+    if (pts.length > 0) {
+      flowEdges[i] = { ...fe, data: { ...fe.data, points: pts } };
     }
-
-    // Find the merged band that contains the source node center.
-    const band = merged.find(([l, r]) => srcPos.x >= l && srcPos.x <= r);
-    if (!band) continue;
-
-    const isLeft = tgtPos.x <= srcPos.x;
-    const baseX = isLeft ? band[0] : band[1];
-    const dir = isLeft ? -1 : 1;
-    const lanes = isLeft ? leftLanes : rightLanes;
-
-    // If this source already has a lane on this side, keep all same-source paths
-    // on the same lane. Use the outermost bypassX and the earliest bypassStartY
-    // so every path in the group clears all intermediate nodes and shares a trunk.
-    const sameSourceLane = lanes.find(l => l.source === fe.source);
-    if (sameSourceLane) {
-      const candidateX = isLeft ? band[0] : band[1];
-      const finalX = isLeft
-        ? Math.min(sameSourceLane.bypassX, candidateX)
-        : Math.max(sameSourceLane.bypassX, candidateX);
-      const finalStartY = Math.min(sameSourceLane.bypassStartY, bypassStartY);
-
-      if (finalX !== sameSourceLane.bypassX || finalStartY !== sameSourceLane.bypassStartY) {
-        // Retroactively widen/raise all prior edges and lane entries for this source.
-        for (const l of lanes) {
-          if (l.source === fe.source) { l.bypassX = finalX; l.bypassStartY = finalStartY; }
-        }
-        for (let j = 0; j < i; j++) {
-          const prev = flowEdges[j];
-          if (prev.source !== fe.source || prev.data.bypassX === undefined) continue;
-          const pt = g.node(prev.target), ps = g.node(prev.source);
-          if (!pt || !ps || (pt.x <= ps.x) !== isLeft) continue;
-          flowEdges[j] = { ...prev, data: { ...prev.data, bypassX: finalX, bypassStartY: finalStartY } };
-        }
-      }
-
-      lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX: finalX, bypassStartY: finalStartY, source: fe.source });
-      flowEdges[i] = { ...fe, data: { ...fe.data, bypassX: finalX, bypassStartY: finalStartY } };
-      continue;
-    }
-
-    // New source on this side: find the first lane with no Y-overlapping bypass
-    // from a different source. Edges from different sources get separate lanes.
-    let laneIdx = 0;
-    while (lanes.some(l =>
-      l.source !== fe.source &&
-      Math.abs(l.bypassX - (baseX + dir * laneIdx * LANE_SPACING)) < LANE_SPACING * 0.8 &&
-      l.yTop < tgtTop && l.yBottom > srcBottom
-    )) {
-      laneIdx++;
-    }
-
-    const bypassX = baseX + dir * laneIdx * LANE_SPACING;
-    lanes.push({ yTop: srcBottom, yBottom: tgtTop, bypassX, bypassStartY, source: fe.source });
-    flowEdges[i] = { ...fe, data: { ...fe.data, bypassX, bypassStartY } };
   }
 
   return { nodes: flowNodes, edges: flowEdges };

@@ -2,10 +2,10 @@
   import { SvelteFlow, MiniMap, Controls, Background } from '@xyflow/svelte';
   import FitViewHelper from './fit-view-helper.svelte';
   import '@xyflow/svelte/dist/style.css';
-  import { setContext } from 'svelte';
+  import { setContext, untrack } from 'svelte';
   import { modelGraphToFlow } from '@wetron/core/transform';
+  import type { FlowEdge, GraphNodeData } from '@wetron/core/transform';
   import type { ModelGraph } from '@wetron/core/ir';
-  import type { GraphNodeData } from '@wetron/core/transform';
   import GraphNodeComponent from './nodes/graph-node.svelte';
   import IoNodeComponent from './nodes/io-node.svelte';
   import ModelEdgeComponent from './edges/model-edge.svelte';
@@ -13,13 +13,7 @@
   import type { PanelTarget } from './types.ts';
   import { CANVAS_VARS, MINIMAP_THEME, EDGE_THEME } from '@wetron/tokens';
 
-  type FlowEdgeData = {
-    tensorName: string;
-    sourceOpType: string;
-    sourceNodeName: string;
-    targetOpType: string;
-    targetNodeName: string;
-  };
+  type FlowEdgeData = FlowEdge['data'];
 
   interface Props {
     graph: ModelGraph;
@@ -32,8 +26,28 @@
 
   setContext('wetron:onTargetClick', () => onTargetClick);
 
-  const isDark = $derived(resolveColorMode(colorMode) === 'dark');
-  provideColorMode(() => isDark ? 'dark' : 'light');
+  let systemIsDark = $state(resolveColorMode('system') === 'dark');
+
+  $effect(() => {
+    if (colorMode !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    systemIsDark = mq.matches;
+    const handler = (e: MediaQueryListEvent) => { systemIsDark = e.matches; };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  });
+
+  const isDark = $derived(
+    colorMode === 'dark' ? true :
+    colorMode === 'light' ? false :
+    systemIsDark
+  );
+
+  // $state object in context — child nodes read .resolved inside $derived,
+  // creating an explicit signal subscription that re-fires on theme change.
+  const colorCtx: { resolved: 'light' | 'dark' } = $state({ resolved: 'light' });
+  $effect.pre(() => { colorCtx.resolved = isDark ? 'dark' : 'light'; });
+  provideColorMode(colorCtx);
 
   const nodeTypes = {
     graphNode: GraphNodeComponent,
@@ -55,7 +69,7 @@
   // $state.raw prevents @xyflow/svelte from seeing deeply-reactive proxies;
   // it mutates node objects internally (computed dims/positions) and that would
   // write back through Svelte's proxy, invalidating rawFlow → infinite loop.
-  let flowNodes = $state.raw(rawFlow.nodes);
+  let flowNodes = $state.raw(untrack(() => rawFlow.nodes));
   $effect.pre(() => {
     flowNodes = rawFlow.nodes;
   });
@@ -130,7 +144,7 @@
       maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
     />
     <Controls />
-    <Background bgColor={isDark ? '#2a2a3a' : '#d0d0d8'} />
+    <Background patternColor={isDark ? '#2a2a3a' : '#d0d0d8'} />
     <FitViewHelper nodes={flowNodes} />
   </SvelteFlow>
 </div>

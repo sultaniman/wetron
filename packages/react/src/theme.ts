@@ -1,8 +1,8 @@
 import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import {
-  ArrowDown, ArrowUp, FrameCorners,
-  ArrowsMerge, Eye, ArrowCounterClockwise, Faders, Question,
-  Aperture, Function, PlusMinus, StackMinus,
+  ArrowDownIcon, ArrowUpIcon, FrameCornersIcon,
+  ArrowsMergeIcon, EyeIcon, ArrowCounterClockwiseIcon, FadersIcon, QuestionIcon,
+  ApertureIcon, FunctionIcon, PlusMinusIcon, StackMinusIcon,
 } from '@phosphor-icons/react';
 import type { OpCategory } from '@wetron/core';
 
@@ -19,18 +19,18 @@ export type IconEntry =
   | { kind: 'glyph'; char: string };
 
 export const CATEGORY_ICON: Record<OpCategory, IconEntry> = {
-  input:         { kind: 'component', Component: ArrowDown },
-  output:        { kind: 'component', Component: ArrowUp },
-  conv:          { kind: 'component', Component: Aperture },
-  activation:    { kind: 'component', Component: Function },
+  input:         { kind: 'component', Component: ArrowDownIcon },
+  output:        { kind: 'component', Component: ArrowUpIcon },
+  conv:          { kind: 'component', Component: ApertureIcon },
+  activation:    { kind: 'component', Component: FunctionIcon },
   normalization: { kind: 'glyph', char: 'μ' },
-  pooling:       { kind: 'component', Component: StackMinus },
-  reshape:       { kind: 'component', Component: FrameCorners },
-  math:          { kind: 'component', Component: PlusMinus },
+  pooling:       { kind: 'component', Component: StackMinusIcon },
+  reshape:       { kind: 'component', Component: FrameCornersIcon },
+  math:          { kind: 'component', Component: PlusMinusIcon },
   reduction:     { kind: 'glyph', char: 'Σ' },
-  merge:         { kind: 'component', Component: ArrowsMerge },
-  attention:     { kind: 'component', Component: Eye },
-  recurrent:     { kind: 'component', Component: ArrowCounterClockwise },
-  quantization:  { kind: 'component', Component: Faders },
-  unknown:       { kind: 'component', Component: Question },
+  merge:         { kind: 'component', Component: ArrowsMergeIcon },
+  attention:     { kind: 'component', Component: EyeIcon },
+  recurrent:     { kind: 'component', Component: ArrowCounterClockwiseIcon },
+  quantization:  { kind: 'component', Component: FadersIcon },
+  unknown:       { kind: 'component', Component: QuestionIcon },
 };

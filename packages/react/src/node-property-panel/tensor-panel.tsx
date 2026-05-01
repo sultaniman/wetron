@@ -1,5 +1,5 @@
 import React from "react";
-import { Cube } from "@phosphor-icons/react";
+import { CubeIcon } from "@phosphor-icons/react";
 import { Row, BackButton } from "./panel-ui.tsx";
 import css from "./node-property-panel.module.css";
 
@@ -16,7 +16,7 @@ export function TensorPanel({
       <div className={css.header}>
         {onBack && <BackButton onBack={onBack} />}
         <div className={css.iconBox} data-kind="tensor">
-          <Cube size={15} />
+          <CubeIcon size={15} />
         </div>
         <div style={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
           <div className={css.nodeTitle}>Tensor</div>

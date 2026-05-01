@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { ArrowCircleDown, ArrowCircleUp, SlidersHorizontal } from "@phosphor-icons/react";
+import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon } from "@phosphor-icons/react";
 import type { GraphNode, AttributeValue } from "@wetron/core/ir";
 import { opCategory } from "@wetron/core";
+import { formatAttrBrief } from "@wetron/core/panel-utils";
 import { CATEGORY_THEME, CATEGORY_ICON } from "../theme.ts";
 import {
   attrChipLabel,
@@ -13,15 +14,6 @@ import {
   Chip,
 } from "./panel-ui.tsx";
 import css from "./node-property-panel.module.css";
-
-function formatAttrBrief(value: AttributeValue): string {
-  if (!Array.isArray(value)) {
-    const s = String(value);
-    return s.length > 26 ? s.slice(0, 23) + "…" : s;
-  }
-  if (value.length <= 4) return `[${value.join(", ")}]`;
-  return `[${(value as (string | number)[]).slice(0, 3).join(", ")}, … ×${value.length}]`;
-}
 
 function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
   const [expanded, setExpanded] = useState(false);
@@ -99,7 +91,7 @@ export function OpPanel({
       </div>
       {visibleInputs.length > 0 && (
         <div className={css.section}>
-          <SectionLabel icon={<ArrowCircleDown size={12} />} title="Inputs" />
+          <SectionLabel icon={<ArrowCircleDownIcon size={12} />} title="Inputs" />
           {visibleInputs.map((name) => {
             const sourceOp = inputSources?.get(name);
             const sourceCat = sourceOp ? opCategory(sourceOp) : null;
@@ -122,7 +114,7 @@ export function OpPanel({
       )}
       {node.outputs.length > 0 && (
         <div className={css.section}>
-          <SectionLabel icon={<ArrowCircleUp size={12} />} title="Outputs" />
+          <SectionLabel icon={<ArrowCircleUpIcon size={12} />} title="Outputs" />
           {node.outputs.map((name, i) => (
             <Row
               key={name || `output_${i}`}
@@ -136,7 +128,7 @@ export function OpPanel({
       )}
       {attrEntries.length > 0 && (
         <div className={css.sectionLast}>
-          <SectionLabel icon={<SlidersHorizontal size={12} />} title="Attributes" />
+          <SectionLabel icon={<SlidersHorizontalIcon size={12} />} title="Attributes" />
           {attrEntries.map(([key, val]) => (
             <AttrRow key={key} name={key} value={val} />
           ))}
