@@ -14,7 +14,9 @@ Graph structure only — no weight data is read or stored.
 | `@wetron/keras`  | Keras `.keras` archive parser                             |
 | `@wetron/react`  | React graph view and property panel                       |
 | `@wetron/svelte` | Svelte graph view and property panel                      |
-| `@wetron/tokens` | Theme constants (colors, CSS vars)                        |
+| `@wetron/tokens` | Theme constants (colors, CSS vars) — no dependencies      |
+
+`@wetron/tokens` is intentionally standalone: it inlines all type definitions and has zero runtime or peer dependencies, so it can be used without installing any other wetron package.
 
 ## Requirements
 
@@ -82,15 +84,22 @@ Returns `"unknown"` — never throws.
 ### Render with React
 
 ```tsx
+import { parseModel } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
-import type { PanelTarget, ColorMode } from "@wetron/react";
+import type { ModelGraph, PanelTarget } from "@wetron/react";
 
 function App() {
   const [graph, setGraph] = useState<ModelGraph | null>(null);
   const [selected, setSelected] = useState<PanelTarget | null>(null);
 
+  async function handleFile(file: File) {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    setGraph(await parseModel(bytes, file.name));
+  }
+
   return (
     <>
+      <input type="file" accept=".onnx,.tflite,.keras" onChange={(e) => handleFile(e.target.files![0])} />
       {graph && (
         <ModelGraphView
           graph={graph}
@@ -110,11 +119,19 @@ Peer dependencies: `react` 18+, `@xyflow/react` 12+, `@phosphor-icons/react` 2+.
 
 ```svelte
 <script>
+  import { parseModel } from "@wetron/core";
   import { ModelGraphView, NodePropertyPanel } from "@wetron/svelte";
   let graph = $state(null);
   let selected = $state(null);
+
+  async function handleFile(e) {
+    const file = e.target.files[0];
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    graph = await parseModel(bytes, file.name);
+  }
 </script>
 
+<input type="file" accept=".onnx,.tflite,.keras" on:change={handleFile} />
 {#if graph}
   <ModelGraphView {graph} onTargetClick={(t) => selected = t} colorMode="system" />
 {/if}

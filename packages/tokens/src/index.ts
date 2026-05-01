@@ -1,4 +1,7 @@
-import type { OpCategory } from "@wetron/core";
+export type OpCategory =
+  | "input" | "output" | "conv" | "activation" | "normalization" | "pooling"
+  | "reshape" | "math" | "reduction" | "merge" | "attention" | "recurrent"
+  | "quantization" | "constant" | "logic" | "unknown";
 
 export type CategoryColors = { readonly light: string; readonly dark: string };
 
