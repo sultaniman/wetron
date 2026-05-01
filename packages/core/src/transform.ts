@@ -42,6 +42,7 @@ export type FlowEdge = {
     readonly targetOpType: string;
     readonly targetNodeName: string;
     readonly bypassX?: number;
+    readonly bypassSlot?: number;
   };
 };
 
@@ -181,6 +182,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
   // range, find the band containing the source, and route just outside that band.
   // This keeps the detour as narrow as possible instead of going to the graph edge.
   const BYPASS_PAD = 40;
+  const sourceBypassSlot = new Map<string, number>();
   const nodeBoxes = flowNodes
     .map(fn => {
       const pos = g.node(fn.id);
@@ -225,7 +227,9 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
 
     // Route left or right based on target direction; band edges already include padding.
     const bypassX = tgtPos.x <= srcPos.x ? band[0] : band[1];
-    flowEdges[i] = { ...fe, data: { ...fe.data, bypassX } };
+    const bypassSlot = sourceBypassSlot.get(fe.source) ?? 0;
+    sourceBypassSlot.set(fe.source, bypassSlot + 1);
+    flowEdges[i] = { ...fe, data: { ...fe.data, bypassX, bypassSlot } };
   }
 
   return { nodes: flowNodes, edges: flowEdges };
