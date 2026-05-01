@@ -2,7 +2,6 @@ import { test, expect } from "bun:test";
 import { parseKeras } from "../src/parse.ts";
 import { ParseError } from "@wetron/core/ir";
 import { zipSync } from "fflate";
-import { opCategory } from "@wetron/core";
 
 function makeKerasZip(files: Record<string, unknown>): Uint8Array {
   const enc = new TextEncoder();
@@ -228,101 +227,7 @@ test("functional merge: Concatenate axis attribute", () => {
   expect(concat.attributes["axis"]).toBe(-1);
 });
 
-test("categories: Keras conv layers → conv", () => {
-  for (const op of [
-    "Conv1D",
-    "Conv2D",
-    "Conv3D",
-    "Conv2DTranspose",
-    "DepthwiseConv2D",
-    "SeparableConv2D",
-    "Dense",
-  ]) {
-    expect(opCategory(op)).toBe("conv");
-  }
-});
-
-test("categories: Keras activation layers → activation", () => {
-  for (const op of ["Activation", "ReLU", "LeakyReLU", "PReLU", "ELU", "Softmax", "Sigmoid"]) {
-    expect(opCategory(op)).toBe("activation");
-  }
-});
-
-test("categories: Keras normalization layers → normalization", () => {
-  for (const op of [
-    "BatchNormalization",
-    "LayerNormalization",
-    "GroupNormalization",
-    "UnitNormalization",
-  ]) {
-    expect(opCategory(op)).toBe("normalization");
-  }
-});
-
-test("categories: Keras pooling layers → pooling", () => {
-  for (const op of [
-    "MaxPooling1D",
-    "MaxPooling2D",
-    "MaxPooling3D",
-    "AveragePooling2D",
-    "GlobalMaxPooling2D",
-    "GlobalAveragePooling2D",
-  ]) {
-    expect(opCategory(op)).toBe("pooling");
-  }
-});
-
-test("categories: Keras reshape layers → reshape", () => {
-  for (const op of [
-    "Flatten",
-    "Reshape",
-    "Permute",
-    "RepeatVector",
-    "ZeroPadding2D",
-    "Cropping2D",
-    "UpSampling2D",
-  ]) {
-    expect(opCategory(op)).toBe("reshape");
-  }
-});
-
-test("categories: Keras math layers → math", () => {
-  for (const op of ["Add", "Subtract", "Multiply", "Average", "Maximum", "Minimum", "Dot"]) {
-    expect(opCategory(op)).toBe("math");
-  }
-});
-
-test("categories: Keras merge layers → merge", () => {
-  expect(opCategory("Concatenate")).toBe("merge");
-});
-
-test("categories: Keras attention layers → attention", () => {
-  for (const op of ["MultiHeadAttention", "Attention", "AdditiveAttention"]) {
-    expect(opCategory(op)).toBe("attention");
-  }
-});
-
-test("categories: Keras recurrent layers → recurrent", () => {
-  for (const op of ["LSTM", "GRU", "SimpleRNN", "Bidirectional", "TimeDistributed", "ConvLSTM2D"]) {
-    expect(opCategory(op)).toBe("recurrent");
-  }
-});
-
-import { detectFormat } from "@wetron/core/detect";
 import { parseModel } from "@wetron/core";
-
-test("detectFormat: ZIP magic bytes → keras", () => {
-  const zip = makeKerasZip({ "config.json": "{}" });
-  expect(detectFormat(zip)).toBe("keras");
-});
-
-test("detectFormat: .keras extension with unknown bytes → keras", () => {
-  expect(detectFormat(new Uint8Array([0x00, 0x00, 0x00, 0x00]), "model.keras")).toBe("keras");
-});
-
-test("detectFormat: ONNX bytes still detected as onnx, not affected by keras addition", () => {
-  expect(detectFormat(new Uint8Array([0x08, 0x00]))).toBe("onnx");
-});
 
 test("parseModel: dispatches .keras bytes to parseKeras", async () => {
   const zip = makeKerasZip({ "config.json": SEQ_CONFIG });

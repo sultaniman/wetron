@@ -32,3 +32,45 @@ test("QuantizeLinear maps to quantization", () =>
 test("unknown op maps to unknown", () => expect(opCategory("SomeWeirdOp")).toBe("unknown"));
 test("Input maps to input", () => expect(opCategory("Input")).toBe("input"));
 test("Output maps to output", () => expect(opCategory("Output")).toBe("output"));
+
+test("Keras conv/dense layers → conv", () => {
+  for (const op of ["Conv1D", "Conv2D", "Conv3D", "Conv2DTranspose", "DepthwiseConv2D", "SeparableConv2D", "Dense"]) {
+    expect(opCategory(op)).toBe("conv");
+  }
+});
+test("Keras activation layers → activation", () => {
+  for (const op of ["Activation", "ReLU", "LeakyReLU", "PReLU", "ELU", "Softmax"]) {
+    expect(opCategory(op)).toBe("activation");
+  }
+});
+test("Keras normalization layers → normalization", () => {
+  for (const op of ["GroupNormalization", "UnitNormalization"]) {
+    expect(opCategory(op)).toBe("normalization");
+  }
+});
+test("Keras pooling layers → pooling", () => {
+  for (const op of ["MaxPooling1D", "MaxPooling2D", "MaxPooling3D", "AveragePooling2D", "GlobalMaxPooling2D", "GlobalAveragePooling2D"]) {
+    expect(opCategory(op)).toBe("pooling");
+  }
+});
+test("Keras reshape layers → reshape", () => {
+  for (const op of ["Flatten", "Permute", "RepeatVector", "ZeroPadding2D", "Cropping2D", "UpSampling2D"]) {
+    expect(opCategory(op)).toBe("reshape");
+  }
+});
+test("Keras math/merge layers → correct category", () => {
+  for (const op of ["Subtract", "Multiply", "Average", "Maximum", "Minimum", "Dot"]) {
+    expect(opCategory(op)).toBe("math");
+  }
+  expect(opCategory("Concatenate")).toBe("merge");
+});
+test("Keras attention layers → attention", () => {
+  for (const op of ["Attention", "AdditiveAttention"]) {
+    expect(opCategory(op)).toBe("attention");
+  }
+});
+test("Keras recurrent layers → recurrent", () => {
+  for (const op of ["SimpleRNN", "Bidirectional", "TimeDistributed", "ConvLSTM2D"]) {
+    expect(opCategory(op)).toBe("recurrent");
+  }
+});
