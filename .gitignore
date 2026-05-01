@@ -1,0 +1,9 @@
+.claude
+.superpowers/
+.worktrees/
+node_modules
+.DS_Store
+test-models/large
+netron-main/
+.serena/
+dist

@@ -1,0 +1,17 @@
+{
+  "name": "wetron",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@types/bun": "^1.3.13",
+    "@types/dagre": "^0.7.54",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "happy-dom": "^20.9.0",
+    "protobufjs-cli": "^2.0.3",
+    "typescript": "^6.0.3"
+  }
+}

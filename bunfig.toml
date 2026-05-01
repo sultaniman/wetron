@@ -1,0 +1,2 @@
+[test]
+preload = ["./packages/react/test/setup.ts"]
