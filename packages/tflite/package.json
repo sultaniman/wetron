@@ -1,0 +1,12 @@
+{
+  "name": "@wetron/tflite",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*",
+    "flatbuffers": "^25.9.23"
+  }
+}
