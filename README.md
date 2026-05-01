@@ -48,7 +48,7 @@ cd apps/demo-svelte && bun dev   # Svelte
 ## Documentation
 
 - [Usage](docs/usage.md) — parsing models, rendering with React/Svelte, core types
-- [Contributing](docs/contributing.md) — adding a new parser
+- [Extending](docs/extending.md) — adding a new parser
 
 ## Constraints
 
