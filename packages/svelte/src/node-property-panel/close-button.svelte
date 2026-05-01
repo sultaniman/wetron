@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { X } from 'phosphor-svelte';
+  import { XIcon } from 'phosphor-svelte';
 
   let { onClose }: { onClose: () => void } = $props();
 </script>
 
 <button class="closeButton" onclick={onClose} aria-label="Close">
-  <X size={13} />
+  <XIcon size={13} />
 </button>
 
 <style>

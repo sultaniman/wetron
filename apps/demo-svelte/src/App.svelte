@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowUp } from 'phosphor-svelte';
+  import { ArrowUpIcon } from 'phosphor-svelte';
   import { parseModel } from '@wetron/core';
   import type { ModelGraph } from '@wetron/core';
   import { ModelGraphView, NodePropertyPanel } from '@wetron/svelte';
@@ -158,7 +158,7 @@
           transition:all 0.15s
         "
       >
-        <div style="color:{isDark ? '#e0e0e0' : '#333'}"><ArrowUp size={48} /></div>
+        <div style="color:{isDark ? '#e0e0e0' : '#333'}"><ArrowUpIcon size={48} /></div>
         <div style="font-weight:600;color:{isDark ? '#e0e0e0' : '#333'}">Drop a model file here</div>
         <div style="color:#888;font-size:13px">Supports .onnx, .tflite and .keras</div>
       </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chip from './chip.svelte';
-  import { CaretRight } from 'phosphor-svelte';
+  import { CaretRightIcon } from 'phosphor-svelte';
 
   let { label, value, chip, chipColor, onClick }: {
     label: string;
@@ -20,7 +20,7 @@
   <span class="label">{label}</span>
   {#if value}<span class="value">{value}</span>{/if}
   <Chip label={chip} color={chipColor} />
-  {#if onClick}<span class="caret"><CaretRight size={9} /></span>{/if}
+  {#if onClick}<span class="caret"><CaretRightIcon size={9} /></span>{/if}
 </div>
 
 <style>

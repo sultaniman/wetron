@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { ArrowsLeftRight } from 'phosphor-svelte';
+  import { ArrowsLeftRightIcon } from 'phosphor-svelte';
   import Row from './row.svelte';
   import SectionLabel from './section-label.svelte';
-  import BackButton from './back-button.svelte';
+  import PanelHeader from './panel-header.svelte';
 
   type EdgeData = {
     tensorName: string;
@@ -22,16 +22,9 @@
   const hasInfo = $derived((info?.shape != null) || !!info?.dtype);
 </script>
 
-<div class="header">
-  {#if onBack}<BackButton {onBack} />{/if}
-  <div class="iconBox" data-kind="edge">
-    <ArrowsLeftRight size={15} />
-  </div>
-  <div class="titleWrap">
-    <div class="nodeTitle">Connection</div>
-    <div class="nodeSubtitle" title={edge.tensorName}>{edge.tensorName}</div>
-  </div>
-</div>
+<PanelHeader title="Connection" subtitle={edge.tensorName} iconKind="edge" {onBack}>
+  {#snippet icon()}<ArrowsLeftRightIcon size={15} />{/snippet}
+</PanelHeader>
 {#if hasInfo}
   <div class="section">
     {#if info?.shape != null}
@@ -54,38 +47,9 @@
 </div>
 
 <style>
-  .header {
-    padding: 10px 38px 9px 11px;
-    border-bottom: 1px solid var(--panel-header-border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
   .section {
     padding: 7px 11px;
     border-bottom: 1px solid var(--panel-section-border);
   }
   .sectionLast { padding: 7px 11px; }
-  .iconBox {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .iconBox[data-kind="edge"] { background: #f3e5f5; color: #9c27b0; }
-  :global([data-theme="dark"]) .iconBox[data-kind="edge"] { background: color-mix(in oklch, #ce93d8 12%, #1e1e2e); color: #ce93d8; }
-  .titleWrap { min-width: 0; flex: 1; overflow: hidden; }
-  .nodeTitle { font-weight: 700; font-size: 13px; }
-  .nodeSubtitle {
-    font-size: 10px;
-    color: var(--panel-subtitle);
-    font-family: monospace;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-top: 4px;
-  }
 </style>

@@ -50,10 +50,10 @@
         ? `color-mix(in oklch, ${color} 38%, ${tintBase})`
         : border
   );
-  const boxShadow = $derived(
+  const selectedShadow = $derived(
     selected
       ? `0 0 0 2px color-mix(in oklch, ${color} 25%, transparent), 0 1px 4px rgba(0,0,0,0.08)`
-      : '0 1px 4px rgba(0,0,0,0.08)'
+      : undefined
   );
   const iconColor = $derived(color + 'B3');
 </script>
@@ -63,7 +63,7 @@
   class="card"
   style:background={cardBg}
   style:border="1px solid {cardBorder}"
-  style:box-shadow={boxShadow}
+  style:box-shadow={selectedShadow}
   style:--node-color={color}
   style:--node-icon-color={iconColor}
   style:--node-muted={muted}
@@ -93,10 +93,11 @@
     width: 220px; /* must match NODE_W in transform.ts */
     box-sizing: border-box;
     cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     transition: box-shadow 0.12s, border-color 0.12s;
   }
   .card:hover {
-    box-shadow: 0 2px 10px rgba(0,0,0,0.13) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.13);
   }
   .header-row {
     display: flex;

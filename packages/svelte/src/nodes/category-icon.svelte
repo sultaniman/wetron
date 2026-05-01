@@ -1,43 +1,43 @@
 <script lang="ts">
   import type { OpCategory } from '@wetron/core';
   import {
-    ArrowDown, ArrowUp, Aperture, Function, StackMinus,
-    Cube, PlusMinus, ArrowsMerge, Eye,
-    ArrowCounterClockwise, Faders, Question, Diamond,
+    ArrowDownIcon, ArrowUpIcon, ApertureIcon, FunctionIcon, StackMinusIcon,
+    CubeIcon, PlusMinusIcon, ArrowsMergeIcon, EyeIcon,
+    ArrowCounterClockwiseIcon, FadersIcon, QuestionIcon, DiamondIcon,
     // per-op overrides
-    ArrowsOutSimple, ArrowsOutLineVertical, ArrowsInLineVertical, Scissors,
-    ArrowsDownUp, Rows, BoundingBox, FrameCorners,
-    DotsNine, CopySimple, ArrowsSplit, FunnelSimple, Table,
-    Stack,
+    ArrowsOutSimpleIcon, ArrowsOutLineVerticalIcon, ArrowsInLineVerticalIcon, ScissorsIcon,
+    ArrowsDownUpIcon, RowsIcon, BoundingBoxIcon, FrameCornersIcon,
+    DotsNineIcon, CopySimpleIcon, ArrowsSplitIcon, FunnelSimpleIcon, TableIcon,
+    StackIcon,
   } from 'phosphor-svelte';
 
   let { cat, op, size = 16 }: { cat: OpCategory; op?: string; size?: number } = $props();
 </script>
 
 {#if op === 'Reshape'}
-  <BoundingBox {size} />
+  <BoundingBoxIcon {size} />
 {:else if op === 'Expand'}
-  <ArrowsOutSimple {size} />
+  <ArrowsOutSimpleIcon {size} />
 {:else if op === 'Unsqueeze'}
-  <ArrowsOutLineVertical {size} />
+  <ArrowsOutLineVerticalIcon {size} />
 {:else if op === 'Squeeze'}
-  <ArrowsInLineVertical {size} />
+  <ArrowsInLineVerticalIcon {size} />
 {:else if op === 'Slice'}
-  <Stack {size} />
+  <StackIcon {size} />
 {:else if op === 'Transpose'}
-  <ArrowsDownUp {size} />
+  <ArrowsDownUpIcon {size} />
 {:else if op === 'Flatten'}
-  <Rows {size} />
+  <RowsIcon {size} />
 {:else if op === 'Pad'}
-  <FrameCorners {size} />
+  <FrameCornersIcon {size} />
 {:else if op === 'ScatterElements' || op === 'ScatterND'}
-  <DotsNine {size} />
+  <DotsNineIcon {size} />
 {:else if op === 'Tile'}
-  <CopySimple {size} />
+  <CopySimpleIcon {size} />
 {:else if op === 'Split'}
-  <ArrowsSplit {size} />
+  <ArrowsSplitIcon {size} />
 {:else if op === 'Gather' || op === 'GatherElements' || op === 'GatherND'}
-  <FunnelSimple {size} />
+  <FunnelSimpleIcon {size} />
 {:else if op === 'Add'}
   <span class="glyph">+</span>
 {:else if op === 'Sub'}
@@ -47,43 +47,43 @@
 {:else if op === 'Div'}
   <span class="glyph">÷</span>
 {:else if op === 'Clip'}
-  <Scissors {size} />
+  <ScissorsIcon {size} />
 {:else if op === 'Not'}
   <span class="glyph">!</span>
 {:else if op === 'MatMul' || op === 'Gemm'}
-  <Table {size} />
+  <TableIcon {size} />
 {:else if cat === 'input'}
-  <ArrowDown {size} />
+  <ArrowDownIcon {size} />
 {:else if cat === 'output'}
-  <ArrowUp {size} />
+  <ArrowUpIcon {size} />
 {:else if cat === 'conv'}
-  <Aperture {size} />
+  <ApertureIcon {size} />
 {:else if cat === 'activation'}
-  <Function {size} />
+  <FunctionIcon {size} />
 {:else if cat === 'normalization'}
   <span class="glyph">μ</span>
 {:else if cat === 'pooling'}
-  <StackMinus {size} />
+  <StackMinusIcon {size} />
 {:else if cat === 'reshape'}
-  <Cube {size} />
+  <CubeIcon {size} />
 {:else if cat === 'math'}
-  <PlusMinus {size} />
+  <PlusMinusIcon {size} />
 {:else if cat === 'reduction'}
   <span class="glyph">Σ</span>
 {:else if cat === 'merge'}
-  <ArrowsMerge {size} />
+  <ArrowsMergeIcon {size} />
 {:else if cat === 'attention'}
-  <Eye {size} />
+  <EyeIcon {size} />
 {:else if cat === 'recurrent'}
-  <ArrowCounterClockwise {size} />
+  <ArrowCounterClockwiseIcon {size} />
 {:else if cat === 'quantization'}
-  <Faders {size} />
+  <FadersIcon {size} />
 {:else if cat === 'constant'}
-  <Diamond {size} />
+  <DiamondIcon {size} />
 {:else if cat === 'logic'}
   <span class="glyph">=</span>
 {:else}
-  <Question {size} />
+  <QuestionIcon {size} />
 {/if}
 
 <style>

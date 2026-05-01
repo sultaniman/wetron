@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { ArrowLeft } from 'phosphor-svelte';
+  import { ArrowLeftIcon } from 'phosphor-svelte';
 
   let { onBack }: { onBack: () => void } = $props();
 </script>
 
 <button class="backButton" onclick={onBack} aria-label="Back">
-  <ArrowLeft size={13} />
+  <ArrowLeftIcon size={13} />
 </button>
 
 <style>
