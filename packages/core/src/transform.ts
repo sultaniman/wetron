@@ -175,33 +175,57 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     if (pos) fn.position = { x: pos.x - NODE_W / 2, y: pos.y - pos.height / 2 };
   }
 
-  // Compute bypass routing for skip connections (edges that span multiple ranks).
-  // The edge component can't see other nodes, so we pre-compute the detour X here
-  // where all dagre positions are available.
+  // Compute bypass routing for skip connections (edges spanning multiple ranks).
+  // The edge component can't see other nodes, so we pre-compute the detour X here.
+  // For each skip edge we build the merged X intervals of every node in its Y travel
+  // range, find the band containing the source, and route just outside that band.
+  // This keeps the detour as narrow as possible instead of going to the graph edge.
   const BYPASS_PAD = 40;
-  let graphLeft = Infinity, graphRight = -Infinity;
-  for (const fn of flowNodes) {
-    const pos = g.node(fn.id);
-    if (pos) {
-      graphLeft = Math.min(graphLeft, pos.x - pos.width / 2);
-      graphRight = Math.max(graphRight, pos.x + pos.width / 2);
-    }
-  }
-  if (isFinite(graphLeft)) {
-    const leftBypassX = graphLeft - BYPASS_PAD;
-    const rightBypassX = graphRight + BYPASS_PAD;
-    for (let i = 0; i < flowEdges.length; i++) {
-      const fe = flowEdges[i];
-      const srcPos = g.node(fe.source);
-      const tgtPos = g.node(fe.target);
-      if (!srcPos || !tgtPos) continue;
-      const gap = (tgtPos.y - tgtPos.height / 2) - (srcPos.y + srcPos.height / 2);
-      // Adjacent ranks have gap === ranksep (60). Skip connections span ≥ 2 ranks.
-      if (gap > 90) {
-        const bypassX = tgtPos.x <= srcPos.x ? leftBypassX : rightBypassX;
-        flowEdges[i] = { ...fe, data: { ...fe.data, bypassX } };
+  const nodeBoxes = flowNodes
+    .map(fn => {
+      const pos = g.node(fn.id);
+      if (!pos) return null;
+      return { left: pos.x - pos.width / 2, right: pos.x + pos.width / 2, top: pos.y - pos.height / 2, bottom: pos.y + pos.height / 2, cx: pos.x };
+    })
+    .filter((b): b is NonNullable<typeof b> => b !== null);
+
+  for (let i = 0; i < flowEdges.length; i++) {
+    const fe = flowEdges[i];
+    const srcPos = g.node(fe.source);
+    const tgtPos = g.node(fe.target);
+    if (!srcPos || !tgtPos) continue;
+    const srcBottom = srcPos.y + srcPos.height / 2;
+    const tgtTop = tgtPos.y - tgtPos.height / 2;
+    // Adjacent ranks have gap === ranksep (60px). Skip connections span ≥ 2 ranks.
+    if (tgtTop - srcBottom <= 90) continue;
+
+    // Collect X intervals (with padding) of nodes whose Y range overlaps the travel lane.
+    const intervals: [number, number][] = [];
+    for (const box of nodeBoxes) {
+      if (box.top < tgtTop && box.bottom > srcBottom) {
+        intervals.push([box.left - BYPASS_PAD, box.right + BYPASS_PAD]);
       }
     }
+    if (intervals.length === 0) continue;
+
+    // Merge overlapping intervals so we find contiguous blocked bands.
+    intervals.sort((a, b) => a[0] - b[0]);
+    const merged: [number, number][] = [];
+    for (const [l, r] of intervals) {
+      if (merged.length && l <= merged[merged.length - 1][1]) {
+        merged[merged.length - 1][1] = Math.max(merged[merged.length - 1][1], r);
+      } else {
+        merged.push([l, r]);
+      }
+    }
+
+    // Find the merged band that contains the source node center.
+    const band = merged.find(([l, r]) => srcPos.x >= l && srcPos.x <= r);
+    if (!band) continue;
+
+    // Route left or right based on target direction; band edges already include padding.
+    const bypassX = tgtPos.x <= srcPos.x ? band[0] : band[1];
+    flowEdges[i] = { ...fe, data: { ...fe.data, bypassX } };
   }
 
   return { nodes: flowNodes, edges: flowEdges };
