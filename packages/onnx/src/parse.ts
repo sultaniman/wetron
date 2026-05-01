@@ -45,9 +45,18 @@ const ONNX_DTYPE: Record<number, string> = {
 // protobufjs .toJSON() serializes enum fields as string names ("FLOAT", "INT", …)
 // Normalize to the numeric AttributeType used in switch cases.
 const ATTR_TYPE_NUM: Record<string, number> = {
-  FLOAT: 1, INT: 2, STRING: 3, TENSOR: 4, GRAPH: 5,
-  FLOATS: 6, INTS: 7, STRINGS: 8, TENSORS: 9, GRAPHS: 10,
-  SPARSE_TENSOR: 11, TYPE_PROTO: 13,
+  FLOAT: 1,
+  INT: 2,
+  STRING: 3,
+  TENSOR: 4,
+  GRAPH: 5,
+  FLOATS: 6,
+  INTS: 7,
+  STRINGS: 8,
+  TENSORS: 9,
+  GRAPHS: 10,
+  SPARSE_TENSOR: 11,
+  TYPE_PROTO: 13,
 };
 
 function attrTypeNumber(raw: unknown): number {
@@ -68,7 +77,11 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
       if (s instanceof Uint8Array) return _decoder.decode(s);
       // protobufjs .toJSON() encodes bytes fields as base64 strings
       if (typeof s === "string") {
-        try { return _decoder.decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0))); } catch { return s; }
+        try {
+          return _decoder.decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)));
+        } catch {
+          return s;
+        }
       }
       return String(s ?? "");
     }
@@ -80,7 +93,11 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
       return ((a["strings"] as Array<unknown> | null) ?? []).map((b) => {
         if (b instanceof Uint8Array) return _decoder.decode(b);
         if (typeof b === "string") {
-          try { return _decoder.decode(Uint8Array.from(atob(b), (c) => c.charCodeAt(0))); } catch { return b; }
+          try {
+            return _decoder.decode(Uint8Array.from(atob(b), (c) => c.charCodeAt(0)));
+          } catch {
+            return b;
+          }
         }
         return String(b);
       });

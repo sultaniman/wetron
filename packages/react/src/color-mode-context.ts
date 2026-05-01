@@ -15,8 +15,11 @@ export function resolveColorMode(mode: ColorMode): "light" | "dark" {
 
 export function useResolvedColorMode(mode: ColorMode): "light" | "dark" {
   const [systemDark, setSystemDark] = useState(() => {
-    try { return window.matchMedia("(prefers-color-scheme: dark)").matches; }
-    catch { return false; }
+    try {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    } catch {
+      return false;
+    }
   });
   useEffect(() => {
     if (mode !== "system") return;

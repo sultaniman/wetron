@@ -317,7 +317,9 @@ function DropZone({
         transition: "all 0.15s",
       }}
     >
-      <div style={{ color: isDark ? "#e0e0e0" : "#333" }}><ArrowUpIcon size={48} /></div>
+      <div style={{ color: isDark ? "#e0e0e0" : "#333" }}>
+        <ArrowUpIcon size={48} />
+      </div>
       <div style={{ fontWeight: 600, color: isDark ? "#e0e0e0" : "#333" }}>
         Drop a model file here
       </div>

@@ -13,12 +13,14 @@
 ## File Map
 
 **Created:**
+
 - `packages/tokens/src/index.ts` — all design token dictionaries
 - `packages/tokens/package.json`
 - `packages/tokens/tsconfig.json`
 - `packages/tokens/test/index.test.ts`
 
 **Modified:**
+
 - `packages/react/package.json` — add `@wetron/tokens` dependency
 - `packages/react/src/theme.ts` — import+re-export CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME from tokens
 - `packages/react/src/node-property-panel/node-property-panel.module.css` — rename `--wp-*` → `--panel-*` (11 vars)
@@ -41,6 +43,7 @@
 ## Task 1: Create `@wetron/tokens` package
 
 **Files:**
+
 - Create: `packages/tokens/src/index.ts`
 - Create: `packages/tokens/package.json`
 - Create: `packages/tokens/tsconfig.json`
@@ -50,36 +53,57 @@
 
 ```ts
 // packages/tokens/test/index.test.ts
-import { test, expect } from 'bun:test';
-import { CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME, CANVAS_VARS, PANEL_VARS } from '../src/index.ts';
+import { test, expect } from "bun:test";
+import {
+  CATEGORY_THEME,
+  MINIMAP_THEME,
+  EDGE_THEME,
+  CANVAS_VARS,
+  PANEL_VARS,
+} from "../src/index.ts";
 
-test('CATEGORY_THEME has all 14 categories with light and dark', () => {
-  const expected = ['input','output','conv','activation','normalization','pooling','reshape','math','reduction','merge','attention','recurrent','quantization','unknown'];
+test("CATEGORY_THEME has all 14 categories with light and dark", () => {
+  const expected = [
+    "input",
+    "output",
+    "conv",
+    "activation",
+    "normalization",
+    "pooling",
+    "reshape",
+    "math",
+    "reduction",
+    "merge",
+    "attention",
+    "recurrent",
+    "quantization",
+    "unknown",
+  ];
   expect(Object.keys(CATEGORY_THEME)).toEqual(expected);
   for (const v of Object.values(CATEGORY_THEME)) {
-    expect(typeof v.light).toBe('string');
-    expect(typeof v.dark).toBe('string');
+    expect(typeof v.light).toBe("string");
+    expect(typeof v.dark).toBe("string");
   }
 });
 
-test('MINIMAP_THEME has light and dark with required fields', () => {
-  expect(typeof MINIMAP_THEME.borderRadius).toBe('number');
-  expect(typeof MINIMAP_THEME.light.background).toBe('string');
-  expect(typeof MINIMAP_THEME.dark.background).toBe('string');
+test("MINIMAP_THEME has light and dark with required fields", () => {
+  expect(typeof MINIMAP_THEME.borderRadius).toBe("number");
+  expect(typeof MINIMAP_THEME.light.background).toBe("string");
+  expect(typeof MINIMAP_THEME.dark.background).toBe("string");
 });
 
-test('EDGE_THEME has selectedStroke and selectedStrokeWidth', () => {
-  expect(typeof EDGE_THEME.selectedStroke).toBe('string');
-  expect(typeof EDGE_THEME.selectedStrokeWidth).toBe('number');
+test("EDGE_THEME has selectedStroke and selectedStrokeWidth", () => {
+  expect(typeof EDGE_THEME.selectedStroke).toBe("string");
+  expect(typeof EDGE_THEME.selectedStrokeWidth).toBe("number");
 });
 
-test('CANVAS_VARS light and dark have the same 7 keys', () => {
+test("CANVAS_VARS light and dark have the same 7 keys", () => {
   const keys = Object.keys(CANVAS_VARS.light);
   expect(keys).toHaveLength(7);
   expect(Object.keys(CANVAS_VARS.dark)).toEqual(keys);
 });
 
-test('PANEL_VARS light and dark have the same 11 keys', () => {
+test("PANEL_VARS light and dark have the same 11 keys", () => {
   const keys = Object.keys(PANEL_VARS.light);
   expect(keys).toHaveLength(11);
   expect(Object.keys(PANEL_VARS.dark)).toEqual(keys);
@@ -122,95 +146,95 @@ Expected: error like `Cannot find module '../src/index.ts'`
 - [ ] **Step 4: Create `packages/tokens/src/index.ts`**
 
 ```ts
-import type { OpCategory } from '@wetron/core';
+import type { OpCategory } from "@wetron/core";
 
 export type CategoryColors = { readonly light: string; readonly dark: string };
 
 export const CATEGORY_THEME: Record<OpCategory, CategoryColors> = {
-  input:         { light: '#2e7d32', dark: '#4caf50' },
-  output:        { light: '#1565c0', dark: '#42a5f5' },
-  conv:          { light: '#3949ab', dark: '#7986cb' },
-  activation:    { light: '#d84315', dark: '#ff7043' },
-  normalization: { light: '#00695c', dark: '#26a69a' },
-  pooling:       { light: '#6a1b9a', dark: '#ab47bc' },
-  reshape:       { light: '#4e342e', dark: '#a1887f' },
-  math:          { light: '#ad1457', dark: '#f06292' },
-  reduction:     { light: '#1565c0', dark: '#64b5f6' },
-  merge:         { light: '#e65100', dark: '#ffa726' },
-  attention:     { light: '#00695c', dark: '#4db6ac' },
-  recurrent:     { light: '#558b2f', dark: '#aed581' },
-  quantization:  { light: '#795548', dark: '#bcaaa4' },
-  unknown:       { light: '#757575', dark: '#9e9e9e' },
+  input: { light: "#2e7d32", dark: "#4caf50" },
+  output: { light: "#1565c0", dark: "#42a5f5" },
+  conv: { light: "#3949ab", dark: "#7986cb" },
+  activation: { light: "#d84315", dark: "#ff7043" },
+  normalization: { light: "#00695c", dark: "#26a69a" },
+  pooling: { light: "#6a1b9a", dark: "#ab47bc" },
+  reshape: { light: "#4e342e", dark: "#a1887f" },
+  math: { light: "#ad1457", dark: "#f06292" },
+  reduction: { light: "#1565c0", dark: "#64b5f6" },
+  merge: { light: "#e65100", dark: "#ffa726" },
+  attention: { light: "#00695c", dark: "#4db6ac" },
+  recurrent: { light: "#558b2f", dark: "#aed581" },
+  quantization: { light: "#795548", dark: "#bcaaa4" },
+  unknown: { light: "#757575", dark: "#9e9e9e" },
 } as const;
 
 export const MINIMAP_THEME = {
   borderRadius: 8,
   light: {
-    background: 'rgba(240, 240, 248, 0.92)',
-    nodeColor:  'rgba(60, 60, 100, 0.4)',
-    maskColor:  'rgba(30, 30, 80, 0.07)',
+    background: "rgba(240, 240, 248, 0.92)",
+    nodeColor: "rgba(60, 60, 100, 0.4)",
+    maskColor: "rgba(30, 30, 80, 0.07)",
   },
   dark: {
-    background: 'rgba(18, 18, 32, 0.55)',
-    nodeColor:  'rgba(180, 180, 220, 0.5)',
-    maskColor:  'rgba(255, 255, 255, 0.08)',
+    background: "rgba(18, 18, 32, 0.55)",
+    nodeColor: "rgba(180, 180, 220, 0.5)",
+    maskColor: "rgba(255, 255, 255, 0.08)",
   },
 } as const;
 
 export const EDGE_THEME = {
-  selectedStroke:      '#e53935',
+  selectedStroke: "#e53935",
   selectedStrokeWidth: 2,
 } as const;
 
 // Keys are CSS custom property names — consumers can apply via style attribute or setProperty.
 export const CANVAS_VARS = {
   light: {
-    '--xy-background-color-default':                      '#f8f8fc',
-    '--xy-controls-button-background-color-default':      '#ffffff',
-    '--xy-controls-button-background-color-hover-default':'#f0f0f8',
-    '--xy-controls-button-color-default':                 '#555',
-    '--xy-controls-button-color-hover-default':           '#333',
-    '--xy-controls-button-border-color-default':          '#e0e0e0',
-    '--xy-controls-box-shadow-default':                   'none',
+    "--xy-background-color-default": "#f8f8fc",
+    "--xy-controls-button-background-color-default": "#ffffff",
+    "--xy-controls-button-background-color-hover-default": "#f0f0f8",
+    "--xy-controls-button-color-default": "#555",
+    "--xy-controls-button-color-hover-default": "#333",
+    "--xy-controls-button-border-color-default": "#e0e0e0",
+    "--xy-controls-box-shadow-default": "none",
   },
   dark: {
-    '--xy-background-color-default':                      '#13131f',
-    '--xy-controls-button-background-color-default':      '#1e1e2e',
-    '--xy-controls-button-background-color-hover-default':'#252538',
-    '--xy-controls-button-color-default':                 '#7a7a9a',
-    '--xy-controls-button-color-hover-default':           '#a0a0c0',
-    '--xy-controls-button-border-color-default':          '#2a2a3a',
-    '--xy-controls-box-shadow-default':                   'none',
+    "--xy-background-color-default": "#13131f",
+    "--xy-controls-button-background-color-default": "#1e1e2e",
+    "--xy-controls-button-background-color-hover-default": "#252538",
+    "--xy-controls-button-color-default": "#7a7a9a",
+    "--xy-controls-button-color-hover-default": "#a0a0c0",
+    "--xy-controls-button-border-color-default": "#2a2a3a",
+    "--xy-controls-box-shadow-default": "none",
   },
 } as const;
 
 // Keys use the --panel-* prefix.
 export const PANEL_VARS = {
   light: {
-    '--panel-bg':             '#fff',
-    '--panel-border':         '#e0e0e0',
-    '--panel-text':           '#222',
-    '--panel-header-border':  '#eee',
-    '--panel-section-border': '#f0f0f0',
-    '--panel-label':          '#555',
-    '--panel-value':          '#333',
-    '--panel-subtitle':       '#aaa',
-    '--panel-chip-bg':        '#f0f0f0',
-    '--panel-chip-color':     '#888',
-    '--panel-close-hover':    '#f0f0f0',
+    "--panel-bg": "#fff",
+    "--panel-border": "#e0e0e0",
+    "--panel-text": "#222",
+    "--panel-header-border": "#eee",
+    "--panel-section-border": "#f0f0f0",
+    "--panel-label": "#555",
+    "--panel-value": "#333",
+    "--panel-subtitle": "#aaa",
+    "--panel-chip-bg": "#f0f0f0",
+    "--panel-chip-color": "#888",
+    "--panel-close-hover": "#f0f0f0",
   },
   dark: {
-    '--panel-bg':             '#1e1e2e',
-    '--panel-border':         '#2a2a3a',
-    '--panel-text':           '#f0f0f0',
-    '--panel-header-border':  '#2a2a3a',
-    '--panel-section-border': '#282840',
-    '--panel-label':          '#a0a0c0',
-    '--panel-value':          '#e0e0f0',
-    '--panel-subtitle':       '#6a6a8a',
-    '--panel-chip-bg':        '#262646',
-    '--panel-chip-color':     '#a0a0c0',
-    '--panel-close-hover':    '#2a2a3a',
+    "--panel-bg": "#1e1e2e",
+    "--panel-border": "#2a2a3a",
+    "--panel-text": "#f0f0f0",
+    "--panel-header-border": "#2a2a3a",
+    "--panel-section-border": "#282840",
+    "--panel-label": "#a0a0c0",
+    "--panel-value": "#e0e0f0",
+    "--panel-subtitle": "#6a6a8a",
+    "--panel-chip-bg": "#262646",
+    "--panel-chip-color": "#a0a0c0",
+    "--panel-close-hover": "#2a2a3a",
   },
 } as const;
 ```
@@ -235,12 +259,14 @@ git commit -m "feat(@wetron/tokens): add design tokens package"
 ## Task 2: Wire React theme.ts to tokens
 
 **Files:**
+
 - Modify: `packages/react/package.json`
 - Modify: `packages/react/src/theme.ts`
 
 - [ ] **Step 1: Add `@wetron/tokens` to React's dependencies**
 
 In `packages/react/package.json`, add to `"dependencies"`:
+
 ```json
 "@wetron/tokens": "workspace:*"
 ```
@@ -249,16 +275,25 @@ In `packages/react/package.json`, add to `"dependencies"`:
 
 ```ts
 // packages/react/src/theme.ts
-import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import {
-  ArrowDown, ArrowUp, FrameCorners,
-  ArrowsMerge, Eye, ArrowCounterClockwise, Faders, Question,
-  Aperture, Function, PlusMinus, StackMinus,
-} from '@phosphor-icons/react';
-import type { OpCategory } from '@wetron/core';
+  ArrowDown,
+  ArrowUp,
+  FrameCorners,
+  ArrowsMerge,
+  Eye,
+  ArrowCounterClockwise,
+  Faders,
+  Question,
+  Aperture,
+  Function,
+  PlusMinus,
+  StackMinus,
+} from "@phosphor-icons/react";
+import type { OpCategory } from "@wetron/core";
 
 export type { OpCategory };
-export { CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME } from '@wetron/tokens';
+export { CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME } from "@wetron/tokens";
 
 export type CategoryTheme = {
   light: string;
@@ -266,24 +301,24 @@ export type CategoryTheme = {
 };
 
 export type IconEntry =
-  | { kind: 'component'; Component: PhosphorIcon }
-  | { kind: 'glyph'; char: string };
+  | { kind: "component"; Component: PhosphorIcon }
+  | { kind: "glyph"; char: string };
 
 export const CATEGORY_ICON: Record<OpCategory, IconEntry> = {
-  input:         { kind: 'component', Component: ArrowDown },
-  output:        { kind: 'component', Component: ArrowUp },
-  conv:          { kind: 'component', Component: Aperture },
-  activation:    { kind: 'component', Component: Function },
-  normalization: { kind: 'glyph', char: 'μ' },
-  pooling:       { kind: 'component', Component: StackMinus },
-  reshape:       { kind: 'component', Component: FrameCorners },
-  math:          { kind: 'component', Component: PlusMinus },
-  reduction:     { kind: 'glyph', char: 'Σ' },
-  merge:         { kind: 'component', Component: ArrowsMerge },
-  attention:     { kind: 'component', Component: Eye },
-  recurrent:     { kind: 'component', Component: ArrowCounterClockwise },
-  quantization:  { kind: 'component', Component: Faders },
-  unknown:       { kind: 'component', Component: Question },
+  input: { kind: "component", Component: ArrowDown },
+  output: { kind: "component", Component: ArrowUp },
+  conv: { kind: "component", Component: Aperture },
+  activation: { kind: "component", Component: Function },
+  normalization: { kind: "glyph", char: "μ" },
+  pooling: { kind: "component", Component: StackMinus },
+  reshape: { kind: "component", Component: FrameCorners },
+  math: { kind: "component", Component: PlusMinus },
+  reduction: { kind: "glyph", char: "Σ" },
+  merge: { kind: "component", Component: ArrowsMerge },
+  attention: { kind: "component", Component: Eye },
+  recurrent: { kind: "component", Component: ArrowCounterClockwise },
+  quantization: { kind: "component", Component: Faders },
+  unknown: { kind: "component", Component: Question },
 };
 ```
 
@@ -307,6 +342,7 @@ git commit -m "feat(@wetron/react): source design tokens from @wetron/tokens"
 ## Task 3: Rename `--wp-*` → `--panel-*` in React CSS
 
 **Files:**
+
 - Modify: `packages/react/src/node-property-panel/node-property-panel.module.css`
 
 - [ ] **Step 1: Replace all `--wp-` occurrences with `--panel-` in the CSS module**
@@ -314,6 +350,7 @@ git commit -m "feat(@wetron/react): source design tokens from @wetron/tokens"
 Use search-and-replace across the entire file. Every occurrence of `--wp-` becomes `--panel-`. There are 11 variable names × 2 locations each (definition + usage) = ~22 occurrences.
 
 The affected lines are:
+
 - Line 3–13: variable definitions under `.panel { ... }` — rename keys
 - Line 27–38: dark theme overrides under `.panel[data-theme="dark"]` — rename keys
 - Every `var(--wp-*)` reference throughout the file — rename to `var(--panel-*)`
@@ -348,12 +385,14 @@ git commit -m "refactor(@wetron/react): rename --wp-* CSS vars to --panel-*"
 ## Task 4: Wire Svelte theme.ts to tokens
 
 **Files:**
+
 - Modify: `packages/svelte/package.json`
 - Modify: `packages/svelte/src/theme.ts`
 
 - [ ] **Step 1: Add `@wetron/tokens` to Svelte's dependencies**
 
 In `packages/svelte/package.json`, add to `"dependencies"`:
+
 ```json
 "@wetron/tokens": "workspace:*"
 ```
@@ -362,8 +401,8 @@ In `packages/svelte/package.json`, add to `"dependencies"`:
 
 ```ts
 // packages/svelte/src/theme.ts
-import type { OpCategory } from '@wetron/core';
-import { CATEGORY_THEME as CATEGORY_COLORS } from '@wetron/tokens';
+import type { OpCategory } from "@wetron/core";
+import { CATEGORY_THEME as CATEGORY_COLORS } from "@wetron/tokens";
 
 export type { OpCategory };
 
@@ -374,20 +413,20 @@ export type CategoryTheme = {
 };
 
 export const CATEGORY_THEME: Record<OpCategory, CategoryTheme> = {
-  input:         { ...CATEGORY_COLORS.input,         icon: '↓' },
-  output:        { ...CATEGORY_COLORS.output,        icon: '↑' },
-  conv:          { ...CATEGORY_COLORS.conv,          icon: '⊛' },
-  activation:    { ...CATEGORY_COLORS.activation,    icon: 'ƒ' },
-  normalization: { ...CATEGORY_COLORS.normalization, icon: 'μ' },
-  pooling:       { ...CATEGORY_COLORS.pooling,       icon: '⊟' },
-  reshape:       { ...CATEGORY_COLORS.reshape,       icon: '⇄' },
-  math:          { ...CATEGORY_COLORS.math,          icon: '±' },
-  reduction:     { ...CATEGORY_COLORS.reduction,     icon: 'Σ' },
-  merge:         { ...CATEGORY_COLORS.merge,         icon: '‖' },
-  attention:     { ...CATEGORY_COLORS.attention,     icon: '⊙' },
-  recurrent:     { ...CATEGORY_COLORS.recurrent,     icon: '↺' },
-  quantization:  { ...CATEGORY_COLORS.quantization,  icon: 'Q' },
-  unknown:       { ...CATEGORY_COLORS.unknown,       icon: '?' },
+  input: { ...CATEGORY_COLORS.input, icon: "↓" },
+  output: { ...CATEGORY_COLORS.output, icon: "↑" },
+  conv: { ...CATEGORY_COLORS.conv, icon: "⊛" },
+  activation: { ...CATEGORY_COLORS.activation, icon: "ƒ" },
+  normalization: { ...CATEGORY_COLORS.normalization, icon: "μ" },
+  pooling: { ...CATEGORY_COLORS.pooling, icon: "⊟" },
+  reshape: { ...CATEGORY_COLORS.reshape, icon: "⇄" },
+  math: { ...CATEGORY_COLORS.math, icon: "±" },
+  reduction: { ...CATEGORY_COLORS.reduction, icon: "Σ" },
+  merge: { ...CATEGORY_COLORS.merge, icon: "‖" },
+  attention: { ...CATEGORY_COLORS.attention, icon: "⊙" },
+  recurrent: { ...CATEGORY_COLORS.recurrent, icon: "↺" },
+  quantization: { ...CATEGORY_COLORS.quantization, icon: "Q" },
+  unknown: { ...CATEGORY_COLORS.unknown, icon: "?" },
 };
 ```
 
@@ -411,6 +450,7 @@ git commit -m "feat(@wetron/svelte): source category colors from @wetron/tokens"
 ## Task 5: Wire canvas, minimap, and edge tokens into Svelte model-graph-view
 
 **Files:**
+
 - Modify: `packages/svelte/src/model-graph-view.svelte`
 
 - [ ] **Step 1: Add imports at the top of the script block**
@@ -418,12 +458,13 @@ git commit -m "feat(@wetron/svelte): source category colors from @wetron/tokens"
 After the existing imports in `<script lang="ts">`, add:
 
 ```ts
-import { CANVAS_VARS, MINIMAP_THEME, EDGE_THEME } from '@wetron/tokens';
+import { CANVAS_VARS, MINIMAP_THEME, EDGE_THEME } from "@wetron/tokens";
 ```
 
 - [ ] **Step 2: Replace hardcoded minimap props with token references**
 
 Find these lines:
+
 ```svelte
 <MiniMap
   style={`background: ${isDark ? 'rgba(18,18,32,0.55)' : 'rgba(240,240,248,0.92)'}; border-radius: 8px; border: none; overflow: hidden;`}
@@ -433,6 +474,7 @@ Find these lines:
 ```
 
 Replace with:
+
 ```svelte
 <MiniMap
   style={`background: ${isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background}; border-radius: ${MINIMAP_THEME.borderRadius}px; border: none; overflow: hidden;`}
@@ -444,11 +486,13 @@ Replace with:
 - [ ] **Step 3: Replace hardcoded edge selection color with EDGE_THEME**
 
 Find this line:
+
 ```ts
 ? 'stroke: #e53935; stroke-width: 2; opacity: 1;'
 ```
 
 Replace with:
+
 ```ts
 ? `stroke: ${EDGE_THEME.selectedStroke}; stroke-width: ${EDGE_THEME.selectedStrokeWidth}; opacity: 1;`
 ```
@@ -456,11 +500,13 @@ Replace with:
 - [ ] **Step 4: Apply CANVAS_VARS via inline style on the wrapper element**
 
 Find:
+
 ```svelte
 <div class="wetron-graph" data-theme={isDark ? 'dark' : 'light'}>
 ```
 
 Replace with:
+
 ```svelte
 <div
   class="wetron-graph"
@@ -519,23 +565,27 @@ git commit -m "feat(@wetron/svelte): source canvas/minimap/edge tokens from @wet
 ## Task 6: Apply panel vars in Svelte panel wrapper
 
 **Files:**
+
 - Modify: `packages/svelte/src/node-property-panel/node-property-panel.svelte`
 
 - [ ] **Step 1: Add PANEL_VARS import to the script block**
 
 Add to the imports:
+
 ```ts
-import { PANEL_VARS } from '@wetron/tokens';
+import { PANEL_VARS } from "@wetron/tokens";
 ```
 
 - [ ] **Step 2: Apply vars via inline style on the `.panel` element**
 
 Find:
+
 ```svelte
 <div class="panel" data-theme={theme}>
 ```
 
 Replace with:
+
 ```svelte
 <div
   class="panel"
@@ -578,6 +628,7 @@ git commit -m "feat(@wetron/svelte): apply --panel-* CSS vars from PANEL_VARS"
 ## Task 7: Update Svelte panel sub-components to inherit `--panel-*` vars
 
 **Files:**
+
 - Modify: `packages/svelte/src/node-property-panel/op-panel.svelte`
 - Modify: `packages/svelte/src/node-property-panel/edge-panel.svelte`
 - Modify: `packages/svelte/src/node-property-panel/tensor-panel.svelte`
@@ -608,6 +659,7 @@ The pattern for all sub-components: replace hardcoded hex values with `var(--pan
 - [ ] **Step 1: Update `section-label.svelte`**
 
 Replace the `<style>` block with:
+
 ```css
 <style>
   .sectionLabel {
@@ -625,6 +677,7 @@ Replace the `<style>` block with:
 - [ ] **Step 2: Update `close-button.svelte`**
 
 Replace the `<style>` block with:
+
 ```css
 <style>
   .closeButton {
@@ -653,6 +706,7 @@ Replace the `<style>` block with:
 - [ ] **Step 3: Update `row.svelte`**
 
 Replace the `<style>` block with:
+
 ```css
 <style>
   .row {
@@ -700,6 +754,7 @@ Replace the `<style>` block with:
 - [ ] **Step 4: Update `attr-row.svelte`**
 
 Replace the `<style>` block with:
+
 ```css
 <style>
   .row {
@@ -766,7 +821,10 @@ Find and replace only these two rules:
 
 ```css
 /* Remove: */
-:global([data-theme="dark"]) .chip { background: #262646; color: #a0a0c0; }
+:global([data-theme="dark"]) .chip {
+  background: #262646;
+  color: #a0a0c0;
+}
 
 /* Change: */
 .chip {
@@ -776,8 +834,8 @@ Find and replace only these two rules:
   white-space: nowrap;
   text-align: center;
   display: inline-block;
-  background: var(--panel-chip-bg);   /* was: #f0f0f0 */
-  color: var(--panel-chip-color);     /* was: #888 */
+  background: var(--panel-chip-bg); /* was: #f0f0f0 */
+  color: var(--panel-chip-color); /* was: #888 */
 }
 ```
 
@@ -790,8 +848,9 @@ All type-specific rules (`.chip[data-type="str"]` etc.) remain exactly as-is.
 Remove only the local `CATEGORY_THEME` constant (lines 12–27). Keep `GLYPH_CATS` and all icon rendering logic unchanged.
 
 Add this import at the top of the script block:
+
 ```ts
-import { CATEGORY_THEME } from '@wetron/tokens';
+import { CATEGORY_THEME } from "@wetron/tokens";
 ```
 
 The existing usage `const color = $derived(isDark ? CATEGORY_THEME[cat].dark : CATEGORY_THEME[cat].light)` continues to work — tokens exports `{ light: string; dark: string }` per category.
@@ -964,6 +1023,7 @@ cd apps/demo-svelte && bunx vite
 ```
 
 Open the panel for an op node, an edge, a tensor, and an IO node. In both light and dark modes, confirm:
+
 - Panel background, borders, and text colors match the React demo
 - Section dividers render correctly
 - Chips show correct base colors (type-specific colors should be unaffected)

@@ -136,7 +136,10 @@ type ModelGraph = {
   readonly outputs: readonly GraphValue[];
   readonly nodes: readonly GraphNode[];
   readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
-  readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
+  readonly tensorShapes: ReadonlyMap<
+    string,
+    { shape: readonly number[] | null; dtype: string | null }
+  >;
 };
 
 type GraphNode = {

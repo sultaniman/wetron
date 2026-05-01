@@ -18,13 +18,16 @@ export async function parseModel(bytes: Uint8Array, filename?: string): Promise<
     const { parseOnnx } = await import("@wetron/onnx");
     return parseOnnx(bytes);
   }
+
   if (format === "tflite") {
     const { parseTflite } = await import("@wetron/tflite");
     return parseTflite(bytes);
   }
+
   if (format === "keras") {
     const { parseKeras } = await import("@wetron/keras");
     return parseKeras(bytes);
   }
+
   throw new ParseError("unknown", `Cannot detect format${filename ? ` for "${filename}"` : ""}`);
 }

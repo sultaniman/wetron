@@ -126,10 +126,7 @@ export function useEdgeClickHandler(
   );
 }
 
-export function useFitOnGraphChange(
-  graph: ModelGraph,
-  layoutNodes: Node<GraphNodeData>[],
-): void {
+export function useFitOnGraphChange(graph: ModelGraph, layoutNodes: Node<GraphNodeData>[]): void {
   const { fitView } = useReactFlow();
   useEffect(() => {
     const topNodes = [...layoutNodes]

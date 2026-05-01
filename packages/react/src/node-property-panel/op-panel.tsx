@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon } from "@phosphor-icons/react";
+import {
+  ArrowCircleDownIcon,
+  ArrowCircleUpIcon,
+  SlidersHorizontalIcon,
+} from "@phosphor-icons/react";
 import type { GraphNode, AttributeValue } from "@wetron/core/ir";
 import { opCategory } from "@wetron/core";
 import { formatAttrBrief } from "@wetron/core/panel-utils";

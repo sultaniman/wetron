@@ -86,6 +86,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
       initialWidth: NODE_W,
       initialHeight: ION_H,
     });
+
     g.setNode(id, { width: NODE_W, height: ION_H });
     outputToNodeId.set(gv.name, id);
     nodeIdToOpType.set(id, "Input");
@@ -102,12 +103,15 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
         return init ? { slot, label: labels[slot] ?? `in_${slot}`, name, ...init } : null;
       })
       .filter((w): w is NonNullable<typeof w> => w !== null);
+
     const weightInputs = weightInputsRaw.length > 0 ? weightInputsRaw : undefined;
     const hasSubtitle = !!(node.name && !/^op_\d+$/.test(node.name));
     const nWeights = weightInputs?.length ?? 0;
-    const nodeH = CARD_BASE
-      + (hasSubtitle ? SUBTITLE_H : 0)
-      + (nWeights > 0 ? META_MARGIN + nWeights * ROW_H : 0);
+    const nodeH =
+      CARD_BASE +
+      (hasSubtitle ? SUBTITLE_H : 0) +
+      (nWeights > 0 ? META_MARGIN + nWeights * ROW_H : 0);
+
     flowNodes.push({
       id,
       type: "graphNode",
@@ -124,8 +128,10 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
       initialWidth: NODE_W,
       initialHeight: nodeH,
     });
+
     g.setNode(id, { width: NODE_W, height: nodeH });
     for (const out of node.outputs) outputToNodeId.set(out, id);
+
     nodeIdToOpType.set(id, node.opType);
     nodeIdToName.set(id, node.name || `${node.opType}_${i}`);
   }
@@ -149,6 +155,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
       initialWidth: NODE_W,
       initialHeight: ION_H,
     });
+
     g.setNode(id, { width: NODE_W, height: ION_H });
     nodeIdToOpType.set(id, "Output");
     nodeIdToName.set(id, gv.name);
@@ -156,6 +163,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
 
   for (const fn of flowNodes) {
     if (fn.type === "ioNode" && fn.data.opType === "Input") continue;
+
     for (const inputName of fn.data.inputs) {
       const srcId = outputToNodeId.get(inputName);
       if (srcId) {
@@ -172,6 +180,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
             targetNodeName: nodeIdToName.get(fn.id) ?? "",
           },
         });
+
         if (!g.hasEdge(srcId, fn.id)) g.setEdge(srcId, fn.id);
       }
     }
@@ -193,12 +202,15 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     const key = `${fe.source}::${fe.target}`;
     let pts = ptCache.get(key);
     if (pts === undefined) {
-      const raw = (g.edge(fe.source, fe.target) as { points?: { x: number; y: number }[] } | undefined)?.points;
+      const raw = (
+        g.edge(fe.source, fe.target) as { points?: { x: number; y: number }[] } | undefined
+      )?.points;
       // Slice off first and last — those are dagre's node-center estimates;
       // the edge component uses xyflow's actual handle positions instead.
       pts = raw && raw.length > 2 ? raw.slice(1, raw.length - 1) : [];
       ptCache.set(key, pts);
     }
+
     if (pts.length > 0) {
       flowEdges[i] = { ...fe, data: { ...fe.data, points: pts } };
     }

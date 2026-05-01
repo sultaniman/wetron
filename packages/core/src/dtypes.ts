@@ -125,6 +125,7 @@ export function readIntBits(
 export function bigIntToNumber(v: bigint): number {
   if (v > BigInt(Number.MAX_SAFE_INTEGER) || v < BigInt(Number.MIN_SAFE_INTEGER))
     throw new RangeError(`64-bit value 0x${v.toString(16)} exceeds safe integer range`);
+
   return Number(v);
 }
 
