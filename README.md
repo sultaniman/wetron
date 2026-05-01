@@ -24,7 +24,7 @@ Graph structure only — no weight data is read or stored.
 ## Setup
 
 ```sh
-git clone <repo>
+git clone ssh://git@codeberg.org/askar/wetron.git
 cd wetron
 bun install
 ```
