@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { SvelteFlow, MiniMap, Controls, Background } from '@xyflow/svelte';
+  import { SvelteFlow, Controls, Background } from '@xyflow/svelte';
   import FitViewHelper from './fit-view-helper.svelte';
+  import MinimapNav from './minimap-nav.svelte';
   import '@xyflow/svelte/dist/style.css';
   import { setContext, untrack } from 'svelte';
   import { modelGraphToFlow } from '@wetron/core/transform';
@@ -138,8 +139,8 @@
     colorMode={isDark ? 'dark' : 'light'}
     proOptions={{ hideAttribution: true }}
   >
-    <MiniMap
-      style={`background: ${isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background}; border-radius: ${MINIMAP_THEME.borderRadius}px; border: none; overflow: hidden;`}
+    <MinimapNav
+      style={`background: ${isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background}; border-radius: ${MINIMAP_THEME.borderRadius}px; border: none; overflow: hidden; cursor: crosshair;`}
       nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
       maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
     />
