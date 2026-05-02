@@ -37,6 +37,8 @@ import {
   DivideIcon,
   CaretUpIcon,
   SigmaIcon,
+  ExclamationMarkIcon,
+  EqualsIcon,
 } from "@phosphor-icons/react";
 import type { OpCategory } from "@wetron/core";
 
@@ -67,7 +69,7 @@ export const CATEGORY_ICON: Record<OpCategory, IconEntry> = {
   recurrent: { kind: "component", Component: ArrowCounterClockwiseIcon },
   quantization: { kind: "component", Component: FadersIcon },
   constant: { kind: "component", Component: DiamondIcon },
-  logic: { kind: "glyph", char: "=" },
+  logic: { kind: "component", Component: EqualsIcon },
   unknown: { kind: "component", Component: QuestionIcon },
 };
 
@@ -128,7 +130,7 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   Sqrt: { kind: "component", Component: RadicalIcon },
   Erf: { kind: "component", Component: WaveSineIcon },
   Clip: { kind: "component", Component: ScissorsIcon },
-  Not: { kind: "glyph", char: "!" },
+  Not: { kind: "component", Component: ExclamationMarkIcon },
   MatMul: { kind: "component", Component: TableIcon },
   Gemm: { kind: "component", Component: TableIcon },
   // math-category overrides (TFLite)
@@ -141,6 +143,6 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   POW: { kind: "component", Component: CaretUpIcon },
   SQRT: { kind: "component", Component: RadicalIcon },
   RSQRT: { kind: "component", Component: RadicalIcon },
-  LOGICAL_NOT: { kind: "glyph", char: "!" },
+  LOGICAL_NOT: { kind: "component", Component: ExclamationMarkIcon },
   BATCH_MATMUL: { kind: "component", Component: TableIcon },
 };
