@@ -23,7 +23,10 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": { "types": "./dist/parse.d.ts", "import": "./dist/parse.js" }
+    ".": {
+      "types": "./dist/parse.d.ts",
+      "import": "./dist/parse.js"
+    }
   },
   "dependencies": {
     "@wetron/core": "workspace:*",

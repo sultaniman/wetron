@@ -22,9 +22,14 @@
     "llms.txt"
   ],
   "type": "module",
-  "sideEffects": ["./dist/index.css"],
+  "sideEffects": [
+    "./dist/index.css"
+  ],
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./dist/index.css": "./dist/index.css"
   },
   "dependencies": {

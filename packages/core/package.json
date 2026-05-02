@@ -25,13 +25,34 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./ir": { "types": "./dist/ir.d.ts", "import": "./dist/ir.js" },
-    "./dtypes": { "types": "./dist/dtypes.d.ts", "import": "./dist/dtypes.js" },
-    "./detect": { "types": "./dist/detect.d.ts", "import": "./dist/detect.js" },
-    "./transform": { "types": "./dist/transform.d.ts", "import": "./dist/transform.js" },
-    "./edge-path": { "types": "./dist/edge-path.d.ts", "import": "./dist/edge-path.js" },
-    "./panel-utils": { "types": "./dist/panel-utils.d.ts", "import": "./dist/panel-utils.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ir": {
+      "types": "./dist/ir.d.ts",
+      "import": "./dist/ir.js"
+    },
+    "./dtypes": {
+      "types": "./dist/dtypes.d.ts",
+      "import": "./dist/dtypes.js"
+    },
+    "./detect": {
+      "types": "./dist/detect.d.ts",
+      "import": "./dist/detect.js"
+    },
+    "./transform": {
+      "types": "./dist/transform.d.ts",
+      "import": "./dist/transform.js"
+    },
+    "./edge-path": {
+      "types": "./dist/edge-path.d.ts",
+      "import": "./dist/edge-path.js"
+    },
+    "./panel-utils": {
+      "types": "./dist/panel-utils.d.ts",
+      "import": "./dist/panel-utils.js"
+    }
   },
   "dependencies": {
     "@wetron/keras": "workspace:*",

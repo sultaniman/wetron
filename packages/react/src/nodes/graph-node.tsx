@@ -7,7 +7,6 @@ import { useColorMode } from "../color-mode-context.ts";
 import { NodeCard } from "./node-card/node-card.tsx";
 import css from "./node-card/node-card.module.css";
 
-
 export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeData>>) {
   const isDark = useColorMode() === "dark";
   const cat = opCategory(data.opType);

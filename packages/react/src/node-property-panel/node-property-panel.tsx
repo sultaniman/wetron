@@ -73,22 +73,26 @@ export function NodePropertyPanel({
         <ScrollArea.Viewport className={css.scrollViewport}>
           <ScrollArea.Content>
             <div className={css.scrollContent}>
-            {isGraphNode(target) ? (
-              <OpPanel
-                node={target}
-                isDark={isDark}
-                inputSources={inputSources}
-                onTensorClick={onTensorClick}
-                onBack={onBack}
-                opsets={opsets}
-              />
-            ) : isEdgeTarget(target) ? (
-              <EdgePanel edge={target.edge} tensorShapes={tensorShapes} onBack={onBack} />
-            ) : isTensorTarget(target) ? (
-              <TensorPanel tensor={target.tensor} onBack={onBack} />
-            ) : (
-              <IoPanel graphValue={target.graphValue} direction={target.direction} onBack={onBack} />
-            )}
+              {isGraphNode(target) ? (
+                <OpPanel
+                  node={target}
+                  isDark={isDark}
+                  inputSources={inputSources}
+                  onTensorClick={onTensorClick}
+                  onBack={onBack}
+                  opsets={opsets}
+                />
+              ) : isEdgeTarget(target) ? (
+                <EdgePanel edge={target.edge} tensorShapes={tensorShapes} onBack={onBack} />
+              ) : isTensorTarget(target) ? (
+                <TensorPanel tensor={target.tensor} onBack={onBack} />
+              ) : (
+                <IoPanel
+                  graphValue={target.graphValue}
+                  direction={target.direction}
+                  onBack={onBack}
+                />
+              )}
             </div>
           </ScrollArea.Content>
         </ScrollArea.Viewport>

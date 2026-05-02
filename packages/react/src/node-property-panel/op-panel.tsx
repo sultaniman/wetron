@@ -45,7 +45,10 @@ function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
         {needsExpand && (
           <button
             className={css.expandBtn}
-            onClick={(e: React.MouseEvent) => { e.stopPropagation(); setExpanded((v: boolean) => !v); }}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              setExpanded((v: boolean) => !v);
+            }}
           >
             {expanded ? "▴" : "···"}
           </button>

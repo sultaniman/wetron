@@ -43,7 +43,7 @@ const graph = await parseModel(bytes, file.name); // auto-detects .onnx / .tflit
 import { ModelGraphView } from "@wetron/react";
 import "@wetron/react/dist/index.css";
 
-<ModelGraphView graph={graph} />
+<ModelGraphView graph={graph} />;
 ```
 
 See [docs/usage.md](docs/usage.md) for full API reference and Svelte examples.
