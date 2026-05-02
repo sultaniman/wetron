@@ -90,7 +90,7 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
           }}
           nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
           maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
-          onClick={(_, pos) => rf.setCenter(pos.x, pos.y, { duration: 300 })}
+          onClick={(_, pos) => rf.setCenter(pos.x, pos.y, { zoom: rf.getViewport().zoom })}
         />
         <Controls />
         <Background color={isDark ? "#2a2a3a" : "#d0d0d8"} />
