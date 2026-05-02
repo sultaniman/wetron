@@ -11,7 +11,7 @@ export function Tooltip({
   onlyIfOverflow?: boolean;
   children: React.ReactElement<React.HTMLAttributes<HTMLElement>>;
 }) {
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
   const [disabled, setDisabled] = useState(onlyIfOverflow);
 
   useEffect(() => {

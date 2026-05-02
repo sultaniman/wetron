@@ -1,6 +1,6 @@
 import React from "react";
 import { ScrollArea } from "@base-ui/react/scroll-area";
-import type { GraphNode, GraphValue } from "@wetron/core/ir";
+import type { GraphNode, GraphValue, PanelTarget } from "@wetron/core/ir";
 import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";
 import { OpPanel } from "./op-panel.tsx";
 import { IoPanel } from "./io-panel.tsx";
@@ -8,18 +8,6 @@ import { EdgePanel } from "./edge-panel.tsx";
 import { TensorPanel } from "./tensor-panel.tsx";
 import { CloseButton } from "./panel-ui.tsx";
 import css from "./node-property-panel.module.css";
-
-export type PanelTarget =
-  | GraphNode
-  | { graphValue: GraphValue; direction: "input" | "output" }
-  | {
-      edge: {
-        tensorName: string;
-        from: { opType: string; name: string };
-        to: Array<{ opType: string; name: string }>;
-      };
-    }
-  | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 
 export function isGraphNode(t: PanelTarget): t is GraphNode {
   return "opType" in t;

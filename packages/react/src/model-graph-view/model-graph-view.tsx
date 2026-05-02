@@ -45,7 +45,7 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
   const isDark = useColorMode() === "dark";
   const rf = useReactFlow();
   const { nodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
-  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName);
+  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark);
   const handleNodeClick = useNodeClickHandler(onTargetClick);
   const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
   useFitOnGraphChange(graph, layoutNodes);

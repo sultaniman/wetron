@@ -3,7 +3,7 @@
   import FitViewHelper from './fit-view-helper.svelte';
   import MinimapNav from './minimap-nav.svelte';
   import '@xyflow/svelte/dist/style.css';
-  import { setContext, untrack } from 'svelte';
+  import { untrack } from 'svelte';
   import { modelGraphToFlow } from '@wetron/core/transform';
   import type { FlowEdge, GraphNodeData } from '@wetron/core/transform';
   import type { ModelGraph } from '@wetron/core/ir';
@@ -24,8 +24,6 @@
   }
 
   let { graph, onTargetClick, selectedEdgeTensorName = null, colorMode = 'system' }: Props = $props();
-
-  setContext('wetron:onTargetClick', () => onTargetClick);
 
   let systemIsDark = $state(resolveColorMode('system') === 'dark');
 

@@ -147,10 +147,10 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
   TRANSPOSE_CONV: "conv",
   CONV_3D: "conv",
   CONV_3D_TRANSPOSE: "conv",
-  FULLY_CONNECTED: "conv",
-  BATCH_MATMUL: "conv",
+  FULLY_CONNECTED: "math",
+  BATCH_MATMUL: "math",
   STABLEHLO_CONVOLUTION: "conv",
-  STABLEHLO_DOT_GENERAL: "conv",
+  STABLEHLO_DOT_GENERAL: "math",
 
   RELU: "activation",
   RELU6: "activation",
@@ -316,7 +316,7 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
   DepthwiseConv2D: "conv",
   SeparableConv1D: "conv",
   SeparableConv2D: "conv",
-  Dense: "conv",
+  Dense: "math",
 
   Activation: "activation",
   ReLU: "activation",

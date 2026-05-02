@@ -1,7 +1,6 @@
 <script lang="ts">
   import { resolveColorMode, type ColorMode } from '../color-mode-context.ts';
-  import type { PanelTarget } from '../types.ts';
-  import type { GraphNode, GraphValue } from '@wetron/core/ir';
+  import type { PanelTarget, GraphNode, GraphValue } from '@wetron/core/ir';
   import { PANEL_VARS } from '@wetron/tokens';
   import OpPanel from './op-panel.svelte';
   import IoPanel from './io-panel.svelte';

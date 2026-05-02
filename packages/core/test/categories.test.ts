@@ -33,7 +33,7 @@ test("unknown op maps to unknown", () => expect(opCategory("SomeWeirdOp")).toBe(
 test("Input maps to input", () => expect(opCategory("Input")).toBe("input"));
 test("Output maps to output", () => expect(opCategory("Output")).toBe("output"));
 
-test("Keras conv/dense layers → conv", () => {
+test("Keras conv layers → conv", () => {
   for (const op of [
     "Conv1D",
     "Conv2D",
@@ -41,11 +41,11 @@ test("Keras conv/dense layers → conv", () => {
     "Conv2DTranspose",
     "DepthwiseConv2D",
     "SeparableConv2D",
-    "Dense",
   ]) {
     expect(opCategory(op)).toBe("conv");
   }
 });
+test("Dense maps to math", () => expect(opCategory("Dense")).toBe("math"));
 test("Keras activation layers → activation", () => {
   for (const op of ["Activation", "ReLU", "LeakyReLU", "PReLU", "ELU", "Softmax"]) {
     expect(opCategory(op)).toBe("activation");

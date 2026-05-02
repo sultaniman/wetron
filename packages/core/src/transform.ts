@@ -123,7 +123,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
         outputs: node.outputs,
         attributes: node.attributes,
         graphNode: node,
-        weightInputs: weightInputs?.length ? weightInputs : undefined,
+        weightInputs,
       },
       initialWidth: NODE_W,
       initialHeight: nodeH,

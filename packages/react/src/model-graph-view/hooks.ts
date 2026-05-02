@@ -8,18 +8,12 @@ import {
   type NodeMouseHandler,
 } from "@xyflow/react";
 import type { MouseEvent } from "react";
-import { modelGraphToFlow, type GraphNodeData } from "@wetron/core/transform";
+import { modelGraphToFlow, type GraphNodeData, type FlowEdge } from "@wetron/core/transform";
 import type { ModelGraph } from "@wetron/core/ir";
 import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
 import { EDGE_THEME } from "../theme.ts";
 
-type FlowEdgeData = {
-  tensorName: string;
-  sourceOpType: string;
-  sourceNodeName: string;
-  targetOpType: string;
-  targetNodeName: string;
-};
+type FlowEdgeData = FlowEdge["data"];
 
 export function useModelNodes(graph: ModelGraph) {
   const { nodes: layoutNodes, edges: layoutEdges } = useMemo(
@@ -40,11 +34,13 @@ export function useModelNodes(graph: ModelGraph) {
 
 export function useEdgeHighlight(
   layoutEdges: Edge[],
-  selectedEdgeTensorName?: string | null,
+  selectedEdgeTensorName: string | null | undefined,
+  isDark: boolean,
 ): Edge[] {
   return useMemo(
-    () =>
-      layoutEdges.map((e) => {
+    () => {
+      const anySelected = selectedEdgeTensorName != null;
+      return layoutEdges.map((e) => {
         const d = e.data as FlowEdgeData | undefined;
         if (d?.tensorName === selectedEdgeTensorName) {
           return {
@@ -62,9 +58,19 @@ export function useEdgeHighlight(
             },
           };
         }
+        if (anySelected) {
+          return {
+            ...e,
+            style: {
+              stroke: isDark ? "rgba(120,120,160,0.2)" : "rgba(0,0,0,0.1)",
+              opacity: 1,
+            },
+          };
+        }
         return e;
-      }),
-    [layoutEdges, selectedEdgeTensorName],
+      });
+    },
+    [layoutEdges, selectedEdgeTensorName, isDark],
   );
 }
 
