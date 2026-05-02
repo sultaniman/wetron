@@ -18,13 +18,13 @@
     "directory": "packages/tflite"
   },
   "files": [
-    "src",
+    "dist",
     "llms.txt"
   ],
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
   },
   "dependencies": {
     "@wetron/core": "workspace:*",

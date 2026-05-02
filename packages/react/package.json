@@ -18,13 +18,14 @@
     "directory": "packages/react"
   },
   "files": [
-    "src",
+    "dist",
     "llms.txt"
   ],
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": ["./dist/index.css"],
   "exports": {
-    ".": "./src/index.ts"
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./dist/index.css": "./dist/index.css"
   },
   "dependencies": {
     "@wetron/core": "workspace:*",

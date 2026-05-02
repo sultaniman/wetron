@@ -8,3 +8,5 @@ test-models/large
 netron-main/
 .serena/
 dist
+*.tgz
+*.zip

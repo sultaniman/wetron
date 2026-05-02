@@ -17,6 +17,7 @@ import {
   BackButton,
   Chip,
 } from "./panel-ui.tsx";
+import { Tooltip } from "../tooltip.tsx";
 import css from "./node-property-panel.module.css";
 
 function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
@@ -88,9 +89,13 @@ export function OpPanel({
         >
           {renderIconEntry(iconEntry)}
         </div>
-        <div>
+        <div className={css.headerText}>
           <div className={css.nodeTitle}>{node.opType}</div>
-          {node.name && <div className={css.nodeSubtitle}>{node.name}</div>}
+          {node.name && (
+            <Tooltip text={node.name}>
+              <div className={css.nodeSubtitle}>{node.name}</div>
+            </Tooltip>
+          )}
         </div>
       </div>
       {visibleInputs.length > 0 && (

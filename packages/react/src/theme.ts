@@ -28,6 +28,8 @@ import {
   FunnelSimpleIcon,
   TableIcon,
   StackIcon,
+  RadicalIcon,
+  ArrowFatLinesRightIcon,
 } from "@phosphor-icons/react";
 import type { OpCategory } from "@wetron/core";
 
@@ -81,10 +83,13 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   GatherElements: { kind: "component", Component: FunnelSimpleIcon },
   GatherND: { kind: "component", Component: FunnelSimpleIcon },
   // math-category overrides
+  Cast: { kind: "component", Component: ArrowFatLinesRightIcon },
   Add: { kind: "glyph", char: "+" },
   Sub: { kind: "glyph", char: "−" },
   Mul: { kind: "glyph", char: "×" },
   Div: { kind: "glyph", char: "÷" },
+  Pow: { kind: "glyph", char: "^" },
+  Sqrt: { kind: "component", Component: RadicalIcon },
   Clip: { kind: "component", Component: ScissorsIcon },
   Not: { kind: "glyph", char: "!" },
   MatMul: { kind: "component", Component: TableIcon },

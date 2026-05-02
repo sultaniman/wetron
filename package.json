@@ -5,6 +5,13 @@
     "packages/*",
     "apps/*"
   ],
+  "scripts": {
+    "build": "bun run build:core:libs && bun run build:parsers && bun run build:core:index && bun run build:ui",
+    "build:core:libs": "cd packages/core && bunx tsup",
+    "build:core:index": "cd packages/core && bunx tsup --config tsup.index.config.ts",
+    "build:parsers": "cd packages/onnx && bunx tsup && cd packages/tflite && bunx tsup && cd packages/keras && bunx tsup",
+    "build:ui": "cd packages/tokens && bunx tsup && cd packages/react && bunx vite build"
+  },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.9.0",
     "@phosphor-icons/react": "^2.1.10",
@@ -15,12 +22,16 @@
     "@types/dagre": "^0.7.54",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
     "@xyflow/react": "^12.10.2",
     "happy-dom": "^20.9.0",
     "phosphor-svelte": "^3.1.0",
     "protobufjs-cli": "^2.0.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "typescript": "^6.0.3"
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vite-plugin-dts": "^5.0.0"
   }
 }

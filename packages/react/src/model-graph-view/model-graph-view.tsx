@@ -7,6 +7,7 @@ import {
   ReactFlowProvider,
   MarkerType,
   PanOnScrollMode,
+  useReactFlow,
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -47,6 +48,7 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
   const handleNodeClick = useNodeClickHandler(onTargetClick);
   const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
   useFitOnGraphChange(graph, layoutNodes);
+  const rf = useReactFlow();
   const edgeDefaults = useMemo(
     () => (isDark ? { stroke: "#7a7a9a", opacity: 0.55 } : { stroke: "rgba(60,60,100,0.55)" }),
     [isDark],
@@ -84,9 +86,11 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
             borderRadius: MINIMAP_THEME.borderRadius,
             border: "none",
             overflow: "hidden",
+            cursor: "crosshair",
           }}
           nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
           maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
+          onClick={(_, pos) => rf.setCenter(pos.x, pos.y, { duration: 300 })}
         />
         <Controls />
         <Background color={isDark ? "#2a2a3a" : "#d0d0d8"} />

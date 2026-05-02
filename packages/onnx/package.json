@@ -17,13 +17,13 @@
     "directory": "packages/onnx"
   },
   "files": [
-    "src",
+    "dist",
     "llms.txt"
   ],
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/parse.ts"
+    ".": { "types": "./dist/parse.d.ts", "import": "./dist/parse.js" }
   },
   "dependencies": {
     "@wetron/core": "workspace:*",

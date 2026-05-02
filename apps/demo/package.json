@@ -9,10 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@wetron/core": "workspace:*",
-    "@wetron/onnx": "workspace:*",
     "@wetron/react": "workspace:*",
-    "@wetron/tflite": "workspace:*",
     "@xyflow/react": "latest",
     "react": "latest",
     "react-dom": "latest"

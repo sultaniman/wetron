@@ -18,12 +18,37 @@ Graph structure only — no weight data is read or stored.
 
 `@wetron/tokens` is intentionally standalone: it inlines all type definitions and has zero runtime or peer dependencies, so it can be used without installing any other wetron package.
 
-## Requirements
+## Install
 
-- Bun 1.x
-- Browser environment (no Node.js APIs used)
+```sh
+# parse + render with React
+bun add @wetron/core @wetron/onnx @wetron/tflite @wetron/keras @wetron/react
 
-## Setup
+# parse only (no UI)
+bun add @wetron/core @wetron/onnx @wetron/tflite @wetron/keras
+```
+
+Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@phosphor-icons/react >=2`.
+
+## Usage
+
+```ts
+import { parseModel } from "@wetron/core";
+
+const bytes = new Uint8Array(await file.arrayBuffer());
+const graph = await parseModel(bytes, file.name); // auto-detects .onnx / .tflite / .keras
+```
+
+```tsx
+import { ModelGraphView } from "@wetron/react";
+import "@wetron/react/styles";
+
+<ModelGraphView graph={graph} />
+```
+
+See [docs/usage.md](docs/usage.md) for full API reference and Svelte examples.
+
+## Development
 
 ```sh
 git clone ssh://git@codeberg.org/askar/wetron.git
@@ -31,14 +56,20 @@ cd wetron
 bun install
 ```
 
-## Run tests
+### Build
 
 ```sh
-bun test              # all packages
+bun run build        # all packages (core libs → parsers → core index → react/tokens)
+```
+
+### Test
+
+```sh
+bun test             # all packages
 bun test packages/core  # one package
 ```
 
-## Demo apps
+### Demo apps
 
 ```sh
 cd apps/demo && bun dev          # React

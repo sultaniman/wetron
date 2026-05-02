@@ -108,6 +108,11 @@
   font-size: 15px;
 }
 
+.headerText {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .nodeTitle {
   font-weight: 700;
   font-size: 13px;
@@ -134,12 +139,19 @@
   gap: 4px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.sectionLabel svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .row {
   display: flex;
   align-items: center;
   padding: 3px 0;
+  padding-left: 16px;
   margin: 1px 0;
   gap: 5px;
   cursor: default;
@@ -152,7 +164,7 @@
 .rowClickable:hover {
   background: color-mix(in oklch, var(--panel-label) 5%, transparent);
   margin: 1px -11px;
-  padding-left: 11px;
+  padding-left: 27px;
   padding-right: 11px;
 }
 

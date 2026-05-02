@@ -19,19 +19,19 @@
     "directory": "packages/core"
   },
   "files": [
-    "src",
+    "dist",
     "llms.txt"
   ],
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts",
-    "./ir": "./src/ir.ts",
-    "./dtypes": "./src/dtypes.ts",
-    "./detect": "./src/detect.ts",
-    "./transform": "./src/transform.ts",
-    "./edge-path": "./src/edge-path.ts",
-    "./panel-utils": "./src/panel-utils.ts"
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./ir": { "types": "./dist/ir.d.ts", "import": "./dist/ir.js" },
+    "./dtypes": { "types": "./dist/dtypes.d.ts", "import": "./dist/dtypes.js" },
+    "./detect": { "types": "./dist/detect.d.ts", "import": "./dist/detect.js" },
+    "./transform": { "types": "./dist/transform.d.ts", "import": "./dist/transform.js" },
+    "./edge-path": { "types": "./dist/edge-path.d.ts", "import": "./dist/edge-path.js" },
+    "./panel-utils": { "types": "./dist/panel-utils.d.ts", "import": "./dist/panel-utils.js" }
   },
   "dependencies": {
     "@wetron/keras": "workspace:*",

@@ -2,6 +2,7 @@ import React from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { OpCategory } from "@wetron/core";
 import type { IconEntry } from "../../theme.ts";
+import { Tooltip } from "../../tooltip.tsx";
 import css from "./node-card.module.css";
 
 type CardColors = {
@@ -69,7 +70,11 @@ export function NodeCard({
           )}
         </span>
       </div>
-      {subtitle && <div className={css.subtitle}>{subtitle}</div>}
+      {subtitle && (
+        <Tooltip text={subtitle}>
+          <div className={css.subtitle}>{subtitle}</div>
+        </Tooltip>
+      )}
       {children != null && (
         <div data-nodename className={css.meta}>
           {children}
