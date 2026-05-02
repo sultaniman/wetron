@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { MiniMap } from '@xyflow/svelte';
-  import { useSvelteFlow } from '@xyflow/svelte';
+  import { MiniMap, useSvelteFlow } from '@xyflow/svelte';
 
   interface Props {
     style?: string;
@@ -10,9 +9,10 @@
 
   let { style, nodeColor, maskColor }: Props = $props();
 
-  const { setCenter } = useSvelteFlow();
+  const { setCenter, screenToFlowPosition } = useSvelteFlow();
 
-  function handleClick(_event: MouseEvent, pos: { x: number; y: number }) {
+  function handleClick(event: MouseEvent) {
+    const pos = screenToFlowPosition({ x: event.clientX, y: event.clientY });
     setCenter(pos.x, pos.y, { duration: 300 });
   }
 </script>
