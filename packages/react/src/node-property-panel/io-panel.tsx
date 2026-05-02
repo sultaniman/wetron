@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowFatDownIcon, ArrowFatUpIcon } from "@phosphor-icons/react";
 import type { GraphValue } from "@wetron/core/ir";
 import { Row, BackButton } from "./panel-ui.tsx";
+import { Tooltip } from "../tooltip.tsx";
 import css from "./node-property-panel.module.css";
 
 export function IoPanel({
@@ -21,8 +22,10 @@ export function IoPanel({
         <div className={css.iconBox} data-kind={direction}>
           {isInput ? <ArrowFatDownIcon size={15} /> : <ArrowFatUpIcon size={15} />}
         </div>
-        <div>
-          <div className={css.nodeTitle}>{graphValue.name}</div>
+        <div className={css.headerText}>
+          <Tooltip text={graphValue.name}>
+            <div className={css.nodeTitle}>{graphValue.name}</div>
+          </Tooltip>
           <div className={css.nodeSubtitle}>{direction}</div>
         </div>
       </div>

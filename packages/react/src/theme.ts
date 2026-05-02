@@ -30,6 +30,12 @@ import {
   StackIcon,
   RadicalIcon,
   ArrowFatLinesRightIcon,
+  WaveSineIcon,
+  PlusIcon,
+  MinusIcon,
+  XIcon,
+  DivideIcon,
+  CaretUpIcon,
 } from "@phosphor-icons/react";
 import type { OpCategory } from "@wetron/core";
 
@@ -65,7 +71,7 @@ export const CATEGORY_ICON: Record<OpCategory, IconEntry> = {
 };
 
 export const OP_ICON: Partial<Record<string, IconEntry>> = {
-  // reshape-category overrides
+  // reshape-category overrides (ONNX / Keras)
   Reshape: { kind: "component", Component: BoundingBoxIcon },
   Expand: { kind: "component", Component: ArrowsOutSimpleIcon },
   Unsqueeze: { kind: "component", Component: ArrowsOutLineVerticalIcon },
@@ -74,7 +80,17 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   Transpose: { kind: "component", Component: ArrowsDownUpIcon },
   Flatten: { kind: "component", Component: RowsIcon },
   Pad: { kind: "component", Component: FrameCornersIcon },
-  // merge-category overrides
+  // reshape-category overrides (TFLite)
+  RESHAPE: { kind: "component", Component: BoundingBoxIcon },
+  EXPAND_DIMS: { kind: "component", Component: ArrowsOutLineVerticalIcon },
+  SQUEEZE: { kind: "component", Component: ArrowsInLineVerticalIcon },
+  SLICE: { kind: "component", Component: StackIcon },
+  STRIDED_SLICE: { kind: "component", Component: StackIcon },
+  TRANSPOSE: { kind: "component", Component: ArrowsDownUpIcon },
+  PAD: { kind: "component", Component: FrameCornersIcon },
+  PADV2: { kind: "component", Component: FrameCornersIcon },
+  MIRROR_PAD: { kind: "component", Component: FrameCornersIcon },
+  // merge-category overrides (ONNX / Keras)
   ScatterElements: { kind: "component", Component: DotsNineIcon },
   ScatterND: { kind: "component", Component: DotsNineIcon },
   Tile: { kind: "component", Component: CopySimpleIcon },
@@ -82,16 +98,36 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   Gather: { kind: "component", Component: FunnelSimpleIcon },
   GatherElements: { kind: "component", Component: FunnelSimpleIcon },
   GatherND: { kind: "component", Component: FunnelSimpleIcon },
-  // math-category overrides
+  // merge-category overrides (TFLite)
+  SPLIT: { kind: "component", Component: ArrowsSplitIcon },
+  SPLIT_V: { kind: "component", Component: ArrowsSplitIcon },
+  GATHER: { kind: "component", Component: FunnelSimpleIcon },
+  GATHER_ND: { kind: "component", Component: FunnelSimpleIcon },
+  SCATTER_ND: { kind: "component", Component: DotsNineIcon },
+  TILE: { kind: "component", Component: CopySimpleIcon },
+  // math-category overrides (ONNX / Keras)
   Cast: { kind: "component", Component: ArrowFatLinesRightIcon },
-  Add: { kind: "glyph", char: "+" },
-  Sub: { kind: "glyph", char: "−" },
-  Mul: { kind: "glyph", char: "×" },
-  Div: { kind: "glyph", char: "÷" },
-  Pow: { kind: "glyph", char: "^" },
+  Add: { kind: "component", Component: PlusIcon },
+  Sub: { kind: "component", Component: MinusIcon },
+  Mul: { kind: "component", Component: XIcon },
+  Div: { kind: "component", Component: DivideIcon },
+  Pow: { kind: "component", Component: CaretUpIcon },
   Sqrt: { kind: "component", Component: RadicalIcon },
+  Erf: { kind: "component", Component: WaveSineIcon },
   Clip: { kind: "component", Component: ScissorsIcon },
   Not: { kind: "glyph", char: "!" },
   MatMul: { kind: "component", Component: TableIcon },
   Gemm: { kind: "component", Component: TableIcon },
+  // math-category overrides (TFLite)
+  CAST: { kind: "component", Component: ArrowFatLinesRightIcon },
+  BITCAST: { kind: "component", Component: ArrowFatLinesRightIcon },
+  ADD: { kind: "component", Component: PlusIcon },
+  SUB: { kind: "component", Component: MinusIcon },
+  MUL: { kind: "component", Component: XIcon },
+  DIV: { kind: "component", Component: DivideIcon },
+  POW: { kind: "component", Component: CaretUpIcon },
+  SQRT: { kind: "component", Component: RadicalIcon },
+  RSQRT: { kind: "component", Component: RadicalIcon },
+  LOGICAL_NOT: { kind: "glyph", char: "!" },
+  BATCH_MATMUL: { kind: "component", Component: TableIcon },
 };

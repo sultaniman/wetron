@@ -7,7 +7,7 @@ import {
 import type { GraphNode, AttributeValue } from "@wetron/core/ir";
 import { opCategory } from "@wetron/core";
 import { formatAttrBrief } from "@wetron/core/panel-utils";
-import { CATEGORY_THEME, CATEGORY_ICON } from "../theme.ts";
+import { CATEGORY_THEME, CATEGORY_ICON, OP_ICON } from "../theme.ts";
 import {
   attrChipLabel,
   formatAttr,
@@ -74,7 +74,7 @@ export function OpPanel({
   const cat = opCategory(node.opType);
   const theme = CATEGORY_THEME[cat];
   const color = isDark ? theme.dark : theme.light;
-  const iconEntry = CATEGORY_ICON[cat];
+  const iconEntry = OP_ICON[node.opType] ?? CATEGORY_ICON[cat];
   const visibleInputs = node.inputs.filter((name) => name !== "");
   const attrEntries = Object.entries(node.attributes);
   return (
@@ -90,7 +90,9 @@ export function OpPanel({
           {renderIconEntry(iconEntry)}
         </div>
         <div className={css.headerText}>
-          <div className={css.nodeTitle}>{node.opType}</div>
+          <Tooltip text={node.opType}>
+            <div className={css.nodeTitle}>{node.opType}</div>
+          </Tooltip>
           {node.name && (
             <Tooltip text={node.name}>
               <div className={css.nodeSubtitle}>{node.name}</div>

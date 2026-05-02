@@ -116,6 +116,9 @@
 .nodeTitle {
   font-weight: 700;
   font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nodeSubtitle {
