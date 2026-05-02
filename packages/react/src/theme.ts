@@ -36,6 +36,7 @@ import {
   XIcon,
   DivideIcon,
   CaretUpIcon,
+  SigmaIcon,
 } from "@phosphor-icons/react";
 import type { OpCategory } from "@wetron/core";
 
@@ -60,7 +61,7 @@ export const CATEGORY_ICON: Record<OpCategory, IconEntry> = {
   pooling: { kind: "component", Component: StackMinusIcon },
   reshape: { kind: "component", Component: CubeIcon },
   math: { kind: "component", Component: PlusMinusIcon },
-  reduction: { kind: "glyph", char: "Σ" },
+  reduction: { kind: "component", Component: SigmaIcon },
   merge: { kind: "component", Component: ArrowsMergeIcon },
   attention: { kind: "component", Component: EyeIcon },
   recurrent: { kind: "component", Component: ArrowCounterClockwiseIcon },
@@ -80,6 +81,18 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   Transpose: { kind: "component", Component: ArrowsDownUpIcon },
   Flatten: { kind: "component", Component: RowsIcon },
   Pad: { kind: "component", Component: FrameCornersIcon },
+  // reshape-category overrides (Keras)
+  Permute: { kind: "component", Component: ArrowsDownUpIcon },
+  ZeroPadding1D: { kind: "component", Component: FrameCornersIcon },
+  ZeroPadding2D: { kind: "component", Component: FrameCornersIcon },
+  ZeroPadding3D: { kind: "component", Component: FrameCornersIcon },
+  Cropping1D: { kind: "component", Component: ScissorsIcon },
+  Cropping2D: { kind: "component", Component: ScissorsIcon },
+  Cropping3D: { kind: "component", Component: ScissorsIcon },
+  RepeatVector: { kind: "component", Component: CopySimpleIcon },
+  UpSampling1D: { kind: "component", Component: ArrowsOutSimpleIcon },
+  UpSampling2D: { kind: "component", Component: ArrowsOutSimpleIcon },
+  UpSampling3D: { kind: "component", Component: ArrowsOutSimpleIcon },
   // reshape-category overrides (TFLite)
   RESHAPE: { kind: "component", Component: BoundingBoxIcon },
   EXPAND_DIMS: { kind: "component", Component: ArrowsOutLineVerticalIcon },
