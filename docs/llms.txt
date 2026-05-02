@@ -8,7 +8,7 @@ Browser-only neural network model visualizer. Parses ONNX, TFLite, and Keras fil
 - `@wetron/onnx` — ONNX parser (protobufjs)
 - `@wetron/tflite` — TFLite parser (flatbuffers)
 - `@wetron/keras` — Keras `.keras` archive parser (fflate)
-- `@wetron/react` — React components: `ModelGraphView`, `NodePropertyPanel` (peer: react 18+, @xyflow/react 12+, @phosphor-icons/react 2+)
+- `@wetron/react` — React components: `ModelGraphView`, `NodePropertyPanel`, `Tooltip` (peer: react 18+, @xyflow/react 12+, @phosphor-icons/react 2+, @base-ui/react 1+)
 - `@wetron/svelte` — Svelte components: `ModelGraphView`, `NodePropertyPanel` (peer: svelte 5+, @xyflow/svelte 1.5+, phosphor-svelte 3+)
 - `@wetron/tokens` — design tokens: category colors, CSS vars — zero dependencies, all types inlined
 
@@ -26,6 +26,7 @@ interface GraphValue {
 interface GraphNode {
   readonly name: string;
   readonly opType: string;
+  readonly domain?: string;             // operator domain (ONNX only; absent = standard ai.onnx)
   readonly inputs: readonly string[];   // tensor names
   readonly outputs: readonly string[];  // tensor names
   readonly attributes: Readonly<Record<string, AttributeValue>>;
@@ -38,6 +39,7 @@ interface ModelGraph {
   readonly nodes: readonly GraphNode[];
   readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
   readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
+  readonly opsets?: ReadonlyMap<string, number>; // domain → version (ONNX only; "" = ai.onnx)
 }
 
 class ParseError extends Error {

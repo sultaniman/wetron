@@ -66,7 +66,20 @@ function App() {
 }
 ```
 
-Peer dependencies: `react` 18+, `@xyflow/react` 12+, `@phosphor-icons/react` 2+.
+Peer dependencies: `react` 18+, `@xyflow/react` 12+, `@phosphor-icons/react` 2+, `@base-ui/react` 1+.
+
+### NodePropertyPanel props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `target` | `PanelTarget \| null` | Currently selected node, edge, or tensor; `null` renders nothing |
+| `colorMode` | `"light" \| "dark" \| "system"` | Theme; `"system"` follows `prefers-color-scheme` |
+| `opsets` | `ReadonlyMap<string, number>` | Op domain → version map (pass `graph?.opsets`); shown in node header |
+| `inputSources` | `ReadonlyMap<string, string>` | Tensor name → producing op type; used to color input chips |
+| `tensorShapes` | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels; pass `graph?.tensorShapes` |
+| `onTensorClick` | `(name: string) => void` | Called when a tensor name in the panel is clicked |
+| `onBack` | `() => void` | Shows a back arrow in the header when provided |
+| `onClose` | `() => void` | Shows a close button when provided |
 
 ## Render with Svelte
 
@@ -169,11 +182,13 @@ type ModelGraph = {
   readonly nodes: readonly GraphNode[];
   readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
   readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
+  readonly opsets?: ReadonlyMap<string, number>; // domain → opset version (ONNX only; "" = ai.onnx)
 };
 
 type GraphNode = {
   readonly name: string;
   readonly opType: string;
+  readonly domain?: string;            // operator domain (ONNX only; absent = standard ai.onnx)
   readonly inputs: readonly string[];
   readonly outputs: readonly string[];
   readonly attributes: Readonly<Record<string, AttributeValue>>;

@@ -35,6 +35,7 @@
     "@wetron/onnx": "workspace:*"
   },
   "peerDependencies": {
+    "@base-ui/react": ">=1",
     "@phosphor-icons/react": ">=2",
     "@xyflow/react": ">=12",
     "react": ">=18",
