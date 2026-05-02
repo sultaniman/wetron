@@ -24,13 +24,7 @@ export function IoNodeComponent({ data, selected }: NodeProps<Node<GraphNodeData
       iconEntry={CATEGORY_ICON[cat]}
       tinted
       selected={selected}
-      colors={{
-        color,
-        bg: isDark ? "#1e1e2e" : "#fff",
-        border: isDark ? "#333" : "#e0e0e0",
-        muted: isDark ? "#7a7a9a" : "#999",
-        tintBase: isDark ? "#1e1e2e" : "white",
-      }}
+      colors={{ color }}
     >
       {meta || null}
     </NodeCard>

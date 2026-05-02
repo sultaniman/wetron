@@ -1,7 +1,7 @@
 .card {
   padding: 7px 8px;
-  background: var(--node-bg);
-  border: 1px solid var(--node-border);
+  background: var(--wetron-node-bg, #fff);
+  border: 1px solid var(--wetron-node-border, #e0e0e0);
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   /* fixed width — must match NODE_W in packages/core/src/transform.ts */
@@ -18,8 +18,8 @@
 }
 
 .cardTinted {
-  background: color-mix(in oklch, var(--node-color) 12%, var(--node-tint-base, white));
-  border-color: color-mix(in oklch, var(--node-color) 26%, var(--node-tint-base, white));
+  background: color-mix(in oklch, var(--node-color) 12%, var(--wetron-node-tint-base, white));
+  border-color: color-mix(in oklch, var(--node-color) 26%, var(--wetron-node-tint-base, white));
 }
 
 .headerRow {
@@ -61,17 +61,14 @@
 
 .subtitle {
   font-size: 11px;
-  color: var(--node-muted);
-  margin-top: 2px;
+  color: var(--wetron-node-muted, #999);
+  margin-top: 4px;
   font-family: monospace;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .meta {
   font-size: 10px;
-  color: var(--node-muted);
+  color: var(--wetron-node-muted, #999);
   margin-top: 5px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -82,7 +79,7 @@
   display: flex;
   gap: 4px;
   font-size: 10px;
-  color: var(--node-muted);
+  color: var(--wetron-node-muted, #999);
   margin-top: 3px;
   border-radius: 2px;
   padding: 2px 3px;

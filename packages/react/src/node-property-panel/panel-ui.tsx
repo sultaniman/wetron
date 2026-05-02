@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowLeftIcon, CaretRightIcon, XIcon } from "@phosphor-icons/react";
 import type { IconEntry } from "../theme.ts";
+import { Tooltip } from "../tooltip.tsx";
 import css from "./node-property-panel.module.css";
 export { attrChipLabel, formatAttr } from "@wetron/core/panel-utils";
 
@@ -45,7 +46,9 @@ export function Row({
       className={`${css.row}${onClick ? ` ${css.rowClickable}` : ""}`}
       onClick={onClick}
     >
-      <span className={css.rowLabel}>{label}</span>
+      <Tooltip text={label} onlyIfOverflow>
+        <span className={css.rowLabel}>{label}</span>
+      </Tooltip>
       {value && <span className={css.rowValue}>{value}</span>}
       <Chip label={chip} color={chipColor} />
       {onClick && (

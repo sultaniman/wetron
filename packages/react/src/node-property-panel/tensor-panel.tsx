@@ -1,6 +1,7 @@
 import React from "react";
 import { CubeIcon } from "@phosphor-icons/react";
 import { Row, BackButton } from "./panel-ui.tsx";
+import { Tooltip } from "../tooltip.tsx";
 import css from "./node-property-panel.module.css";
 
 export function TensorPanel({
@@ -18,11 +19,11 @@ export function TensorPanel({
         <div className={css.iconBox} data-kind="tensor">
           <CubeIcon size={15} />
         </div>
-        <div style={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
+        <div className={css.headerText}>
           <div className={css.nodeTitle}>Tensor</div>
-          <div className={css.nodeSubtitle} title={tensor.name}>
-            {tensor.name}
-          </div>
+          <Tooltip text={tensor.name} onlyIfOverflow>
+            <div className={css.nodeSubtitle}>{tensor.name}</div>
+          </Tooltip>
         </div>
       </div>
       {hasInfo && (

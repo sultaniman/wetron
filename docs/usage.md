@@ -36,6 +36,12 @@ Returns `"unknown"` — never throws.
 
 ## Render with React
 
+Import the stylesheet once alongside the component:
+
+```tsx
+import "@wetron/react/dist/index.css";
+```
+
 ```tsx
 import { parseModel } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
@@ -52,13 +58,9 @@ function App() {
 
   return (
     <>
-      <input
-        type="file"
-        accept=".onnx,.tflite,.keras"
-        onChange={(e) => handleFile(e.target.files![0])}
-      />
+      <input type="file" accept=".onnx,.tflite,.keras" onChange={(e) => handleFile(e.target.files![0])} />
       {graph && <ModelGraphView graph={graph} onTargetClick={setSelected} colorMode="system" />}
-      <NodePropertyPanel target={selected} colorMode="system" />
+      <NodePropertyPanel target={selected} colorMode="system" opsets={graph?.opsets} />
     </>
   );
 }
@@ -91,6 +93,62 @@ Peer dependencies: `react` 18+, `@xyflow/react` 12+, `@phosphor-icons/react` 2+.
 
 Peer dependencies: `svelte` 5+, `@xyflow/svelte` 1.5+, `phosphor-svelte` 3+.
 
+## Theming
+
+`ModelGraphView` wraps its content in a `<div data-theme="light|dark">`. All visual tokens are CSS custom properties defined on that element — override any of them to customise the appearance without rebuilding.
+
+### Node card tokens
+
+| Variable                  | Default (light) | Default (dark) | Controls                                                        |
+| ------------------------- | --------------- | -------------- | --------------------------------------------------------------- |
+| `--wetron-node-bg`        | `#ffffff`       | `#1e1e2e`      | Card background                                                 |
+| `--wetron-node-border`    | `#e0e0e0`       | `#333333`      | Card border                                                     |
+| `--wetron-node-muted`     | `#999999`       | `#7a7a9a`      | Subtitle / weight text                                          |
+| `--wetron-node-tint-base` | `white`         | `#1e1e2e`      | Base for the category-tinted background on parameter-free nodes |
+
+### Tooltip tokens
+
+| Variable                 | Default (light) | Default (dark) | Controls           |
+| ------------------------ | --------------- | -------------- | ------------------ |
+| `--wetron-tooltip-bg`    | `#1e1e2e`       | `#2a2a3a`      | Tooltip background |
+| `--wetron-tooltip-color` | `#e8e8f0`       | `#e8e8f0`      | Tooltip text       |
+
+### Property panel tokens
+
+| Variable                        | Default (light) | Default (dark) | Controls                      |
+| ------------------------------- | --------------- | -------------- | ----------------------------- |
+| `--wetron-panel-bg`             | `#ffffff`       | `#1e1e2e`      | Panel background              |
+| `--wetron-panel-border`         | `#e0e0e0`       | `#2a2a3a`      | Panel border                  |
+| `--wetron-panel-text`           | `#222222`       | `#f0f0f0`      | Primary text                  |
+| `--wetron-panel-label`          | `#555555`       | `#a0a0c0`      | Row labels / section headers  |
+| `--wetron-panel-value`          | `#333333`       | `#e0e0f0`      | Row values                    |
+| `--wetron-panel-subtitle`       | `#aaaaaa`       | `#6a6a8a`      | Node name subtitle            |
+| `--wetron-panel-chip-bg`        | `#f0f0f0`       | `#262646`      | Default chip background       |
+| `--wetron-panel-chip-color`     | `#888888`       | `#a0a0c0`      | Default chip text             |
+| `--wetron-panel-header-border`  | `#eeeeee`       | `#2a2a3a`      | Header bottom border          |
+| `--wetron-panel-section-border` | `#f0f0f0`       | `#282840`      | Section divider               |
+| `--wetron-panel-close-hover`    | `#f0f0f0`       | `#2a2a3a`      | Close button hover background |
+
+### Example
+
+```css
+/* Override in your app's CSS — target the data-theme the graph emits */
+[data-theme="light"] {
+  --wetron-node-bg: #fafafa;
+  --wetron-panel-bg: #f5f5f5;
+  --wetron-tooltip-bg: #222;
+  --wetron-tooltip-color: #fff;
+}
+
+[data-theme="dark"] {
+  --wetron-node-bg: #111827;
+  --wetron-node-border: #1f2937;
+  --wetron-panel-bg: #111827;
+}
+```
+
+Node category colours (the accent colour per op type) come from `@wetron/tokens` and are not CSS variables — customise them by passing modified `CATEGORY_THEME` values if you fork the theme layer.
+
 ## Convert graph to flow nodes manually
 
 ```ts
@@ -110,10 +168,7 @@ type ModelGraph = {
   readonly outputs: readonly GraphValue[];
   readonly nodes: readonly GraphNode[];
   readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
-  readonly tensorShapes: ReadonlyMap<
-    string,
-    { shape: readonly number[] | null; dtype: string | null }
-  >;
+  readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
 };
 
 type GraphNode = {

@@ -133,6 +133,12 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   Not: { kind: "component", Component: ExclamationMarkIcon },
   MatMul: { kind: "component", Component: TableIcon },
   Gemm: { kind: "component", Component: TableIcon },
+  // logic-category overrides (ONNX)
+  Greater: { kind: "glyph", char: ">" },
+  GreaterOrEqual: { kind: "glyph", char: "≥" },
+  Less: { kind: "glyph", char: "<" },
+  LessOrEqual: { kind: "glyph", char: "≤" },
+  Equal: { kind: "glyph", char: "=" },
   // math-category overrides (TFLite)
   CAST: { kind: "component", Component: ArrowFatLinesRightIcon },
   BITCAST: { kind: "component", Component: ArrowFatLinesRightIcon },
@@ -145,4 +151,11 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   RSQRT: { kind: "component", Component: RadicalIcon },
   LOGICAL_NOT: { kind: "component", Component: ExclamationMarkIcon },
   BATCH_MATMUL: { kind: "component", Component: TableIcon },
+  // logic/math-category overrides (TFLite comparison ops)
+  GREATER: { kind: "glyph", char: ">" },
+  GREATER_EQUAL: { kind: "glyph", char: "≥" },
+  LESS: { kind: "glyph", char: "<" },
+  LESS_EQUAL: { kind: "glyph", char: "≤" },
+  EQUAL: { kind: "glyph", char: "=" },
+  NOT_EQUAL: { kind: "glyph", char: "≠" },
 };

@@ -9,6 +9,7 @@ export interface GraphValue {
 export interface GraphNode {
   readonly name: string;
   readonly opType: string;
+  readonly domain?: string;
   readonly inputs: readonly string[];
   readonly outputs: readonly string[];
   readonly attributes: Readonly<Record<string, AttributeValue>>;
@@ -34,6 +35,8 @@ export interface ModelGraph {
       readonly dtype: string | null;
     }
   >;
+  /** Operator domain → opset version (ONNX only; empty string = standard ai.onnx domain). */
+  readonly opsets?: ReadonlyMap<string, number>;
 }
 
 export class ParseError extends Error {

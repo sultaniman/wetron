@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   ArrowCircleDownIcon,
   ArrowCircleUpIcon,
@@ -20,20 +20,22 @@ import {
 import { Tooltip } from "../tooltip.tsx";
 import css from "./node-property-panel.module.css";
 
+function formatModule(
+  domain: string | undefined,
+  opsets: ReadonlyMap<string, number> | undefined,
+): string | null {
+  if (!opsets || opsets.size === 0) return null;
+  const key = domain ?? "";
+  const version = opsets.get(key);
+  const displayDomain = key === "" ? "ai.onnx" : key;
+  return version != null ? `${displayDomain} v${version}` : displayDomain;
+}
+
 function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
   const [expanded, setExpanded] = useState(false);
   const full = formatAttr(value);
   const brief = formatAttrBrief(value);
   const needsExpand = brief !== full;
-
-  useEffect(() => {
-    if (!expanded) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setExpanded(false);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [expanded]);
 
   return (
     <div>
@@ -43,17 +45,22 @@ function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
         {needsExpand && (
           <button
             className={css.expandBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpanded((v) => !v);
-            }}
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); setExpanded((v: boolean) => !v); }}
           >
             {expanded ? "▴" : "···"}
           </button>
         )}
         <Chip label={attrChipLabel(value)} />
       </div>
-      {expanded && <pre className={css.valueExpanded}>{full}</pre>}
+      {expanded && (
+        <>
+          <pre className={css.valueExpanded}>{full}</pre>
+          <div className={css.row}>
+            <span className={css.rowLabel}>type</span>
+            <span className={css.rowValue}>{attrChipLabel(value)}</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -64,12 +71,14 @@ export function OpPanel({
   inputSources,
   onTensorClick,
   onBack,
+  opsets,
 }: {
   node: GraphNode;
   isDark: boolean;
   inputSources?: ReadonlyMap<string, string>;
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
+  opsets?: ReadonlyMap<string, number>;
 }) {
   const cat = opCategory(node.opType);
   const theme = CATEGORY_THEME[cat];
@@ -77,6 +86,7 @@ export function OpPanel({
   const iconEntry = OP_ICON[node.opType] ?? CATEGORY_ICON[cat];
   const visibleInputs = node.inputs.filter((name) => name !== "");
   const attrEntries = Object.entries(node.attributes);
+  const module = formatModule(node.domain, opsets);
   return (
     <>
       <div className={css.header}>
@@ -90,11 +100,12 @@ export function OpPanel({
           {renderIconEntry(iconEntry)}
         </div>
         <div className={css.headerText}>
-          <Tooltip text={node.opType}>
+          <Tooltip text={node.opType} onlyIfOverflow>
             <div className={css.nodeTitle}>{node.opType}</div>
           </Tooltip>
+          {module && <div className={css.nodeSubtitle}>{module}</div>}
           {node.name && (
-            <Tooltip text={node.name}>
+            <Tooltip text={node.name} onlyIfOverflow>
               <div className={css.nodeSubtitle}>{node.name}</div>
             </Tooltip>
           )}

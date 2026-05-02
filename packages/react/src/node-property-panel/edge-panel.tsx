@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowsLeftRightIcon } from "@phosphor-icons/react";
 import { Row, SectionLabel, BackButton } from "./panel-ui.tsx";
+import { Tooltip } from "../tooltip.tsx";
 import css from "./node-property-panel.module.css";
 
 type EdgeData = {
@@ -28,11 +29,11 @@ export function EdgePanel({
         <div className={css.iconBox} data-kind="edge">
           <ArrowsLeftRightIcon size={15} />
         </div>
-        <div>
+        <div className={css.headerText}>
           <div className={css.nodeTitle}>Connection</div>
-          <div className={css.nodeSubtitle} title={edge.tensorName}>
-            {edge.tensorName}
-          </div>
+          <Tooltip text={edge.tensorName} onlyIfOverflow>
+            <div className={css.nodeSubtitle}>{edge.tensorName}</div>
+          </Tooltip>
         </div>
       </div>
       {(info?.shape != null || info?.dtype) && (

@@ -7,6 +7,7 @@ import { useColorMode } from "../color-mode-context.ts";
 import { NodeCard } from "./node-card/node-card.tsx";
 import css from "./node-card/node-card.module.css";
 
+
 export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeData>>) {
   const isDark = useColorMode() === "dark";
   const cat = opCategory(data.opType);
@@ -24,16 +25,10 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
       iconEntry={OP_ICON[data.opType] ?? CATEGORY_ICON[cat]}
       tinted={!hasWeights}
       selected={selected}
-      colors={{
-        color,
-        bg: isDark ? "#1e1e2e" : "#fff",
-        border: isDark ? "#333" : "#e0e0e0",
-        muted: isDark ? "#7a7a9a" : "#999",
-        tintBase: isDark ? "#1e1e2e" : "white",
-      }}
+      colors={{ color }}
     >
       {data.weightInputs && data.weightInputs.length > 0
-        ? data.weightInputs.map((w, i) => (
+        ? data.weightInputs.map((w, _) => (
             <div
               key={w.name}
               className={css.weightRow}

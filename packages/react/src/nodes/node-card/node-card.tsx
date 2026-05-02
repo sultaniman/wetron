@@ -7,10 +7,6 @@ import css from "./node-card.module.css";
 
 type CardColors = {
   color: string;
-  bg: string;
-  border: string;
-  muted: string;
-  tintBase?: string;
 };
 
 export function NodeCard({
@@ -44,12 +40,8 @@ export function NodeCard({
       className={`${css.card}${tinted ? ` ${css.cardTinted}` : ""}`}
       style={
         {
-          "--node-bg": colors.bg,
-          "--node-border": colors.border,
           "--node-color": colors.color,
           "--node-icon-color": colors.color + "B3",
-          "--node-muted": colors.muted,
-          ...(colors.tintBase ? { "--node-tint-base": colors.tintBase } : {}),
           ...(selected
             ? {
                 borderColor: colors.color,
@@ -61,7 +53,9 @@ export function NodeCard({
     >
       {topHandle && <Handle type="target" position={Position.Top} />}
       <div className={css.headerRow}>
-        <span className={css.pill}>{pill}</span>
+        <Tooltip text={pill} onlyIfOverflow>
+          <span className={css.pill}>{pill}</span>
+        </Tooltip>
         <span data-icon={cat} className={css.icon}>
           {iconEntry.kind === "glyph" ? (
             <span className={css.glyph}>{iconEntry.char}</span>
@@ -72,7 +66,7 @@ export function NodeCard({
       </div>
       {subtitle && (
         <Tooltip text={subtitle}>
-          <div className={css.subtitle}>{subtitle}</div>
+          <span className={css.subtitle}>{subtitle}</span>
         </Tooltip>
       )}
       {children != null && (

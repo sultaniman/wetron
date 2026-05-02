@@ -184,18 +184,22 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
       const outputs = (n["output"] as string[] | null) ?? [];
       return outputs.length !== 1 || !foldedConstants.has(String(outputs[0] ?? ""));
     })
-    .map((n) => ({
-      name: String(n["name"] ?? ""),
-      opType: String(n["opType"] ?? ""),
-      inputs: ((n["input"] as string[] | null) ?? []).map(String),
-      outputs: ((n["output"] as string[] | null) ?? []).map(String),
-      attributes: Object.fromEntries(
-        ((n["attribute"] as Array<Record<string, unknown>> | null) ?? []).map((a) => [
-          String(a["name"] ?? ""),
-          mapAttribute(a),
-        ]),
-      ),
-    }));
+    .map((n) => {
+      const domain = String(n["domain"] ?? "");
+      return {
+        name: String(n["name"] ?? ""),
+        opType: String(n["opType"] ?? ""),
+        ...(domain ? { domain } : {}),
+        inputs: ((n["input"] as string[] | null) ?? []).map(String),
+        outputs: ((n["output"] as string[] | null) ?? []).map(String),
+        attributes: Object.fromEntries(
+          ((n["attribute"] as Array<Record<string, unknown>> | null) ?? []).map((a) => [
+            String(a["name"] ?? ""),
+            mapAttribute(a),
+          ]),
+        ),
+      } satisfies GraphNode;
+    });
 
   const rawInputs = (graph["input"] as Array<Record<string, unknown>> | null) ?? [];
   const rawOutputs = (graph["output"] as Array<Record<string, unknown>> | null) ?? [];
@@ -244,6 +248,11 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
     tensorShapes.set(gv.name, { shape: gv.shape, dtype: gv.dtype });
   }
 
+  const rawOpsets = (decoded["opsetImport"] as Array<Record<string, unknown>> | null) ?? [];
+  const opsets = new Map<string, number>(
+    rawOpsets.map((o) => [String(o["domain"] ?? ""), longToNumber(o["version"] ?? 0)]),
+  );
+
   return {
     name: String(graph["name"] ?? ""),
     inputs: filteredInputs.map(mapValueInfo),
@@ -251,5 +260,6 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
     nodes,
     initializers,
     tensorShapes,
+    opsets,
   };
 }

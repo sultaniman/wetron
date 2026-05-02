@@ -1,4 +1,5 @@
 import React from "react";
+import { ScrollArea } from "@base-ui/react/scroll-area";
 import type { GraphNode, GraphValue } from "@wetron/core/ir";
 import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";
 import { OpPanel } from "./op-panel.tsx";
@@ -50,6 +51,7 @@ export function NodePropertyPanel({
   colorMode,
   inputSources,
   tensorShapes,
+  opsets,
 }: {
   target: PanelTarget | null;
   onTensorClick?: (name: string) => void;
@@ -58,6 +60,7 @@ export function NodePropertyPanel({
   colorMode?: ColorMode;
   inputSources?: ReadonlyMap<string, string>;
   tensorShapes?: ReadonlyMap<string, TensorInfo>;
+  opsets?: ReadonlyMap<string, number>;
 }) {
   const theme = useResolvedColorMode(colorMode ?? "system");
   const isDark = theme === "dark";
@@ -66,21 +69,33 @@ export function NodePropertyPanel({
   return (
     <div className={css.panel} data-theme={theme}>
       {onClose && <CloseButton onClose={onClose} />}
-      {isGraphNode(target) ? (
-        <OpPanel
-          node={target}
-          isDark={isDark}
-          inputSources={inputSources}
-          onTensorClick={onTensorClick}
-          onBack={onBack}
-        />
-      ) : isEdgeTarget(target) ? (
-        <EdgePanel edge={target.edge} tensorShapes={tensorShapes} onBack={onBack} />
-      ) : isTensorTarget(target) ? (
-        <TensorPanel tensor={target.tensor} onBack={onBack} />
-      ) : (
-        <IoPanel graphValue={target.graphValue} direction={target.direction} onBack={onBack} />
-      )}
+      <ScrollArea.Root key={isGraphNode(target) ? target.name : "other"} className={css.scrollRoot}>
+        <ScrollArea.Viewport className={css.scrollViewport}>
+          <ScrollArea.Content>
+            <div className={css.scrollContent}>
+            {isGraphNode(target) ? (
+              <OpPanel
+                node={target}
+                isDark={isDark}
+                inputSources={inputSources}
+                onTensorClick={onTensorClick}
+                onBack={onBack}
+                opsets={opsets}
+              />
+            ) : isEdgeTarget(target) ? (
+              <EdgePanel edge={target.edge} tensorShapes={tensorShapes} onBack={onBack} />
+            ) : isTensorTarget(target) ? (
+              <TensorPanel tensor={target.tensor} onBack={onBack} />
+            ) : (
+              <IoPanel graphValue={target.graphValue} direction={target.direction} onBack={onBack} />
+            )}
+            </div>
+          </ScrollArea.Content>
+        </ScrollArea.Viewport>
+        <ScrollArea.Scrollbar orientation="vertical" className={css.scrollbar}>
+          <ScrollArea.Thumb className={css.scrollThumb} />
+        </ScrollArea.Scrollbar>
+      </ScrollArea.Root>
     </div>
   );
 }

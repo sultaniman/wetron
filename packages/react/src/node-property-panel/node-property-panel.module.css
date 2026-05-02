@@ -1,46 +1,46 @@
 .panel {
   /* Light theme variables */
-  --panel-bg: #fff;
-  --panel-border: #e0e0e0;
-  --panel-text: #222;
-  --panel-header-border: #eee;
-  --panel-section-border: #f0f0f0;
-  --panel-label: #555;
-  --panel-value: #333;
-  --panel-subtitle: #aaa;
-  --panel-chip-bg: #f0f0f0;
-  --panel-chip-color: #888;
-  --panel-close-hover: #f0f0f0;
+  --wetron-panel-bg: #fff;
+  --wetron-panel-border: #e0e0e0;
+  --wetron-panel-text: #222;
+  --wetron-panel-header-border: #eee;
+  --wetron-panel-section-border: #f0f0f0;
+  --wetron-panel-label: #555;
+  --wetron-panel-value: #333;
+  --wetron-panel-subtitle: #aaa;
+  --wetron-panel-chip-bg: #f0f0f0;
+  --wetron-panel-chip-color: #888;
+  --wetron-panel-close-hover: #f0f0f0;
 
   position: relative;
   width: 260px;
-  background: var(--panel-bg);
+  background: var(--wetron-panel-bg);
   border-radius: 8px;
   overflow: hidden;
   font-family: system-ui, sans-serif;
   font-size: 11px;
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--wetron-panel-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  color: var(--panel-text);
+  color: var(--wetron-panel-text);
 }
 
 .panel[data-theme="dark"] {
-  --panel-bg: #1e1e2e;
-  --panel-border: #2a2a3a;
-  --panel-text: #f0f0f0;
-  --panel-header-border: #2a2a3a;
-  --panel-section-border: #282840;
-  --panel-label: #a0a0c0;
-  --panel-value: #e0e0f0;
-  --panel-subtitle: #6a6a8a;
-  --panel-chip-bg: #262646;
-  --panel-chip-color: #a0a0c0;
-  --panel-close-hover: #2a2a3a;
+  --wetron-panel-bg: #1e1e2e;
+  --wetron-panel-border: #2a2a3a;
+  --wetron-panel-text: #f0f0f0;
+  --wetron-panel-header-border: #2a2a3a;
+  --wetron-panel-section-border: #282840;
+  --wetron-panel-label: #a0a0c0;
+  --wetron-panel-value: #e0e0f0;
+  --wetron-panel-subtitle: #6a6a8a;
+  --wetron-panel-chip-bg: #262646;
+  --wetron-panel-chip-color: #a0a0c0;
+  --wetron-panel-close-hover: #2a2a3a;
 }
 
 .header {
   padding: 10px 38px 9px 11px;
-  border-bottom: 1px solid var(--panel-header-border);
+  border-bottom: 1px solid var(--wetron-panel-header-border);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -48,7 +48,7 @@
 
 .section {
   padding: 7px 11px;
-  border-bottom: 1px solid var(--panel-section-border);
+  border-bottom: 1px solid var(--wetron-panel-section-border);
 }
 
 .sectionLast {
@@ -123,7 +123,7 @@
 
 .nodeSubtitle {
   font-size: 10px;
-  color: var(--panel-subtitle);
+  color: var(--wetron-panel-subtitle);
   font-family: monospace;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -135,7 +135,7 @@
 .sectionLabel {
   font-size: 10px;
   font-weight: 500;
-  color: var(--panel-label);
+  color: var(--wetron-panel-label);
   margin-bottom: 5px;
   display: flex;
   align-items: center;
@@ -154,10 +154,11 @@
   display: flex;
   align-items: center;
   padding: 3px 0;
-  padding-left: 16px;
   margin: 1px 0;
   gap: 5px;
   cursor: default;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .rowClickable {
@@ -165,16 +166,17 @@
 }
 
 .rowClickable:hover {
-  background: color-mix(in oklch, var(--panel-label) 5%, transparent);
+  background: color-mix(in oklch, var(--wetron-panel-label) 5%, transparent);
   margin: 1px -11px;
-  padding-left: 27px;
+  padding-left: 11px;
   padding-right: 11px;
 }
 
 .rowLabel {
-  color: var(--panel-label);
+  color: var(--wetron-panel-label);
   font-size: 10px;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -183,7 +185,7 @@
 .rowValue {
   font-family: monospace;
   font-size: 9px;
-  color: var(--panel-value);
+  color: var(--wetron-panel-value);
   text-align: right;
   white-space: nowrap;
 }
@@ -192,7 +194,7 @@
 .rowCaret {
   flex-shrink: 0;
   opacity: 0.4;
-  color: var(--panel-label);
+  color: var(--wetron-panel-label);
   display: flex;
   align-items: center;
 }
@@ -204,8 +206,8 @@
   white-space: nowrap;
   text-align: center;
   display: inline-block;
-  background: var(--panel-chip-bg);
-  color: var(--panel-chip-color);
+  background: var(--wetron-panel-chip-bg);
+  color: var(--wetron-panel-chip-color);
 }
 
 /* Light mode chip type colors */
@@ -287,25 +289,60 @@
   cursor: pointer;
   font-size: 9px;
   padding: 1px 4px;
-  color: var(--panel-label);
+  color: var(--wetron-panel-label);
   border-radius: 3px;
   flex-shrink: 0;
   font-family: monospace;
   line-height: 1;
 }
 .expandBtn:hover {
-  background: var(--panel-chip-bg);
-  color: var(--panel-text);
+  background: var(--wetron-panel-chip-bg);
+  color: var(--wetron-panel-text);
+}
+
+/* ScrollArea */
+.scrollRoot {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.scrollContent {
+  width: 260px;
+  overflow-x: clip;
+}
+.scrollViewport {
+  max-height: calc(100vh - 48px);
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+.scrollViewport::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  bottom: 2px;
+  width: 4px;
+  border-radius: 2px;
+}
+.scrollThumb {
+  background: var(--wetron-panel-label);
+  opacity: 0.35;
+  border-radius: 2px;
+  width: 4px;
 }
 
 /* Inline expanded value block */
 .valueExpanded {
   font-family: monospace;
   font-size: 9px;
-  color: var(--panel-value);
+  color: var(--wetron-panel-value);
   margin: 2px 0 4px;
   padding: 5px 8px;
-  background: var(--panel-chip-bg);
+  background: var(--wetron-panel-chip-bg);
   border-radius: 4px;
   white-space: pre-wrap;
   word-break: break-all;
@@ -317,7 +354,7 @@
   border: none;
   cursor: pointer;
   padding: 4px;
-  color: #aaa;
+  color: var(--wetron-panel-subtitle, #aaa);
   display: flex;
   align-items: center;
   border-radius: 4px;
@@ -334,7 +371,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--panel-subtitle);
+  color: var(--wetron-panel-subtitle);
   padding: 0;
   border-radius: 50%;
   display: flex;
@@ -342,6 +379,6 @@
   justify-content: center;
 }
 .closeButton:hover {
-  background: var(--panel-close-hover);
-  color: var(--panel-text);
+  background: var(--wetron-panel-close-hover);
+  color: var(--wetron-panel-text);
 }

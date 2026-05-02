@@ -29,6 +29,27 @@
   --xy-controls-button-color-hover-default: #a0a0c0;
   --xy-controls-button-border-color-default: #2a2a3a;
   --xy-controls-box-shadow-default: none;
+
+  /* ── Wetron theme tokens (override these to customise) ── */
+  --wetron-node-bg: #1e1e2e;
+  --wetron-node-border: #333333;
+  --wetron-node-muted: #7a7a9a;
+  --wetron-node-tint-base: #1e1e2e;
+
+  --wetron-tooltip-bg: #2a2a3a;
+  --wetron-tooltip-color: #e8e8f0;
+
+  --wetron-panel-bg: #1e1e2e;
+  --wetron-panel-border: #2a2a3a;
+  --wetron-panel-text: #f0f0f0;
+  --wetron-panel-header-border: #2a2a3a;
+  --wetron-panel-section-border: #282840;
+  --wetron-panel-label: #a0a0c0;
+  --wetron-panel-value: #e0e0f0;
+  --wetron-panel-subtitle: #6a6a8a;
+  --wetron-panel-chip-bg: #262646;
+  --wetron-panel-chip-color: #a0a0c0;
+  --wetron-panel-close-hover: #2a2a3a;
 }
 
 /* Direct overrides — ReactFlow's colorMode="dark" may set these on .react-flow
@@ -74,6 +95,27 @@
   --xy-controls-button-color-hover-default: #333;
   --xy-controls-button-border-color-default: #e0e0e0;
   --xy-controls-box-shadow-default: none;
+
+  /* ── Wetron theme tokens (override these to customise) ── */
+  --wetron-node-bg: #ffffff;
+  --wetron-node-border: #e0e0e0;
+  --wetron-node-muted: #999999;
+  --wetron-node-tint-base: white;
+
+  --wetron-tooltip-bg: #1e1e2e;
+  --wetron-tooltip-color: #e8e8f0;
+
+  --wetron-panel-bg: #ffffff;
+  --wetron-panel-border: #e0e0e0;
+  --wetron-panel-text: #222222;
+  --wetron-panel-header-border: #eeeeee;
+  --wetron-panel-section-border: #f0f0f0;
+  --wetron-panel-label: #555555;
+  --wetron-panel-value: #333333;
+  --wetron-panel-subtitle: #aaaaaa;
+  --wetron-panel-chip-bg: #f0f0f0;
+  --wetron-panel-chip-color: #888888;
+  --wetron-panel-close-hover: #f0f0f0;
 }
 
 [data-theme="light"] .react-flow {

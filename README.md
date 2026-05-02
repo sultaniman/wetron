@@ -41,7 +41,7 @@ const graph = await parseModel(bytes, file.name); // auto-detects .onnx / .tflit
 
 ```tsx
 import { ModelGraphView } from "@wetron/react";
-import "@wetron/react/styles";
+import "@wetron/react/dist/index.css";
 
 <ModelGraphView graph={graph} />
 ```
@@ -78,7 +78,7 @@ cd apps/demo-svelte && bun dev   # Svelte
 
 ## Documentation
 
-- [Usage](docs/usage.md) — parsing models, rendering with React/Svelte, core types
+- [Usage](docs/usage.md) — parsing models, rendering with React/Svelte, theming, core types
 - [Extending](docs/extending.md) — adding a new parser
 - [llms.txt](docs/llms.txt) — machine-readable summary for LLM context
 

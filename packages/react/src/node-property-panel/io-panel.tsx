@@ -23,7 +23,7 @@ export function IoPanel({
           {isInput ? <ArrowFatDownIcon size={15} /> : <ArrowFatUpIcon size={15} />}
         </div>
         <div className={css.headerText}>
-          <Tooltip text={graphValue.name}>
+          <Tooltip text={graphValue.name} onlyIfOverflow>
             <div className={css.nodeTitle}>{graphValue.name}</div>
           </Tooltip>
           <div className={css.nodeSubtitle}>{direction}</div>
