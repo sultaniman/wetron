@@ -43,12 +43,12 @@ type Props = {
 
 function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Props) {
   const isDark = useColorMode() === "dark";
+  const rf = useReactFlow();
   const { nodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
   const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName);
   const handleNodeClick = useNodeClickHandler(onTargetClick);
   const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
   useFitOnGraphChange(graph, layoutNodes);
-  const rf = useReactFlow();
   const edgeDefaults = useMemo(
     () => (isDark ? { stroke: "#7a7a9a", opacity: 0.55 } : { stroke: "rgba(60,60,100,0.55)" }),
     [isDark],
