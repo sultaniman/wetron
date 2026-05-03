@@ -8,10 +8,10 @@ if (!version) {
 
 const packages = [
   "packages/core",
-  // "packages/onnx",
-  // "packages/tflite",
-  // "packages/keras",
-  // "packages/tokens",
+  "packages/tokens",
+  "packages/onnx",
+  "packages/tflite",
+  "packages/keras",
   "packages/executorch",
   "packages/torchscript",
   "packages/react",
