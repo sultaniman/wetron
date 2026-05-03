@@ -12,11 +12,10 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./model-graph-view.css";
-import type { ModelGraph } from "@wetron/core/ir";
+import type { ModelGraph, PanelTarget } from "@wetron/core/ir";
 import { GraphNodeComponent } from "../nodes/graph-node.tsx";
 import { IoNodeComponent } from "../nodes/io-node.tsx";
 import { ModelEdge } from "../edges/model-edge.tsx";
-import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
 import { ColorModeContext, useColorMode, type ColorMode } from "../color-mode-context.ts";
 import { MINIMAP_THEME } from "../theme.ts";
 import {

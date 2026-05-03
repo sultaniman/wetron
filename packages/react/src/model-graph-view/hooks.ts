@@ -9,8 +9,7 @@ import {
 } from "@xyflow/react";
 import type { MouseEvent } from "react";
 import { modelGraphToFlow, type GraphNodeData, type FlowEdge } from "@wetron/core/transform";
-import type { ModelGraph } from "@wetron/core/ir";
-import { type PanelTarget } from "../node-property-panel/node-property-panel.tsx";
+import type { ModelGraph, PanelTarget } from "@wetron/core/ir";
 import { EDGE_THEME } from "../theme.ts";
 
 type FlowEdgeData = FlowEdge["data"];
