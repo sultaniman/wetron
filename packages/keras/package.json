@@ -1,6 +1,6 @@
 {
   "name": "@wetron/keras",
-  "version": "0.0.1",
+  "version": "0.0.1-beta",
   "description": "Keras model parser — extracts graph structure from .keras archive files",
   "keywords": [
     "graph",

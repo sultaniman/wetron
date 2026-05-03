@@ -1,0 +1,6 @@
+// Bootstrap 5 removed .form-group; doks-core still @extends it without !optional
+.form-group {
+  margin-bottom: 1rem;
+}
+
+// Custom overrides for Wetron docs

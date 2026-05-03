@@ -1,0 +1,50 @@
+title = "Wetron"
+description = "Browser-native ML model graph viewer"
+
+mainSections = ["docs"]
+
+[doks]
+colorMode = "auto"
+colorModeToggler = true
+navbarSticky = true
+containerBreakpoint = "fluid"
+flexSearch = true
+searchExclKinds = []
+searchExclTypes = []
+showSearch = []
+indexSummary = false
+showDate = false
+showSummary = true
+searchLimit = 99
+bootstrapJavascript = false
+sectionNav = ["docs"]
+toTopButton = false
+breadcrumbTrail = false
+headlineHash = true
+scrollSpy = true
+multilingualMode = false
+headerBar = false
+backgroundDots = false
+sectionFooter = false
+editPage = false
+lastMod = false
+repoHost = "GitHub"
+docsRepo = "https://github.com/wetron/wetron"
+docsRepoBranch = "main"
+docsRepoSubPath = "docs"
+
+[inline_svg]
+iconSetDir = "tabler-icons"
+iconSetVariant = "outline"
+
+[seo]
+[seo.title]
+separator = "|"
+suffix = "Wetron"
+[seo.favicons]
+icon = "favicon.png"
+svgIcon = "favicon.svg"
+[seo.schemas]
+type = "Organization"
+name = "Wetron"
+images = ["cover.png"]

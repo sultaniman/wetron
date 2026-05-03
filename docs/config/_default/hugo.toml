@@ -1,0 +1,66 @@
+title = "Wetron"
+baseurl = "/"
+disableAliases = true
+disableHugoGeneratorInject = true
+enableEmoji = true
+enableGitInfo = false
+enableRobotsTXT = true
+languageCode = "en"
+summarylength = 20
+
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
+
+[build.buildStats]
+enable = true
+
+[outputFormats.rss]
+disable = true
+
+[outputs]
+home = ["html", "sitemap", "searchIndex"]
+section = ["html", "sitemap"]
+taxonomy = ["html"]
+term = ["html"]
+
+[outputFormats.searchIndex]
+mediaType = "application/json"
+baseName = "search-index"
+isPlainText = true
+notAlternative = true
+
+[outputFormats.sitemap]
+mediaType = "application/xml"
+baseName = "sitemap"
+isHTML = false
+isPlainText = true
+noUgly = true
+rel = "sitemap"
+
+[sitemap]
+changefreq = "monthly"
+filename = "sitemap.xml"
+priority = 0.5
+
+[caches]
+[caches.getresource]
+dir = ":cacheDir/:project"
+maxAge = -1
+
+[taxonomies]
+category = "categories"
+tag = "tags"
+
+[permalinks]
+docs = "/docs/:sections[1:]/:slug/"
+
+[minify.tdewolff.html]
+keepComments = true
+keepWhitespace = false
+
+[imaging]
+anchor = "Center"
+bgColor = "#ffffff"
+hint = "photo"
+quality = 85
+resampleFilter = "Lanczos"

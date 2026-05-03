@@ -6,29 +6,33 @@ Graph structure only — no weight data is read or stored.
 
 ## Packages
 
-| Package          | Description                                               |
-| ---------------- | --------------------------------------------------------- |
-| `@wetron/core`   | IR types, format detection, dtype utilities, Dagre layout |
-| `@wetron/onnx`   | ONNX parser (protobufjs)                                  |
-| `@wetron/tflite` | TFLite parser (flatbuffers)                               |
-| `@wetron/keras`  | Keras `.keras` archive parser                             |
-| `@wetron/react`  | React graph view and property panel                       |
-| `@wetron/svelte` | Svelte graph view and property panel                      |
-| `@wetron/tokens` | Theme constants (colors, CSS vars) — no dependencies      |
+| Package | Description |
+| --- | --- |
+| `@wetron/core` | IR types, format detection, dtype utilities, Dagre layout |
+| `@wetron/onnx` | ONNX parser (protobufjs) |
+| `@wetron/tflite` | TFLite parser (flatbuffers) |
+| `@wetron/keras` | Keras `.keras` archive parser |
+| `@wetron/torchscript` | TorchScript Mobile and ZIP-based `.pt` parser |
+| `@wetron/executorch` | ExecuTorch `.pte` parser (flatbuffers) |
+| `@wetron/react` | React graph view and property panel |
+| `@wetron/svelte` | Svelte graph view and property panel |
+| `@wetron/tokens` | Theme constants (colors, CSS vars) — no dependencies |
 
-`@wetron/tokens` is intentionally standalone: it inlines all type definitions and has zero runtime or peer dependencies, so it can be used without installing any other wetron package.
+`@wetron/tokens` is intentionally standalone: zero runtime or peer dependencies, usable without any other wetron package.
+
+> **Keeping tokens in sync with core:** `OpCategory` is defined in both `@wetron/core` and `@wetron/tokens`. If you add a new category, update both — then update `CATEGORY_THEME` in `tokens/src/index.ts`. `bun test packages/tokens` enforces this at runtime.
 
 ## Install
 
 ```sh
 # parse + render with React
-bun add @wetron/core @wetron/onnx @wetron/tflite @wetron/keras @wetron/react
+bun add @wetron/core @wetron/onnx @wetron/tflite @wetron/keras @wetron/torchscript @wetron/executorch @wetron/react
 
 # parse only (no UI)
-bun add @wetron/core @wetron/onnx @wetron/tflite @wetron/keras
+bun add @wetron/core @wetron/onnx @wetron/tflite @wetron/keras @wetron/torchscript @wetron/executorch
 ```
 
-Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@phosphor-icons/react >=2`.
+Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@phosphor-icons/react >=2`, `@base-ui/react >=1`.
 
 ## Usage
 
@@ -36,17 +40,17 @@ Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@pho
 import { parseModel } from "@wetron/core";
 
 const bytes = new Uint8Array(await file.arrayBuffer());
-const graph = await parseModel(bytes, file.name); // auto-detects .onnx / .tflite / .keras
+const graph = await parseModel(bytes, file.name); // auto-detects format from magic bytes
 ```
 
 ```tsx
 import { ModelGraphView } from "@wetron/react";
 import "@wetron/react/dist/index.css";
 
-<ModelGraphView graph={graph} />;
+<ModelGraphView graph={graph} colorMode="system" />
 ```
 
-See [docs/usage.md](docs/usage.md) for full API reference and Svelte examples.
+See the [docs](docs/) for the full API reference, Svelte examples, and theming tokens.
 
 ## Development
 
@@ -76,11 +80,20 @@ cd apps/demo && bun dev          # React
 cd apps/demo-svelte && bun dev   # Svelte
 ```
 
+### Docs
+
+```sh
+cd docs && bun install && bun run dev   # Hugo site at localhost:1313
+```
+
 ## Documentation
 
-- [Usage](docs/usage.md) — parsing models, rendering with React/Svelte, theming, core types
-- [Extending](docs/extending.md) — adding a new parser
-- [llms.txt](docs/llms.txt) — machine-readable summary for LLM context
+- [Guide](docs/content/docs/guide/) — installation, quick start, architecture
+- [API Reference](docs/content/docs/api/) — parseModel, detectFormat, IR types
+- [Formats](docs/content/docs/formats/) — ONNX, TFLite, Keras, TorchScript, ExecuTorch
+- [Rendering](docs/content/docs/rendering/) — React, Svelte, theming tokens
+- [Contributing](docs/content/docs/contributing/) — adding a new parser
+- [llms.md](docs/llms.md) — machine-readable summary for LLM context
 
 ## Constraints
 

@@ -1,0 +1,23 @@
+[get_started]
+other = "Get Started"
+
+[api_reference]
+other = "API Reference"
+
+[feature_formats_title]
+other = "Five model formats"
+
+[feature_formats_desc]
+other = "ONNX, TFLite, Keras, TorchScript, and ExecuTorch — parsed entirely in the browser with no server required."
+
+[feature_browser_title]
+other = "Zero server, zero upload"
+
+[feature_browser_desc]
+other = "All parsing runs in the browser via native Web APIs. Your model files never leave the device."
+
+[feature_render_title]
+other = "React & Svelte renderers"
+
+[feature_render_desc]
+other = "Drop-in graph view and property panel components for React and Svelte, built on @xyflow."

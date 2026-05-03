@@ -1,0 +1,148 @@
+{{ if .IsHome }}
+<script>
+  (function () {
+    const canvas = document.createElement("canvas");
+    canvas.id = "graph-bg";
+    canvas.style.cssText =
+      "position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;opacity:0.45";
+    document.body.prepend(canvas);
+
+    const ctx = canvas.getContext("2d");
+    let w, h;
+
+    const CONNECT_DIST = 160;
+    const BASE_SPEED = 0.3;
+    const NODE_RADIUS = 2.5;
+    const SPAWN_FADE_IN = 60;
+    const MAX_NODES = 200;
+
+    const nodes = [];
+
+    function isDark() {
+      return (
+        document.documentElement.getAttribute("data-dark-mode") === "true" ||
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      );
+    }
+
+    function nodeColor(alpha) {
+      return isDark() ? "rgba(255,255,255," + alpha + ")" : "rgba(0,0,0," + alpha + ")";
+    }
+
+    function lineColor(alpha) {
+      return isDark() ? "rgba(255,255,255," + alpha + ")" : "rgba(0,0,0," + alpha + ")";
+    }
+
+    function createNode(x, y, isUser) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = BASE_SPEED * (0.5 + Math.random() * 0.5);
+      return {
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        age: 0,
+        isUser: isUser || false,
+      };
+    }
+
+    function seed() {
+      nodes.length = 0;
+      const count = Math.floor((w * h) / 18000);
+      for (let i = 0; i < count; i++) {
+        nodes.push(createNode(Math.random() * w, Math.random() * h, false));
+        nodes[nodes.length - 1].age = SPAWN_FADE_IN;
+      }
+    }
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      seed();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const n = nodes[i];
+        n.x += n.vx;
+        n.y += n.vy;
+        n.age = Math.min(n.age + 1, SPAWN_FADE_IN);
+
+        const margin = 50;
+        if (n.x < -margin || n.x > w + margin || n.y < -margin || n.y > h + margin) {
+          if (n.isUser) {
+            nodes.splice(i, 1);
+          } else {
+            // re-enter from a random edge
+            const edge = Math.random();
+            if (edge < 0.25) {
+              n.x = -margin;
+              n.y = Math.random() * h;
+              n.vx = Math.abs(n.vx);
+            } else if (edge < 0.5) {
+              n.x = w + margin;
+              n.y = Math.random() * h;
+              n.vx = -Math.abs(n.vx);
+            } else if (edge < 0.75) {
+              n.y = -margin;
+              n.x = Math.random() * w;
+              n.vy = Math.abs(n.vy);
+            } else {
+              n.y = h + margin;
+              n.x = Math.random() * w;
+              n.vy = -Math.abs(n.vy);
+            }
+          }
+        }
+      }
+
+      // draw edges
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        const aAlpha = a.age / SPAWN_FADE_IN;
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONNECT_DIST) {
+            const bAlpha = b.age / SPAWN_FADE_IN;
+            const alpha = (1 - dist / CONNECT_DIST) * 0.15 * aAlpha * bAlpha;
+            ctx.strokeStyle = lineColor(alpha);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // draw nodes
+      for (const n of nodes) {
+        const alpha = (n.age / SPAWN_FADE_IN) * (n.isUser ? 0.6 : 0.35);
+        ctx.fillStyle = nodeColor(alpha);
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.isUser ? NODE_RADIUS * 1.4 : NODE_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener("resize", resize);
+
+    document.addEventListener("click", function (e) {
+      if (e.target.closest("a, button, input, select, textarea, [role='button']")) return;
+      if (nodes.length < MAX_NODES) {
+        nodes.push(createNode(e.clientX, e.clientY, true));
+      }
+    });
+
+    resize();
+    draw();
+  })();
+</script>
+{{ end }}

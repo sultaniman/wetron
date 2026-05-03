@@ -11,3 +11,10 @@ dist
 *.tgz
 *.zip
 .venv
+docs/public
+docs/resources/_gen/
+docs/.hugo_build.lock
+*.log
+*draft*
+npm-debug.log*
+data/

@@ -9,7 +9,7 @@ Shared foundation for the wetron monorepo. Provides the IR types all parsers pro
 async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
 // Format detection — never throws, returns "unknown" on no match
-type Format = "onnx" | "tflite" | "keras" | "unknown";
+type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // IR → ReactFlow / SvelteFlow nodes and edges, Dagre layout applied (top-to-bottom)
@@ -17,22 +17,9 @@ function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEd
 
 // Op category from opType string
 type OpCategory =
-  | "input"
-  | "output"
-  | "conv"
-  | "activation"
-  | "normalization"
-  | "pooling"
-  | "reshape"
-  | "math"
-  | "reduction"
-  | "merge"
-  | "attention"
-  | "recurrent"
-  | "quantization"
-  | "constant"
-  | "logic"
-  | "unknown";
+  | "input" | "output" | "conv" | "activation" | "normalization" | "pooling"
+  | "reshape" | "math" | "reduction" | "merge" | "attention" | "recurrent"
+  | "quantization" | "constant" | "logic" | "unknown";
 function opCategory(opType: string): OpCategory;
 
 // Named input slot labels for known ops (e.g. Conv → ["X","W","B"])
@@ -62,7 +49,8 @@ interface GraphValue {
 interface GraphNode {
   readonly name: string;
   readonly opType: string;
-  readonly inputs: readonly string[]; // tensor names consumed
+  readonly domain?: string; // operator domain (ONNX only; absent = standard ai.onnx)
+  readonly inputs: readonly string[];  // tensor names consumed
   readonly outputs: readonly string[]; // tensor names produced
   readonly attributes: Readonly<Record<string, AttributeValue>>;
 }
@@ -77,6 +65,14 @@ interface ModelGraph {
     string,
     { shape: readonly number[] | null; dtype: string | null }
   >;
+  readonly opsets?: ReadonlyMap<string, number>; // domain → version (ONNX only; "" = ai.onnx)
+  readonly warnings?: readonly ParseWarning[];
+}
+
+interface ParseWarning {
+  readonly code: string;
+  readonly context: string;
+  readonly nodeIndex?: number;
 }
 
 class ParseError extends Error {
@@ -94,7 +90,7 @@ type GraphNodeData = {
   inputs: readonly string[];
   outputs: readonly string[];
   attributes: Readonly<Record<string, AttributeValue>>;
-  graphNode?: GraphNode; // set for op nodes
+  graphNode?: GraphNode;   // set for op nodes
   graphValue?: GraphValue; // set for I/O nodes
   shape?: readonly number[] | null;
   dtype?: string | null;
@@ -124,6 +120,17 @@ type FlowEdge = {
   data: { tensorName: string; sourceOpType: string };
 };
 ```
+
+## Format detection (magic bytes)
+
+| Format | Detection |
+|---|---|
+| ONNX | protobuf field 1 varint tag `0x08` |
+| TFLite | `TFL3` or `ODLF` at offset 4 |
+| Keras | ZIP magic `PK\x03\x04` + `config.json` entry |
+| TorchScript ZIP | ZIP magic `PK\x03\x04` + `bytecode.pkl` |
+| TorchScript Mobile | `PTMF` at offset 4 |
+| ExecuTorch | `ET12` at offset 4 |
 
 ## Constraints
 

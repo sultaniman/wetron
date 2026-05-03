@@ -1,0 +1,28 @@
+defaultMarkdownHandler = "goldmark"
+
+[goldmark]
+[goldmark.extensions]
+linkify = false
+[goldmark.extensions.passthrough]
+enable = true
+[goldmark.extensions.passthrough.delimiters]
+block = [['\[', '\]'], ['$$', '$$']]
+inline = [['\(', '\)']]
+[goldmark.parser]
+autoHeadingID = true
+autoHeadingIDType = "github"
+[goldmark.parser.attribute]
+block = true
+title = true
+[goldmark.renderer]
+unsafe = true
+
+[highlight]
+codeFences = true
+noClasses = false
+tabWidth = 2
+
+[tableOfContents]
+endLevel = 3
+ordered = false
+startLevel = 2

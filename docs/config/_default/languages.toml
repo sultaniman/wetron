@@ -1,0 +1,5 @@
+[en]
+languageName = "English"
+weight = 10
+[en.params]
+footer = 'Built with <a class="text-muted" href="https://getdoks.org/">Doks</a>'

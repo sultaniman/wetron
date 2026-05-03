@@ -1,14 +1,16 @@
 # wetron
 
-Browser-only neural network model visualizer. Parses ONNX, TFLite, and Keras files into a shared IR and renders the computation graph. Graph structure only — no weight data is read or stored anywhere in the stack.
+Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, TorchScript, and ExecuTorch files into a shared IR and renders the computation graph. Graph structure only — no weight data is read or stored anywhere in the stack.
 
 ## Packages
 
 - `@wetron/core` — shared IR types, format detection, dtype utilities, Dagre layout, unified `parseModel` entry point
 - `@wetron/onnx` — ONNX parser (protobufjs)
-- `@wetron/tflite` — TFLite parser (flatbuffers)
+- `@wetron/tflite` — TFLite parser (flatbuffers), synchronous
 - `@wetron/keras` — Keras `.keras` archive parser (fflate)
-- `@wetron/react` — React components: `ModelGraphView`, `NodePropertyPanel`, `Tooltip` (peer: react 18+, @xyflow/react 12+, @phosphor-icons/react 2+, @base-ui/react 1+)
+- `@wetron/torchscript` — TorchScript Mobile and ZIP-based parser (flatbuffers + custom bytecode decoder)
+- `@wetron/executorch` — ExecuTorch `.pte` parser (flatbuffers)
+- `@wetron/react` — React components: `ModelGraphView`, `NodePropertyPanel` (peer: react 18+, @xyflow/react 12+, @phosphor-icons/react 2+, @base-ui/react 1+)
 - `@wetron/svelte` — Svelte components: `ModelGraphView`, `NodePropertyPanel` (peer: svelte 5+, @xyflow/svelte 1.5+, phosphor-svelte 3+)
 - `@wetron/tokens` — design tokens: category colors, CSS vars — zero dependencies, all types inlined
 
@@ -27,8 +29,8 @@ interface GraphNode {
   readonly name: string;
   readonly opType: string;
   readonly domain?: string; // operator domain (ONNX only; absent = standard ai.onnx)
-  readonly inputs: readonly string[]; // tensor names
-  readonly outputs: readonly string[]; // tensor names
+  readonly inputs: readonly string[];  // tensor names consumed
+  readonly outputs: readonly string[]; // tensor names produced
   readonly attributes: Readonly<Record<string, AttributeValue>>;
 }
 
@@ -43,10 +45,17 @@ interface ModelGraph {
     { shape: readonly number[] | null; dtype: string | null }
   >;
   readonly opsets?: ReadonlyMap<string, number>; // domain → version (ONNX only; "" = ai.onnx)
+  readonly warnings?: readonly ParseWarning[];
+}
+
+interface ParseWarning {
+  readonly code: string;
+  readonly context: string;
+  readonly nodeIndex?: number;
 }
 
 class ParseError extends Error {
-  readonly format: string; // "onnx" | "tflite" | "keras" | "unknown"
+  readonly format: string; // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown"
   readonly context: string; // human-readable description of failure
 }
 ```
@@ -58,7 +67,7 @@ class ParseError extends Error {
 async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
 // Format detection — never throws, returns "unknown" on no match
-type Format = "onnx" | "tflite" | "keras" | "unknown";
+type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // IR → ReactFlow / SvelteFlow nodes and edges with Dagre layout applied
@@ -66,23 +75,13 @@ function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEd
 
 // Op category classification
 type OpCategory =
-  | "input"
-  | "output"
-  | "conv"
-  | "activation"
-  | "normalization"
-  | "pooling"
-  | "reshape"
-  | "math"
-  | "reduction"
-  | "merge"
-  | "attention"
-  | "recurrent"
-  | "quantization"
-  | "constant"
-  | "logic"
-  | "unknown";
+  | "input" | "output" | "conv" | "activation" | "normalization" | "pooling"
+  | "reshape" | "math" | "reduction" | "merge" | "attention" | "recurrent"
+  | "quantization" | "constant" | "logic" | "unknown";
 function opCategory(opType: string): OpCategory;
+
+// Named input slot labels for known ops (e.g. Conv → ["X","W","B"])
+function opInputLabels(opType: string): readonly string[];
 ```
 
 ## Parser APIs
@@ -95,8 +94,25 @@ async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph>;
 function parseTflite(bytes: Uint8Array): ModelGraph; // sync
 
 // @wetron/keras
-function parseKeras(bytes: Uint8Array): ModelGraph;
+async function parseKeras(bytes: Uint8Array): Promise<ModelGraph>;
+
+// @wetron/torchscript
+function parseTorchscript(bytes: Uint8Array): ModelGraph; // sync; handles ZIP and FlatBuffers Mobile
+
+// @wetron/executorch
+function parseExecutorch(bytes: Uint8Array): ModelGraph; // sync
 ```
+
+## Format detection (magic bytes)
+
+| Format | Detection |
+|---|---|
+| ONNX | protobuf field 1 varint tag `0x08` |
+| TFLite | `TFL3` or `ODLF` at offset 4 |
+| Keras | ZIP magic `PK\x03\x04` + `config.json` entry |
+| TorchScript ZIP | ZIP magic `PK\x03\x04` + `bytecode.pkl` |
+| TorchScript Mobile | `PTMF` at offset 4 |
+| ExecuTorch | `ET12` at offset 4 |
 
 ## Architecture rules
 
@@ -113,7 +129,7 @@ function parseKeras(bytes: Uint8Array): ModelGraph;
 - File input: `file.arrayBuffer()`
 - Remote fetch: `fetch().arrayBuffer()`
 - Text: `TextDecoder` / `TextEncoder`
-- Decompression: `DecompressionStream`
+- Decompression: `DecompressionStream` (or `fflate` for ZIP in Keras/TorchScript)
 - No `FileReader`, `XMLHttpRequest`, Node.js APIs, or manual UTF-8 loops
 
 ## Adding a parser
