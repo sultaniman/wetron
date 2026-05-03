@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { OpCategory } from '@wetron/core';
+  import { opBase } from '@wetron/core';
   import {
     ArrowDownIcon, ArrowUpIcon, ApertureIcon, FunctionIcon, StackMinusIcon,
     CubeIcon, PlusMinusIcon, ArrowsMergeIcon, EyeIcon,
@@ -14,6 +15,8 @@
   } from 'phosphor-svelte';
 
   let { cat, op, size = 16 }: { cat: OpCategory; op?: string; size?: number } = $props();
+
+  const base = $derived(op ? opBase(op) : null);
 </script>
 
 {#if op === 'Reshape' || op === 'RESHAPE'}
@@ -84,6 +87,59 @@
   <span class="glyph">=</span>
 {:else if op === 'NOT_EQUAL'}
   <span class="glyph">≠</span>
+<!-- aten:: op base-name overrides -->
+{:else if base === 'add' || base === 'add_'}
+  <PlusIcon {size} />
+{:else if base === 'sub' || base === 'sub_'}
+  <MinusIcon {size} />
+{:else if base === 'mul' || base === 'mul_'}
+  <XIcon {size} />
+{:else if base === 'div' || base === 'div_' || base === 'true_divide'}
+  <DivideIcon {size} />
+{:else if base === 'pow'}
+  <CaretUpIcon {size} />
+{:else if base === 'sqrt' || base === 'rsqrt'}
+  <RadicalIcon {size} />
+{:else if base === 'mm' || base === 'bmm' || base === 'matmul' || base === 'addmm' || base === 'baddbmm'}
+  <TableIcon {size} />
+{:else if base === 'clamp' || base === 'clamp_' || base === 'clip'}
+  <ScissorsIcon {size} />
+{:else if base === 'eq'}
+  <span class="glyph">=</span>
+{:else if base === 'ne'}
+  <span class="glyph">≠</span>
+{:else if base === 'lt'}
+  <span class="glyph">&lt;</span>
+{:else if base === 'le'}
+  <span class="glyph">≤</span>
+{:else if base === 'gt'}
+  <span class="glyph">&gt;</span>
+{:else if base === 'ge'}
+  <span class="glyph">≥</span>
+{:else if base === 'reshape' || base === 'view'}
+  <BoundingBoxIcon {size} />
+{:else if base === 'squeeze' || base === 'squeeze_'}
+  <ArrowsInLineVerticalIcon {size} />
+{:else if base === 'unsqueeze' || base === 'unsqueeze_'}
+  <ArrowsOutLineVerticalIcon {size} />
+{:else if base === 'transpose' || base === 'permute'}
+  <ArrowsDownUpIcon {size} />
+{:else if base === 'flatten'}
+  <RowsIcon {size} />
+{:else if base === 'pad' || base === 'constant_pad_nd'}
+  <FrameCornersIcon {size} />
+{:else if base === 'slice' || base === 'narrow' || base === 'select'}
+  <StackIcon {size} />
+{:else if base === 'size' || base === 'expand' || base === 'expand_as'}
+  <ArrowsOutSimpleIcon {size} />
+{:else if base === 'to'}
+  <ArrowFatLinesRightIcon {size} />
+{:else if base === 'split' || base === 'chunk' || base === 'tensor_split'}
+  <ArrowsSplitIcon {size} />
+{:else if base === 'gather' || base === '__getitem__'}
+  <FunnelSimpleIcon {size} />
+{:else if base === 'scatter' || base === 'scatter_' || base === 'scatter_add'}
+  <DotsNineIcon {size} />
 {:else if cat === 'input'}
   <ArrowDownIcon {size} />
 {:else if cat === 'output'}
