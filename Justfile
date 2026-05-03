@@ -25,24 +25,7 @@ check: build test
 
 # Set version across all packages: just bump 0.1.0
 bump version:
-    #!/usr/bin/env bun
-    import { readFileSync, writeFileSync } from "fs";
-    const dirs = [
-      "packages/core",
-      "packages/onnx",
-      "packages/tflite",
-      "packages/keras",
-      "packages/tokens",
-      "packages/react",
-      "packages/svelte",
-    ];
-    for (const dir of dirs) {
-      const path = `${dir}/package.json`;
-      const pkg = JSON.parse(readFileSync(path, "utf8"));
-      pkg.version = "{{version}}";
-      writeFileSync(path, JSON.stringify(pkg, null, 2) + "\n");
-      console.log(`  ${pkg.name}  →  {{version}}`);
-    }
+    bun scripts/bump-version.ts {{version}}
 
 # Publish all packages to npm (run `just build` first)
 publish:
