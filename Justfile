@@ -8,17 +8,20 @@ default:
 
 # Build all packages in dependency order
 build:
-    cd packages/core   && bunx tsup
-    cd packages/onnx   && bunx tsup
-    cd packages/tflite && bunx tsup
-    cd packages/keras  && bunx tsup
-    cd packages/core   && bunx tsup --config tsup.index.config.ts
-    cd packages/tokens && bunx tsup
-    cd packages/react  && bunx vite build
+    cd packages/core        && bunx tsup
+    cd packages/onnx        && bunx tsup
+    cd packages/tflite      && bunx tsup
+    cd packages/keras       && bunx tsup
+    cd packages/executorch  && bunx tsup
+    cd packages/torchscript && bunx tsup
+    cd packages/core        && bunx tsup --config tsup.index.config.ts
+    cd packages/tokens      && bunx tsup
+    cd packages/react       && bunx vite build
+    # @wetron/svelte ships source directly — no build step
 
 # Run the test suite
 test:
-    bun test packages/core packages/onnx packages/tflite packages/keras packages/tokens packages/react packages/svelte
+    bun test packages/core packages/onnx packages/tflite packages/keras packages/executorch packages/torchscript packages/tokens packages/react packages/svelte
 
 # Build then test
 check: build test
@@ -29,13 +32,16 @@ bump version:
 
 # Publish all packages to npm (run `just build` first)
 publish:
-    cd packages/core   && bun publish --access public
-    cd packages/onnx   && bun publish --access public
-    cd packages/tflite && bun publish --access public
-    cd packages/keras  && bun publish --access public
-    cd packages/tokens && bun publish --access public
-    cd packages/react  && bun publish --access public
-    cd packages/svelte && bun publish --access public
+    bun install
+    cd packages/tokens      && bun publish --access public
+    cd packages/onnx        && bun publish --access public
+    cd packages/tflite      && bun publish --access public
+    cd packages/keras       && bun publish --access public
+    cd packages/executorch  && bun publish --access public
+    cd packages/torchscript && bun publish --access public
+    cd packages/core        && bun publish --access public
+    cd packages/react       && bun publish --access public
+    cd packages/svelte      && bun publish --access public
 
 # Bump version, build, test, publish: just release 0.1.0
 release version: (bump version) check publish
