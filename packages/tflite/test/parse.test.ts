@@ -22,5 +22,7 @@ test("mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs", as
 });
 
 test("throws ParseError on garbage input", () => {
-  expect(() => parseTflite(new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00]))).toThrow(ParseError);
+  expect(() =>
+    parseTflite(new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00])),
+  ).toThrow(ParseError);
 });

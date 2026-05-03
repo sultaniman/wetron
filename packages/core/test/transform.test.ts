@@ -7,7 +7,13 @@ const GRAPH: ModelGraph = {
   inputs: [{ name: "x", shape: [1, 3, 224, 224], dtype: "float32" }],
   outputs: [{ name: "y", shape: [1, 1000], dtype: "float32" }],
   nodes: [
-    { name: "conv1", opType: "Conv", inputs: ["x", "weight", "bias"], outputs: ["h"], attributes: {} },
+    {
+      name: "conv1",
+      opType: "Conv",
+      inputs: ["x", "weight", "bias"],
+      outputs: ["h"],
+      attributes: {},
+    },
     { name: "relu1", opType: "Relu", inputs: ["h"], outputs: ["y"], attributes: {} },
   ],
   initializers: new Map([

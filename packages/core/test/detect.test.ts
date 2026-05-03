@@ -3,7 +3,10 @@ import { detectFormat } from "../src/detect.ts";
 
 test("detects TFLite by TFL3 magic at offset 4", () => {
   const bytes = new Uint8Array(8);
-  bytes[4] = 0x54; bytes[5] = 0x46; bytes[6] = 0x4c; bytes[7] = 0x33;
+  bytes[4] = 0x54;
+  bytes[5] = 0x46;
+  bytes[6] = 0x4c;
+  bytes[7] = 0x33;
   expect(detectFormat(bytes)).toBe("tflite");
 });
 
@@ -17,7 +20,10 @@ test("detects keras by ZIP magic bytes", () => {
 
 test("TFLite magic beats .onnx extension", () => {
   const bytes = new Uint8Array(8);
-  bytes[4] = 0x54; bytes[5] = 0x46; bytes[6] = 0x4c; bytes[7] = 0x33;
+  bytes[4] = 0x54;
+  bytes[5] = 0x46;
+  bytes[6] = 0x4c;
+  bytes[7] = 0x33;
   expect(detectFormat(bytes, "model.onnx")).toBe("tflite");
 });
 

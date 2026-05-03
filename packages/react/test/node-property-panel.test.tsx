@@ -34,21 +34,39 @@ describe("op panel", () => {
 describe("IO panel", () => {
   test("shows name, shape, dtype for tensor with shape", () => {
     const tensor: GraphValue = { name: "data", shape: [1, 3, 224, 224], dtype: "float32" };
-    render(React.createElement(NodePropertyPanel, { target: { graphValue: tensor, direction: "input" } }));
+    render(
+      React.createElement(NodePropertyPanel, {
+        target: { graphValue: tensor, direction: "input" },
+      }),
+    );
     expect(screen.getByText("data")).toBeDefined();
     expect(screen.getByText("[1 × 3 × 224 × 224]")).toBeDefined();
     expect(screen.getByText("float32")).toBeDefined();
   });
 
   test("omits shape/dtype rows when null", () => {
-    const { container } = render(React.createElement(NodePropertyPanel, { target: { graphValue: { name: "x", shape: null, dtype: null }, direction: "input" } }));
+    const { container } = render(
+      React.createElement(NodePropertyPanel, {
+        target: { graphValue: { name: "x", shape: null, dtype: null }, direction: "input" },
+      }),
+    );
     expect(container.textContent).not.toContain("shape");
   });
 });
 
 describe("edge panel", () => {
   test("shows tensor name, from and to nodes", () => {
-    render(React.createElement(NodePropertyPanel, { target: { edge: { tensorName: "h", from: { opType: "Conv", name: "conv_0" }, to: [{ opType: "Relu", name: "relu_0" }] } } }));
+    render(
+      React.createElement(NodePropertyPanel, {
+        target: {
+          edge: {
+            tensorName: "h",
+            from: { opType: "Conv", name: "conv_0" },
+            to: [{ opType: "Relu", name: "relu_0" }],
+          },
+        },
+      }),
+    );
     expect(screen.getByText("h")).toBeDefined();
     expect(screen.getByText("Conv")).toBeDefined();
     expect(screen.getByText("Relu")).toBeDefined();
@@ -58,7 +76,14 @@ describe("edge panel", () => {
 describe("onClose and onTensorClick", () => {
   test("close button fires onClose and is absent without it", () => {
     let closed = false;
-    render(React.createElement(NodePropertyPanel, { target: mockOp, onClose: () => { closed = true; } }));
+    render(
+      React.createElement(NodePropertyPanel, {
+        target: mockOp,
+        onClose: () => {
+          closed = true;
+        },
+      }),
+    );
     fireEvent.click(screen.getByLabelText("Close"));
     expect(closed).toBe(true);
 
@@ -69,7 +94,14 @@ describe("onClose and onTensorClick", () => {
 
   test("onTensorClick fires with correct tensor name", () => {
     let clicked = "";
-    render(React.createElement(NodePropertyPanel, { target: mockOp, onTensorClick: (name: string) => { clicked = name; } }));
+    render(
+      React.createElement(NodePropertyPanel, {
+        target: mockOp,
+        onTensorClick: (name: string) => {
+          clicked = name;
+        },
+      }),
+    );
     fireEvent.click(screen.getByText("data"));
     expect(clicked).toBe("data");
   });

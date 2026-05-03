@@ -1,6 +1,12 @@
 import { Root } from "protobufjs/light";
 import type { INamespace } from "protobufjs/light";
-import type { ModelGraph, GraphNode, GraphValue, AttributeValue, ParseWarning } from "@wetron/core/ir";
+import type {
+  ModelGraph,
+  GraphNode,
+  GraphValue,
+  AttributeValue,
+  ParseWarning,
+} from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 import { bigIntToNumber } from "@wetron/core/dtypes";
 import descriptor from "./onnx-descriptor.json" with { type: "json" };

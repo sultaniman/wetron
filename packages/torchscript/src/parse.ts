@@ -36,7 +36,13 @@ function vecUint32(bb: ByteBuffer, table: number, vto: number, i: number): numbe
 }
 
 // Struct vector: elements are packed inline (no indirection), each `stride` bytes
-function vecStructBase(bb: ByteBuffer, table: number, vto: number, i: number, stride: number): number {
+function vecStructBase(
+  bb: ByteBuffer,
+  table: number,
+  vto: number,
+  i: number,
+  stride: number,
+): number {
   const off = voff(bb, table, vto);
   if (!off) return -1;
   return bb.__vector(table + off) + i * stride;
@@ -60,7 +66,7 @@ function isTorchscript(bytes: Uint8Array): boolean {
     bytes[4] === 0x50 && // P
     bytes[5] === 0x54 && // T
     bytes[6] === 0x4d && // M
-    bytes[7] === 0x46    // F
+    bytes[7] === 0x46 // F
   );
 }
 
@@ -112,53 +118,168 @@ function decodePkl(buf: Uint8Array): PklVal {
   let p = 0;
 
   const u8 = () => buf[p++];
-  const u16 = () => { const v = view.getUint16(p, true); p += 2; return v; };
-  const i32 = () => { const v = view.getInt32(p, true); p += 4; return v; };
-  const u32 = () => { const v = view.getUint32(p, true); p += 4; return v; };
-  const f64be = () => { const v = view.getFloat64(p, false); p += 8; return v; };
-  const str = (n: number) => { const s = dec.decode(buf.subarray(p, p + n)); p += n; return s; };
-  const popMark = () => { const m = marks.pop()!; return stack.splice(m) as PklVal[]; };
+  const u16 = () => {
+    const v = view.getUint16(p, true);
+    p += 2;
+    return v;
+  };
+  const i32 = () => {
+    const v = view.getInt32(p, true);
+    p += 4;
+    return v;
+  };
+  const u32 = () => {
+    const v = view.getUint32(p, true);
+    p += 4;
+    return v;
+  };
+  const f64be = () => {
+    const v = view.getFloat64(p, false);
+    p += 8;
+    return v;
+  };
+  const str = (n: number) => {
+    const s = dec.decode(buf.subarray(p, p + n));
+    p += n;
+    return s;
+  };
+  const popMark = () => {
+    const m = marks.pop()!;
+    return stack.splice(m) as PklVal[];
+  };
 
   while (p < buf.length) {
     const op = u8();
     switch (op) {
-      case 0x80: p++; break;                                         // PROTO
-      case 0x4e: stack.push(null); break;                            // NONE
-      case 0x88: stack.push(true); break;                            // NEWTRUE
-      case 0x89: stack.push(false); break;                           // NEWFALSE
-      case 0x28: marks.push(stack.length); break;                    // MARK
-      case 0x29: stack.push([]); break;                              // EMPTY_TUPLE
-      case 0x5d: stack.push([]); break;                              // EMPTY_LIST
-      case 0x7d: stack.push([]); break;                              // EMPTY_DICT (as list)
-      case 0x4b: stack.push(u8()); break;                            // BININT1
-      case 0x4d: stack.push(u16()); break;                           // BININT2
-      case 0x4a: stack.push(i32()); break;                           // BININT
-      case 0x47: stack.push(f64be()); break;                         // BINFLOAT
-      case 0x58: { const n = u32(); stack.push(str(n)); break; }     // BINUNICODE
-      case 0x8c: { const n = u8(); stack.push(str(n)); break; }      // SHORT_BINUNICODE
-      case 0x55: { const n = u8(); stack.push(str(n)); break; }      // SHORT_BINSTRING
-      case 0x71: { const i = u8();  memo.set(i, stack[stack.length - 1]); break; }   // BINPUT
-      case 0x72: { const i = u32(); memo.set(i, stack[stack.length - 1]); break; }   // LONG_BINPUT
-      case 0x68: stack.push(memo.get(u8())  ?? null); break;         // BINGET
-      case 0x6a: stack.push(memo.get(u32()) ?? null); break;         // LONG_BINGET
-      case 0x74: stack.push(popMark()); break;                       // TUPLE
-      case 0x85: { const a = stack.pop()!; stack.push([a]); break; }                            // TUPLE1
-      case 0x86: { const b = stack.pop()!; const a = stack.pop()!; stack.push([a, b]); break; } // TUPLE2
-      case 0x87: { const c = stack.pop()!; const b = stack.pop()!; const a = stack.pop()!; stack.push([a, b, c]); break; } // TUPLE3
-      case 0x61: { const v = stack.pop()!; (stack[stack.length - 1] as PklVal[]).push(v); break; }           // APPEND
-      case 0x6c: { const items = popMark(); (stack[stack.length - 1] as PklVal[]).push(...items); break; }   // APPENDS
-      case 0x73: stack.pop(); stack.pop(); break;                    // SETITEM (discard)
-      case 0x75: popMark(); break;                                   // SETITEMS (discard)
-      case 0x52: stack.pop(); stack.push(null); break;               // REDUCE (drop callable result)
-      case 0x62: stack.pop(); break;                                 // BUILD (ignore)
-      case 0x81: stack.pop(); stack.push(null); break;               // NEWOBJ (ignore)
-      case 0x63: {                                                   // GLOBAL module\nname\n
-        while (p < buf.length && buf[p] !== 0x0a) p++; p++;
-        while (p < buf.length && buf[p] !== 0x0a) p++; p++;
-        stack.push(null); break;
+      case 0x80:
+        p++;
+        break; // PROTO
+      case 0x4e:
+        stack.push(null);
+        break; // NONE
+      case 0x88:
+        stack.push(true);
+        break; // NEWTRUE
+      case 0x89:
+        stack.push(false);
+        break; // NEWFALSE
+      case 0x28:
+        marks.push(stack.length);
+        break; // MARK
+      case 0x29:
+        stack.push([]);
+        break; // EMPTY_TUPLE
+      case 0x5d:
+        stack.push([]);
+        break; // EMPTY_LIST
+      case 0x7d:
+        stack.push([]);
+        break; // EMPTY_DICT (as list)
+      case 0x4b:
+        stack.push(u8());
+        break; // BININT1
+      case 0x4d:
+        stack.push(u16());
+        break; // BININT2
+      case 0x4a:
+        stack.push(i32());
+        break; // BININT
+      case 0x47:
+        stack.push(f64be());
+        break; // BINFLOAT
+      case 0x58: {
+        const n = u32();
+        stack.push(str(n));
+        break;
+      } // BINUNICODE
+      case 0x8c: {
+        const n = u8();
+        stack.push(str(n));
+        break;
+      } // SHORT_BINUNICODE
+      case 0x55: {
+        const n = u8();
+        stack.push(str(n));
+        break;
+      } // SHORT_BINSTRING
+      case 0x71: {
+        const i = u8();
+        memo.set(i, stack[stack.length - 1]);
+        break;
+      } // BINPUT
+      case 0x72: {
+        const i = u32();
+        memo.set(i, stack[stack.length - 1]);
+        break;
+      } // LONG_BINPUT
+      case 0x68:
+        stack.push(memo.get(u8()) ?? null);
+        break; // BINGET
+      case 0x6a:
+        stack.push(memo.get(u32()) ?? null);
+        break; // LONG_BINGET
+      case 0x74:
+        stack.push(popMark());
+        break; // TUPLE
+      case 0x85: {
+        const a = stack.pop()!;
+        stack.push([a]);
+        break;
+      } // TUPLE1
+      case 0x86: {
+        const b = stack.pop()!;
+        const a = stack.pop()!;
+        stack.push([a, b]);
+        break;
+      } // TUPLE2
+      case 0x87: {
+        const c = stack.pop()!;
+        const b = stack.pop()!;
+        const a = stack.pop()!;
+        stack.push([a, b, c]);
+        break;
+      } // TUPLE3
+      case 0x61: {
+        const v = stack.pop()!;
+        (stack[stack.length - 1] as PklVal[]).push(v);
+        break;
+      } // APPEND
+      case 0x6c: {
+        const items = popMark();
+        (stack[stack.length - 1] as PklVal[]).push(...items);
+        break;
+      } // APPENDS
+      case 0x73:
+        stack.pop();
+        stack.pop();
+        break; // SETITEM (discard)
+      case 0x75:
+        popMark();
+        break; // SETITEMS (discard)
+      case 0x52:
+        stack.pop();
+        stack.push(null);
+        break; // REDUCE (drop callable result)
+      case 0x62:
+        stack.pop();
+        break; // BUILD (ignore)
+      case 0x81:
+        stack.pop();
+        stack.push(null);
+        break; // NEWOBJ (ignore)
+      case 0x63: {
+        // GLOBAL module\nname\n
+        while (p < buf.length && buf[p] !== 0x0a) p++;
+        p++;
+        while (p < buf.length && buf[p] !== 0x0a) p++;
+        p++;
+        stack.push(null);
+        break;
       }
-      case 0x2e: return stack[stack.length - 1] ?? null;             // STOP
-      default: break;
+      case 0x2e:
+        return stack[stack.length - 1] ?? null; // STOP
+      default:
+        break;
     }
   }
   return stack[stack.length - 1] ?? null;
@@ -202,9 +323,7 @@ function parseZipTorchscript(bytes: Uint8Array): ModelGraph {
         const name = op[0];
         const overload = op[1];
         if (typeof name !== "string") continue;
-        orderedOps.push(
-          typeof overload === "string" && overload ? `${name}.${overload}` : name,
-        );
+        orderedOps.push(typeof overload === "string" && overload ? `${name}.${overload}` : name);
       }
     }
   }
@@ -235,7 +354,13 @@ function parseZipTorchscript(bytes: Uint8Array): ModelGraph {
 
 export function parseTorchscript(bytes: Uint8Array): ModelGraph {
   // ZIP-based format (torch.jit.save / newer lite interpreter)
-  if (bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04) {
+  if (
+    bytes.length >= 4 &&
+    bytes[0] === 0x50 &&
+    bytes[1] === 0x4b &&
+    bytes[2] === 0x03 &&
+    bytes[3] === 0x04
+  ) {
     return parseZipTorchscript(bytes);
   }
 

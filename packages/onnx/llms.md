@@ -5,7 +5,7 @@ ONNX model parser. Reads `.onnx` files via protobufjs and returns a `ModelGraph`
 ## API
 
 ```ts
-async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph>
+async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph>;
 ```
 
 Throws `ParseError` (from `@wetron/core/ir`) on malformed input.
@@ -13,23 +13,23 @@ Throws `ParseError` (from `@wetron/core/ir`) on malformed input.
 ## ONNX dtype mapping
 
 | ONNX enum | dtype string |
-|-----------|-------------|
-| 1 | `float32` |
-| 2 | `uint8` |
-| 3 | `int8` |
-| 4 | `uint16` |
-| 5 | `int16` |
-| 6 | `int32` |
-| 7 | `int64` |
-| 8 | `string` |
-| 9 | `bool` |
-| 10 | `float16` |
-| 11 | `float64` |
-| 12 | `uint32` |
-| 13 | `uint64` |
-| 14 | `complex64` |
-| 15 | `complex128` |
-| 16 | `bfloat16` |
+| --------- | ------------ |
+| 1         | `float32`    |
+| 2         | `uint8`      |
+| 3         | `int8`       |
+| 4         | `uint16`     |
+| 5         | `int16`      |
+| 6         | `int32`      |
+| 7         | `int64`      |
+| 8         | `string`     |
+| 9         | `bool`       |
+| 10        | `float16`    |
+| 11        | `float64`    |
+| 12        | `uint32`     |
+| 13        | `uint64`     |
+| 14        | `complex64`  |
+| 15        | `complex128` |
+| 16        | `bfloat16`   |
 
 ## Implementation notes
 

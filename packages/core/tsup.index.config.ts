@@ -8,5 +8,12 @@ export default defineConfig({
   sourcemap: true,
   tsconfig: "../../tsconfig.build.json",
   clean: false,
-  external: ["@wetron/onnx", "@wetron/tflite", "@wetron/keras", "@wetron/executorch", "@wetron/torchscript", "dagre"],
+  external: [
+    "@wetron/onnx",
+    "@wetron/tflite",
+    "@wetron/keras",
+    "@wetron/executorch",
+    "@wetron/torchscript",
+    "dagre",
+  ],
 });

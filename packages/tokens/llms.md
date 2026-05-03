@@ -6,36 +6,49 @@ Design tokens for wetron graph visualization components. Exports theme colors fo
 
 ```ts
 type OpCategory =
-  | "input" | "output" | "conv" | "activation" | "normalization" | "pooling"
-  | "reshape" | "math" | "reduction" | "merge" | "attention" | "recurrent"
-  | "quantization" | "constant" | "logic" | "unknown";
+  | "input"
+  | "output"
+  | "conv"
+  | "activation"
+  | "normalization"
+  | "pooling"
+  | "reshape"
+  | "math"
+  | "reduction"
+  | "merge"
+  | "attention"
+  | "recurrent"
+  | "quantization"
+  | "constant"
+  | "logic"
+  | "unknown";
 
 type CategoryColors = { readonly light: string; readonly dark: string };
 
 // Node header colors keyed by OpCategory
-const CATEGORY_THEME: Record<OpCategory, CategoryColors>
+const CATEGORY_THEME: Record<OpCategory, CategoryColors>;
 
 // Minimap styling
 const MINIMAP_THEME: {
   borderRadius: number;
   light: { background: string; nodeColor: string; maskColor: string };
-  dark:  { background: string; nodeColor: string; maskColor: string };
-}
+  dark: { background: string; nodeColor: string; maskColor: string };
+};
 
 // Selected edge highlight
-const EDGE_THEME: { selectedStroke: string; selectedStrokeWidth: number }
+const EDGE_THEME: { selectedStroke: string; selectedStrokeWidth: number };
 
 // ReactFlow / SvelteFlow canvas CSS custom properties
 const CANVAS_VARS: {
-  light: Record<string, string>;  // 7 --xy-* variables
-  dark:  Record<string, string>;
-}
+  light: Record<string, string>; // 7 --xy-* variables
+  dark: Record<string, string>;
+};
 
 // Property panel CSS custom properties
 const PANEL_VARS: {
-  light: Record<string, string>;  // 11 --panel-* variables
-  dark:  Record<string, string>;
-}
+  light: Record<string, string>; // 11 --panel-* variables
+  dark: Record<string, string>;
+};
 ```
 
 ## Usage

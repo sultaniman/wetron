@@ -23,5 +23,7 @@ test("mnist-12: 12 nodes, 1 input (float32), 1 output, initializers not in input
 });
 
 test("throws ParseError on garbage input", async () => {
-  await expect(parseOnnx(new Uint8Array([0x00, 0x01, 0x02, 0x03]))).rejects.toBeInstanceOf(ParseError);
+  await expect(parseOnnx(new Uint8Array([0x00, 0x01, 0x02, 0x03]))).rejects.toBeInstanceOf(
+    ParseError,
+  );
 });

@@ -21,16 +21,16 @@ Throws `ParseError` (from `@wetron/core/ir`) on malformed input or missing `ET12
 ## ScalarType mapping
 
 | ExecuTorch enum | dtype string |
-|---|---|
-| 0 | `uint8` |
-| 1 | `int8` |
-| 2 | `int16` |
-| 3 | `int32` |
-| 4 | `int64` |
-| 5 | `float16` |
-| 6 | `float32` |
-| 7 | `float64` |
-| 11 | `bool` |
+| --------------- | ------------ |
+| 0               | `uint8`      |
+| 1               | `int8`       |
+| 2               | `int16`      |
+| 3               | `int32`      |
+| 4               | `int64`      |
+| 5               | `float16`    |
+| 6               | `float32`    |
+| 7               | `float64`    |
+| 11              | `bool`       |
 
 ## Graph construction
 

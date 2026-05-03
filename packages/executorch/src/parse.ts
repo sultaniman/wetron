@@ -76,7 +76,7 @@ function isExecutorch(bytes: Uint8Array): boolean {
     bytes[4] === 0x45 && // E
     bytes[5] === 0x54 && // T
     bytes[6] === 0x31 && // 1
-    bytes[7] === 0x32    // 2
+    bytes[7] === 0x32 // 2
   );
 }
 

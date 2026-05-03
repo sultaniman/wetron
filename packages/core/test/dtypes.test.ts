@@ -49,7 +49,7 @@ test("readFloat4e2m1 decodes from lookup table", () => {
 test("readInt4 extracts signed nibbles from 0x3f", () => {
   const v = view([0x3f]);
   expect(readInt4(v, 0, false)).toBe(-1); // low nibble 0xf = -1 signed
-  expect(readInt4(v, 0, true)).toBe(3);   // high nibble 0x3
+  expect(readInt4(v, 0, true)).toBe(3); // high nibble 0x3
 });
 
 test("readUint4 extracts unsigned nibbles from 0xab", () => {

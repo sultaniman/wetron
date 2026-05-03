@@ -13,12 +13,14 @@ Throws `ParseError` (from `@wetron/core/ir`) on malformed input or unrecognised 
 ## Format variants
 
 **ZIP-based** (`torch.jit.save` / newer lite interpreter):
+
 - Detected by `PK\x03\x04` ZIP magic at offset 0
 - Reads `bytecode.pkl` from the archive
 - Decodes the Python binary serialization stream (protocol 2/4) — extracts operator names and overloads only; values are not evaluated or executed
 - Operators section extracted as `(name, overload, n)` tuples
 
 **FlatBuffers Mobile** (`.ptl`):
+
 - Detected by `PTMF` at bytes 4–7
 - Reads the Module root table, walks `methods` → IValue references → Function entries
 - Extracts operator calls from instruction bytecode (opcode 0 = OP = call registered operator)

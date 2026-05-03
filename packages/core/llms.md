@@ -17,9 +17,22 @@ function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEd
 
 // Op category from opType string
 type OpCategory =
-  | "input" | "output" | "conv" | "activation" | "normalization" | "pooling"
-  | "reshape" | "math" | "reduction" | "merge" | "attention" | "recurrent"
-  | "quantization" | "constant" | "logic" | "unknown";
+  | "input"
+  | "output"
+  | "conv"
+  | "activation"
+  | "normalization"
+  | "pooling"
+  | "reshape"
+  | "math"
+  | "reduction"
+  | "merge"
+  | "attention"
+  | "recurrent"
+  | "quantization"
+  | "constant"
+  | "logic"
+  | "unknown";
 function opCategory(opType: string): OpCategory;
 
 // Named input slot labels for known ops (e.g. Conv → ["X","W","B"])
@@ -50,7 +63,7 @@ interface GraphNode {
   readonly name: string;
   readonly opType: string;
   readonly domain?: string; // operator domain (ONNX only; absent = standard ai.onnx)
-  readonly inputs: readonly string[];  // tensor names consumed
+  readonly inputs: readonly string[]; // tensor names consumed
   readonly outputs: readonly string[]; // tensor names produced
   readonly attributes: Readonly<Record<string, AttributeValue>>;
 }
@@ -90,7 +103,7 @@ type GraphNodeData = {
   inputs: readonly string[];
   outputs: readonly string[];
   attributes: Readonly<Record<string, AttributeValue>>;
-  graphNode?: GraphNode;   // set for op nodes
+  graphNode?: GraphNode; // set for op nodes
   graphValue?: GraphValue; // set for I/O nodes
   shape?: readonly number[] | null;
   dtype?: string | null;
@@ -123,14 +136,14 @@ type FlowEdge = {
 
 ## Format detection (magic bytes)
 
-| Format | Detection |
-|---|---|
-| ONNX | protobuf field 1 varint tag `0x08` |
-| TFLite | `TFL3` or `ODLF` at offset 4 |
-| Keras | ZIP magic `PK\x03\x04` + `config.json` entry |
-| TorchScript ZIP | ZIP magic `PK\x03\x04` + `bytecode.pkl` |
-| TorchScript Mobile | `PTMF` at offset 4 |
-| ExecuTorch | `ET12` at offset 4 |
+| Format             | Detection                                    |
+| ------------------ | -------------------------------------------- |
+| ONNX               | protobuf field 1 varint tag `0x08`           |
+| TFLite             | `TFL3` or `ODLF` at offset 4                 |
+| Keras              | ZIP magic `PK\x03\x04` + `config.json` entry |
+| TorchScript ZIP    | ZIP magic `PK\x03\x04` + `bytecode.pkl`      |
+| TorchScript Mobile | `PTMF` at offset 4                           |
+| ExecuTorch         | `ET12` at offset 4                           |
 
 ## Constraints
 

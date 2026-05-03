@@ -10,12 +10,25 @@ import type { GraphNodeData } from "@wetron/core/transform";
 afterEach(cleanup);
 
 function renderNode(opType: string, data?: Partial<GraphNodeData>) {
-  const nodeData: GraphNodeData = { opType, name: "", inputs: [], outputs: [], attributes: {}, ...data } as GraphNodeData;
+  const nodeData: GraphNodeData = {
+    opType,
+    name: "",
+    inputs: [],
+    outputs: [],
+    attributes: {},
+    ...data,
+  } as GraphNodeData;
   const props = { data: nodeData } as unknown as Parameters<typeof GraphNodeComponent>[0];
   return render(
-    React.createElement(ReactFlowProvider, null,
-      React.createElement(ColorModeContext.Provider, { value: "light" },
-        React.createElement(GraphNodeComponent, props))),
+    React.createElement(
+      ReactFlowProvider,
+      null,
+      React.createElement(
+        ColorModeContext.Provider,
+        { value: "light" },
+        React.createElement(GraphNodeComponent, props),
+      ),
+    ),
   );
 }
 
