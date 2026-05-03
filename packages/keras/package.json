@@ -24,12 +24,12 @@
   "sideEffects": false,
   "exports": {
     ".": {
+      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
   "dependencies": {
-    "@wetron/core": "workspace:*",
-    "fflate": "^0.8.2"
+    "@wetron/core": "workspace:*"
   }
 }

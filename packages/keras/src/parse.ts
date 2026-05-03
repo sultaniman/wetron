@@ -1,5 +1,11 @@
 import { unzipSync } from "fflate";
-import type { ModelGraph, GraphNode, GraphValue, AttributeValue, ParseWarning } from "@wetron/core/ir";
+import type {
+  ModelGraph,
+  GraphNode,
+  GraphValue,
+  AttributeValue,
+  ParseWarning,
+} from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 
 type KerasInboundNode = {
@@ -60,7 +66,11 @@ function buildSequential(model: KerasModelConfig, warnings: ParseWarning[]): Mod
     try {
       const name = layerName(layer);
       if (name === null) {
-        warnings.push({ code: "layer_name_missing", context: `Layer ${i} (${layer.class_name}) has no name`, nodeIndex: i });
+        warnings.push({
+          code: "layer_name_missing",
+          context: `Layer ${i} (${layer.class_name}) has no name`,
+          nodeIndex: i,
+        });
         continue;
       }
 
@@ -84,7 +94,11 @@ function buildSequential(model: KerasModelConfig, warnings: ParseWarning[]): Mod
       });
       prevOutput = name;
     } catch (e) {
-      warnings.push({ code: "layer_parse_error", context: `Layer ${i} (${layer.class_name}): ${e instanceof Error ? e.message : String(e)}`, nodeIndex: i });
+      warnings.push({
+        code: "layer_parse_error",
+        context: `Layer ${i} (${layer.class_name}): ${e instanceof Error ? e.message : String(e)}`,
+        nodeIndex: i,
+      });
     }
   }
 
@@ -102,7 +116,15 @@ function buildSequential(model: KerasModelConfig, warnings: ParseWarning[]): Mod
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>(
     inputs.map((gv) => [gv.name, { shape: gv.shape, dtype: gv.dtype }]),
   );
-  return { name: model.config.name, inputs, outputs, nodes, initializers: new Map(), tensorShapes, ...(warnings.length ? { warnings } : {}) };
+  return {
+    name: model.config.name,
+    inputs,
+    outputs,
+    nodes,
+    initializers: new Map(),
+    tensorShapes,
+    ...(warnings.length ? { warnings } : {}),
+  };
 }
 
 // Keras 3 serializes tensors as { class_name: "__keras_tensor__", config: { keras_history: [...] } }
@@ -157,7 +179,11 @@ function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[]): Mod
     try {
       const name = layerName(layer);
       if (name === null) {
-        warnings.push({ code: "layer_name_missing", context: `Layer ${i} (${layer.class_name}) has no name`, nodeIndex: i });
+        warnings.push({
+          code: "layer_name_missing",
+          context: `Layer ${i} (${layer.class_name}) has no name`,
+          nodeIndex: i,
+        });
         continue;
       }
       outputMap.set(name, name);
@@ -183,7 +209,11 @@ function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[]): Mod
         attributes: extractAttributes(layer.config),
       });
     } catch (e) {
-      warnings.push({ code: "layer_parse_error", context: `Layer ${i} (${layer.class_name}): ${e instanceof Error ? e.message : String(e)}`, nodeIndex: i });
+      warnings.push({
+        code: "layer_parse_error",
+        context: `Layer ${i} (${layer.class_name}): ${e instanceof Error ? e.message : String(e)}`,
+        nodeIndex: i,
+      });
     }
   }
 
@@ -195,7 +225,15 @@ function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[]): Mod
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>(
     inputs.map((gv) => [gv.name, { shape: gv.shape, dtype: gv.dtype }]),
   );
-  return { name: model.config.name, inputs, outputs, nodes, initializers: new Map(), tensorShapes, ...(warnings.length ? { warnings } : {}) };
+  return {
+    name: model.config.name,
+    inputs,
+    outputs,
+    nodes,
+    initializers: new Map(),
+    tensorShapes,
+    ...(warnings.length ? { warnings } : {}),
+  };
 }
 
 export function parseKeras(bytes: Uint8Array): ModelGraph {
