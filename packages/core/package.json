@@ -1,6 +1,6 @@
 {
   "name": "@wetron/core",
-  "version": "0.0.2-beta",
+  "version": "0.0.4",
   "description": "IR types, format detection, dtype utilities and layout transform for neural network graph visualization",
   "keywords": [
     "graph",
@@ -66,6 +66,9 @@
     "@wetron/keras": "workspace:*",
     "@wetron/onnx": "workspace:*",
     "@wetron/tflite": "workspace:*",
-    "@wetron/torchscript": "workspace:*"
+    "@wetron/torchscript": "workspace:*",
+    "dagre": "^0.8.5",
+    "fflate": "^0.8.2",
+    "flatbuffers": "^25.9.23"
   }
 }

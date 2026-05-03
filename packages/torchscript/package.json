@@ -1,6 +1,6 @@
 {
   "name": "@wetron/torchscript",
-  "version": "0.0.2-beta",
+  "version": "0.0.4",
   "description": "TorchScript Mobile model parser — extracts graph structure from .pt flatbuffer files",
   "keywords": [
     "graph",
@@ -31,7 +31,6 @@
     }
   },
   "dependencies": {
-    "@wetron/core": "workspace:*",
-    "fflate": "*"
+    "@wetron/core": "workspace:*"
   }
 }
