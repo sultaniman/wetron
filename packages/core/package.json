@@ -26,38 +26,46 @@
   "sideEffects": false,
   "exports": {
     ".": {
+      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./ir": {
+      "source": "./src/ir.ts",
       "types": "./dist/ir.d.ts",
       "import": "./dist/ir.js"
     },
     "./dtypes": {
+      "source": "./src/dtypes.ts",
       "types": "./dist/dtypes.d.ts",
       "import": "./dist/dtypes.js"
     },
     "./detect": {
+      "source": "./src/detect.ts",
       "types": "./dist/detect.d.ts",
       "import": "./dist/detect.js"
     },
     "./transform": {
+      "source": "./src/transform.ts",
       "types": "./dist/transform.d.ts",
       "import": "./dist/transform.js"
     },
     "./edge-path": {
+      "source": "./src/edge-path.ts",
       "types": "./dist/edge-path.d.ts",
       "import": "./dist/edge-path.js"
     },
     "./panel-utils": {
+      "source": "./src/panel-utils.ts",
       "types": "./dist/panel-utils.d.ts",
       "import": "./dist/panel-utils.js"
     }
   },
   "dependencies": {
+    "@wetron/executorch": "workspace:*",
     "@wetron/keras": "workspace:*",
     "@wetron/onnx": "workspace:*",
     "@wetron/tflite": "workspace:*",
-    "dagre": "^0.8.5"
+    "@wetron/torchscript": "workspace:*"
   }
 }

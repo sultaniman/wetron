@@ -1,8 +1,15 @@
-export { opCategory } from "./categories.ts";
+export { opCategory, opBase } from "./categories.ts";
 export type { OpCategory } from "./categories.ts";
 export { opInputLabels } from "./op-inputs.ts";
 export { ParseError } from "./ir.ts";
-export type { ModelGraph, GraphNode, GraphValue, AttributeValue, PanelTarget, ParseWarning } from "./ir.ts";
+export type {
+  ModelGraph,
+  GraphNode,
+  GraphValue,
+  AttributeValue,
+  PanelTarget,
+  ParseWarning,
+} from "./ir.ts";
 export { detectFormat } from "./detect.ts";
 export type { Format } from "./detect.ts";
 export { modelGraphToFlow } from "./transform.ts";
@@ -39,6 +46,16 @@ export async function parseModel(bytes: Uint8Array, filename?: string): Promise<
   if (format === "keras") {
     const { parseKeras } = await import("@wetron/keras");
     return parseKeras(bytes);
+  }
+
+  if (format === "executorch") {
+    const { parseExecutorch } = await import("@wetron/executorch");
+    return parseExecutorch(bytes);
+  }
+
+  if (format === "torchscript") {
+    const { parseTorchscript } = await import("@wetron/torchscript");
+    return parseTorchscript(bytes);
   }
 
   throw new ParseError("unknown", `Cannot detect format${filename ? ` for "${filename}"` : ""}`);
