@@ -26,9 +26,9 @@ interface GraphValue {
 interface GraphNode {
   readonly name: string;
   readonly opType: string;
-  readonly domain?: string;             // operator domain (ONNX only; absent = standard ai.onnx)
-  readonly inputs: readonly string[];   // tensor names
-  readonly outputs: readonly string[];  // tensor names
+  readonly domain?: string; // operator domain (ONNX only; absent = standard ai.onnx)
+  readonly inputs: readonly string[]; // tensor names
+  readonly outputs: readonly string[]; // tensor names
   readonly attributes: Readonly<Record<string, AttributeValue>>;
 }
 
@@ -38,13 +38,16 @@ interface ModelGraph {
   readonly outputs: readonly GraphValue[];
   readonly nodes: readonly GraphNode[];
   readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
-  readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
+  readonly tensorShapes: ReadonlyMap<
+    string,
+    { shape: readonly number[] | null; dtype: string | null }
+  >;
   readonly opsets?: ReadonlyMap<string, number>; // domain → version (ONNX only; "" = ai.onnx)
 }
 
 class ParseError extends Error {
-  readonly format: string;   // "onnx" | "tflite" | "keras" | "unknown"
-  readonly context: string;  // human-readable description of failure
+  readonly format: string; // "onnx" | "tflite" | "keras" | "unknown"
+  readonly context: string; // human-readable description of failure
 }
 ```
 
@@ -52,33 +55,47 @@ class ParseError extends Error {
 
 ```ts
 // Unified entry — detects format from magic bytes, dispatches to parser
-async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>
+async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
 // Format detection — never throws, returns "unknown" on no match
 type Format = "onnx" | "tflite" | "keras" | "unknown";
-function detectFormat(bytes: Uint8Array, filename?: string): Format
+function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // IR → ReactFlow / SvelteFlow nodes and edges with Dagre layout applied
-function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] }
+function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] };
 
 // Op category classification
-type OpCategory = "input" | "output" | "conv" | "activation" | "normalization" | "pooling"
-  | "reshape" | "math" | "reduction" | "merge" | "attention" | "recurrent"
-  | "quantization" | "constant" | "logic" | "unknown";
-function opCategory(opType: string): OpCategory
+type OpCategory =
+  | "input"
+  | "output"
+  | "conv"
+  | "activation"
+  | "normalization"
+  | "pooling"
+  | "reshape"
+  | "math"
+  | "reduction"
+  | "merge"
+  | "attention"
+  | "recurrent"
+  | "quantization"
+  | "constant"
+  | "logic"
+  | "unknown";
+function opCategory(opType: string): OpCategory;
 ```
 
 ## Parser APIs
 
 ```ts
 // @wetron/onnx
-async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph>
+async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph>;
 
 // @wetron/tflite
-function parseTflite(bytes: Uint8Array): ModelGraph  // sync
+function parseTflite(bytes: Uint8Array): ModelGraph; // sync
 
 // @wetron/keras
-function parseKeras(bytes: Uint8Array): ModelGraph
+function parseKeras(bytes: Uint8Array): ModelGraph;
 ```
 
 ## Architecture rules

@@ -9,17 +9,17 @@ React components for neural network graph visualization. Renders a `ModelGraph` 
 function ModelGraphView(props: {
   graph: ModelGraph;
   onTargetClick?: (target: PanelTarget) => void;
-  colorMode?: ColorMode;  // default: "system"
-}): JSX.Element
+  colorMode?: ColorMode; // default: "system"
+}): JSX.Element;
 
 // Property panel — pass the target from onTargetClick
 function NodePropertyPanel(props: {
   target: PanelTarget | null;
-  colorMode?: ColorMode;  // default: "system"
-}): JSX.Element
+  colorMode?: ColorMode; // default: "system"
+}): JSX.Element;
 
 // Type guard: check if a PanelTarget is a GraphNode
-function isGraphNode(t: PanelTarget): t is GraphNode
+function isGraphNode(t: PanelTarget): t is GraphNode;
 ```
 
 ## Types
@@ -29,7 +29,14 @@ type ColorMode = "light" | "dark" | "system";
 
 type PanelTarget =
   | GraphNode
-  | { edge: { tensorName: string; sourceOpType: string; shape: readonly number[] | null; dtype: string | null } }
+  | {
+      edge: {
+        tensorName: string;
+        sourceOpType: string;
+        shape: readonly number[] | null;
+        dtype: string | null;
+      };
+    }
   | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```
 

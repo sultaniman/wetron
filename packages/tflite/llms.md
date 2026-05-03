@@ -5,7 +5,7 @@ TFLite model parser. Reads `.tflite` flatbuffer files synchronously and returns 
 ## API
 
 ```ts
-function parseTflite(bytes: Uint8Array): ModelGraph  // synchronous
+function parseTflite(bytes: Uint8Array): ModelGraph; // synchronous
 ```
 
 Throws `ParseError` (from `@wetron/core/ir`) on malformed input.
@@ -13,22 +13,22 @@ Throws `ParseError` (from `@wetron/core/ir`) on malformed input.
 ## TFLite dtype mapping
 
 | TFLite enum | dtype string |
-|-------------|-------------|
-| 0 | `float32` |
-| 1 | `int32` |
-| 2 | `uint8` |
-| 3 | `int64` |
-| 4 | `string` |
-| 5 | `bool` |
-| 6 | `int16` |
-| 7 | `complex64` |
-| 8 | `int8` |
-| 9 | `float16` |
-| 10 | `float64` |
-| 11 | `complex128` |
-| 16 | `uint32` |
-| 17 | `uint64` |
-| 256 | `bfloat16` |
+| ----------- | ------------ |
+| 0           | `float32`    |
+| 1           | `int32`      |
+| 2           | `uint8`      |
+| 3           | `int64`      |
+| 4           | `string`     |
+| 5           | `bool`       |
+| 6           | `int16`      |
+| 7           | `complex64`  |
+| 8           | `int8`       |
+| 9           | `float16`    |
+| 10          | `float64`    |
+| 11          | `complex128` |
+| 16          | `uint32`     |
+| 17          | `uint64`     |
+| 256         | `bfloat16`   |
 
 ## Implementation notes
 

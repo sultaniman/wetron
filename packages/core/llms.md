@@ -6,23 +6,37 @@ Shared foundation for the wetron monorepo. Provides the IR types all parsers pro
 
 ```ts
 // Unified entry — detects format from magic bytes, dynamic-imports the right parser
-async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>
+async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
 // Format detection — never throws, returns "unknown" on no match
 type Format = "onnx" | "tflite" | "keras" | "unknown";
-function detectFormat(bytes: Uint8Array, filename?: string): Format
+function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // IR → ReactFlow / SvelteFlow nodes and edges, Dagre layout applied (top-to-bottom)
-function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] }
+function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] };
 
 // Op category from opType string
-type OpCategory = "input" | "output" | "conv" | "activation" | "normalization" | "pooling"
-  | "reshape" | "math" | "reduction" | "merge" | "attention" | "recurrent"
-  | "quantization" | "constant" | "logic" | "unknown";
-function opCategory(opType: string): OpCategory
+type OpCategory =
+  | "input"
+  | "output"
+  | "conv"
+  | "activation"
+  | "normalization"
+  | "pooling"
+  | "reshape"
+  | "math"
+  | "reduction"
+  | "merge"
+  | "attention"
+  | "recurrent"
+  | "quantization"
+  | "constant"
+  | "logic"
+  | "unknown";
+function opCategory(opType: string): OpCategory;
 
 // Named input slot labels for known ops (e.g. Conv → ["X","W","B"])
-function opInputLabels(opType: string): readonly string[]
+function opInputLabels(opType: string): readonly string[];
 ```
 
 ## Sub-path exports
@@ -48,8 +62,8 @@ interface GraphValue {
 interface GraphNode {
   readonly name: string;
   readonly opType: string;
-  readonly inputs: readonly string[];   // tensor names consumed
-  readonly outputs: readonly string[];  // tensor names produced
+  readonly inputs: readonly string[]; // tensor names consumed
+  readonly outputs: readonly string[]; // tensor names produced
   readonly attributes: Readonly<Record<string, AttributeValue>>;
 }
 
@@ -59,12 +73,15 @@ interface ModelGraph {
   readonly outputs: readonly GraphValue[];
   readonly nodes: readonly GraphNode[];
   readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
-  readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
+  readonly tensorShapes: ReadonlyMap<
+    string,
+    { shape: readonly number[] | null; dtype: string | null }
+  >;
 }
 
 class ParseError extends Error {
-  readonly format: string;   // format string or "unknown"
-  readonly context: string;  // human-readable failure description
+  readonly format: string; // format string or "unknown"
+  readonly context: string; // human-readable failure description
 }
 ```
 
@@ -77,11 +94,17 @@ type GraphNodeData = {
   inputs: readonly string[];
   outputs: readonly string[];
   attributes: Readonly<Record<string, AttributeValue>>;
-  graphNode?: GraphNode;    // set for op nodes
-  graphValue?: GraphValue;  // set for I/O nodes
+  graphNode?: GraphNode; // set for op nodes
+  graphValue?: GraphValue; // set for I/O nodes
   shape?: readonly number[] | null;
   dtype?: string | null;
-  weightInputs?: readonly { slot: number; label: string; name: string; shape: readonly number[]; dtype: string }[];
+  weightInputs?: readonly {
+    slot: number;
+    label: string;
+    name: string;
+    shape: readonly number[];
+    dtype: string;
+  }[];
 };
 
 type FlowNode = {
@@ -98,7 +121,7 @@ type FlowEdge = {
   source: string;
   target: string;
   type: "modelEdge";
-  data: { tensorName: string; sourceOpType: string; };
+  data: { tensorName: string; sourceOpType: string };
 };
 ```
 
