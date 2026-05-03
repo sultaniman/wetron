@@ -26,11 +26,13 @@ Graph structure only — no weight data is read or stored.
 
 ```sh
 # parse + render with React
-bun add @wetron/core @wetron/onnx @wetron/tflite @wetron/keras @wetron/torchscript @wetron/executorch @wetron/react
+bun add @wetron/react
 
 # parse only (no UI)
-bun add @wetron/core @wetron/onnx @wetron/tflite @wetron/keras @wetron/torchscript @wetron/executorch
+bun add @wetron/core
 ```
+
+`@wetron/react` depends on `@wetron/core`, and `@wetron/core` depends on all parser packages — so a single install covers everything.
 
 Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@phosphor-icons/react >=2`, `@base-ui/react >=1`.
 
