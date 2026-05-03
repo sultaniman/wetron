@@ -12,6 +12,7 @@
     "@base-ui/react": "^1.4.1",
     "@wetron/react": "workspace:*",
     "@xyflow/react": "latest",
+    "html-to-image": "^1.11.13",
     "react": "latest",
     "react-dom": "latest"
   },

@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { ArrowUpIcon } from "@phosphor-icons/react";
+import { toPng } from "html-to-image";
 import { parseModel } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
 import type { ModelGraph } from "@wetron/core";
@@ -31,6 +32,7 @@ export default function App() {
   const [selectedEdgeTensorName, setSelectedEdgeTensorName] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [colorMode, setColorMode] = useState<ColorMode>("system");
+  const graphContainerRef = useRef<HTMLDivElement>(null);
   const [resolvedMode, setResolvedMode] = useState<"light" | "dark">(() => resolveMode("system"));
 
   useEffect(() => {
@@ -115,6 +117,17 @@ export default function App() {
     setHistory((h) => h.slice(0, -1));
   }, [history]);
 
+  const exportPng = useCallback(async () => {
+    const el = graphContainerRef.current?.querySelector<HTMLElement>(".react-flow__viewport");
+    if (!el || state.status !== "ready") return;
+    const name = state.name.replace(/\.[^.]+$/, "") || "graph";
+    const dataUrl = await toPng(el, { cacheBust: true, pixelRatio: 2 });
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `${name}.png`;
+    a.click();
+  }, [state, graphContainerRef]);
+
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -191,6 +204,23 @@ export default function App() {
               width: 180,
             }}
           />
+        )}
+        {state.status === "ready" && (
+          <button
+            onClick={exportPng}
+            style={{
+              padding: "5px 12px",
+              background: "transparent",
+              color: chrome.muted,
+              border: `1px solid ${chrome.border}`,
+              borderRadius: 6,
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 500,
+            }}
+          >
+            Export PNG
+          </button>
         )}
         <button
           onClick={cycleMode}
@@ -274,6 +304,7 @@ export default function App() {
         )}
         {state.status === "ready" && (
           <div
+            ref={graphContainerRef}
             style={{ position: "relative", width: "100%", height: "100%" }}
             onDrop={onDrop}
             onDragOver={(e) => {
