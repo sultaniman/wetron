@@ -127,6 +127,7 @@ bun test packages/core    # single package
 - Don't refactor things that aren't broken.
 - Don't remove pre-existing dead code — mention it instead.
 - Don't skip or work around failing tests — fix them before proceeding.
+- Don't touch `dist` folder, never, no work should be done no code should be written in `dist`.
 
 **Git**
 

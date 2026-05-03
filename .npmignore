@@ -5,3 +5,4 @@ docs/
 types/
 packages/
 *.lock
+.venv

@@ -10,3 +10,4 @@ netron-main/
 dist
 *.tgz
 *.zip
+.venv
