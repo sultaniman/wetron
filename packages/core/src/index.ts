@@ -12,6 +12,18 @@ import { detectFormat } from "./detect.ts";
 import type { ModelGraph } from "./ir.ts";
 import { ParseError } from "./ir.ts";
 
+export function filterGraph(graph: ModelGraph, query: string): ReadonlySet<string> {
+  const q = query.trim().toLowerCase();
+  if (!q) return new Set();
+  const matches = new Set<string>();
+  for (const node of graph.nodes) {
+    if (node.opType.toLowerCase().includes(q) || node.name.toLowerCase().includes(q)) {
+      matches.add(node.name);
+    }
+  }
+  return matches;
+}
+
 export async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph> {
   const format = detectFormat(bytes, filename);
   if (format === "onnx") {

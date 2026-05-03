@@ -4,7 +4,7 @@
   import MinimapNav from './minimap-nav.svelte';
   import '@xyflow/svelte/dist/style.css';
   import { untrack } from 'svelte';
-  import { modelGraphToFlow } from '@wetron/core/transform';
+  import { modelGraphToFlow, filterGraph } from '@wetron/core';
   import type { FlowEdge, GraphNodeData } from '@wetron/core/transform';
   import type { ModelGraph, ParseWarning } from '@wetron/core/ir';
   import GraphNodeComponent from './nodes/graph-node.svelte';
@@ -21,10 +21,11 @@
     onTargetClick?: (target: PanelTarget) => void;
     onwarnings?: (warnings: readonly ParseWarning[]) => void;
     selectedEdgeTensorName?: string | null;
+    searchQuery?: string;
     colorMode?: ColorMode;
   }
 
-  let { graph, onTargetClick, onwarnings, selectedEdgeTensorName = null, colorMode = 'system' }: Props = $props();
+  let { graph, onTargetClick, onwarnings, selectedEdgeTensorName = null, searchQuery = '', colorMode = 'system' }: Props = $props();
 
   let systemIsDark = $state(resolveColorMode('system') === 'dark');
 
@@ -69,6 +70,7 @@
   });
 
   const rawFlow = $derived(modelGraphToFlow(graph));
+  const matchedNames = $derived(searchQuery ? filterGraph(graph, searchQuery) : new Set<string>());
 
   // $state.raw prevents @xyflow/svelte from seeing deeply-reactive proxies;
   // it mutates node objects internally (computed dims/positions) and that would
@@ -77,6 +79,16 @@
   $effect.pre(() => {
     flowNodes = rawFlow.nodes;
   });
+
+  const styledFlowNodes = $derived(
+    matchedNames.size === 0
+      ? flowNodes
+      : flowNodes.map(n => {
+          const data = n.data as GraphNodeData | undefined;
+          if (!data?.graphNode) return n;
+          return matchedNames.has(data.graphNode.name) ? n : { ...n, style: 'opacity: 0.1' };
+        })
+  );
 
   const flowEdges = $derived(rawFlow.edges.map(edge => {
     const tensorName = (edge.data as FlowEdgeData | undefined)?.tensorName;
@@ -126,7 +138,7 @@
   style={Object.entries(CANVAS_VARS[isDark ? 'dark' : 'light']).map(([k, v]) => `${k}:${v}`).join(';')}
 >
   <SvelteFlow
-    nodes={flowNodes}
+    nodes={styledFlowNodes}
     edges={flowEdges}
     {nodeTypes}
     {edgeTypes}

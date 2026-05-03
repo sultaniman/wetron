@@ -135,6 +135,20 @@ export function useEdgeClickHandler(
   );
 }
 
+export function useNodeDim(
+  nodes: Node<GraphNodeData>[],
+  matchedNames: ReadonlySet<string>,
+): Node<GraphNodeData>[] {
+  return useMemo(() => {
+    if (matchedNames.size === 0) return nodes;
+    return nodes.map((n) => {
+      if (!n.data.graphNode) return n; // IO nodes always fully visible
+      const matched = matchedNames.has(n.data.graphNode.name);
+      return matched ? n : { ...n, style: { ...n.style, opacity: 0.1 } };
+    });
+  }, [nodes, matchedNames]);
+}
+
 export function useFitOnGraphChange(graph: ModelGraph, layoutNodes: Node<GraphNodeData>[]): void {
   const { fitView } = useReactFlow();
   useEffect(() => {

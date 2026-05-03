@@ -21,10 +21,12 @@ import { MINIMAP_THEME } from "../theme.ts";
 import {
   useModelNodes,
   useEdgeHighlight,
+  useNodeDim,
   useNodeClickHandler,
   useEdgeClickHandler,
   useFitOnGraphChange,
 } from "./hooks.ts";
+import { filterGraph } from "@wetron/core";
 
 const nodeTypes: NodeTypes = {
   graphNode: GraphNodeComponent as NodeTypes[string],
@@ -39,12 +41,18 @@ type Props = {
   onWarnings?: (warnings: readonly ParseWarning[]) => void;
   colorMode?: ColorMode;
   selectedEdgeTensorName?: string | null;
+  searchQuery?: string;
 };
 
-function Inner({ graph, onTargetClick, onWarnings, selectedEdgeTensorName, colorMode }: Props) {
+function Inner({ graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, colorMode }: Props) {
   const isDark = useColorMode() === "dark";
   const rf = useReactFlow();
-  const { nodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
+  const { nodes: rawNodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
+  const matchedNames = useMemo(
+    () => (searchQuery ? filterGraph(graph, searchQuery) : new Set<string>()),
+    [graph, searchQuery],
+  );
+  const nodes = useNodeDim(rawNodes, matchedNames);
   const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark);
   const handleNodeClick = useNodeClickHandler(onTargetClick);
   const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
