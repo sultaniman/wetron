@@ -37,55 +37,52 @@ export function useEdgeHighlight(
   isDark: boolean,
   matchedNames?: ReadonlySet<string>,
 ): Edge[] {
-  return useMemo(
-    () => {
-      const anySelected = selectedEdgeTensorName != null;
-      const filtering = matchedNames != null && matchedNames.size > 0;
-      return layoutEdges.map((e) => {
-        const d = e.data as FlowEdgeData | undefined;
-        if (d?.tensorName === selectedEdgeTensorName) {
+  return useMemo(() => {
+    const anySelected = selectedEdgeTensorName != null;
+    const filtering = matchedNames != null && matchedNames.size > 0;
+    return layoutEdges.map((e) => {
+      const d = e.data as FlowEdgeData | undefined;
+      if (d?.tensorName === selectedEdgeTensorName) {
+        return {
+          ...e,
+          style: {
+            stroke: EDGE_THEME.selectedStroke,
+            strokeWidth: EDGE_THEME.selectedStrokeWidth,
+            opacity: 1,
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: EDGE_THEME.selectedStroke,
+            width: 10,
+            height: 10,
+          },
+        };
+      }
+      if (anySelected) {
+        return {
+          ...e,
+          style: {
+            stroke: isDark ? "rgba(120,120,160,0.2)" : "rgba(0,0,0,0.1)",
+            opacity: 1,
+          },
+        };
+      }
+      if (filtering) {
+        const sourceMatch = matchedNames!.has(d?.sourceNodeName ?? "");
+        const targetMatch = matchedNames!.has(d?.targetNodeName ?? "");
+        if (!sourceMatch && !targetMatch) {
           return {
             ...e,
             style: {
-              stroke: EDGE_THEME.selectedStroke,
-              strokeWidth: EDGE_THEME.selectedStrokeWidth,
-              opacity: 1,
-            },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              color: EDGE_THEME.selectedStroke,
-              width: 10,
-              height: 10,
-            },
-          };
-        }
-        if (anySelected) {
-          return {
-            ...e,
-            style: {
-              stroke: isDark ? "rgba(120,120,160,0.2)" : "rgba(0,0,0,0.1)",
+              stroke: isDark ? "rgba(120,120,160,0.15)" : "rgba(0,0,0,0.07)",
               opacity: 1,
             },
           };
         }
-        if (filtering) {
-          const sourceMatch = matchedNames!.has(d?.sourceNodeName ?? "");
-          const targetMatch = matchedNames!.has(d?.targetNodeName ?? "");
-          if (!sourceMatch && !targetMatch) {
-            return {
-              ...e,
-              style: {
-                stroke: isDark ? "rgba(120,120,160,0.15)" : "rgba(0,0,0,0.07)",
-                opacity: 1,
-              },
-            };
-          }
-        }
-        return e;
-      });
-    },
-    [layoutEdges, selectedEdgeTensorName, isDark, matchedNames],
-  );
+      }
+      return e;
+    });
+  }, [layoutEdges, selectedEdgeTensorName, isDark, matchedNames]);
 }
 
 export function useNodeClickHandler(

@@ -41,6 +41,7 @@ import {
   EqualsIcon,
 } from "@phosphor-icons/react";
 import type { OpCategory } from "@wetron/core";
+import { opBase } from "@wetron/core";
 
 export type { OpCategory };
 export { CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME } from "@wetron/tokens";
@@ -72,6 +73,73 @@ export const CATEGORY_ICON: Record<OpCategory, IconEntry> = {
   logic: { kind: "component", Component: EqualsIcon },
   unknown: { kind: "component", Component: QuestionIcon },
 };
+
+const ATEN_OP_ICON: Partial<Record<string, IconEntry>> = {
+  // math
+  add: { kind: "component", Component: PlusIcon },
+  add_: { kind: "component", Component: PlusIcon },
+  sub: { kind: "component", Component: MinusIcon },
+  sub_: { kind: "component", Component: MinusIcon },
+  mul: { kind: "component", Component: XIcon },
+  mul_: { kind: "component", Component: XIcon },
+  div: { kind: "component", Component: DivideIcon },
+  div_: { kind: "component", Component: DivideIcon },
+  true_divide: { kind: "component", Component: DivideIcon },
+  pow: { kind: "component", Component: CaretUpIcon },
+  sqrt: { kind: "component", Component: RadicalIcon },
+  rsqrt: { kind: "component", Component: RadicalIcon },
+  mm: { kind: "component", Component: TableIcon },
+  bmm: { kind: "component", Component: TableIcon },
+  matmul: { kind: "component", Component: TableIcon },
+  addmm: { kind: "component", Component: TableIcon },
+  baddbmm: { kind: "component", Component: TableIcon },
+  clamp: { kind: "component", Component: ScissorsIcon },
+  clamp_: { kind: "component", Component: ScissorsIcon },
+  clip: { kind: "component", Component: ScissorsIcon },
+  // logic
+  eq: { kind: "glyph", char: "=" },
+  ne: { kind: "glyph", char: "≠" },
+  lt: { kind: "glyph", char: "<" },
+  le: { kind: "glyph", char: "≤" },
+  gt: { kind: "glyph", char: ">" },
+  ge: { kind: "glyph", char: "≥" },
+  // reshape
+  reshape: { kind: "component", Component: BoundingBoxIcon },
+  view: { kind: "component", Component: BoundingBoxIcon },
+  squeeze: { kind: "component", Component: ArrowsInLineVerticalIcon },
+  squeeze_: { kind: "component", Component: ArrowsInLineVerticalIcon },
+  unsqueeze: { kind: "component", Component: ArrowsOutLineVerticalIcon },
+  unsqueeze_: { kind: "component", Component: ArrowsOutLineVerticalIcon },
+  transpose: { kind: "component", Component: ArrowsDownUpIcon },
+  permute: { kind: "component", Component: ArrowsDownUpIcon },
+  flatten: { kind: "component", Component: RowsIcon },
+  pad: { kind: "component", Component: FrameCornersIcon },
+  constant_pad_nd: { kind: "component", Component: FrameCornersIcon },
+  slice: { kind: "component", Component: StackIcon },
+  narrow: { kind: "component", Component: StackIcon },
+  select: { kind: "component", Component: StackIcon },
+  size: { kind: "component", Component: ArrowsOutSimpleIcon },
+  expand: { kind: "component", Component: ArrowsOutSimpleIcon },
+  expand_as: { kind: "component", Component: ArrowsOutSimpleIcon },
+  to: { kind: "component", Component: ArrowFatLinesRightIcon },
+  // merge
+  split: { kind: "component", Component: ArrowsSplitIcon },
+  chunk: { kind: "component", Component: ArrowsSplitIcon },
+  tensor_split: { kind: "component", Component: ArrowsSplitIcon },
+  gather: { kind: "component", Component: FunnelSimpleIcon },
+  __getitem__: { kind: "component", Component: FunnelSimpleIcon },
+  scatter: { kind: "component", Component: DotsNineIcon },
+  scatter_: { kind: "component", Component: DotsNineIcon },
+  scatter_add: { kind: "component", Component: DotsNineIcon },
+};
+
+export function opIcon(opType: string, cat: OpCategory): IconEntry {
+  const exact = OP_ICON[opType];
+  if (exact) return exact;
+  const base = opBase(opType);
+  if (base) return ATEN_OP_ICON[base] ?? CATEGORY_ICON[cat];
+  return CATEGORY_ICON[cat];
+}
 
 export const OP_ICON: Partial<Record<string, IconEntry>> = {
   // reshape-category overrides (ONNX / Keras)
