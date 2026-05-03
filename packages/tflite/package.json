@@ -19,7 +19,7 @@
   },
   "files": [
     "dist",
-    "llms.txt"
+    "llms.md"
   ],
   "type": "module",
   "sideEffects": false,
