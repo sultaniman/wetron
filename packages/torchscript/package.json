@@ -1,0 +1,36 @@
+{
+  "name": "@wetron/torchscript",
+  "version": "0.0.1",
+  "description": "TorchScript Mobile model parser — extracts graph structure from .pt flatbuffer files",
+  "keywords": [
+    "graph",
+    "model-parser",
+    "neural-network",
+    "pytorch",
+    "torchscript",
+    "visualization"
+  ],
+  "homepage": "https://codeberg.org/askar/wetron",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://codeberg.org/askar/wetron.git",
+    "directory": "packages/torchscript"
+  },
+  "files": [
+    "dist",
+    "llms.txt"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*",
+    "fflate": "*"
+  }
+}
