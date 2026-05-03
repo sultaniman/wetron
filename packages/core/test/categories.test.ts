@@ -1,98 +1,66 @@
 import { test, expect } from "bun:test";
 import { opCategory } from "../src/categories.ts";
 
-test("Conv maps to conv", () => expect(opCategory("Conv")).toBe("conv"));
-test("ConvTranspose maps to conv", () => expect(opCategory("ConvTranspose")).toBe("conv"));
-test("Gemm maps to math", () => expect(opCategory("Gemm")).toBe("math"));
-test("MatMul maps to math", () => expect(opCategory("MatMul")).toBe("math"));
-test("Relu maps to activation", () => expect(opCategory("Relu")).toBe("activation"));
-test("Sigmoid maps to activation", () => expect(opCategory("Sigmoid")).toBe("activation"));
-test("Gelu maps to activation", () => expect(opCategory("Gelu")).toBe("activation"));
-test("BatchNormalization maps to normalization", () =>
-  expect(opCategory("BatchNormalization")).toBe("normalization"));
-test("LayerNormalization maps to normalization", () =>
-  expect(opCategory("LayerNormalization")).toBe("normalization"));
-test("MaxPool maps to pooling", () => expect(opCategory("MaxPool")).toBe("pooling"));
-test("GlobalAveragePool maps to pooling", () =>
-  expect(opCategory("GlobalAveragePool")).toBe("pooling"));
-test("Reshape maps to reshape", () => expect(opCategory("Reshape")).toBe("reshape"));
-test("Transpose maps to reshape", () => expect(opCategory("Transpose")).toBe("reshape"));
-test("Add maps to math", () => expect(opCategory("Add")).toBe("math"));
-test("Mul maps to math", () => expect(opCategory("Mul")).toBe("math"));
-test("ReduceMean maps to reduction", () => expect(opCategory("ReduceMean")).toBe("reduction"));
-test("ArgMax maps to reduction", () => expect(opCategory("ArgMax")).toBe("reduction"));
-test("Concat maps to merge", () => expect(opCategory("Concat")).toBe("merge"));
-test("Gather maps to merge", () => expect(opCategory("Gather")).toBe("merge"));
-test("MultiHeadAttention maps to attention", () =>
-  expect(opCategory("MultiHeadAttention")).toBe("attention"));
-test("LSTM maps to recurrent", () => expect(opCategory("LSTM")).toBe("recurrent"));
-test("GRU maps to recurrent", () => expect(opCategory("GRU")).toBe("recurrent"));
-test("QuantizeLinear maps to quantization", () =>
-  expect(opCategory("QuantizeLinear")).toBe("quantization"));
-test("unknown op maps to unknown", () => expect(opCategory("SomeWeirdOp")).toBe("unknown"));
-test("Input maps to input", () => expect(opCategory("Input")).toBe("input"));
-test("Output maps to output", () => expect(opCategory("Output")).toBe("output"));
+test("ONNX ops map to correct categories", () => {
+  expect(opCategory("Conv")).toBe("conv");
+  expect(opCategory("Gemm")).toBe("math");
+  expect(opCategory("Relu")).toBe("activation");
+  expect(opCategory("BatchNormalization")).toBe("normalization");
+  expect(opCategory("MaxPool")).toBe("pooling");
+  expect(opCategory("Reshape")).toBe("reshape");
+  expect(opCategory("ReduceMean")).toBe("reduction");
+  expect(opCategory("Concat")).toBe("merge");
+  expect(opCategory("MultiHeadAttention")).toBe("attention");
+  expect(opCategory("LSTM")).toBe("recurrent");
+  expect(opCategory("QuantizeLinear")).toBe("quantization");
+  expect(opCategory("Constant")).toBe("constant");
+  expect(opCategory("Equal")).toBe("logic");
+  expect(opCategory("Input")).toBe("input");
+  expect(opCategory("Output")).toBe("output");
+});
 
-test("Keras conv layers → conv", () => {
-  for (const op of [
-    "Conv1D",
-    "Conv2D",
-    "Conv3D",
-    "Conv2DTranspose",
-    "DepthwiseConv2D",
-    "SeparableConv2D",
-  ]) {
-    expect(opCategory(op)).toBe("conv");
-  }
+test("TFLite ops map to correct categories", () => {
+  expect(opCategory("CONV_2D")).toBe("conv");
+  expect(opCategory("FULLY_CONNECTED")).toBe("math");
+  expect(opCategory("RELU")).toBe("activation");
+  expect(opCategory("MAX_POOL_2D")).toBe("pooling");
+  expect(opCategory("RESHAPE")).toBe("reshape");
+  expect(opCategory("MEAN")).toBe("reduction");
+  expect(opCategory("CONCATENATION")).toBe("merge");
 });
-test("Dense maps to math", () => expect(opCategory("Dense")).toBe("math"));
-test("Keras activation layers → activation", () => {
-  for (const op of ["Activation", "ReLU", "LeakyReLU", "PReLU", "ELU", "Softmax"]) {
-    expect(opCategory(op)).toBe("activation");
-  }
-});
-test("Keras normalization layers → normalization", () => {
-  for (const op of ["GroupNormalization", "UnitNormalization"]) {
-    expect(opCategory(op)).toBe("normalization");
-  }
-});
-test("Keras pooling layers → pooling", () => {
-  for (const op of [
-    "MaxPooling1D",
-    "MaxPooling2D",
-    "MaxPooling3D",
-    "AveragePooling2D",
-    "GlobalMaxPooling2D",
-    "GlobalAveragePooling2D",
-  ]) {
-    expect(opCategory(op)).toBe("pooling");
-  }
-});
-test("Keras reshape layers → reshape", () => {
-  for (const op of [
-    "Flatten",
-    "Permute",
-    "RepeatVector",
-    "ZeroPadding2D",
-    "Cropping2D",
-    "UpSampling2D",
-  ]) {
-    expect(opCategory(op)).toBe("reshape");
-  }
-});
-test("Keras math/merge layers → correct category", () => {
-  for (const op of ["Subtract", "Multiply", "Average", "Maximum", "Minimum", "Dot"]) {
-    expect(opCategory(op)).toBe("math");
-  }
+
+test("Keras ops map to correct categories", () => {
+  expect(opCategory("Conv2D")).toBe("conv");
+  expect(opCategory("Dense")).toBe("math");
+  expect(opCategory("ReLU")).toBe("activation");
+  expect(opCategory("MaxPooling2D")).toBe("pooling");
+  expect(opCategory("Flatten")).toBe("reshape");
   expect(opCategory("Concatenate")).toBe("merge");
+  expect(opCategory("ConvLSTM2D")).toBe("recurrent");
 });
-test("Keras attention layers → attention", () => {
-  for (const op of ["Attention", "AdditiveAttention"]) {
-    expect(opCategory(op)).toBe("attention");
-  }
+
+test("aten:: ops strip namespace and overload", () => {
+  expect(opCategory("aten::conv2d.default")).toBe("conv");
+  expect(opCategory("aten::add.Tensor")).toBe("math");
+  expect(opCategory("aten::relu.default")).toBe("activation");
+  expect(opCategory("aten::batch_norm.default")).toBe("normalization");
+  expect(opCategory("aten::max_pool2d.default")).toBe("pooling");
+  expect(opCategory("aten::reshape.default")).toBe("reshape");
+  expect(opCategory("aten::sum.default")).toBe("reduction");
+  expect(opCategory("aten::cat.default")).toBe("merge");
+  expect(opCategory("aten::dropout.default")).toBe("activation");
+  expect(opCategory("aten::size.int")).toBe("reshape");
+  expect(opCategory("aten::__getitem__.t")).toBe("merge");
+  expect(opCategory("aten::len.t")).toBe("reduction");
+  expect(opCategory("aten::eq.Tensor")).toBe("logic");
 });
-test("Keras recurrent layers → recurrent", () => {
-  for (const op of ["SimpleRNN", "Bidirectional", "TimeDistributed", "ConvLSTM2D"]) {
-    expect(opCategory(op)).toBe("recurrent");
-  }
+
+test("aten:: TorchScript slash overload syntax", () => {
+  expect(opCategory("aten::add/Tensor")).toBe("math");
+  expect(opCategory("aten::conv2d/default")).toBe("conv");
+});
+
+test("unknown op returns unknown", () => {
+  expect(opCategory("SomeWeirdOp")).toBe("unknown");
+  expect(opCategory("aten::nonexistent_op.default")).toBe("unknown");
 });

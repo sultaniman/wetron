@@ -9,47 +9,18 @@ async function loadModel() {
   return new Uint8Array(buf);
 }
 
-test("parseTflite returns a ModelGraph", async () => {
-  const bytes = await loadModel();
-  const graph = parseTflite(bytes);
-  expect(graph.nodes.length).toBe(66); // verified against netron
+test("mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs", async () => {
+  const graph = parseTflite(await loadModel());
+  expect(graph.nodes.length).toBe(66);
+  expect(graph.nodes.every((n) => n.opType.length > 0)).toBe(true);
   expect(graph.inputs.length).toBe(1);
+  expect(graph.inputs[0].dtype).toBeTruthy();
+  expect(graph.inputs[0].shape).not.toBeNull();
   expect(graph.outputs.length).toBe(1);
-});
-
-test("every node has a non-empty opType", async () => {
-  const bytes = await loadModel();
-  const graph = parseTflite(bytes);
-  for (const node of graph.nodes) {
-    expect(node.opType).toBeTruthy();
-  }
-});
-
-test("graph inputs have dtype", async () => {
-  const bytes = await loadModel();
-  const graph = parseTflite(bytes);
-  for (const inp of graph.inputs) {
-    expect(inp.dtype).toBeTruthy();
-    expect(inp.shape).not.toBeNull();
-  }
-});
-
-test("parseTflite throws ParseError on garbage input", () => {
-  const bad = new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00]);
-  expect(() => parseTflite(bad)).toThrow(ParseError);
-});
-
-test("graph.initializers is a Map with weight entries", async () => {
-  const bytes = await loadModel();
-  const graph = parseTflite(bytes);
-  expect(graph.initializers).toBeInstanceOf(Map);
   expect(graph.initializers.size).toBeGreaterThan(0);
+  for (const input of graph.inputs) expect(graph.initializers.has(input.name)).toBe(false);
 });
 
-test("graph input tensors are not in initializers", async () => {
-  const bytes = await loadModel();
-  const graph = parseTflite(bytes);
-  for (const input of graph.inputs) {
-    expect(graph.initializers.has(input.name)).toBe(false);
-  }
+test("throws ParseError on garbage input", () => {
+  expect(() => parseTflite(new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00]))).toThrow(ParseError);
 });

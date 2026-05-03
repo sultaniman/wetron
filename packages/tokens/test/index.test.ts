@@ -1,4 +1,6 @@
 import { test, expect } from "bun:test";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import {
   CATEGORY_THEME,
   MINIMAP_THEME,
@@ -7,26 +9,26 @@ import {
   PANEL_VARS,
 } from "../src/index.ts";
 
-test("CATEGORY_THEME has all categories with light and dark", () => {
-  const expected = [
-    "input",
-    "output",
-    "conv",
-    "activation",
-    "normalization",
-    "pooling",
-    "reshape",
-    "math",
-    "reduction",
-    "merge",
-    "attention",
-    "recurrent",
-    "quantization",
-    "constant",
-    "logic",
-    "unknown",
-  ];
-  expect(Object.keys(CATEGORY_THEME)).toEqual(expected);
+function extractOpCategoryValues(filePath: string): string[] {
+  const src = readFileSync(filePath, "utf-8");
+  const m = src.match(/export type OpCategory\s*=\s*([\s\S]+?)(?=;)/);
+  if (!m) throw new Error(`OpCategory not found in ${filePath}`);
+  return [...m[1].matchAll(/"([^"]+)"/g)].map((r) => r[1]).sort();
+}
+
+test("OpCategory in tokens matches core", () => {
+  const coreValues = extractOpCategoryValues(
+    resolve(import.meta.dir, "../../core/src/categories.ts"),
+  );
+  const tokenValues = extractOpCategoryValues(resolve(import.meta.dir, "../src/index.ts"));
+  expect(tokenValues).toEqual(coreValues);
+});
+
+test("CATEGORY_THEME has a light and dark entry for every OpCategory in core", () => {
+  const coreValues = extractOpCategoryValues(
+    resolve(import.meta.dir, "../../core/src/categories.ts"),
+  );
+  expect(Object.keys(CATEGORY_THEME).sort()).toEqual(coreValues);
   for (const v of Object.values(CATEGORY_THEME)) {
     expect(typeof v.light).toBe("string");
     expect(typeof v.dark).toBe("string");
