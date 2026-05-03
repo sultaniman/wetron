@@ -29,6 +29,7 @@ export default function App() {
   const [selected, setSelected] = useState<PanelTarget | null>(null);
   const [history, setHistory] = useState<PanelTarget[]>([]);
   const [selectedEdgeTensorName, setSelectedEdgeTensorName] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [colorMode, setColorMode] = useState<ColorMode>("system");
   const [resolvedMode, setResolvedMode] = useState<"light" | "dark">(() => resolveMode("system"));
 
@@ -53,6 +54,7 @@ export default function App() {
     setSelected(null);
     setHistory([]);
     setSelectedEdgeTensorName(null);
+    setSearchQuery("");
     try {
       const buf = await file.arrayBuffer();
       const graph = await parseModel(new Uint8Array(buf), file.name);
@@ -171,10 +173,29 @@ export default function App() {
             {state.graph.outputs.length} outputs
           </span>
         )}
+        {state.status === "ready" && (
+          <input
+            type="search"
+            placeholder="Search ops…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              marginLeft: "auto",
+              padding: "5px 10px",
+              background: "transparent",
+              color: chrome.text,
+              border: `1px solid ${chrome.border}`,
+              borderRadius: 6,
+              fontSize: 13,
+              outline: "none",
+              width: 180,
+            }}
+          />
+        )}
         <button
           onClick={cycleMode}
           style={{
-            marginLeft: "auto",
+            marginLeft: state.status === "ready" ? 0 : "auto",
             padding: "5px 12px",
             background: "transparent",
             color: chrome.muted,
@@ -265,6 +286,7 @@ export default function App() {
               graph={state.graph}
               onTargetClick={handleTargetClick}
               selectedEdgeTensorName={selectedEdgeTensorName}
+              searchQuery={searchQuery}
               colorMode={colorMode}
             />
             <div style={{ position: "absolute", top: 16, right: 16, width: 280, zIndex: 10 }}>
