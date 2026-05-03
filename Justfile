@@ -30,7 +30,7 @@ check: build test
 bump version:
     bun scripts/bump-version.ts {{version}}
 
-# Publish all packages to npm (run `just build` first)
+# Publish all packages to npm in dependency order (run `just build` first)
 publish:
     bun install
     cd packages/tokens      && bun publish --access public
