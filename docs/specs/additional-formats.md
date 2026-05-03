@@ -1,31 +1,50 @@
 # wetron — Additional Format Parsers
 
+## Browser-Only Constraint
+
+wetron is a pure browser library — no server, no backend, no Node.js. Only formats parseable in plain JavaScript from a `Uint8Array` are in scope.
+
+**Supported PyTorch sub-formats:**
+
+- ExecuTorch `.pte` — FlatBuffer (`ET12` identifier), fully parseable
+- TorchScript Mobile `.pt` — FlatBuffer (`PTMF` identifier), fully parseable
+
+**Not supported:**
+
+- Raw `.pth` state dicts — Python-specific serialization format requiring `torch.load()`
+- Full model saves (non-mobile `.pt`) — ZIP + Python-specific serialization, requires Python interpreter
+- Any format requiring server-side inference or a Python interpreter
+
 ## Status
 
-| Format              | Package              | Status                                         |
-| ------------------- | -------------------- | ---------------------------------------------- |
-| Keras               | `@wetron/keras`      | ✅ Shipped — see `docs/plans/keras-support.md` |
-| CoreML              | `@wetron/coreml`     | Planned                                        |
-| TensorFlow GraphDef | `@wetron/tensorflow` | Planned                                        |
-| OpenVINO IR         | `@wetron/openvino`   | Planned                                        |
-| ncnn                | `@wetron/ncnn`       | Planned                                        |
-| GGUF                | `@wetron/gguf`       | Planned                                        |
+| Format              | Package               | Status                                         |
+| ------------------- | --------------------- | ---------------------------------------------- |
+| Keras               | `@wetron/keras`       | ✅ Shipped — see `docs/plans/keras-support.md` |
+| ExecuTorch          | `@wetron/executorch`  | Planned                                        |
+| TorchScript Mobile  | `@wetron/torchscript` | Planned                                        |
+| CoreML              | `@wetron/coreml`      | Planned                                        |
+| TensorFlow GraphDef | `@wetron/tensorflow`  | Planned                                        |
+| OpenVINO IR         | `@wetron/openvino`    | Planned                                        |
+| ncnn                | `@wetron/ncnn`        | Planned                                        |
+| GGUF                | `@wetron/gguf`        | Planned                                        |
 
 ## Goal
 
-Add five parsers covering the most practically important ML model formats beyond ONNX, TFLite, and Keras: CoreML, TensorFlow GraphDef, OpenVINO IR, ncnn, and GGUF. All follow the same contract as existing parsers: graph structure only, browser-only, exports a single parse function returning `ModelGraph`.
+Add parsers covering the most practically important ML model formats beyond ONNX, TFLite, and Keras. All follow the same contract as existing parsers: graph structure only, browser-only, exports a single parse function returning `ModelGraph`.
 
 ---
 
 ## Format Overview
 
-| Format              | Package              | Extensions               | Wire format   | Detection                             |
-| ------------------- | -------------------- | ------------------------ | ------------- | ------------------------------------- |
-| CoreML              | `@wetron/coreml`     | `.mlmodel`, `.mlpackage` | Protobuf      | Field tags 200–620 or `.mlmodel` ext  |
-| TensorFlow GraphDef | `@wetron/tensorflow` | `.pb`, `.pbtxt`          | Protobuf      | Field-1 node structure or `.pb` ext   |
-| OpenVINO IR         | `@wetron/openvino`   | `.xml`                   | XML           | `<net ` tag in first 256 bytes        |
-| ncnn                | `@wetron/ncnn`       | `.param`                 | Text          | First line is `"7767517"`             |
-| GGUF                | `@wetron/gguf`       | `.gguf`                  | Custom binary | Magic `GGUF` (0x47475546) at offset 0 |
+| Format              | Package               | Extensions               | Wire format   | Detection                             |
+| ------------------- | --------------------- | ------------------------ | ------------- | ------------------------------------- |
+| ExecuTorch          | `@wetron/executorch`  | `.pte`                   | FlatBuffer    | bytes[4..7] === `ET12`                |
+| TorchScript Mobile  | `@wetron/torchscript` | `.pt`                    | FlatBuffer    | bytes[4..7] === `PTMF`                |
+| CoreML              | `@wetron/coreml`      | `.mlmodel`, `.mlpackage` | Protobuf      | Field tags 200–620 or `.mlmodel` ext  |
+| TensorFlow GraphDef | `@wetron/tensorflow`  | `.pb`, `.pbtxt`          | Protobuf      | Field-1 node structure or `.pb` ext   |
+| OpenVINO IR         | `@wetron/openvino`    | `.xml`                   | XML           | `<net ` tag in first 256 bytes        |
+| ncnn                | `@wetron/ncnn`        | `.param`                 | Text          | First line is `"7767517"`             |
+| GGUF                | `@wetron/gguf`        | `.gguf`                  | Custom binary | Magic `GGUF` (0x47475546) at offset 0 |
 
 ---
 
@@ -59,6 +78,8 @@ export type Format =
   | "onnx"
   | "tflite"
   | "keras"
+  | "executorch"
+  | "torchscript"
   | "coreml"
   | "tensorflow"
   | "openvino"
@@ -69,15 +90,17 @@ export type Format =
 
 Detection order (magic bytes before extension):
 
-| Format     | Detection                                                                    |
-| ---------- | ---------------------------------------------------------------------------- |
-| TFLite     | bytes[4..7] === `TFL3` or `ODLF`                                             |
-| GGUF       | bytes[0..3] === `GGUF` (0x47 0x47 0x55 0x46)                                 |
-| OpenVINO   | UTF-8 scan of first 256 bytes contains `<net `                               |
-| ncnn       | First line of UTF-8 text is exactly `7767517`                                |
-| CoreML     | Protobuf tag scan: field ≥ 200 at offset 0 (after ONNX ruled out)            |
-| TensorFlow | bytes[0] === 0x08 fallthrough (same as ONNX, disambiguate by filename `.pb`) |
-| ONNX       | bytes[0] === 0x08 or `.onnx` extension                                       |
+| Format      | Detection                                                                    |
+| ----------- | ---------------------------------------------------------------------------- |
+| TFLite      | bytes[4..7] === `TFL3` or `ODLF`                                             |
+| ExecuTorch  | bytes[4..7] === `ET12`                                                       |
+| TorchScript | bytes[4..7] === `PTMF`                                                       |
+| GGUF        | bytes[0..3] === `GGUF` (0x47 0x47 0x55 0x46)                                 |
+| OpenVINO    | UTF-8 scan of first 256 bytes contains `<net `                               |
+| ncnn        | First line of UTF-8 text is exactly `7767517`                                |
+| CoreML      | Protobuf tag scan: field ≥ 200 at offset 0 (after ONNX ruled out)            |
+| TensorFlow  | bytes[0] === 0x08 fallthrough (same as ONNX, disambiguate by filename `.pb`) |
+| ONNX        | bytes[0] === 0x08 or `.onnx` extension                                       |
 
 > **Note:** Both ONNX and TensorFlow GraphDef are protobuf with field-1 as varint — they share the 0x08 magic. Disambiguation uses file extension (`.onnx` → onnx, `.pb` → tensorflow). When no extension is provided and bytes start with 0x08, return `'onnx'` (the more common format).
 
@@ -154,6 +177,106 @@ Add op type entries for the new frameworks' naming conventions:
 ---
 
 ## Per-Format Parser Design
+
+---
+
+### `@wetron/executorch`
+
+**Scope:** ExecuTorch `.pte` files — the FlatBuffer serialization format used by Meta's ExecuTorch runtime.
+
+**Wire format:** FlatBuffer with file identifier `ET12`. Parse with `flatbuffers` (same library as `@wetron/tflite`).
+
+**Package:** `packages/executorch/`
+**Dependency:** `flatbuffers`
+
+**ExecuTorch graph structure:**
+
+```
+Program
+  └── execution_plan: [ExecutionPlan]      (field 6)
+        ├── name: string                    (field 4)
+        ├── operators: [Operator]           (field 16) → {name, overload}
+        ├── values: [EValue]               (field 8)  → tensor shapes/dtypes
+        ├── inputs: Int32Array             (field 10) → value indices
+        ├── outputs: Int32Array            (field 12) → value indices
+        └── chains: [Chain]               (field 14)
+              └── instructions: [Instruction]  (field 8)
+                    └── instr_args: union
+                          └── KernelCall (type=1)
+                                ├── op_index: int32  (field 4)
+                                └── args: Int32Array (field 6)
+```
+
+**IR mapping:**
+
+- Each `KernelCall` instruction → one `GraphNode`
+- `operators[op_index].name` + `.overload` → `GraphNode.opType` (e.g. `aten::conv2d.default`)
+- `KernelCall.args`: mixed input/output value indices — heuristic: values not yet "defined" by a prior instruction become this node's outputs; already-defined values become inputs
+- `values[i].val` where val is a `Tensor` (type=5) → shape from `Tensor.sizes`, dtype from `Tensor.scalar_type`
+- `execution_plan.inputs` value indices → `ModelGraph.inputs`
+- `execution_plan.outputs` value indices → `ModelGraph.outputs`
+- `execution_plan.name` → `ModelGraph.name`
+
+**Tensor value naming:** `v{i}` where `i` is the EValue index (e.g. `v0`, `v1`, …).
+
+**`scalar_type` → dtype mapping** (same as PyTorch's `ScalarType` enum):
+
+| Value | dtype   |
+| ----- | ------- |
+| 0     | uint8   |
+| 1     | int8    |
+| 2     | int16   |
+| 3     | int32   |
+| 4     | int64   |
+| 5     | float16 |
+| 6     | float32 |
+| 7     | float64 |
+| 11    | bool    |
+
+---
+
+### `@wetron/torchscript`
+
+**Scope:** TorchScript Mobile `.pt` files — the FlatBuffer serialization format used by PyTorch Mobile (`PTMF` identifier). Standard ZIP-based `.pt` files are out of scope (require Python-specific deserialization).
+
+**Wire format:** FlatBuffer with file identifier `PTMF`. Parse with `flatbuffers`.
+
+**Package:** `packages/torchscript/`
+**Dependency:** `flatbuffers`
+
+**TorchScript Mobile graph structure:**
+
+```
+Module (root table)
+  ├── methods: Uint32Array               (field 8)  → IValue indices
+  ├── ivalues: [IValue]                  (field 12) → all values
+  └── jit_constants: Uint32Array        (field 22) → constant IValue indices
+
+IValue.val: union (field 4)
+  └── type=16 → Function
+        ├── qn: string                   (field 4)  → qualified name
+        ├── operators: [Operator]        (field 8)  → {name, overload_name}
+        └── instructions: [Instruction] (field 6, stride=8) → bytecode
+
+Instruction (struct, 8 bytes):
+  ├── op: int8    (offset 0) — 1=CALL (operator call)
+  ├── n: uint16   (offset 2) — arg count
+  └── x: int32   (offset 4) — operator index (when op=1)
+```
+
+**IR mapping:**
+
+- Find all `Function` IValues (union type = 16)
+- For each function, iterate instructions where `op == 1` (CALL):
+  - `operators[x]` → op name: `{name}.{overload_name}` (e.g. `aten::conv2d.default`)
+  - One `GraphNode` per CALL instruction
+- Build a linear graph within each function: function inputs → op_0 → op_1 → … → function outputs
+- Functions with qualified name `__torch__.forward` or `__torch__._call_impl` become the primary graph
+- `Module.methods` identifies which IValues are entry points
+
+**Op name format:** `{operator.name}/{operator.overload_name}` when overload_name is non-empty, else just `{operator.name}`.
+
+No tensor shape info is available in PTMF — `GraphValue.shape` is always `null`.
 
 ---
 
@@ -416,6 +539,14 @@ export async function parseModel(bytes: Uint8Array, filename?: string): Promise<
       const { parseKeras } = await import("@wetron/keras");
       return parseKeras(bytes);
     }
+    case "executorch": {
+      const { parseExecutorch } = await import("@wetron/executorch");
+      return parseExecutorch(bytes);
+    }
+    case "torchscript": {
+      const { parseTorchscript } = await import("@wetron/torchscript");
+      return parseTorchscript(bytes);
+    }
     case "coreml": {
       const { parseCoreml } = await import("@wetron/coreml");
       return parseCoreml(bytes);
@@ -485,6 +616,6 @@ Each test asserts: node count > 0, no undefined `opType`, at least one input and
 - TensorFlow SavedModel ZIP unpacking — defer; focus on bare `.pb` first
 - ncnn binary `.param.bin` — `.param` text covers most use cases
 - ONNX model with external data (`.onnx` + `.onnx_data`) — out of scope per existing design
-- PyTorch `.pt`/`.pth` — not feasible in browser (Python-specific serialization format)
+- PyTorch `.pth` and non-mobile `.pt` — require Python-specific serialization; use ExecuTorch or TorchScript Mobile instead
 - Weights / tensor data for any format
 - Quantization metadata display

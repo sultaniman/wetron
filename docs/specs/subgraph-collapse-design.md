@@ -21,7 +21,7 @@ restore the full view when done.
 ```ts
 // Passed as a prop alongside graph
 type SubgraphGroup = {
-  readonly name: string;          // display label
+  readonly name: string; // display label
   readonly nodeNames: ReadonlySet<string>; // GraphNode.name values
 };
 ```
@@ -89,6 +89,7 @@ fully controlled. This keeps the library stateless and makes serialisation trivi
 ## Layout strategy
 
 Run dagre twice:
+
 1. Once on the full graph (all nodes) to get stable positions — cache this result
 2. Overlay the collapsed view: remove constituent nodes, add group node at centroid,
    re-run a second dagre pass on the reduced set to clean up spacing

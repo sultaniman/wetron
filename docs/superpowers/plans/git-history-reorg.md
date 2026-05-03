@@ -12,28 +12,28 @@
 
 ## Proposed New History (20 commits, oldest → newest)
 
-| # | New commit message | Source commits (squashed) |
-|---|---|---|
-| 1 | `scaffold repo, add initial docs, upgrade deps` | `02ce065`, `aaea276`, `08866bf`, `283c426`, `cb7ed46`, `8b9ea38` |
-| 2 | `add IR types, ParseError, dtype utilities` | `a313f6b`, `e946332`, `6430708`, `2fb47ea` |
-| 3 | `add ONNX parser with protobufjs` | `c3c3296`, `b9dddb6`, `797c9e5`, `ac75077` |
-| 4 | `add TFLite FlatBuffers parser` | `e56e7cd`, `66142de`, `472895d` |
-| 5 | `add format detection, dagre layout, parseModel entry` | `52fc4f1`, `6f7c44d`, `0fc660c` |
-| 6 | `add React ModelGraphView with custom nodes` | `5f00b7e`, `961311e` |
-| 7 | `add Svelte ModelGraphView with custom nodes` | `119888b` |
-| 8 | `add React demo app, fix type errors, wire parsers` | `e680717`, `fd78b54`, `cac72ae` |
-| 9 | `add NodePropertyPanel with Phosphor icons` | `6945d4a`, `abddcd2`, `0b573fb`, `c13ce1a`, `f2b5163`, `469b248`, `54fe3fb`, `045d04f`, `bb8bd34`, `6f4941b` |
-| 10 | `add op categories, B·3 layout, color mode` | `6daefbd`, `ff29c31`, `c590451`, `c1607ae`, `947bbdc`, `0db6429`, `d256b1b`, `dfcd731`, `53779d0`, `46413f2`, `6c69224`, `124e521`, `1e52ff4` |
-| 11 | `add edge data, smoothstep edges, edge click` | `554696e`, `b876f5d`, `5872c95`, `b8c2fc9` |
-| 12 | `move to CSS modules, shared NodeCard, kebab-case` | `7404c57`, `e913744` |
-| 13 | `add EdgePanel, TensorPanel, UX polish, hybrid icons` | `5bbacaf`, `d20e03a`, `3518107`, `8cf0991`, `f806996`, `98d1198` |
-| 14 | `add Keras parser — ZIP, Sequential, Functional models` | `9d8d1dc`, `a4f9ef8`, `5f3dcd0`, `375bffd`, `98c59dd`, `85c05e2` |
-| 15 | `add initializers, opInputLabels, weightInputs, wire Keras` | `31c8894`, `1f158e7`, `f082bd6`, `f5e076a`, `35ad4b1`, `6e9c1c4` |
-| 16 | `add edge panel, weight shapes, panel facelift` | `e3d56d9`, `c991952`, `c0b317b`, `7ecba8c`, `5ca4893`, `7f0b805`, `716970d` |
-| 17 | `fix Keras tensor names, inbound_nodes, op icons, add MobileNetV2 tests` | `258dd13`, `58f7dfa`, `b59ce69`, `ce53620`, `68030b8` |
-| 18 | `bring Svelte to parity with React — styles, icons, reactivity` | `be01fcb`, `ca8fa89`, `a41091f`, `e3ea256`, `dd3f77b`, `9ce2ed5`, `4de9d33`, `d710c01`, `4131da1`, `901504f` |
-| 19 | `add Svelte demo, FlowNode dimensions, React node subtitle, clean up docs` | `13a89d4`, `24507e9`, `6b2152c`, `78f74ec` |
-| 20 | `add styling drift prevention spec and plan, format code` | `ced7da9`, `c7c85a6`, `badfc03`, `2d985f0` |
+| #   | New commit message                                                         | Source commits (squashed)                                                                                                                     |
+| --- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `scaffold repo, add initial docs, upgrade deps`                            | `02ce065`, `aaea276`, `08866bf`, `283c426`, `cb7ed46`, `8b9ea38`                                                                              |
+| 2   | `add IR types, ParseError, dtype utilities`                                | `a313f6b`, `e946332`, `6430708`, `2fb47ea`                                                                                                    |
+| 3   | `add ONNX parser with protobufjs`                                          | `c3c3296`, `b9dddb6`, `797c9e5`, `ac75077`                                                                                                    |
+| 4   | `add TFLite FlatBuffers parser`                                            | `e56e7cd`, `66142de`, `472895d`                                                                                                               |
+| 5   | `add format detection, dagre layout, parseModel entry`                     | `52fc4f1`, `6f7c44d`, `0fc660c`                                                                                                               |
+| 6   | `add React ModelGraphView with custom nodes`                               | `5f00b7e`, `961311e`                                                                                                                          |
+| 7   | `add Svelte ModelGraphView with custom nodes`                              | `119888b`                                                                                                                                     |
+| 8   | `add React demo app, fix type errors, wire parsers`                        | `e680717`, `fd78b54`, `cac72ae`                                                                                                               |
+| 9   | `add NodePropertyPanel with Phosphor icons`                                | `6945d4a`, `abddcd2`, `0b573fb`, `c13ce1a`, `f2b5163`, `469b248`, `54fe3fb`, `045d04f`, `bb8bd34`, `6f4941b`                                  |
+| 10  | `add op categories, B·3 layout, color mode`                                | `6daefbd`, `ff29c31`, `c590451`, `c1607ae`, `947bbdc`, `0db6429`, `d256b1b`, `dfcd731`, `53779d0`, `46413f2`, `6c69224`, `124e521`, `1e52ff4` |
+| 11  | `add edge data, smoothstep edges, edge click`                              | `554696e`, `b876f5d`, `5872c95`, `b8c2fc9`                                                                                                    |
+| 12  | `move to CSS modules, shared NodeCard, kebab-case`                         | `7404c57`, `e913744`                                                                                                                          |
+| 13  | `add EdgePanel, TensorPanel, UX polish, hybrid icons`                      | `5bbacaf`, `d20e03a`, `3518107`, `8cf0991`, `f806996`, `98d1198`                                                                              |
+| 14  | `add Keras parser — ZIP, Sequential, Functional models`                    | `9d8d1dc`, `a4f9ef8`, `5f3dcd0`, `375bffd`, `98c59dd`, `85c05e2`                                                                              |
+| 15  | `add initializers, opInputLabels, weightInputs, wire Keras`                | `31c8894`, `1f158e7`, `f082bd6`, `f5e076a`, `35ad4b1`, `6e9c1c4`                                                                              |
+| 16  | `add edge panel, weight shapes, panel facelift`                            | `e3d56d9`, `c991952`, `c0b317b`, `7ecba8c`, `5ca4893`, `7f0b805`, `716970d`                                                                   |
+| 17  | `fix Keras tensor names, inbound_nodes, op icons, add MobileNetV2 tests`   | `258dd13`, `58f7dfa`, `b59ce69`, `ce53620`, `68030b8`                                                                                         |
+| 18  | `bring Svelte to parity with React — styles, icons, reactivity`            | `be01fcb`, `ca8fa89`, `a41091f`, `e3ea256`, `dd3f77b`, `9ce2ed5`, `4de9d33`, `d710c01`, `4131da1`, `901504f`                                  |
+| 19  | `add Svelte demo, FlowNode dimensions, React node subtitle, clean up docs` | `13a89d4`, `24507e9`, `6b2152c`, `78f74ec`                                                                                                    |
+| 20  | `add styling drift prevention spec and plan, format code`                  | `ced7da9`, `c7c85a6`, `badfc03`, `2d985f0`                                                                                                    |
 
 ---
 
@@ -231,7 +231,6 @@ s 2d985f0 format code
 ```
 
 - [ ] **Step 3: For each squash, the editor will prompt for a combined message. Use these:**
-
   - Group 1 → `scaffold repo, add initial docs, upgrade deps`
   - Group 2 → `add IR types, ParseError, dtype utilities`
   - Group 3 → `add ONNX parser with protobufjs`
