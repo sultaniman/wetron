@@ -1,6 +1,6 @@
 {
   "name": "@wetron/react",
-  "version": "0.0.1-beta",
+  "version": "0.0.2-beta",
   "description": "React components for neural network graph visualization, built on ReactFlow",
   "keywords": [
     "graph",
