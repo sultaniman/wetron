@@ -12,6 +12,8 @@
   const theme = $derived(CATEGORY_THEME[cat]);
   const color = $derived(isDark ? theme.dark : theme.light);
   const hasWeights = $derived(data.weightInputs != null && data.weightInputs.length > 0);
+  const displayName = $derived(data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined);
+  const ariaLabel = $derived(displayName ? `${data.opType}, ${displayName}` : data.opType);
 </script>
 
 <NodeCard
@@ -19,7 +21,8 @@
   topHandle
   bottomHandle
   pill={data.opType}
-  subtitle={data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined}
+  subtitle={displayName}
+  {ariaLabel}
   {cat}
   op={data.opType}
   {color}
@@ -35,6 +38,7 @@
       {#each data.weightInputs as w}
         <div
           class="weight-row"
+          aria-label="{w.label} weight, shape {w.shape.join('×')}, {w.dtype}"
           data-weight-name={w.name}
           data-weight-dtype={w.dtype}
           data-weight-shape={w.shape.join(',')}

@@ -15,6 +15,7 @@
     [data.shape ? `[${data.shape.join(' × ')}]` : null, data.dtype]
       .filter(Boolean).join(' ')
   );
+  const ariaLabel = $derived(`${isInput ? 'Input' : 'Output'}: ${data.name}${meta ? `, ${meta}` : ''}`);
 </script>
 
 <NodeCard
@@ -22,6 +23,7 @@
   topHandle={!isInput}
   bottomHandle={isInput}
   pill={data.name}
+  {ariaLabel}
   {cat}
   {color}
   bg={isDark ? '#1e1e2e' : '#fff'}

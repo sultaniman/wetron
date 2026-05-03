@@ -10,6 +10,7 @@
     bottomHandle?: boolean;
     pill: string;
     subtitle?: string;
+    ariaLabel?: string;
     cat: OpCategory;
     op?: string;
     color: string;
@@ -28,6 +29,7 @@
     bottomHandle = false,
     pill,
     subtitle,
+    ariaLabel,
     cat,
     op,
     color,
@@ -59,6 +61,9 @@
 </script>
 
 <div
+  role="button"
+  aria-label={ariaLabel ?? pill}
+  aria-pressed={selected}
   data-nodetype={nodeType}
   class="card"
   style:background={cardBg}

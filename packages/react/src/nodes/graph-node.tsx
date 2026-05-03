@@ -13,13 +13,15 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
   const theme = CATEGORY_THEME[cat];
   const color = isDark ? theme.dark : theme.light;
   const hasWeights = data.weightInputs != null && data.weightInputs.length > 0;
+  const displayName = data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined;
   return (
     <NodeCard
       nodeType="graphNode"
       topHandle
       bottomHandle
       pill={data.opType}
-      subtitle={data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined}
+      subtitle={displayName}
+      ariaLabel={displayName ? `${data.opType}, ${displayName}` : data.opType}
       cat={cat}
       iconEntry={OP_ICON[data.opType] ?? CATEGORY_ICON[cat]}
       tinted={!hasWeights}
@@ -27,10 +29,11 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
       colors={{ color }}
     >
       {data.weightInputs && data.weightInputs.length > 0
-        ? data.weightInputs.map((w, _) => (
+        ? data.weightInputs.map((w) => (
             <div
               key={w.name}
               className={css.weightRow}
+              aria-label={`${w.label} weight, shape ${w.shape.join("×")}, ${w.dtype}`}
               data-weight-name={w.name}
               data-weight-dtype={w.dtype}
               data-weight-shape={w.shape.join(",")}

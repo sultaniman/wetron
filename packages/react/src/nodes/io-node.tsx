@@ -14,12 +14,14 @@ export function IoNodeComponent({ data, selected }: NodeProps<Node<GraphNodeData
   const meta = [data.shape ? `[${data.shape.join(" × ")}]` : null, data.dtype]
     .filter(Boolean)
     .join(" ");
+  const ariaLabel = `${isInput ? "Input" : "Output"}: ${data.name}${meta ? `, ${meta}` : ""}`;
   return (
     <NodeCard
       nodeType="ioNode"
       topHandle={!isInput}
       bottomHandle={isInput}
       pill={data.name}
+      ariaLabel={ariaLabel}
       cat={cat}
       iconEntry={CATEGORY_ICON[cat]}
       tinted

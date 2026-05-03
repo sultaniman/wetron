@@ -20,6 +20,7 @@ export function NodeCard({
   colors,
   tinted = false,
   selected = false,
+  ariaLabel,
   children,
 }: {
   nodeType: "graphNode" | "ioNode";
@@ -32,10 +33,14 @@ export function NodeCard({
   colors: CardColors;
   tinted?: boolean;
   selected?: boolean;
+  ariaLabel?: string;
   children?: React.ReactNode;
 }) {
   return (
     <div
+      role="button"
+      aria-label={ariaLabel ?? pill}
+      aria-pressed={selected}
       data-nodetype={nodeType}
       className={`${css.card}${tinted ? ` ${css.cardTinted}` : ""}`}
       style={
