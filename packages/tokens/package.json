@@ -17,6 +17,7 @@
     "directory": "packages/tokens"
   },
   "files": [
+    "README.md",
     "dist",
     "llms.md"
   ],

@@ -18,6 +18,7 @@
     "directory": "packages/svelte"
   },
   "files": [
+    "README.md",
     "src",
     "llms.md"
   ],

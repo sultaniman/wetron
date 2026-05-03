@@ -17,6 +17,7 @@
     "directory": "packages/onnx"
   },
   "files": [
+    "README.md",
     "dist",
     "llms.md"
   ],

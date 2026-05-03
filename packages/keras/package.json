@@ -17,6 +17,7 @@
     "directory": "packages/keras"
   },
   "files": [
+    "README.md",
     "dist",
     "llms.md"
   ],

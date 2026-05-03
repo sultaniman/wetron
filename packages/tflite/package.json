@@ -18,6 +18,7 @@
     "directory": "packages/tflite"
   },
   "files": [
+    "README.md",
     "dist",
     "llms.md"
   ],

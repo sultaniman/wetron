@@ -18,6 +18,7 @@
     "directory": "packages/executorch"
   },
   "files": [
+    "README.md",
     "dist",
     "llms.md"
   ],

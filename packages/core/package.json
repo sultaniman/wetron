@@ -19,6 +19,7 @@
     "directory": "packages/core"
   },
   "files": [
+    "README.md",
     "dist",
     "llms.md"
   ],

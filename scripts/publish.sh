@@ -8,7 +8,7 @@ packages=(tokens onnx tflite keras executorch torchscript core react svelte)
 
 for pkg in "${packages[@]}"; do
   echo "Publishing @wetron/$pkg..."
-  (cd "packages/$pkg" && bun publish --tag beta --access public)
+  (cd "packages/$pkg" && bun publish --access public)
   echo "✓ @wetron/$pkg"
 done
 

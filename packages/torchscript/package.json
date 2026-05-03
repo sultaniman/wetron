@@ -18,6 +18,7 @@
     "directory": "packages/torchscript"
   },
   "files": [
+    "README.md",
     "dist",
     "llms.md"
   ],
