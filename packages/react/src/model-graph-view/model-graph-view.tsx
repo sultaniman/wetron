@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useImperativeHandle, forwardRef } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -8,6 +8,7 @@ import {
   MarkerType,
   PanOnScrollMode,
   useReactFlow,
+  getNodesBounds,
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -35,6 +36,17 @@ const nodeTypes: NodeTypes = {
 
 const edgeTypes = { modelEdge: ModelEdge } as const;
 
+export type ModelGraphViewHandle = {
+  /** Fit all nodes into view and wait for DOM to update (ensures all nodes are rendered). */
+  fitAll: () => Promise<void>;
+  getViewport: () => { x: number; y: number; zoom: number };
+  setViewport: (vp: { x: number; y: number; zoom: number }) => void;
+  /** Bounding box of all nodes — use with getViewportForBounds for a hi-res export. */
+  getNodesBounds: () => { x: number; y: number; width: number; height: number };
+  /** The `.react-flow__viewport` element — capture with a custom transform for PNG export. */
+  getViewportElement: () => HTMLElement | null;
+};
+
 type Props = {
   graph: ModelGraph;
   onTargetClick?: (target: PanelTarget) => void;
@@ -44,79 +56,113 @@ type Props = {
   searchQuery?: string;
 };
 
-function Inner({ graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, colorMode }: Props) {
-  const isDark = useColorMode() === "dark";
-  const rf = useReactFlow();
-  const { nodes: rawNodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
-  const matchedNames = useMemo(
-    () => (searchQuery ? filterGraph(graph, searchQuery) : new Set<string>()),
-    [graph, searchQuery],
-  );
-  const nodes = useNodeDim(rawNodes, matchedNames);
-  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark, matchedNames);
-  const handleNodeClick = useNodeClickHandler(onTargetClick);
-  const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
-  useFitOnGraphChange(graph, layoutNodes);
-  useEffect(() => {
-    onWarnings?.(graph.warnings ?? []);
-  }, [graph, onWarnings]);
-  const edgeDefaults = useMemo(
-    () => (isDark ? { stroke: "#7a7a9a", opacity: 0.55 } : { stroke: "rgba(60,60,100,0.55)" }),
-    [isDark],
-  );
+const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>(
+  function Inner(
+    { graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, colorMode },
+    ref,
+  ) {
+    const isDark = useColorMode() === "dark";
+    const rf = useReactFlow();
+    const { nodes: rawNodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
+    const matchedNames = useMemo(
+      () => (searchQuery ? filterGraph(graph, searchQuery) : new Set<string>()),
+      [graph, searchQuery],
+    );
+    const nodes = useNodeDim(rawNodes, matchedNames);
+    const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark, matchedNames);
+    const handleNodeClick = useNodeClickHandler(onTargetClick);
+    const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
+    useFitOnGraphChange(graph, layoutNodes);
+    useEffect(() => {
+      onWarnings?.(graph.warnings ?? []);
+    }, [graph, onWarnings]);
+    const edgeDefaults = useMemo(
+      () => (isDark ? { stroke: "#7a7a9a", opacity: 0.55 } : { stroke: "rgba(60,60,100,0.55)" }),
+      [isDark],
+    );
 
-  return (
-    <div data-theme={isDark ? "dark" : "light"} style={{ width: "100%", height: "100%" }}>
-      <ReactFlow
-        colorMode={colorMode}
-        nodes={nodes}
-        onNodesChange={onNodesChange}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        onNodeClick={handleNodeClick}
-        onEdgeClick={handleEdgeClick}
-        defaultEdgeOptions={{
-          markerEnd: { type: MarkerType.ArrowClosed, width: 10, height: 10 },
-          style: edgeDefaults,
-        }}
-        nodesConnectable={false}
-        nodesDraggable={false}
-        panOnScroll
-        panOnScrollMode={PanOnScrollMode.Free}
-        zoomOnScroll={false}
-        zoomOnDoubleClick={false}
-        zoomActivationKeyCode="Meta"
-        minZoom={0.05}
-        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-        onlyRenderVisibleElements
-        proOptions={{ hideAttribution: true }}
-      >
-        <MiniMap
-          style={{
-            background: isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background,
-            borderRadius: MINIMAP_THEME.borderRadius,
-            border: "none",
-            overflow: "hidden",
-            cursor: "crosshair",
+    useImperativeHandle(
+      ref,
+      () => ({
+        async fitAll() {
+          const allNodes = rf.getNodes();
+          rf.fitView({ nodes: allNodes.map((n) => ({ id: n.id })), padding: 0.1, duration: 0 });
+          // Two frames: first for React to flush state, second for DOM to settle.
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+        },
+        getViewport() {
+          return rf.getViewport();
+        },
+        setViewport(vp) {
+          rf.setViewport(vp);
+        },
+        getNodesBounds() {
+          return getNodesBounds(rf.getNodes());
+        },
+        getViewportElement() {
+          return document.querySelector<HTMLElement>(".react-flow__viewport");
+        },
+      }),
+      [rf],
+    );
+
+    return (
+      <div data-theme={isDark ? "dark" : "light"} style={{ width: "100%", height: "100%" }}>
+        <ReactFlow
+          colorMode={colorMode}
+          nodes={nodes}
+          onNodesChange={onNodesChange}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          onNodeClick={handleNodeClick}
+          onEdgeClick={handleEdgeClick}
+          defaultEdgeOptions={{
+            markerEnd: { type: MarkerType.ArrowClosed, width: 10, height: 10 },
+            style: edgeDefaults,
           }}
-          nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
-          maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
-          onClick={(_, pos) => rf.setCenter(pos.x, pos.y, { zoom: rf.getViewport().zoom })}
-        />
-        <Controls />
-        <Background color={isDark ? "#2a2a3a" : "#d0d0d8"} />
-      </ReactFlow>
-    </div>
-  );
-}
+          nodesConnectable={false}
+          nodesDraggable={false}
+          panOnScroll
+          panOnScrollMode={PanOnScrollMode.Free}
+          zoomOnScroll={false}
+          zoomOnDoubleClick={false}
+          zoomActivationKeyCode="Meta"
+          minZoom={0.05}
+          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          onlyRenderVisibleElements
+          proOptions={{ hideAttribution: true }}
+        >
+          <MiniMap
+            style={{
+              background: isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background,
+              borderRadius: MINIMAP_THEME.borderRadius,
+              border: "none",
+              overflow: "hidden",
+              cursor: "crosshair",
+            }}
+            nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
+            maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
+            onClick={(_, pos) => rf.setCenter(pos.x, pos.y, { zoom: rf.getViewport().zoom })}
+          />
+          <Controls />
+          <Background color={isDark ? "#2a2a3a" : "#d0d0d8"} />
+        </ReactFlow>
+      </div>
+    );
+  },
+);
 
-export function ModelGraphView({ colorMode = "system", ...rest }: Props) {
-  return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ReactFlowProvider>
-        <Inner {...rest} colorMode={colorMode} />
-      </ReactFlowProvider>
-    </ColorModeContext.Provider>
-  );
-}
+export const ModelGraphView = forwardRef<ModelGraphViewHandle, Props>(
+  function ModelGraphView({ colorMode = "system", ...rest }, ref) {
+    return (
+      <ColorModeContext.Provider value={colorMode}>
+        <ReactFlowProvider>
+          <Inner {...rest} colorMode={colorMode} ref={ref} />
+        </ReactFlowProvider>
+      </ColorModeContext.Provider>
+    );
+  },
+);

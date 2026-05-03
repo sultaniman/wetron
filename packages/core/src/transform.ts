@@ -59,7 +59,7 @@ const ION_H = CARD_BASE + META_MARGIN + 12; // 49
 export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] } {
   const g = new Dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 40, ranksep: 60 });
+  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 100 });
 
   const flowNodes: FlowNode[] = [];
   const flowEdges: FlowEdge[] = [];
@@ -95,7 +95,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
 
   for (let i = 0; i < graph.nodes.length; i++) {
     const node = graph.nodes[i];
-    const id = `node::${node.name || `${node.opType}_${i}`}`;
+    const id = `node::${i}::${node.name || node.opType}`;
     const labels = opInputLabels(node.opType);
     const weightInputsRaw = node.inputs
       .map((name, slot) => {

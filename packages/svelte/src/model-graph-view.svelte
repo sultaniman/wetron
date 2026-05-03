@@ -2,6 +2,8 @@
   import { SvelteFlow, Controls, Background } from '@xyflow/svelte';
   import FitViewHelper from './fit-view-helper.svelte';
   import MinimapNav from './minimap-nav.svelte';
+  import ExportHelper from './export-helper.svelte';
+  import type { ExportHelpers } from './export-helper.svelte';
   import '@xyflow/svelte/dist/style.css';
   import { untrack } from 'svelte';
   import { modelGraphToFlow, filterGraph } from '@wetron/core';
@@ -23,9 +25,10 @@
     selectedEdgeTensorName?: string | null;
     searchQuery?: string;
     colorMode?: ColorMode;
+    exportRef?: ExportHelpers | null;
   }
 
-  let { graph, onTargetClick, onwarnings, selectedEdgeTensorName = null, searchQuery = '', colorMode = 'system' }: Props = $props();
+  let { graph, onTargetClick, onwarnings, selectedEdgeTensorName = null, searchQuery = '', colorMode = 'system', exportRef = $bindable<ExportHelpers | null>(null) }: Props = $props();
 
   let systemIsDark = $state(resolveColorMode('system') === 'dark');
 
@@ -167,6 +170,7 @@
     <Controls />
     <Background patternColor={isDark ? '#2a2a3a' : '#d0d0d8'} />
     <FitViewHelper nodes={flowNodes} />
+    <ExportHelper bind:ref={exportRef} />
   </SvelteFlow>
 </div>
 

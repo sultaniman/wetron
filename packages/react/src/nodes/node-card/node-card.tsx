@@ -70,7 +70,7 @@ export function NodeCard({
         </span>
       </div>
       {subtitle && (
-        <Tooltip text={subtitle}>
+        <Tooltip text={subtitle} onlyIfOverflow>
           <span className={css.subtitle}>{subtitle}</span>
         </Tooltip>
       )}

@@ -60,10 +60,15 @@
 }
 
 .subtitle {
+  display: inline-block;
+  max-width: 100%;
   font-size: 11px;
   color: var(--wetron-node-muted, #999);
   margin-top: 4px;
   font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .meta {

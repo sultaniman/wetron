@@ -366,6 +366,7 @@
   position: absolute;
   top: 9px;
   right: 9px;
+  z-index: 1;
   width: 24px;
   height: 24px;
   background: none;

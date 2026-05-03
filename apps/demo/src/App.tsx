@@ -1,8 +1,10 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { ArrowUpIcon } from "@phosphor-icons/react";
 import { toPng } from "html-to-image";
+import { getViewportForBounds } from "@xyflow/react";
 import { parseModel } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
+import type { ModelGraphViewHandle } from "@wetron/react";
 import type { ModelGraph } from "@wetron/core";
 import type { PanelTarget, ColorMode } from "@wetron/react";
 
@@ -33,6 +35,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [colorMode, setColorMode] = useState<ColorMode>("system");
   const graphContainerRef = useRef<HTMLDivElement>(null);
+  const graphViewRef = useRef<ModelGraphViewHandle>(null);
   const [resolvedMode, setResolvedMode] = useState<"light" | "dark">(() => resolveMode("system"));
 
   useEffect(() => {
@@ -118,15 +121,36 @@ export default function App() {
   }, [history]);
 
   const exportPng = useCallback(async () => {
-    const el = graphContainerRef.current?.querySelector<HTMLElement>(".react-flow__viewport");
-    if (!el || state.status !== "ready") return;
+    if (!graphViewRef.current || state.status !== "ready") return;
     const name = state.name.replace(/\.[^.]+$/, "") || "graph";
-    const dataUrl = await toPng(el, { cacheBust: true, pixelRatio: 2 });
+    const saved = graphViewRef.current.getViewport();
+    // fitAll renders all nodes into the DOM (onlyRenderVisibleElements)
+    await graphViewRef.current.fitAll();
+    const el = graphViewRef.current.getViewportElement();
+    if (!el) return;
+    // Compute output canvas at actual node-layout scale (1px per layout unit) + padding
+    const bounds = graphViewRef.current.getNodesBounds();
+    const PAD = 60;
+    const imgW = Math.ceil(bounds.width + PAD * 2);
+    const imgH = Math.ceil(bounds.height + PAD * 2);
+    const vp = getViewportForBounds(bounds, imgW, imgH, 0.1, 4, PAD / Math.max(bounds.width, bounds.height));
+    const dataUrl = await toPng(el, {
+      cacheBust: true,
+      pixelRatio: 2,
+      width: imgW,
+      height: imgH,
+      style: {
+        width: `${imgW}px`,
+        height: `${imgH}px`,
+        transform: `translate(${vp.x}px, ${vp.y}px) scale(${vp.zoom})`,
+      },
+    });
+    graphViewRef.current.setViewport(saved);
     const a = document.createElement("a");
     a.href = dataUrl;
     a.download = `${name}.png`;
     a.click();
-  }, [state, graphContainerRef]);
+  }, [state]);
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
@@ -252,7 +276,7 @@ export default function App() {
           Open model
           <input
             type="file"
-            accept=".onnx,.tflite,.keras"
+            accept=".onnx,.tflite,.keras,.pte,.pt"
             style={{ display: "none" }}
             onChange={onFileChange}
           />
@@ -314,6 +338,7 @@ export default function App() {
             onDragLeave={() => setDragging(false)}
           >
             <ModelGraphView
+              ref={graphViewRef}
               graph={state.graph}
               onTargetClick={handleTargetClick}
               selectedEdgeTensorName={selectedEdgeTensorName}

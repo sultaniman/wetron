@@ -129,6 +129,8 @@
     color: var(--node-icon-color);
   }
   .subtitle {
+    display: inline-block;
+    max-width: 100%;
     font-size: 11px;
     color: var(--node-muted);
     margin-top: 2px;

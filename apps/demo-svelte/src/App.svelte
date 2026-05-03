@@ -1,9 +1,11 @@
 <script lang="ts">
   import { ArrowUpIcon } from 'phosphor-svelte';
+  import { toPng } from 'html-to-image';
+  import { getViewportForBounds } from '@xyflow/svelte';
   import { parseModel } from '@wetron/core';
   import type { ModelGraph } from '@wetron/core';
   import { ModelGraphView, NodePropertyPanel } from '@wetron/svelte';
-  import type { PanelTarget, ColorMode } from '@wetron/svelte';
+  import type { PanelTarget, ColorMode, ExportHelpers } from '@wetron/svelte';
 
   type AppState =
     | { status: 'idle' }
@@ -15,6 +17,7 @@
   const MODE_LABEL: Record<ColorMode, string> = { system: 'System', light: 'Light', dark: 'Dark' };
 
   let appState = $state<AppState>({ status: 'idle' });
+  let graphExport = $state<ExportHelpers | null>(null);
   // $state.raw so the parsed graph is never wrapped in a deep-reactive proxy;
   // SvelteFlow mutates node objects internally and would trigger an infinite loop otherwise.
   let graph = $state.raw<ModelGraph | null>(null);
@@ -117,6 +120,36 @@
     const file = (e.target as HTMLInputElement).files?.[0];
     if (file) loadFile(file);
   }
+
+  async function exportPng() {
+    if (!graphExport || appState.status !== 'ready') return;
+    const name = (appState as { name: string }).name.replace(/\.[^.]+$/, '') || 'graph';
+    const saved = graphExport.getViewport();
+    await graphExport.fitAll();
+    const el = graphExport.getViewportElement();
+    if (!el) return;
+    const bounds = graphExport.getNodesBounds();
+    const PAD = 60;
+    const imgW = Math.ceil(bounds.width + PAD * 2);
+    const imgH = Math.ceil(bounds.height + PAD * 2);
+    const vp = getViewportForBounds(bounds, imgW, imgH, 0.1, 4, PAD / Math.max(bounds.width, bounds.height));
+    const dataUrl = await toPng(el, {
+      cacheBust: true,
+      pixelRatio: 2,
+      width: imgW,
+      height: imgH,
+      style: {
+        width: `${imgW}px`,
+        height: `${imgH}px`,
+        transform: `translate(${vp.x}px, ${vp.y}px) scale(${vp.zoom})`,
+      },
+    });
+    graphExport.setViewport(saved);
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `${name}.png`;
+    a.click();
+  }
 </script>
 
 <div style="display:flex;flex-direction:column;height:100vh;background:{chrome.pageBg}">
@@ -130,9 +163,17 @@
         {graph.nodes.length} nodes · {graph.inputs.length} inputs · {graph.outputs.length} outputs
       </span>
     {/if}
+    {#if appState.status === 'ready'}
+      <button
+        onclick={exportPng}
+        style="margin-left:auto;padding:5px 12px;background:transparent;color:{chrome.muted};border:1px solid {chrome.border};border-radius:6px;cursor:pointer;font-size:12px;font-weight:500"
+      >
+        Export PNG
+      </button>
+    {/if}
     <button
       onclick={cycleMode}
-      style="margin-left:auto;padding:5px 12px;background:transparent;color:{chrome.muted};border:1px solid {chrome.border};border-radius:6px;cursor:pointer;font-size:12px;font-weight:500"
+      style="{appState.status !== 'ready' ? 'margin-left:auto;' : ''}padding:5px 12px;background:transparent;color:{chrome.muted};border:1px solid {chrome.border};border-radius:6px;cursor:pointer;font-size:12px;font-weight:500"
     >
       {MODE_LABEL[colorMode]}
     </button>
@@ -184,6 +225,7 @@
           onTargetClick={handleTargetClick}
           {selectedEdgeTensorName}
           {colorMode}
+          bind:exportRef={graphExport}
         />
 
         {#if selected !== null}

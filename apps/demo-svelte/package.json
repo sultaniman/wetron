@@ -11,6 +11,7 @@
   "dependencies": {
     "@wetron/svelte": "workspace:*",
     "@xyflow/svelte": "latest",
+    "html-to-image": "latest",
     "svelte": "latest"
   },
   "devDependencies": {
