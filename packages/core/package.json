@@ -1,6 +1,6 @@
 {
   "name": "@wetron/core",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "IR types, format detection, dtype utilities and layout transform for neural network graph visualization",
   "keywords": [
     "graph",
