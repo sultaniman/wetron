@@ -35,10 +35,12 @@ export function useEdgeHighlight(
   layoutEdges: Edge[],
   selectedEdgeTensorName: string | null | undefined,
   isDark: boolean,
+  matchedNames?: ReadonlySet<string>,
 ): Edge[] {
   return useMemo(
     () => {
       const anySelected = selectedEdgeTensorName != null;
+      const filtering = matchedNames != null && matchedNames.size > 0;
       return layoutEdges.map((e) => {
         const d = e.data as FlowEdgeData | undefined;
         if (d?.tensorName === selectedEdgeTensorName) {
@@ -66,10 +68,23 @@ export function useEdgeHighlight(
             },
           };
         }
+        if (filtering) {
+          const sourceMatch = matchedNames!.has(d?.sourceNodeName ?? "");
+          const targetMatch = matchedNames!.has(d?.targetNodeName ?? "");
+          if (!sourceMatch && !targetMatch) {
+            return {
+              ...e,
+              style: {
+                stroke: isDark ? "rgba(120,120,160,0.15)" : "rgba(0,0,0,0.07)",
+                opacity: 1,
+              },
+            };
+          }
+        }
         return e;
       });
     },
-    [layoutEdges, selectedEdgeTensorName, isDark],
+    [layoutEdges, selectedEdgeTensorName, isDark, matchedNames],
   );
 }
 

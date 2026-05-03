@@ -53,7 +53,7 @@ function Inner({ graph, onTargetClick, onWarnings, selectedEdgeTensorName, searc
     [graph, searchQuery],
   );
   const nodes = useNodeDim(rawNodes, matchedNames);
-  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark);
+  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark, matchedNames);
   const handleNodeClick = useNodeClickHandler(onTargetClick);
   const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
   useFitOnGraphChange(graph, layoutNodes);

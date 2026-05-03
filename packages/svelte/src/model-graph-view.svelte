@@ -91,16 +91,20 @@
   );
 
   const flowEdges = $derived(rawFlow.edges.map(edge => {
-    const tensorName = (edge.data as FlowEdgeData | undefined)?.tensorName;
-    const isSelected = selectedEdgeTensorName != null && tensorName === selectedEdgeTensorName;
+    const d = edge.data as FlowEdgeData | undefined;
+    const isSelected = selectedEdgeTensorName != null && d?.tensorName === selectedEdgeTensorName;
     const anySelected = selectedEdgeTensorName != null;
+    const filtering = matchedNames.size > 0;
+    const edgeDimmed = filtering && !matchedNames.has(d?.sourceNodeName ?? '') && !matchedNames.has(d?.targetNodeName ?? '');
     return {
       ...edge,
       style: isSelected
         ? `stroke: ${EDGE_THEME.selectedStroke}; stroke-width: ${EDGE_THEME.selectedStrokeWidth}; opacity: 1;`
         : anySelected
           ? `stroke: ${isDark ? 'rgba(120,120,160,0.2)' : 'rgba(0,0,0,0.1)'}; opacity: 1;`
-          : edgeDefaults.style,
+          : edgeDimmed
+            ? `stroke: ${isDark ? 'rgba(120,120,160,0.15)' : 'rgba(0,0,0,0.07)'}; opacity: 1;`
+            : edgeDefaults.style,
     };
   }));
 
