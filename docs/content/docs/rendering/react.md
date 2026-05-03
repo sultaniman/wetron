@@ -17,10 +17,10 @@ import "@wetron/react/dist/index.css";
 import { ModelGraphView } from "@wetron/react";
 
 <ModelGraphView
-  graph={graph}                // ModelGraph — required
-  onTargetClick={setSelected}  // (target: PanelTarget) => void
-  colorMode="system"           // "light" | "dark" | "system" (default: "system")
-/>
+  graph={graph} // ModelGraph — required
+  onTargetClick={setSelected} // (target: PanelTarget) => void
+  colorMode="system" // "light" | "dark" | "system" (default: "system")
+/>;
 ```
 
 Renders the full interactive graph. Nodes are coloured by operator category. Click a node or edge to receive a `PanelTarget` you can pass to `NodePropertyPanel`.
@@ -31,35 +31,42 @@ Renders the full interactive graph. Nodes are coloured by operator category. Cli
 import { NodePropertyPanel } from "@wetron/react";
 
 <NodePropertyPanel
-  target={selected}                    // PanelTarget | null — null renders nothing
+  target={selected} // PanelTarget | null — null renders nothing
   colorMode="system"
-  opsets={graph?.opsets}               // ReadonlyMap<string, number> — ONNX domain versions
-  tensorShapes={graph?.tensorShapes}   // shape info for edge panels
-  onTensorClick={(name) => {}}         // called when a tensor name chip is clicked
-  onBack={() => {}}                    // shows a back arrow when provided
-  onClose={() => setSelected(null)}    // shows a close button when provided
-/>
+  opsets={graph?.opsets} // ReadonlyMap<string, number> — ONNX domain versions
+  tensorShapes={graph?.tensorShapes} // shape info for edge panels
+  onTensorClick={(name) => {}} // called when a tensor name chip is clicked
+  onBack={() => {}} // shows a back arrow when provided
+  onClose={() => setSelected(null)} // shows a close button when provided
+/>;
 ```
 
 ### Props
 
-| Prop | Type | Description |
-|---|---|---|
-| `target` | `PanelTarget \| null` | Selected node, edge, or tensor. `null` renders nothing. |
-| `colorMode` | `"light" \| "dark" \| "system"` | Theme. `"system"` follows `prefers-color-scheme`. |
-| `opsets` | `ReadonlyMap<string, number>` | Op domain → version (ONNX only). Shown in node header. |
-| `inputSources` | `ReadonlyMap<string, string>` | Tensor name → producing op type. Used to colour input chips. |
-| `tensorShapes` | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels. |
-| `onTensorClick` | `(name: string) => void` | Called when a tensor name chip is clicked. |
-| `onBack` | `() => void` | Shows a back arrow when provided. |
-| `onClose` | `() => void` | Shows a close button when provided. |
+| Prop            | Type                                    | Description                                                  |
+| --------------- | --------------------------------------- | ------------------------------------------------------------ |
+| `target`        | `PanelTarget \| null`                   | Selected node, edge, or tensor. `null` renders nothing.      |
+| `colorMode`     | `"light" \| "dark" \| "system"`         | Theme. `"system"` follows `prefers-color-scheme`.            |
+| `opsets`        | `ReadonlyMap<string, number>`           | Op domain → version (ONNX only). Shown in node header.       |
+| `inputSources`  | `ReadonlyMap<string, string>`           | Tensor name → producing op type. Used to colour input chips. |
+| `tensorShapes`  | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels.                                  |
+| `onTensorClick` | `(name: string) => void`                | Called when a tensor name chip is clicked.                   |
+| `onBack`        | `() => void`                            | Shows a back arrow when provided.                            |
+| `onClose`       | `() => void`                            | Shows a close button when provided.                          |
 
 ## PanelTarget type
 
 ```ts
 type PanelTarget =
   | GraphNode
-  | { edge: { tensorName: string; sourceOpType: string; shape: readonly number[] | null; dtype: string | null } }
+  | {
+      edge: {
+        tensorName: string;
+        sourceOpType: string;
+        shape: readonly number[] | null;
+        dtype: string | null;
+      };
+    }
   | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```
 

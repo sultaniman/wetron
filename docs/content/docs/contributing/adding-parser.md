@@ -35,6 +35,7 @@ export function parse<Format>(bytes: Uint8Array): ModelGraph {
 ```
 
 Rules:
+
 - Import IR types from `@wetron/core/ir` — never redefine them.
 - Import exotic dtype readers from `@wetron/core/dtypes` — never inline shims.
 - Use native Web APIs: `DataView`, `TextDecoder`, `DecompressionStream`.

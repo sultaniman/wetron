@@ -49,12 +49,12 @@ This pulls in all parser packages as transitive dependencies.
 
 ## Version constraints
 
-| Peer | Minimum |
-|---|---|
-| react | 18 |
-| @xyflow/react | 12 |
-| @phosphor-icons/react | 2 |
-| @base-ui/react | 1 |
-| svelte | 5 |
-| @xyflow/svelte | 1.5 |
-| phosphor-svelte | 3 |
+| Peer                  | Minimum |
+| --------------------- | ------- |
+| react                 | 18      |
+| @xyflow/react         | 12      |
+| @phosphor-icons/react | 2       |
+| @base-ui/react        | 1       |
+| svelte                | 5       |
+| @xyflow/svelte        | 1.5     |
+| phosphor-svelte       | 3       |

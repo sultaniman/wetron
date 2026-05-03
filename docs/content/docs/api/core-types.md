@@ -6,7 +6,13 @@ weight: 20
 ---
 
 ```ts
-import type { ModelGraph, GraphNode, GraphValue, ParseWarning, AttributeValue } from "@wetron/core/ir";
+import type {
+  ModelGraph,
+  GraphNode,
+  GraphValue,
+  ParseWarning,
+  AttributeValue,
+} from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 ```
 
@@ -35,8 +41,8 @@ interface GraphNode {
   readonly name: string;
   readonly opType: string;
   readonly domain?: string; // ONNX only — absent means standard ai.onnx domain
-  readonly inputs: readonly string[];   // tensor names consumed
-  readonly outputs: readonly string[];  // tensor names produced
+  readonly inputs: readonly string[]; // tensor names consumed
+  readonly outputs: readonly string[]; // tensor names produced
   readonly attributes: Readonly<Record<string, AttributeValue>>;
 }
 ```
@@ -75,7 +81,7 @@ Thrown by all parsers on unrecoverable failures:
 
 ```ts
 class ParseError extends Error {
-  readonly format: string;  // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown"
+  readonly format: string; // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown"
   readonly context: string; // human-readable description of the failure
 }
 ```
@@ -95,7 +101,7 @@ type GraphNodeData = {
   inputs: readonly string[];
   outputs: readonly string[];
   attributes: Readonly<Record<string, AttributeValue>>;
-  graphNode?: GraphNode;   // set for op nodes
+  graphNode?: GraphNode; // set for op nodes
   graphValue?: GraphValue; // set for I/O nodes
   shape?: readonly number[] | null;
   dtype?: string | null;

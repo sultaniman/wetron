@@ -39,7 +39,14 @@ type ColorMode = "light" | "dark" | "system";
 
 type PanelTarget =
   | GraphNode
-  | { edge: { tensorName: string; sourceOpType: string; shape: readonly number[] | null; dtype: string | null } }
+  | {
+      edge: {
+        tensorName: string;
+        sourceOpType: string;
+        shape: readonly number[] | null;
+        dtype: string | null;
+      };
+    }
   | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```
 

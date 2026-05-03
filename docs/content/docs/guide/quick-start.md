@@ -27,18 +27,8 @@ export default function App() {
 
   return (
     <>
-      <input
-        type="file"
-        accept=".onnx,.tflite,.keras,.pt,.pte"
-        onChange={handleFile}
-      />
-      {graph && (
-        <ModelGraphView
-          graph={graph}
-          onTargetClick={setSelected}
-          colorMode="system"
-        />
-      )}
+      <input type="file" accept=".onnx,.tflite,.keras,.pt,.pte" onChange={handleFile} />
+      {graph && <ModelGraphView graph={graph} onTargetClick={setSelected} colorMode="system" />}
       <NodePropertyPanel
         target={selected}
         colorMode="system"
