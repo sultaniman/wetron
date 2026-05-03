@@ -9,8 +9,8 @@
     "build": "bun run build:core:libs && bun run build:parsers && bun run build:core:index && bun run build:ui",
     "build:core:libs": "cd packages/core && bunx tsup",
     "build:core:index": "cd packages/core && bunx tsup --config tsup.index.config.ts",
-    "build:parsers": "cd packages/onnx && bunx tsup && cd packages/tflite && bunx tsup && cd packages/keras && bunx tsup && cd packages/executorch && bunx tsup && cd packages/torchscript && bunx tsup",
-    "build:ui": "cd packages/tokens && bunx tsup && cd packages/react && bunx vite build"
+    "build:parsers": "(cd packages/onnx && bunx tsup) && (cd packages/tflite && bunx tsup) && (cd packages/keras && bunx tsup) && (cd packages/executorch && bunx tsup) && (cd packages/torchscript && bunx tsup)",
+    "build:ui": "(cd packages/tokens && bunx tsup) && (cd packages/react && bunx vite build)"
   },
   "dependencies": {
     "dagre": "^0.8.5",

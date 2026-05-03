@@ -106,7 +106,7 @@ function buildSequential(model: KerasModelConfig, warnings: ParseWarning[]): Mod
   const outputs: GraphValue[] = lastNonInput
     ? [
         {
-          name: layerName(lastNonInput),
+          name: layerName(lastNonInput) ?? "",
           shape: null,
           dtype: null,
         },

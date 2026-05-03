@@ -1,6 +1,6 @@
 import { ByteBuffer } from "flatbuffers";
 import { unzipSync } from "fflate";
-import type { ModelGraph, GraphNode } from "@wetron/core/ir";
+import type { ModelGraph, GraphNode, ParseWarning } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 
 // All numeric field parameters are raw FlatBuffer vtable byte offsets,
