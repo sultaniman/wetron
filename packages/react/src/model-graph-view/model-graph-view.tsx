@@ -89,6 +89,7 @@ function Inner({ graph, onTargetClick, onWarnings, selectedEdgeTensorName, searc
         zoomActivationKeyCode="Meta"
         minZoom={0.05}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        onlyRenderVisibleElements
         proOptions={{ hideAttribution: true }}
       >
         <MiniMap

@@ -156,6 +156,7 @@
     zoomActivationKey="Meta"
     minZoom={0.05}
     colorMode={isDark ? 'dark' : 'light'}
+    onlyRenderVisibleElements
     proOptions={{ hideAttribution: true }}
   >
     <MinimapNav
