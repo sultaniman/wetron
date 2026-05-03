@@ -10,7 +10,7 @@
 
   type TensorInfo = { readonly shape: readonly number[] | null; readonly dtype: string | null };
 
-  let { target, onTensorClick, onBack, onClose, colorMode, inputSources, tensorShapes }: {
+  let { target, onTensorClick, onBack, onClose, colorMode, inputSources, tensorShapes, opsets }: {
     target: PanelTarget | null;
     onTensorClick?: (name: string) => void;
     onBack?: () => void;
@@ -18,6 +18,7 @@
     colorMode?: ColorMode;
     inputSources?: ReadonlyMap<string, string>;
     tensorShapes?: ReadonlyMap<string, TensorInfo>;
+    opsets?: ReadonlyMap<string, number>;
   } = $props();
 
   let systemIsDark = $state(resolveColorMode('system') === 'dark');
@@ -61,7 +62,7 @@
   >
     {#if onClose}<CloseButton {onClose} />{/if}
     {#if isGraphNode(target)}
-      <OpPanel node={target} {isDark} {inputSources} {onTensorClick} {onBack} />
+      <OpPanel node={target} {isDark} {inputSources} {onTensorClick} {onBack} {opsets} />
     {:else if isEdgeTarget(target)}
       <EdgePanel edge={target.edge} {tensorShapes} {onBack} />
     {:else if isTensorTarget(target)}

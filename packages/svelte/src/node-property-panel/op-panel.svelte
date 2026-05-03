@@ -9,22 +9,32 @@
   import SectionLabel from './section-label.svelte';
   import PanelHeader from './panel-header.svelte';
 
-  let { node, isDark, inputSources, onTensorClick, onBack }: {
+  let { node, isDark, inputSources, onTensorClick, onBack, opsets }: {
     node: GraphNode;
     isDark: boolean;
     inputSources?: ReadonlyMap<string, string>;
     onTensorClick?: (name: string) => void;
     onBack?: () => void;
+    opsets?: ReadonlyMap<string, number>;
   } = $props();
+
+  function formatModule(domain: string | undefined, sets: ReadonlyMap<string, number> | undefined): string | null {
+    if (!sets || sets.size === 0) return null;
+    const key = domain ?? '';
+    const version = sets.get(key);
+    const displayDomain = key === '' ? 'ai.onnx' : key;
+    return version != null ? `${displayDomain} v${version}` : displayDomain;
+  }
 
   const cat = $derived(opCategory(node.opType));
   const color = $derived(isDark ? CATEGORY_THEME[cat].dark : CATEGORY_THEME[cat].light);
   const iconBg = $derived(color + '20');
+  const module = $derived(formatModule(node.domain, opsets));
   const visibleInputs = $derived(node.inputs.filter(n => n !== ''));
   const attrEntries = $derived(Object.entries(node.attributes));
 </script>
 
-<PanelHeader title={node.opType} subtitle={node.name || undefined} iconBg={iconBg} iconColor={color} {onBack}>
+<PanelHeader title={node.opType} subtitle={module ?? (node.name || undefined)} extraSubtitle={module ? (node.name || undefined) : undefined} iconBg={iconBg} iconColor={color} {onBack}>
   {#snippet icon()}<CategoryIcon {cat} op={node.opType} size={15} />{/snippet}
 </PanelHeader>
 {#if visibleInputs.length > 0}

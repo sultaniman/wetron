@@ -2,9 +2,10 @@
   import type { Snippet } from 'svelte';
   import BackButton from './back-button.svelte';
 
-  let { title, subtitle, iconKind, iconBg, iconColor, onBack, icon }: {
+  let { title, subtitle, extraSubtitle, iconKind, iconBg, iconColor, onBack, icon }: {
     title: string;
     subtitle?: string;
+    extraSubtitle?: string;
     iconKind?: string;
     iconBg?: string;
     iconColor?: string;
@@ -21,6 +22,7 @@
   <div class="titleWrap">
     <div class="nodeTitle">{title}</div>
     {#if subtitle}<div class="nodeSubtitle" title={subtitle}>{subtitle}</div>{/if}
+    {#if extraSubtitle}<div class="nodeSubtitle" title={extraSubtitle}>{extraSubtitle}</div>{/if}
   </div>
 </div>
 
