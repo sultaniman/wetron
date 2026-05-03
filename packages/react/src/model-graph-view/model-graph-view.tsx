@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -12,7 +12,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import "./model-graph-view.css";
-import type { ModelGraph, PanelTarget } from "@wetron/core/ir";
+import type { ModelGraph, PanelTarget, ParseWarning } from "@wetron/core/ir";
 import { GraphNodeComponent } from "../nodes/graph-node.tsx";
 import { IoNodeComponent } from "../nodes/io-node.tsx";
 import { ModelEdge } from "../edges/model-edge.tsx";
@@ -36,11 +36,12 @@ const edgeTypes = { modelEdge: ModelEdge } as const;
 type Props = {
   graph: ModelGraph;
   onTargetClick?: (target: PanelTarget) => void;
+  onWarnings?: (warnings: readonly ParseWarning[]) => void;
   colorMode?: ColorMode;
   selectedEdgeTensorName?: string | null;
 };
 
-function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Props) {
+function Inner({ graph, onTargetClick, onWarnings, selectedEdgeTensorName, colorMode }: Props) {
   const isDark = useColorMode() === "dark";
   const rf = useReactFlow();
   const { nodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
@@ -48,6 +49,9 @@ function Inner({ graph, onTargetClick, selectedEdgeTensorName, colorMode }: Prop
   const handleNodeClick = useNodeClickHandler(onTargetClick);
   const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
   useFitOnGraphChange(graph, layoutNodes);
+  useEffect(() => {
+    onWarnings?.(graph.warnings ?? []);
+  }, [graph, onWarnings]);
   const edgeDefaults = useMemo(
     () => (isDark ? { stroke: "#7a7a9a", opacity: 0.55 } : { stroke: "rgba(60,60,100,0.55)" }),
     [isDark],

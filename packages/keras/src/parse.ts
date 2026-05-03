@@ -1,5 +1,5 @@
 import { unzipSync } from "fflate";
-import type { ModelGraph, GraphNode, GraphValue, AttributeValue } from "@wetron/core/ir";
+import type { ModelGraph, GraphNode, GraphValue, AttributeValue, ParseWarning } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 
 type KerasInboundNode = {
@@ -43,42 +43,49 @@ function extractAttributes(config: Record<string, unknown>): Record<string, Attr
   return result;
 }
 
-function layerName(layer: KerasLayerEntry): string {
+function layerName(layer: KerasLayerEntry): string | null {
   const name = layer.config["name"];
-  if (typeof name !== "string" || !name) {
-    throw new ParseError("keras", `Layer missing name: ${layer.class_name}`);
-  }
+  if (typeof name !== "string" || !name) return null;
   return name;
 }
 
-function buildSequential(model: KerasModelConfig): ModelGraph {
+function buildSequential(model: KerasModelConfig, warnings: ParseWarning[]): ModelGraph {
   const { layers } = model.config;
   const nodes: GraphNode[] = [];
   const inputs: GraphValue[] = [];
   let prevOutput = "";
 
-  for (const layer of layers) {
-    const name = layerName(layer);
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i];
+    try {
+      const name = layerName(layer);
+      if (name === null) {
+        warnings.push({ code: "layer_name_missing", context: `Layer ${i} (${layer.class_name}) has no name`, nodeIndex: i });
+        continue;
+      }
 
-    if (layer.class_name === "InputLayer") {
-      const batchShape = (layer.config["batch_shape"] as (number | null)[] | null) ?? null;
-      inputs.push({
+      if (layer.class_name === "InputLayer") {
+        const batchShape = (layer.config["batch_shape"] as (number | null)[] | null) ?? null;
+        inputs.push({
+          name,
+          shape: batchShape ? batchShape.map((d) => d ?? -1) : null,
+          dtype: (layer.config["dtype"] as string | null) ?? null,
+        });
+        prevOutput = name;
+        continue;
+      }
+
+      nodes.push({
         name,
-        shape: batchShape ? batchShape.map((d) => d ?? -1) : null,
-        dtype: (layer.config["dtype"] as string | null) ?? null,
+        opType: layer.class_name,
+        inputs: prevOutput ? [prevOutput] : [],
+        outputs: [name],
+        attributes: extractAttributes(layer.config),
       });
       prevOutput = name;
-      continue;
+    } catch (e) {
+      warnings.push({ code: "layer_parse_error", context: `Layer ${i} (${layer.class_name}): ${e instanceof Error ? e.message : String(e)}`, nodeIndex: i });
     }
-
-    nodes.push({
-      name,
-      opType: layer.class_name,
-      inputs: prevOutput ? [prevOutput] : [],
-      outputs: [name],
-      attributes: extractAttributes(layer.config),
-    });
-    prevOutput = name;
   }
 
   const lastNonInput = [...layers].reverse().find((l) => l.class_name !== "InputLayer");
@@ -95,7 +102,7 @@ function buildSequential(model: KerasModelConfig): ModelGraph {
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>(
     inputs.map((gv) => [gv.name, { shape: gv.shape, dtype: gv.dtype }]),
   );
-  return { name: model.config.name, inputs, outputs, nodes, initializers: new Map(), tensorShapes };
+  return { name: model.config.name, inputs, outputs, nodes, initializers: new Map(), tensorShapes, ...(warnings.length ? { warnings } : {}) };
 }
 
 // Keras 3 serializes tensors as { class_name: "__keras_tensor__", config: { keras_history: [...] } }
@@ -138,37 +145,46 @@ function resolveInbounds(
   return tensor ? [tensor] : [];
 }
 
-function buildFunctional(model: KerasModelConfig): ModelGraph {
+function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[]): ModelGraph {
   const { layers } = model.config;
   const nodes: GraphNode[] = [];
   const inputs: GraphValue[] = [];
   const outputMap = new Map<string, string>(); // layerName → synthetic output tensor name
   const consumedTensors = new Set<string>();
 
-  for (const layer of layers) {
-    const name = layerName(layer);
-    outputMap.set(name, name);
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i];
+    try {
+      const name = layerName(layer);
+      if (name === null) {
+        warnings.push({ code: "layer_name_missing", context: `Layer ${i} (${layer.class_name}) has no name`, nodeIndex: i });
+        continue;
+      }
+      outputMap.set(name, name);
 
-    if (layer.class_name === "InputLayer") {
-      const batchShape = (layer.config["batch_shape"] as (number | null)[] | null) ?? null;
-      inputs.push({
+      if (layer.class_name === "InputLayer") {
+        const batchShape = (layer.config["batch_shape"] as (number | null)[] | null) ?? null;
+        inputs.push({
+          name,
+          shape: batchShape ? batchShape.map((d) => d ?? -1) : null,
+          dtype: (layer.config["dtype"] as string | null) ?? null,
+        });
+        continue;
+      }
+
+      const inputTensors = resolveInbounds(layer.inbound_nodes, outputMap);
+      inputTensors.forEach((t) => consumedTensors.add(t));
+
+      nodes.push({
         name,
-        shape: batchShape ? batchShape.map((d) => d ?? -1) : null,
-        dtype: (layer.config["dtype"] as string | null) ?? null,
+        opType: layer.class_name,
+        inputs: inputTensors,
+        outputs: [name],
+        attributes: extractAttributes(layer.config),
       });
-      continue;
+    } catch (e) {
+      warnings.push({ code: "layer_parse_error", context: `Layer ${i} (${layer.class_name}): ${e instanceof Error ? e.message : String(e)}`, nodeIndex: i });
     }
-
-    const inputTensors = resolveInbounds(layer.inbound_nodes, outputMap);
-    inputTensors.forEach((t) => consumedTensors.add(t));
-
-    nodes.push({
-      name,
-      opType: layer.class_name,
-      inputs: inputTensors,
-      outputs: [name],
-      attributes: extractAttributes(layer.config),
-    });
   }
 
   // Graph outputs: layer outputs that are never consumed as another layer's input
@@ -179,7 +195,7 @@ function buildFunctional(model: KerasModelConfig): ModelGraph {
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>(
     inputs.map((gv) => [gv.name, { shape: gv.shape, dtype: gv.dtype }]),
   );
-  return { name: model.config.name, inputs, outputs, nodes, initializers: new Map(), tensorShapes };
+  return { name: model.config.name, inputs, outputs, nodes, initializers: new Map(), tensorShapes, ...(warnings.length ? { warnings } : {}) };
 }
 
 export function parseKeras(bytes: Uint8Array): ModelGraph {
@@ -209,7 +225,8 @@ export function parseKeras(bytes: Uint8Array): ModelGraph {
   const model = raw as KerasModelConfig;
   if (!model?.config?.layers) throw new ParseError("keras", "config.json missing config.layers");
 
-  if (model.class_name === "Sequential") return buildSequential(model);
-  if (model.class_name === "Functional") return buildFunctional(model);
+  const warnings: ParseWarning[] = [];
+  if (model.class_name === "Sequential") return buildSequential(model, warnings);
+  if (model.class_name === "Functional") return buildFunctional(model, warnings);
   throw new ParseError("keras", `Unsupported model class: ${model.class_name}`);
 }

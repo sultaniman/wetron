@@ -2,7 +2,7 @@ export { opCategory } from "./categories.ts";
 export type { OpCategory } from "./categories.ts";
 export { opInputLabels } from "./op-inputs.ts";
 export { ParseError } from "./ir.ts";
-export type { ModelGraph, GraphNode, GraphValue, AttributeValue, PanelTarget } from "./ir.ts";
+export type { ModelGraph, GraphNode, GraphValue, AttributeValue, PanelTarget, ParseWarning } from "./ir.ts";
 export { detectFormat } from "./detect.ts";
 export type { Format } from "./detect.ts";
 export { modelGraphToFlow } from "./transform.ts";

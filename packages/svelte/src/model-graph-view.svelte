@@ -6,7 +6,7 @@
   import { untrack } from 'svelte';
   import { modelGraphToFlow } from '@wetron/core/transform';
   import type { FlowEdge, GraphNodeData } from '@wetron/core/transform';
-  import type { ModelGraph } from '@wetron/core/ir';
+  import type { ModelGraph, ParseWarning } from '@wetron/core/ir';
   import GraphNodeComponent from './nodes/graph-node.svelte';
   import IoNodeComponent from './nodes/io-node.svelte';
   import ModelEdgeComponent from './edges/model-edge.svelte';
@@ -19,11 +19,12 @@
   interface Props {
     graph: ModelGraph;
     onTargetClick?: (target: PanelTarget) => void;
+    onwarnings?: (warnings: readonly ParseWarning[]) => void;
     selectedEdgeTensorName?: string | null;
     colorMode?: ColorMode;
   }
 
-  let { graph, onTargetClick, selectedEdgeTensorName = null, colorMode = 'system' }: Props = $props();
+  let { graph, onTargetClick, onwarnings, selectedEdgeTensorName = null, colorMode = 'system' }: Props = $props();
 
   let systemIsDark = $state(resolveColorMode('system') === 'dark');
 
@@ -62,6 +63,10 @@
       ? { style: 'stroke: #7a7a9a; opacity: 0.55;' }
       : { style: 'opacity: 0.35;' }
   );
+
+  $effect(() => {
+    onwarnings?.(graph.warnings ?? []);
+  });
 
   const rawFlow = $derived(modelGraphToFlow(graph));
 

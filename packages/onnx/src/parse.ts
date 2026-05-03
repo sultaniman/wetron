@@ -1,6 +1,6 @@
 import { Root } from "protobufjs/light";
 import type { INamespace } from "protobufjs/light";
-import type { ModelGraph, GraphNode, GraphValue, AttributeValue } from "@wetron/core/ir";
+import type { ModelGraph, GraphNode, GraphValue, AttributeValue, ParseWarning } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 import { bigIntToNumber } from "@wetron/core/dtypes";
 import descriptor from "./onnx-descriptor.json" with { type: "json" };
@@ -178,15 +178,17 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
     });
   }
 
-  const nodes: GraphNode[] = rawNodes
-    .filter((n) => {
-      if (String(n["opType"] ?? "") !== "Constant") return true;
+  const warnings: ParseWarning[] = [];
+  const nodes: GraphNode[] = [];
+  for (let i = 0; i < rawNodes.length; i++) {
+    const n = rawNodes[i];
+    if (String(n["opType"] ?? "") === "Constant") {
       const outputs = (n["output"] as string[] | null) ?? [];
-      return outputs.length !== 1 || !foldedConstants.has(String(outputs[0] ?? ""));
-    })
-    .map((n) => {
+      if (outputs.length === 1 && foldedConstants.has(String(outputs[0] ?? ""))) continue;
+    }
+    try {
       const domain = String(n["domain"] ?? "");
-      return {
+      nodes.push({
         name: String(n["name"] ?? ""),
         opType: String(n["opType"] ?? ""),
         ...(domain ? { domain } : {}),
@@ -198,8 +200,15 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
             mapAttribute(a),
           ]),
         ),
-      } satisfies GraphNode;
-    });
+      } satisfies GraphNode);
+    } catch (e) {
+      warnings.push({
+        code: "node_parse_error",
+        context: `Node ${i} (${String(n["opType"] ?? "?")}): ${e instanceof Error ? e.message : String(e)}`,
+        nodeIndex: i,
+      });
+    }
+  }
 
   const rawInputs = (graph["input"] as Array<Record<string, unknown>> | null) ?? [];
   const rawOutputs = (graph["output"] as Array<Record<string, unknown>> | null) ?? [];
@@ -261,5 +270,6 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
     initializers,
     tensorShapes,
     opsets,
+    ...(warnings.length ? { warnings } : {}),
   };
 }

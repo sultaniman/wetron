@@ -1,5 +1,5 @@
 import { ByteBuffer } from "flatbuffers";
-import type { ModelGraph, GraphNode, GraphValue } from "@wetron/core/ir";
+import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 import { BUILTIN_OP_NAMES } from "./builtin-ops.ts";
 import { TENSOR_TYPE_NAMES } from "./tensor-types.ts";
@@ -157,35 +157,44 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
 
   // Operator field indices: 0=opcode_index, 1=inputs, 2=outputs
   const numOperators = vecLen(bb, subgraph, 3);
+  const warnings: ParseWarning[] = [];
   const nodes: GraphNode[] = [];
   for (let i = 0; i < numOperators; i++) {
-    const op = vecTable(bb, subgraph, 3, i);
-    const opcodeIdx = uint32_(bb, op, 0, 0);
-    const opName = opcodeNames[opcodeIdx] ?? `OP_${opcodeIdx}`;
+    try {
+      const op = vecTable(bb, subgraph, 3, i);
+      const opcodeIdx = uint32_(bb, op, 0, 0);
+      const opName = opcodeNames[opcodeIdx] ?? `OP_${opcodeIdx}`;
 
-    const numOpInputs = vecLen(bb, op, 1);
-    const opInputs: string[] = [];
-    for (let j = 0; j < numOpInputs; j++) {
-      const idx = vecInt32(bb, op, 1, j);
-      if (idx < 0) continue; // -1 = optional input, skip
-      opInputs.push(idx < tensors.length ? tensors[idx].name : `tensor_${idx}`);
+      const numOpInputs = vecLen(bb, op, 1);
+      const opInputs: string[] = [];
+      for (let j = 0; j < numOpInputs; j++) {
+        const idx = vecInt32(bb, op, 1, j);
+        if (idx < 0) continue; // -1 = optional input, skip
+        opInputs.push(idx < tensors.length ? tensors[idx].name : `tensor_${idx}`);
+      }
+
+      const numOpOutputs = vecLen(bb, op, 2);
+      const opOutputs: string[] = [];
+      for (let j = 0; j < numOpOutputs; j++) {
+        const idx = vecInt32(bb, op, 2, j);
+        if (idx < 0) continue; // -1 = optional output, skip
+        opOutputs.push(idx < tensors.length ? tensors[idx].name : `tensor_${idx}`);
+      }
+
+      nodes.push({
+        name: `op_${i}`,
+        opType: opName,
+        inputs: opInputs,
+        outputs: opOutputs,
+        attributes: {},
+      });
+    } catch (e) {
+      warnings.push({
+        code: "node_parse_error",
+        context: `Operator ${i}: ${e instanceof Error ? e.message : String(e)}`,
+        nodeIndex: i,
+      });
     }
-
-    const numOpOutputs = vecLen(bb, op, 2);
-    const opOutputs: string[] = [];
-    for (let j = 0; j < numOpOutputs; j++) {
-      const idx = vecInt32(bb, op, 2, j);
-      if (idx < 0) continue; // -1 = optional output, skip
-      opOutputs.push(idx < tensors.length ? tensors[idx].name : `tensor_${idx}`);
-    }
-
-    nodes.push({
-      name: `op_${i}`,
-      opType: opName,
-      inputs: opInputs,
-      outputs: opOutputs,
-      attributes: {},
-    });
   }
 
   const toGraphValue = (idx: number): GraphValue => {
@@ -206,5 +215,6 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
     nodes,
     initializers,
     tensorShapes,
+    ...(warnings.length ? { warnings } : {}),
   };
 }
