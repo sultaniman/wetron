@@ -25,12 +25,12 @@
   "sideEffects": false,
   "exports": {
     ".": {
+      "source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
   "dependencies": {
-    "@wetron/core": "workspace:*",
-    "flatbuffers": "^25.9.23"
+    "@wetron/core": "workspace:*"
   }
 }

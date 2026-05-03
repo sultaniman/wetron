@@ -24,8 +24,9 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/parse.d.ts",
-      "import": "./dist/parse.js"
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
   "dependencies": {
