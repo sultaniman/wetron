@@ -43,5 +43,22 @@ publish:
     cd packages/react       && bun publish --access public
     cd packages/svelte      && bun publish --access public
 
-# Bump version, build, test, publish: just release 0.1.0
-release version: (bump version) check publish
+# Dry-run all packages — shows resolved versions and files before publishing
+preview:
+    cd packages/tokens      && bun publish --dry-run --access public
+    cd packages/onnx        && bun publish --dry-run --access public
+    cd packages/tflite      && bun publish --dry-run --access public
+    cd packages/keras       && bun publish --dry-run --access public
+    cd packages/executorch  && bun publish --dry-run --access public
+    cd packages/torchscript && bun publish --dry-run --access public
+    cd packages/core        && bun publish --dry-run --access public
+    cd packages/react       && bun publish --dry-run --access public
+    cd packages/svelte      && bun publish --dry-run --access public
+
+# Bump version, build, test, preview, confirm, publish: just release 0.1.0
+release version: (bump version) check preview
+    #!/usr/bin/env bash
+    set -euo pipefail
+    read -rp $'\nPublish the above to npm? [y/N] ' confirm
+    [[ "$confirm" == [yY] ]] || { echo "Aborting."; exit 1; }
+    just publish
