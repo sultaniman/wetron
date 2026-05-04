@@ -29,10 +29,11 @@
   "exports": {
     ".": {
       "source": "./src/index.ts",
-      "types": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./dist/index.css": "./dist/index.css"
+    "./styles": "./dist/index.css",
+    "./styles.css": "./dist/index.css"
   },
   "dependencies": {
     "@wetron/core": "workspace:*",
