@@ -1,6 +1,6 @@
 {
   "name": "@wetron/svelte",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Svelte components for neural network graph visualization, built on SvelteFlow",
   "keywords": [
     "graph",
