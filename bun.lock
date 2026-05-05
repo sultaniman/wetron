@@ -69,7 +69,7 @@
     },
     "packages/core": {
       "name": "@wetron/core",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/executorch": "workspace:*",
         "@wetron/keras": "workspace:*",
@@ -85,28 +85,28 @@
     },
     "packages/executorch": {
       "name": "@wetron/executorch",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/keras": {
       "name": "@wetron/keras",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/onnx": {
       "name": "@wetron/onnx",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/react": {
       "name": "@wetron/react",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/core": "workspace:*",
         "@wetron/tokens": "workspace:*",
@@ -124,7 +124,7 @@
     },
     "packages/savedmodel": {
       "name": "@wetron/savedmodel",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/core": "workspace:*",
         "@wetron/keras": "workspace:*",
@@ -132,7 +132,7 @@
     },
     "packages/svelte": {
       "name": "@wetron/svelte",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/core": "workspace:*",
         "@wetron/tokens": "workspace:*",
@@ -145,22 +145,20 @@
     },
     "packages/tflite": {
       "name": "@wetron/tflite",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/tokens": {
       "name": "@wetron/tokens",
-      "version": "0.0.7",
+      "version": "0.0.8",
     },
     "packages/torchscript": {
       "name": "@wetron/torchscript",
-      "version": "0.0.7",
+      "version": "0.0.8",
       "dependencies": {
         "@wetron/core": "workspace:*",
-        "fflate": "^0.8.2",
-        "flatbuffers": "^25.9.23",
       },
     },
   },
