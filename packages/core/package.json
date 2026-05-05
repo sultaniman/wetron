@@ -60,6 +60,11 @@
       "source": "./src/panel-utils.ts",
       "types": "./dist/panel-utils.d.ts",
       "import": "./dist/panel-utils.js"
+    },
+    "./flatbuffers": {
+      "source": "./src/flatbuffers.ts",
+      "types": "./dist/flatbuffers.d.ts",
+      "import": "./dist/flatbuffers.js"
     }
   },
   "dependencies": {

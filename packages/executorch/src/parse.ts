@@ -1,63 +1,18 @@
 import { ByteBuffer } from "flatbuffers";
 import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
+import {
+  int8_,
+  int32_,
+  string_,
+  vecLen,
+  vecTable,
+  vecInt32,
+  unionType,
+  unionTable,
+} from "@wetron/core/flatbuffers";
 
-// All numeric field parameters are raw FlatBuffer vtable byte offsets,
-// matching the executorch-schema.js convention directly (4, 6, 8, …).
-
-function voff(bb: ByteBuffer, table: number, vto: number): number {
-  return bb.__offset(table, vto);
-}
-
-function int8_(bb: ByteBuffer, table: number, vto: number, def = 0): number {
-  const off = voff(bb, table, vto);
-  return off ? bb.readInt8(table + off) : def;
-}
-
-function int32_(bb: ByteBuffer, table: number, vto: number, def = 0): number {
-  const off = voff(bb, table, vto);
-  return off ? bb.readInt32(table + off) : def;
-}
-
-const _dec = new TextDecoder();
-
-function string_(bb: ByteBuffer, table: number, vto: number): string | null {
-  const off = voff(bb, table, vto);
-  if (!off) return null;
-  const result = bb.__string(table + off);
-  return typeof result === "string" ? result : _dec.decode(result);
-}
-
-function vecLen(bb: ByteBuffer, table: number, vto: number): number {
-  const off = voff(bb, table, vto);
-  return off ? bb.__vector_len(table + off) : 0;
-}
-
-function vecTable(bb: ByteBuffer, table: number, vto: number, i: number): number {
-  const off = voff(bb, table, vto);
-  if (!off) return 0;
-  return bb.__indirect(bb.__vector(table + off) + i * 4);
-}
-
-function vecInt32(bb: ByteBuffer, table: number, vto: number, i: number): number {
-  const off = voff(bb, table, vto);
-  if (!off) return 0;
-  return bb.readInt32(bb.__vector(table + off) + i * 4);
-}
-
-// Union: type byte at `vto`, table reference at `vto + 2`
-function unionType(bb: ByteBuffer, table: number, vto: number): number {
-  const off = voff(bb, table, vto);
-  return off ? bb.readInt8(table + off) : 0;
-}
-
-function unionTable(bb: ByteBuffer, table: number, vto: number): number {
-  const off = voff(bb, table, vto + 2);
-  if (!off) return 0;
-  return bb.__indirect(table + off);
-}
-
-// PyTorch / ExecuTorch ScalarType enum → dtype string
+// PyTorch / ExecuTorch ScalarType enum -> dtype string
 const SCALAR_TYPE: Record<number, string> = {
   0: "uint8",
   1: "int8",
@@ -143,7 +98,7 @@ export function parseExecutorch(bytes: Uint8Array): ModelGraph {
   for (let i = 0; i < vecLen(bb, plan, 12); i++) planOutputIdxs.push(vecInt32(bb, plan, 12, i));
 
   // Build graph from KernelCall instructions across all chains.
-  // Heuristic: values not yet produced → this node's outputs; already produced → inputs.
+  // Heuristic: values not yet produced -> this node's outputs; already produced -> inputs.
   const produced = new Set<number>(planInputIdxs);
   const warnings: ParseWarning[] = [];
   const nodes: GraphNode[] = [];

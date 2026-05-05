@@ -2,63 +2,15 @@ import { ByteBuffer } from "flatbuffers";
 import { unzipSync } from "fflate/browser";
 import type { ModelGraph, GraphNode, ParseWarning } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
-
-// All numeric field parameters are raw FlatBuffer vtable byte offsets,
-// matching the pytorch-schema.js convention directly (4, 6, 8, …).
-
-function voff(bb: ByteBuffer, table: number, vto: number): number {
-  return bb.__offset(table, vto);
-}
-
-function string_(bb: ByteBuffer, table: number, vto: number): string | null {
-  const off = voff(bb, table, vto);
-  if (!off) return null;
-  const dec = new TextDecoder();
-  const result = bb.__string(table + off);
-  return typeof result === "string" ? result : dec.decode(result);
-}
-
-function vecLen(bb: ByteBuffer, table: number, vto: number): number {
-  const off = voff(bb, table, vto);
-  return off ? bb.__vector_len(table + off) : 0;
-}
-
-function vecTable(bb: ByteBuffer, table: number, vto: number, i: number): number {
-  const off = voff(bb, table, vto);
-  if (!off) return 0;
-  return bb.__indirect(bb.__vector(table + off) + i * 4);
-}
-
-function vecUint32(bb: ByteBuffer, table: number, vto: number, i: number): number {
-  const off = voff(bb, table, vto);
-  if (!off) return 0;
-  return bb.readUint32(bb.__vector(table + off) + i * 4);
-}
-
-// Struct vector: elements are packed inline (no indirection), each `stride` bytes
-function vecStructBase(
-  bb: ByteBuffer,
-  table: number,
-  vto: number,
-  i: number,
-  stride: number,
-): number {
-  const off = voff(bb, table, vto);
-  if (!off) return -1;
-  return bb.__vector(table + off) + i * stride;
-}
-
-// Union: type byte at `vto`, table reference at `vto + 2`
-function unionType(bb: ByteBuffer, table: number, vto: number): number {
-  const off = voff(bb, table, vto);
-  return off ? bb.readInt8(table + off) : 0;
-}
-
-function unionTable(bb: ByteBuffer, table: number, vto: number): number {
-  const off = voff(bb, table, vto + 2);
-  if (!off) return 0;
-  return bb.__indirect(table + off);
-}
+import {
+  string_,
+  vecLen,
+  vecTable,
+  vecUint32,
+  vecStructBase,
+  unionType,
+  unionTable,
+} from "@wetron/core/flatbuffers";
 
 function isTorchscript(bytes: Uint8Array): boolean {
   if (bytes.length < 8) return false;
@@ -104,7 +56,7 @@ function readFunction(bb: ByteBuffer, funcTable: number): { qn: string; ops: str
 // ZIP-based TorchScript (torch.jit.save / newer _save_for_lite_interpreter)
 // ---------------------------------------------------------------------------
 
-// Minimal Python binary serialization decoder (protocol 2/4) — handles only
+// Minimal Python binary serialization decoder (protocol 2/4) - handles only
 // tuples, lists, strings, ints, floats, and None. Callables and objects are
 // dropped as null so we can still walk the operator metadata.
 type PklVal = string | number | boolean | null | PklVal[];
@@ -436,7 +388,7 @@ export function parseTorchscript(bytes: Uint8Array): ModelGraph {
     throw new ParseError("torchscript", "No operator calls found in TorchScript Mobile module");
   }
 
-  // Build a linear graph: input → op_0 → op_1 → … → output
+  // Build a linear graph: input -> op_0 -> op_1 -> … -> output
   const nodes: GraphNode[] = allOpCalls.map((opType, i) => ({
     name: `op_${i}`,
     opType,
