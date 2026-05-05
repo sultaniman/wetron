@@ -1,4 +1,4 @@
-# CSS Isolation + Node Color Theming — Implementation Plan
+# CSS Isolation + Node Color Theming - Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -10,9 +10,10 @@
 
 ---
 
-## Task 1: React — Strategy C: category CSS vars + node color expressions
+## Task 1: React - Strategy C: category CSS vars + node color expressions
 
 **Files:**
+
 - Modify: `packages/react/src/model-graph-view/model-graph-view.css`
 - Modify: `packages/react/src/nodes/graph-node.tsx`
 - Modify: `packages/react/src/nodes/io-node.tsx`
@@ -28,9 +29,7 @@ Add to `packages/react/test/graph-node.test.tsx` at the end of the file:
 test("color prop uses CSS category var not hex", () => {
   const { container } = renderNode("Conv");
   const card = container.querySelector('[data-nodetype="graphNode"]')!;
-  expect(card.style.getPropertyValue("--node-color")).toBe(
-    "var(--wetron-category-conv)",
-  );
+  expect(card.style.getPropertyValue("--node-color")).toBe("var(--wetron-category-conv)");
 });
 ```
 
@@ -47,45 +46,45 @@ Expected: last test fails with something like `expected "#3949ab" to be "var(--w
 Append these lines inside the `[data-theme="dark"]` block (before the closing `}`):
 
 ```css
-  /* ── Category node colors — override with .my-container [data-theme="light/dark"] { --wetron-category-*: … } ── */
-  --wetron-category-input:         #4caf50;
-  --wetron-category-output:        #42a5f5;
-  --wetron-category-conv:          #7986cb;
-  --wetron-category-activation:    #ef5350;
-  --wetron-category-normalization: #26a69a;
-  --wetron-category-pooling:       #ab47bc;
-  --wetron-category-reshape:       #90a4ae;
-  --wetron-category-math:          #ce93d8;
-  --wetron-category-reduction:     #64b5f6;
-  --wetron-category-merge:         #9fa8da;
-  --wetron-category-attention:     #4db6ac;
-  --wetron-category-recurrent:     #aed581;
-  --wetron-category-quantization:  #bcaaa4;
-  --wetron-category-constant:      #4fc3f7;
-  --wetron-category-logic:         #4dd0e1;
-  --wetron-category-unknown:       #9e9e9e;
+/* ── Category node colors - override with .my-container [data-theme="light/dark"] { --wetron-category-*: … } ── */
+--wetron-category-input: #4caf50;
+--wetron-category-output: #42a5f5;
+--wetron-category-conv: #7986cb;
+--wetron-category-activation: #ef5350;
+--wetron-category-normalization: #26a69a;
+--wetron-category-pooling: #ab47bc;
+--wetron-category-reshape: #90a4ae;
+--wetron-category-math: #ce93d8;
+--wetron-category-reduction: #64b5f6;
+--wetron-category-merge: #9fa8da;
+--wetron-category-attention: #4db6ac;
+--wetron-category-recurrent: #aed581;
+--wetron-category-quantization: #bcaaa4;
+--wetron-category-constant: #4fc3f7;
+--wetron-category-logic: #4dd0e1;
+--wetron-category-unknown: #9e9e9e;
 ```
 
 Append these lines inside the `[data-theme="light"]` block (before the closing `}`):
 
 ```css
-  /* ── Category node colors ── */
-  --wetron-category-input:         #2e7d32;
-  --wetron-category-output:        #1565c0;
-  --wetron-category-conv:          #3949ab;
-  --wetron-category-activation:    #c0392b;
-  --wetron-category-normalization: #00695c;
-  --wetron-category-pooling:       #6a1b9a;
-  --wetron-category-reshape:       #546e7a;
-  --wetron-category-math:          #7b1fa2;
-  --wetron-category-reduction:     #0277bd;
-  --wetron-category-merge:         #5c6bc0;
-  --wetron-category-attention:     #00695c;
-  --wetron-category-recurrent:     #558b2f;
-  --wetron-category-quantization:  #795548;
-  --wetron-category-constant:      #0277bd;
-  --wetron-category-logic:         #00838f;
-  --wetron-category-unknown:       #757575;
+/* ── Category node colors ── */
+--wetron-category-input: #2e7d32;
+--wetron-category-output: #1565c0;
+--wetron-category-conv: #3949ab;
+--wetron-category-activation: #c0392b;
+--wetron-category-normalization: #00695c;
+--wetron-category-pooling: #6a1b9a;
+--wetron-category-reshape: #546e7a;
+--wetron-category-math: #7b1fa2;
+--wetron-category-reduction: #0277bd;
+--wetron-category-merge: #5c6bc0;
+--wetron-category-attention: #00695c;
+--wetron-category-recurrent: #558b2f;
+--wetron-category-quantization: #795548;
+--wetron-category-constant: #0277bd;
+--wetron-category-logic: #00838f;
+--wetron-category-unknown: #757575;
 ```
 
 - [ ] **Step 4: Update `graph-node.tsx`**
@@ -184,9 +183,10 @@ git commit -m "use CSS category vars for node colors in react package"
 
 ---
 
-## Task 2: React — Strategies A+B: defensive CSS + all:revert wrapper
+## Task 2: React - Strategies A+B: defensive CSS + all:revert wrapper
 
 **Files:**
+
 - Modify: `packages/react/src/nodes/node-card/node-card.module.css`
 - Modify: `packages/react/src/model-graph-view/model-graph-view.css`
 - Modify: `packages/react/src/model-graph-view/model-graph-view.tsx`
@@ -202,7 +202,7 @@ Update the `.card` rule to add the six defensive properties (keep all existing p
   border: 1px solid var(--wetron-node-border, #e0e0e0);
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  /* fixed width — must match NODE_W in packages/core/src/transform.ts */
+  /* fixed width - must match NODE_W in packages/core/src/transform.ts */
   width: 220px;
   box-sizing: border-box;
   /* prevent consumer app's global line-height from inflating node height */
@@ -239,11 +239,13 @@ Add this rule at the top of `model-graph-view.css` (before the existing `.react-
 - [ ] **Step 3: Add `className="wetron-root"` to the wrapper div in `model-graph-view.tsx`**
 
 Find the line (around line 111):
+
 ```tsx
 <div data-theme={isDark ? "dark" : "light"} style={{ width: "100%", height: "100%" }}>
 ```
 
 Change it to:
+
 ```tsx
 <div className="wetron-root" data-theme={isDark ? "dark" : "light"} style={{ width: "100%", height: "100%" }}>
 ```
@@ -267,9 +269,10 @@ git commit -m "add CSS isolation to react package (defensive card props + all:re
 
 ---
 
-## Task 3: Svelte — Strategy C: category CSS vars + node color expressions
+## Task 3: Svelte - Strategy C: category CSS vars + node color expressions
 
 **Files:**
+
 - Modify: `packages/svelte/src/model-graph-view.svelte`
 - Modify: `packages/svelte/src/nodes/graph-node.svelte`
 - Modify: `packages/svelte/src/nodes/io-node.svelte`
@@ -280,43 +283,43 @@ git commit -m "add CSS isolation to react package (defensive card props + all:re
 In the `<style>` block of `model-graph-view.svelte`, add two new `:global()` rules after the existing light/dark control button rules:
 
 ```css
-  :global(.wetron-graph[data-theme="dark"]) {
-    --wetron-category-input:         #4caf50;
-    --wetron-category-output:        #42a5f5;
-    --wetron-category-conv:          #7986cb;
-    --wetron-category-activation:    #ef5350;
-    --wetron-category-normalization: #26a69a;
-    --wetron-category-pooling:       #ab47bc;
-    --wetron-category-reshape:       #90a4ae;
-    --wetron-category-math:          #ce93d8;
-    --wetron-category-reduction:     #64b5f6;
-    --wetron-category-merge:         #9fa8da;
-    --wetron-category-attention:     #4db6ac;
-    --wetron-category-recurrent:     #aed581;
-    --wetron-category-quantization:  #bcaaa4;
-    --wetron-category-constant:      #4fc3f7;
-    --wetron-category-logic:         #4dd0e1;
-    --wetron-category-unknown:       #9e9e9e;
-  }
+:global(.wetron-graph[data-theme="dark"]) {
+  --wetron-category-input: #4caf50;
+  --wetron-category-output: #42a5f5;
+  --wetron-category-conv: #7986cb;
+  --wetron-category-activation: #ef5350;
+  --wetron-category-normalization: #26a69a;
+  --wetron-category-pooling: #ab47bc;
+  --wetron-category-reshape: #90a4ae;
+  --wetron-category-math: #ce93d8;
+  --wetron-category-reduction: #64b5f6;
+  --wetron-category-merge: #9fa8da;
+  --wetron-category-attention: #4db6ac;
+  --wetron-category-recurrent: #aed581;
+  --wetron-category-quantization: #bcaaa4;
+  --wetron-category-constant: #4fc3f7;
+  --wetron-category-logic: #4dd0e1;
+  --wetron-category-unknown: #9e9e9e;
+}
 
-  :global(.wetron-graph[data-theme="light"]) {
-    --wetron-category-input:         #2e7d32;
-    --wetron-category-output:        #1565c0;
-    --wetron-category-conv:          #3949ab;
-    --wetron-category-activation:    #c0392b;
-    --wetron-category-normalization: #00695c;
-    --wetron-category-pooling:       #6a1b9a;
-    --wetron-category-reshape:       #546e7a;
-    --wetron-category-math:          #7b1fa2;
-    --wetron-category-reduction:     #0277bd;
-    --wetron-category-merge:         #5c6bc0;
-    --wetron-category-attention:     #00695c;
-    --wetron-category-recurrent:     #558b2f;
-    --wetron-category-quantization:  #795548;
-    --wetron-category-constant:      #0277bd;
-    --wetron-category-logic:         #00838f;
-    --wetron-category-unknown:       #757575;
-  }
+:global(.wetron-graph[data-theme="light"]) {
+  --wetron-category-input: #2e7d32;
+  --wetron-category-output: #1565c0;
+  --wetron-category-conv: #3949ab;
+  --wetron-category-activation: #c0392b;
+  --wetron-category-normalization: #00695c;
+  --wetron-category-pooling: #6a1b9a;
+  --wetron-category-reshape: #546e7a;
+  --wetron-category-math: #7b1fa2;
+  --wetron-category-reduction: #0277bd;
+  --wetron-category-merge: #5c6bc0;
+  --wetron-category-attention: #00695c;
+  --wetron-category-recurrent: #558b2f;
+  --wetron-category-quantization: #795548;
+  --wetron-category-constant: #0277bd;
+  --wetron-category-logic: #00838f;
+  --wetron-category-unknown: #757575;
+}
 ```
 
 - [ ] **Step 2: Update `graph-node.svelte`**
@@ -398,13 +401,13 @@ In the template, remove the `style:--node-icon-color` binding:
 In the `<style>` block, update `.icon` to derive the icon color from `--node-color`:
 
 ```css
-  .icon {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    margin-left: auto;
-    color: color-mix(in oklch, var(--node-color) 70%, transparent);
-  }
+.icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: color-mix(in oklch, var(--node-color) 70%, transparent);
+}
 ```
 
 - [ ] **Step 5: Run all tests to confirm nothing broke**
@@ -427,9 +430,10 @@ git commit -m "use CSS category vars for node colors in svelte package"
 
 ---
 
-## Task 4: Svelte — Strategies A+B: defensive CSS + all:revert wrapper
+## Task 4: Svelte - Strategies A+B: defensive CSS + all:revert wrapper
 
 **Files:**
+
 - Modify: `packages/svelte/src/nodes/node-card.svelte`
 - Modify: `packages/svelte/src/model-graph-view.svelte`
 
@@ -438,23 +442,25 @@ git commit -m "use CSS category vars for node colors in svelte package"
 Update the `.card` rule in `node-card.svelte`'s `<style>` block:
 
 ```css
-  .card {
-    padding: 7px 8px;
-    border-radius: 4px;
-    width: 220px; /* must match NODE_W in transform.ts */
-    box-sizing: border-box;
-    line-height: 1;
-    cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    transition: box-shadow 0.12s, border-color 0.12s;
-    /* defensive resets against consumer CSS resets */
-    font-family: monospace;
-    font-size: 13px;
-    text-align: left;
-    letter-spacing: normal;
-    word-spacing: normal;
-    border-style: solid;
-  }
+.card {
+  padding: 7px 8px;
+  border-radius: 4px;
+  width: 220px; /* must match NODE_W in transform.ts */
+  box-sizing: border-box;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition:
+    box-shadow 0.12s,
+    border-color 0.12s;
+  /* defensive resets against consumer CSS resets */
+  font-family: monospace;
+  font-size: 13px;
+  text-align: left;
+  letter-spacing: normal;
+  word-spacing: normal;
+  border-style: solid;
+}
 ```
 
 - [ ] **Step 2: Add `all: revert` to `.wetron-graph` in `model-graph-view.svelte`**
@@ -462,14 +468,14 @@ Update the `.card` rule in `node-card.svelte`'s `<style>` block:
 Update the `.wetron-graph` rule in the `<style>` block:
 
 ```css
-  .wetron-graph {
-    all: revert;
-    width: 100%;
-    height: 100%;
-    font-family: system-ui, sans-serif;
-    font-size: 14px;
-    box-sizing: border-box;
-  }
+.wetron-graph {
+  all: revert;
+  width: 100%;
+  height: 100%;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+}
 ```
 
 `all: revert` rolls back inherited consumer styles. Declarations after it in the same rule re-establish the base. CSS custom properties (`--*`) are excluded from `all`, so the category vars and `--xy-*` variables on this element are preserved.
@@ -494,12 +500,12 @@ git commit -m "add CSS isolation to svelte package (defensive card props + all:r
 
 ## Self-Review Checklist
 
-- [x] Strategy A (defensive CSS on `.card`) — React: Task 2 Step 1 / Svelte: Task 4 Step 1
-- [x] Strategy B (`all: revert` wrapper) — React: Task 2 Steps 2-3 / Svelte: Task 4 Step 2
-- [x] Strategy C (category CSS vars) — React: Task 1 Steps 3-5 / Svelte: Task 3 Steps 1-3
-- [x] Icon color `B3` append bug fixed — React: Task 1 Steps 6-7 / Svelte: Task 3 Step 4
+- [x] Strategy A (defensive CSS on `.card`) - React: Task 2 Step 1 / Svelte: Task 4 Step 1
+- [x] Strategy B (`all: revert` wrapper) - React: Task 2 Steps 2-3 / Svelte: Task 4 Step 2
+- [x] Strategy C (category CSS vars) - React: Task 1 Steps 3-5 / Svelte: Task 3 Steps 1-3
+- [x] Icon color `B3` append bug fixed - React: Task 1 Steps 6-7 / Svelte: Task 3 Step 4
 - [x] `CATEGORY_THEME` import removed from React `graph-node.tsx` and `io-node.tsx`
 - [x] `CATEGORY_THEME` import removed from Svelte `graph-node.svelte` and `io-node.svelte`
-- [x] `useColorMode`/`consumeColorMode` removed only where `isDark` is no longer needed (React nodes) — Svelte nodes retain `isDark` for bg/border/muted/tintBase props
+- [x] `useColorMode`/`consumeColorMode` removed only where `isDark` is no longer needed (React nodes) - Svelte nodes retain `isDark` for bg/border/muted/tintBase props
 - [x] TDD test added for the one mechanically verifiable behavior (category var expression)
 - [x] All four tasks end with `bun test` + commit
