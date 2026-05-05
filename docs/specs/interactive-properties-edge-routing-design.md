@@ -8,9 +8,9 @@
 
 Three improvements to the graph viewer:
 
-1. **Edge routing** — smoothstep edges with arrowheads, top/bottom handles, pan-on-scroll, Meta+scroll zoom, visible zoom controls
-2. **Edge click** → CONNECTION PROPERTIES panel showing the tensor name and source/target op types
-3. **Tensor drill-down** → clicking an input/output row in the node panel replaces the panel with TENSOR PROPERTIES
+1. **Edge routing** - smoothstep edges with arrowheads, top/bottom handles, pan-on-scroll, Meta+scroll zoom, visible zoom controls
+2. **Edge click** -> CONNECTION PROPERTIES panel showing the tensor name and source/target op types
+3. **Tensor drill-down** -> clicking an input/output row in the node panel replaces the panel with TENSOR PROPERTIES
 
 ## Scope
 
@@ -23,18 +23,18 @@ Three improvements to the graph viewer:
 - Two new `PanelTarget` union cases: `EdgeTarget` and `TensorTarget`
 - `onEdgeClick` handler in `ModelGraphView`
 - Clickable input/output rows in `NodePropertyPanel` via `onTensorClick` callback
-- `App.tsx` resolves tensor name → shape/dtype from `graph.inputs`/`graph.outputs`
+- `App.tsx` resolves tensor name -> shape/dtype from `graph.inputs`/`graph.outputs`
 
 ### Out of scope
 
-- Inline edge labels (tensor shapes on graph lines) — future feature
-- Weight tensor metrics (min/max/mean/std) — requires weight deserialization
+- Inline edge labels (tensor shapes on graph lines) - future feature
+- Weight tensor metrics (min/max/mean/std) - requires weight deserialization
 - Tensor value display
 - Navigation history / back button in panel
 
 ## Data Model (`@wetron/core`)
 
-### `FlowEdge` — add `data`
+### `FlowEdge` - add `data`
 
 ```ts
 export type FlowEdge = {
@@ -52,7 +52,7 @@ export type FlowEdge = {
 
 `transform.ts` populates `data` when building edges. `sourceOpType` and `targetOpType` come from the node map already built during graph traversal.
 
-`markerEnd` is NOT set in core — `@wetron/core` must not import from `@xyflow/react`. The arrowhead is applied in the renderer via ReactFlow's `defaultEdgeOptions` prop.
+`markerEnd` is NOT set in core - `@wetron/core` must not import from `@xyflow/react`. The arrowhead is applied in the renderer via ReactFlow's `defaultEdgeOptions` prop.
 
 ## Panel Targets (`@wetron/react`)
 
@@ -116,7 +116,7 @@ In `GraphNode` and `IONode` node components:
 
 ### `ModelGraphView`
 
-New prop: `onEdgeClick` wired from ReactFlow's `onEdgeClick` event → calls `onTargetClick({ edge: { tensorName, sourceOpType, targetOpType } })`.
+New prop: `onEdgeClick` wired from ReactFlow's `onEdgeClick` event -> calls `onTargetClick({ edge: { tensorName, sourceOpType, targetOpType } })`.
 
 ### `NodePropertyPanel`
 

@@ -12,12 +12,12 @@ function ModelGraphView(props: {
   colorMode?: ColorMode; // default: "system"
 }): JSX.Element;
 
-// Property panel — pass the target from onTargetClick
+// Property panel - pass the target from onTargetClick
 function NodePropertyPanel(props: {
   target: PanelTarget | null;
   colorMode?: ColorMode; // default: "system"
-  opsets?: ReadonlyMap<string, number>; // ONNX only — domain → version
-  inputSources?: ReadonlyMap<string, string>; // tensor name → producing op type
+  opsets?: ReadonlyMap<string, number>; // ONNX only - domain -> version
+  inputSources?: ReadonlyMap<string, string>; // tensor name -> producing op type
   tensorShapes?: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
@@ -81,7 +81,7 @@ import "@wetron/react/dist/index.css";
 
 ## Implementation notes
 
-- `ModelGraphView` calls `modelGraphToFlow` from `@wetron/core/transform` internally — consumers pass a `ModelGraph`, not raw flow nodes.
+- `ModelGraphView` calls `modelGraphToFlow` from `@wetron/core/transform` internally - consumers pass a `ModelGraph`, not raw flow nodes.
 - Two custom ReactFlow node types: `graphNode` (op nodes) and `ioNode` (graph inputs/outputs).
 - One custom edge type: `modelEdge`.
 - `colorMode="system"` reads `prefers-color-scheme` via a media query listener.

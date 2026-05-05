@@ -41,9 +41,9 @@ export type ModelGraphViewHandle = {
   fitAll: () => Promise<void>;
   getViewport: () => { x: number; y: number; zoom: number };
   setViewport: (vp: { x: number; y: number; zoom: number }) => void;
-  /** Bounding box of all nodes — use with getViewportForBounds for a hi-res export. */
+  /** Bounding box of all nodes - use with getViewportForBounds for a hi-res export. */
   getNodesBounds: () => { x: number; y: number; width: number; height: number };
-  /** The `.react-flow__viewport` element — capture with a custom transform for PNG export. */
+  /** The `.react-flow__viewport` element - capture with a custom transform for PNG export. */
   getViewportElement: () => HTMLElement | null;
 };
 

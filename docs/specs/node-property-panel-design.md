@@ -2,21 +2,21 @@
 
 ## Goal
 
-Add a `NodePropertyPanel` React component to `@wetron/react` that displays the properties of a clicked node — either an operation node (`GraphNode`) or an IO node (`GraphValue`) — with Phosphor Icons and type-annotated rows.
+Add a `NodePropertyPanel` React component to `@wetron/react` that displays the properties of a clicked node - either an operation node (`GraphNode`) or an IO node (`GraphValue`) - with Phosphor Icons and type-annotated rows.
 
 ## Architecture
 
 **New file:**
 
-- `packages/react/src/NodePropertyPanel.tsx` — the component
+- `packages/react/src/NodePropertyPanel.tsx` - the component
 
 **Modified files:**
 
-- `packages/core/src/transform.ts` — add `graphValue?: GraphValue` to `GraphNodeData`
-- `packages/react/src/ModelGraphView.tsx` — replace `onNodeClick` with `onTargetClick`
-- `packages/react/src/index.ts` — export `NodePropertyPanel`
-- `packages/react/package.json` — add `@phosphor-icons/react` peer + dev dep
-- `apps/demo/src/App.tsx` — wire up panel alongside graph
+- `packages/core/src/transform.ts` - add `graphValue?: GraphValue` to `GraphNodeData`
+- `packages/react/src/ModelGraphView.tsx` - replace `onNodeClick` with `onTargetClick`
+- `packages/react/src/index.ts` - export `NodePropertyPanel`
+- `packages/react/package.json` - add `@phosphor-icons/react` peer + dev dep
+- `apps/demo/src/App.tsx` - wire up panel alongside graph
 
 **Dependency:** `@phosphor-icons/react@^2.1.10` (already installed at workspace root; needs adding to react package deps).
 
@@ -71,17 +71,17 @@ Each row is a flex container: `key (flex:1) | value (monospace, right-aligned) |
 - `opType` bold 13px
 - `name` gray monospace 9px below
 
-**Inputs section** — Phosphor `ArrowCircleDown` icon + "Inputs" label
+**Inputs section** - Phosphor `ArrowCircleDown` icon + "Inputs" label
 Each input name row: `name | shape·dtype if known | chip`
 
-- Live tensor → green chip `tensor`
-- Initializer (name present in outputs-of-prior-nodes) → red chip `init`
-- Missing optional → gray chip `optional`
+- Live tensor -> green chip `tensor`
+- Initializer (name present in outputs-of-prior-nodes) -> red chip `init`
+- Missing optional -> gray chip `optional`
 
-**Outputs section** — Phosphor `ArrowCircleUp` icon + "Outputs" label
+**Outputs section** - Phosphor `ArrowCircleUp` icon + "Outputs" label
 Same row structure as inputs.
 
-**Attributes section** — Phosphor `SlidersHorizontal` icon + "Attributes" label
+**Attributes section** - Phosphor `SlidersHorizontal` icon + "Attributes" label
 Each attribute row: `key | formatted value | type chip`
 
 ### IO node (`GraphValue`)
@@ -89,9 +89,9 @@ Each attribute row: `key | formatted value | type chip`
 **Header**
 
 - Phosphor `ArrowFatDown` (graph input) or `ArrowFatUp` (graph output) icon
-- Determined by whether the value appears in `graph.inputs` or `graph.outputs` — but since the panel only receives the `GraphValue`, the panel infers direction from a `direction: 'input' | 'output'` prop passed by the caller (added to the `IoPanel` signature).
+- Determined by whether the value appears in `graph.inputs` or `graph.outputs` - but since the panel only receives the `GraphValue`, the panel infers direction from a `direction: 'input' | 'output'` prop passed by the caller (added to the `IoPanel` signature).
 
-Actually — the panel receives `GraphValue` only, with no graph context. The caller knows whether it's an input or output. To keep the API simple: extend `ModelGraphView`'s `onTargetClick` to pass `{ value: GraphValue, direction: 'input' | 'output' }` for IO nodes.
+Actually - the panel receives `GraphValue` only, with no graph context. The caller knows whether it's an input or output. To keep the API simple: extend `ModelGraphView`'s `onTargetClick` to pass `{ value: GraphValue, direction: 'input' | 'output' }` for IO nodes.
 
 **Revised API:**
 
@@ -149,7 +149,7 @@ All at `size={12}` weight `"regular"` inside section labels; `size={15}` in head
 
 ## Initializer detection
 
-An input is an initializer if its name appears as an output of a node whose `opType` would mark it as a weight — but the ONNX IR doesn't carry initializer metadata in `GraphNode`. Instead: inputs with names not found as any node's output and not in `graph.inputs` are initializers. This lookup is done inside the panel by inspecting `graph.nodes` — but `NodePropertyPanel` does not receive the full `ModelGraph`.
+An input is an initializer if its name appears as an output of a node whose `opType` would mark it as a weight - but the ONNX IR doesn't carry initializer metadata in `GraphNode`. Instead: inputs with names not found as any node's output and not in `graph.inputs` are initializers. This lookup is done inside the panel by inspecting `graph.nodes` - but `NodePropertyPanel` does not receive the full `ModelGraph`.
 
 **Simplified approach:** do not distinguish `init` vs `tensor` at the panel level. All input connections get the `tensor` chip. The `init` distinction requires graph context that the panel doesn't have. This keeps the API clean and avoids prop-drilling. The chip colour key only uses `tensor`, `optional`, and the attribute type chips.
 

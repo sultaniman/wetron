@@ -1,6 +1,6 @@
 # @wetron/executorch
 
-ExecuTorch model parser for wetron. Reads `.pte` FlatBuffers files and returns a `ModelGraph` IR. Graph structure only — no weight tensors are deserialized.
+ExecuTorch model parser for wetron. Reads `.pte` FlatBuffers files and returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
 
 ## Install
 
@@ -24,9 +24,9 @@ Throws `ParseError` from `@wetron/core/ir` on malformed input or missing `ET12` 
 ## What gets parsed
 
 - First `ExecutionPlan` from the root `Program` table
-- Operator list → op type strings
-- `EValue` tensor entries → shapes and dtypes
-- `KernelCall` instructions → operator calls
+- Operator list -> op type strings
+- `EValue` tensor entries -> shapes and dtypes
+- `KernelCall` instructions -> operator calls
 
 ## dtype mapping
 

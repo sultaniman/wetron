@@ -2,8 +2,8 @@
 
 ## Problem
 
-Large models (ResNet, BERT, GPT variants) have deeply repetitive structures — transformer
-blocks, residual units, encoder/decoder stacks — that repeat tens or hundreds of times.
+Large models (ResNet, BERT, GPT variants) have deeply repetitive structures - transformer
+blocks, residual units, encoder/decoder stacks - that repeat tens or hundreds of times.
 Displaying every node at once makes the graph unreadable and slow. Users want to fold a
 named group of nodes into a single summary node, explore one expanded at a time, and
 restore the full view when done.
@@ -14,7 +14,7 @@ restore the full view when done.
 - Subgraph boundaries defined by the consumer (not inferred automatically)
 - Collapsed node shows name, op count, and category color
 - Edges crossing the boundary are preserved (re-routed to the collapsed node)
-- No IR changes to `ModelGraph` — grouping is a view-only concept
+- No IR changes to `ModelGraph` - grouping is a view-only concept
 
 ## Data model
 
@@ -27,7 +27,7 @@ type SubgraphGroup = {
 ```
 
 Consumer decides grouping (e.g. by regex on name prefix, by explicit list). The library
-does not infer groups automatically — that stays in user-land.
+does not infer groups automatically - that stays in user-land.
 
 ## Transform layer changes (`@wetron/core/transform.ts`)
 
@@ -57,7 +57,7 @@ Dagre is re-run on the reduced graph so layout is clean, not a hole in the middl
 - Same card shell as `GraphNodeComponent` but body shows `{nodeCount} ops`
 - Category color uses `dominantCategory`
 - Click opens a property panel entry (or fires `onTargetClick` with a new `groupTarget` union member)
-- A small expand icon/button on the card fires `onExpandGroup(groupName)` — separate from node click
+- A small expand icon/button on the card fires `onExpandGroup(groupName)` - separate from node click
 
 ## Renderer prop additions
 
@@ -75,7 +75,7 @@ onexpandgroup?: (name: string) => void;
 oncollapsegroup?: (name: string) => void;
 ```
 
-State (which groups are currently collapsed) is owned by the consumer — the renderer is
+State (which groups are currently collapsed) is owned by the consumer - the renderer is
 fully controlled. This keeps the library stateless and makes serialisation trivial.
 
 ## IR union extension
@@ -90,7 +90,7 @@ fully controlled. This keeps the library stateless and makes serialisation trivi
 
 Run dagre twice:
 
-1. Once on the full graph (all nodes) to get stable positions — cache this result
+1. Once on the full graph (all nodes) to get stable positions - cache this result
 2. Overlay the collapsed view: remove constituent nodes, add group node at centroid,
    re-run a second dagre pass on the reduced set to clean up spacing
 
@@ -98,13 +98,13 @@ The two-pass approach avoids positions jumping wildly when a group is collapsed/
 
 ## Open questions (decide before implementing)
 
-1. **Auto-grouping heuristic** — should the library offer `inferGroups(graph): SubgraphGroup[]`
+1. **Auto-grouping heuristic** - should the library offer `inferGroups(graph): SubgraphGroup[]`
    based on name-prefix clustering? Useful default for transformer models.
-2. **Nested collapse** — can a group contain other groups? Start with flat-only for v1.
-3. **Panel content for a collapsed group** — list of op types inside, or full node list?
-4. **Keyboard shortcut** — `Space` to expand/collapse focused group node?
+2. **Nested collapse** - can a group contain other groups? Start with flat-only for v1.
+3. **Panel content for a collapsed group** - list of op types inside, or full node list?
+4. **Keyboard shortcut** - `Space` to expand/collapse focused group node?
 
 ## Effort
 
-~3–4 days. Transform layer changes are the bulk; renderer changes are straightforward
+~3-4 days. Transform layer changes are the bulk; renderer changes are straightforward
 once the data model is settled.

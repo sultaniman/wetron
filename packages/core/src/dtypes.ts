@@ -11,7 +11,7 @@ interface DataViewWithFloat16 extends DataView {
   getFloat16(byteOffset: number, littleEndian?: boolean): number;
 }
 
-// Float16 — use DataView.getFloat16 if available, otherwise manual decode
+// Float16 - use DataView.getFloat16 if available, otherwise manual decode
 const _hasNativeFloat16 =
   typeof (DataView.prototype as DataViewWithFloat16).getFloat16 === "function";
 
@@ -80,7 +80,7 @@ export function readFloat8e5m2(view: DataView, offset: number): number {
   return _float8e5m2[view.getUint8(offset)];
 }
 
-// Float4 e2m1 — 16-entry lookup table
+// Float4 e2m1 - 16-entry lookup table
 const _float4e2m1 = [0, 0.5, 1, 1.5, 2, 3, 4, 6, -0, -0.5, -1, -1.5, -2, -3, -4, -6];
 
 export function readFloat4e2m1(view: DataView, byteOffset: number, highNibble: boolean): number {

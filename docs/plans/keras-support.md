@@ -4,7 +4,7 @@
 
 **Goal:** Add a `@wetron/keras` parser package that reads `.keras` (Keras 3 ZIP format) files and produces a `ModelGraph`, wired into the existing `parseModel` dispatcher.
 
-**Architecture:** The `.keras` file is a ZIP archive — extract `config.json` with `fflate`, then walk the layer list to build wetron IR. Sequential models are a linear chain; Functional models use each layer's `inbound_nodes` to reconstruct the DAG. Subclassed models (no serializable config) are out of scope.
+**Architecture:** The `.keras` file is a ZIP archive - extract `config.json` with `fflate`, then walk the layer list to build wetron IR. Sequential models are a linear chain; Functional models use each layer's `inbound_nodes` to reconstruct the DAG. Subclassed models (no serializable config) are out of scope.
 
 **Tech Stack:** TypeScript, Bun workspaces, `bun test`, `fflate` (ZIP extraction), `@wetron/core` IR types.
 
@@ -19,8 +19,8 @@ wetron/
   packages/
     core/src/
       ir.ts          ← ModelGraph, GraphNode, GraphValue, AttributeValue, ParseError
-      detect.ts      ← detectFormat(bytes, filename?) → Format
-      categories.ts  ← opCategory(opType) → OpCategory  (CATEGORY_MAP Record)
+      detect.ts      ← detectFormat(bytes, filename?) -> Format
+      categories.ts  ← opCategory(opType) -> OpCategory  (CATEGORY_MAP Record)
       index.ts       ← parseModel(bytes, filename?) entry point
     onnx/src/parse.ts   ← reference: async parseOnnx(bytes)
     tflite/src/parse.ts ← reference: sync parseTflite(bytes)
@@ -115,9 +115,9 @@ export function opCategory(opType: string): OpCategory {
 
 A `.keras` file is a standard ZIP archive containing:
 
-- **`config.json`** — JSON model architecture (the only file we need)
-- `model.weights.h5` — binary weights (ignored)
-- `metadata.json` — version metadata (ignored)
+- **`config.json`** - JSON model architecture (the only file we need)
+- `model.weights.h5` - binary weights (ignored)
+- `metadata.json` - version metadata (ignored)
 
 ### config.json format (Keras 3)
 
@@ -217,8 +217,8 @@ Sequential `inbound_nodes` are always `[]`; connectivity comes from layer order.
 
 `inbound_nodes[0].args[0]` is:
 
-- An **object** `{ keras_history: [name, nodeIdx, tensorIdx] }` → single input
-- An **array** of such objects → multiple inputs (merge layers)
+- An **object** `{ keras_history: [name, nodeIdx, tensorIdx] }` -> single input
+- An **array** of such objects -> multiple inputs (merge layers)
 
 ### Tensor naming convention
 
@@ -239,7 +239,7 @@ Keras config doesn't assign explicit tensor names like ONNX does. We synthesise 
 | `packages/keras/src/parse.ts`       | Create | ZIP extraction + Sequential + Functional IR builders |
 | `packages/keras/test/parse.test.ts` | Create | All tests for the package                            |
 | `packages/core/src/detect.ts`       | Modify | Add `'keras'` to `Format`, add ZIP magic bytes check |
-| `packages/core/src/categories.ts`   | Modify | Add ~45 Keras `class_name` → `OpCategory` entries    |
+| `packages/core/src/categories.ts`   | Modify | Add ~45 Keras `class_name` -> `OpCategory` entries   |
 | `packages/core/src/index.ts`        | Modify | Add `parseKeras` branch in `parseModel`              |
 | `apps/demo/src/App.tsx`             | Modify | Add `.keras` to file `accept` attribute              |
 
@@ -274,7 +274,7 @@ test("parseKeras throws ParseError on garbage bytes", () => {
 bun test packages/keras
 ```
 
-Expected: error — `Cannot find module '../src/parse.ts'`
+Expected: error - `Cannot find module '../src/parse.ts'`
 
 - [ ] **Step 3: Create package files**
 
@@ -323,7 +323,7 @@ export function parseKeras(_bytes: Uint8Array): ModelGraph {
 bun add fflate --cwd packages/keras
 ```
 
-- [ ] **Step 5: Run test — expect it to pass**
+- [ ] **Step 5: Run test - expect it to pass**
 
 ```bash
 bun test packages/keras
@@ -480,7 +480,7 @@ export function parseKeras(bytes: Uint8Array): ModelGraph {
 }
 ```
 
-- [ ] **Step 4: Run tests — all 4 should pass**
+- [ ] **Step 4: Run tests - all 4 should pass**
 
 ```bash
 bun test packages/keras
@@ -660,7 +660,7 @@ function buildSequential(model: KerasModelConfig): ModelGraph {
 }
 ```
 
-- [ ] **Step 4: Run tests — all 10 should pass**
+- [ ] **Step 4: Run tests - all 10 should pass**
 
 ```bash
 bun test packages/keras
@@ -672,7 +672,7 @@ Expected: 10 pass
 
 ```bash
 git add packages/keras/src/parse.ts packages/keras/test/parse.test.ts
-git commit -m "feat(@wetron/keras): Sequential model → ModelGraph IR"
+git commit -m "feat(@wetron/keras): Sequential model -> ModelGraph IR"
 ```
 
 ---
@@ -837,7 +837,7 @@ function buildFunctional(model: KerasModelConfig): ModelGraph {
   const { layers } = model.config;
   const nodes: GraphNode[] = [];
   const inputs: GraphValue[] = [];
-  const outputMap = new Map<string, string>(); // layerName → synthetic output tensor name
+  const outputMap = new Map<string, string>(); // layerName -> synthetic output tensor name
   const consumedTensors = new Set<string>();
 
   for (const layer of layers) {
@@ -876,7 +876,7 @@ function buildFunctional(model: KerasModelConfig): ModelGraph {
 }
 ```
 
-- [ ] **Step 4: Run tests — all 17 should pass**
+- [ ] **Step 4: Run tests - all 17 should pass**
 
 ```bash
 bun test packages/keras
@@ -907,7 +907,7 @@ Append to `packages/keras/test/parse.test.ts`:
 ```ts
 import { opCategory } from "@wetron/core";
 
-test("categories: Keras conv layers → conv", () => {
+test("categories: Keras conv layers -> conv", () => {
   for (const op of [
     "Conv1D",
     "Conv2D",
@@ -921,13 +921,13 @@ test("categories: Keras conv layers → conv", () => {
   }
 });
 
-test("categories: Keras activation layers → activation", () => {
+test("categories: Keras activation layers -> activation", () => {
   for (const op of ["Activation", "ReLU", "LeakyReLU", "PReLU", "ELU", "Softmax", "Sigmoid"]) {
     expect(opCategory(op)).toBe("activation");
   }
 });
 
-test("categories: Keras normalization layers → normalization", () => {
+test("categories: Keras normalization layers -> normalization", () => {
   for (const op of [
     "BatchNormalization",
     "LayerNormalization",
@@ -938,7 +938,7 @@ test("categories: Keras normalization layers → normalization", () => {
   }
 });
 
-test("categories: Keras pooling layers → pooling", () => {
+test("categories: Keras pooling layers -> pooling", () => {
   for (const op of [
     "MaxPooling1D",
     "MaxPooling2D",
@@ -951,7 +951,7 @@ test("categories: Keras pooling layers → pooling", () => {
   }
 });
 
-test("categories: Keras reshape layers → reshape", () => {
+test("categories: Keras reshape layers -> reshape", () => {
   for (const op of [
     "Flatten",
     "Reshape",
@@ -965,23 +965,23 @@ test("categories: Keras reshape layers → reshape", () => {
   }
 });
 
-test("categories: Keras math layers → math", () => {
+test("categories: Keras math layers -> math", () => {
   for (const op of ["Add", "Subtract", "Multiply", "Average", "Maximum", "Minimum", "Dot"]) {
     expect(opCategory(op)).toBe("math");
   }
 });
 
-test("categories: Keras merge layers → merge", () => {
+test("categories: Keras merge layers -> merge", () => {
   expect(opCategory("Concatenate")).toBe("merge");
 });
 
-test("categories: Keras attention layers → attention", () => {
+test("categories: Keras attention layers -> attention", () => {
   for (const op of ["MultiHeadAttention", "Attention", "AdditiveAttention"]) {
     expect(opCategory(op)).toBe("attention");
   }
 });
 
-test("categories: Keras recurrent layers → recurrent", () => {
+test("categories: Keras recurrent layers -> recurrent", () => {
   for (const op of ["LSTM", "GRU", "SimpleRNN", "Bidirectional", "TimeDistributed", "ConvLSTM2D"]) {
     expect(opCategory(op)).toBe("recurrent");
   }
@@ -1079,7 +1079,7 @@ Add the following block at the end of `CATEGORY_MAP`, after the existing TFLite 
   ConvLSTM3D: 'recurrent',
 ```
 
-- [ ] **Step 4: Run the full test suite — all tests should pass**
+- [ ] **Step 4: Run the full test suite - all tests should pass**
 
 ```bash
 bun test
@@ -1113,12 +1113,12 @@ Append to `packages/keras/test/parse.test.ts`:
 import { detectFormat } from "@wetron/core/detect";
 import { parseModel } from "@wetron/core";
 
-test("detectFormat: ZIP magic bytes → keras", () => {
+test("detectFormat: ZIP magic bytes -> keras", () => {
   const zip = makeKerasZip({ "config.json": "{}" });
   expect(detectFormat(zip)).toBe("keras");
 });
 
-test("detectFormat: .keras extension with unknown bytes → keras", () => {
+test("detectFormat: .keras extension with unknown bytes -> keras", () => {
   expect(detectFormat(new Uint8Array([0x00, 0x00, 0x00, 0x00]), "model.keras")).toBe("keras");
 });
 
@@ -1158,7 +1158,7 @@ export function detectFormat(bytes: Uint8Array, filename?: string): Format {
     if (bytes[4] === 0x4f && bytes[5] === 0x44 && bytes[6] === 0x4c && bytes[7] === 0x46)
       return "tflite";
   }
-  // ZIP magic bytes PK\x03\x04 — .keras archives
+  // ZIP magic bytes PK\x03\x04 - .keras archives
   if (
     bytes.length >= 4 &&
     bytes[0] === 0x50 &&
@@ -1207,7 +1207,7 @@ export { detectFormat } from "./detect.ts";
 export type { Format } from "./detect.ts";
 ```
 
-These will automatically pick up the new `'keras'` value — no change needed there.
+These will automatically pick up the new `'keras'` value - no change needed there.
 
 - [ ] **Step 5: Add @wetron/keras to core's workspace dependency**
 
@@ -1256,23 +1256,23 @@ git commit -m "feat: wire @wetron/keras into parseModel dispatch and demo file i
 
 **Spec coverage check:**
 
-- ✅ `.keras` ZIP parsing — Task 2
-- ✅ Sequential model IR — Task 3
-- ✅ Functional model IR — Task 4
-- ✅ Merge layer (multiple inputs) — Task 4
-- ✅ Keras layer → category mappings — Task 5
-- ✅ Format detection via ZIP magic bytes — Task 6
-- ✅ `parseModel` dispatch — Task 6
-- ✅ Demo app wiring — Task 6
-- ✅ `ParseError` on unsupported model class (subclassed) — Task 2
+- ✅ `.keras` ZIP parsing - Task 2
+- ✅ Sequential model IR - Task 3
+- ✅ Functional model IR - Task 4
+- ✅ Merge layer (multiple inputs) - Task 4
+- ✅ Keras layer -> category mappings - Task 5
+- ✅ Format detection via ZIP magic bytes - Task 6
+- ✅ `parseModel` dispatch - Task 6
+- ✅ Demo app wiring - Task 6
+- ✅ `ParseError` on unsupported model class (subclassed) - Task 2
 
 **Out of scope (documented non-goals):**
 
-- `.h5` / HDF5 format — requires WASM or incomplete pure-JS library
-- Subclassed Keras models — no serializable config
-- Nested model layers (e.g. `TimeDistributed` wrapping a full sub-model) — outer layer appears as a single node; inner config is not expanded
+- `.h5` / HDF5 format - requires WASM or incomplete pure-JS library
+- Subclassed Keras models - no serializable config
+- Nested model layers (e.g. `TimeDistributed` wrapping a full sub-model) - outer layer appears as a single node; inner config is not expanded
 
-**Placeholder scan:** No TBD, no "add appropriate error handling", no "similar to Task N" — each task has complete code.
+**Placeholder scan:** No TBD, no "add appropriate error handling", no "similar to Task N" - each task has complete code.
 
 **Type consistency check:**
 
@@ -1280,4 +1280,4 @@ git commit -m "feat: wire @wetron/keras into parseModel dispatch and demo file i
 - `extractAttributes` returns `Record<string, AttributeValue>` used in all GraphNode constructions ✅
 - `resolveInbounds` returns `string[]` and is used in `buildFunctional` only ✅
 - `buildSequential` and `buildFunctional` both return `ModelGraph` ✅
-- `parseKeras` signature: `(bytes: Uint8Array): ModelGraph` — synchronous, consistent with `parseTflite` ✅
+- `parseKeras` signature: `(bytes: Uint8Array): ModelGraph` - synchronous, consistent with `parseTflite` ✅

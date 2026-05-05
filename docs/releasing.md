@@ -33,19 +33,19 @@ just release <version>
 
 Runs in sequence:
 
-1. **bump** — sets version again (idempotent if already bumped)
-2. **build** — tsup for all parser/core/token packages, vite build for `@wetron/react`
-3. **test** — full `bun test` across all packages
-4. **preview** — dry-run publish for each package; shows resolved files and versions
-5. **confirm** — prompts `[y/N]`; abort here if anything looks wrong
-6. **publish** — `bun publish --access public` for each package in dependency order
+1. **bump** - sets version again (idempotent if already bumped)
+2. **build** - tsup for all parser/core/token packages, vite build for `@wetron/react`
+3. **test** - full `bun test` across all packages
+4. **preview** - dry-run publish for each package; shows resolved files and versions
+5. **confirm** - prompts `[y/N]`; abort here if anything looks wrong
+6. **publish** - `bun publish --access public` for each package in dependency order
 
 ## Publish order
 
-Tokens → parsers (onnx, tflite, keras, executorch, torchscript, savedmodel) → core → react → svelte
+Tokens -> parsers (onnx, tflite, keras, executorch, torchscript, savedmodel) -> core -> react -> svelte
 
 ## Notes
 
 - Run `just check` (`build` + `test`) at any point without publishing.
 - Run `just preview` alone to inspect what would be published.
-- `@wetron/svelte` ships source directly — no build step.
+- `@wetron/svelte` ships source directly - no build step.

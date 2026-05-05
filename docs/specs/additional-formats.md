@@ -1,25 +1,25 @@
-# wetron — Additional Format Parsers
+# wetron - Additional Format Parsers
 
 ## Browser-Only Constraint
 
-wetron is a pure browser library — no server, no backend, no Node.js. Only formats parseable in plain JavaScript from a `Uint8Array` are in scope.
+wetron is a pure browser library - no server, no backend, no Node.js. Only formats parseable in plain JavaScript from a `Uint8Array` are in scope.
 
 **Supported PyTorch sub-formats:**
 
-- ExecuTorch `.pte` — FlatBuffer (`ET12` identifier), fully parseable
-- TorchScript Mobile `.pt` — FlatBuffer (`PTMF` identifier), fully parseable
+- ExecuTorch `.pte` - FlatBuffer (`ET12` identifier), fully parseable
+- TorchScript Mobile `.pt` - FlatBuffer (`PTMF` identifier), fully parseable
 
 **Not supported:**
 
-- Raw `.pth` state dicts — Python-specific serialization format requiring `torch.load()`
-- Full model saves (non-mobile `.pt`) — ZIP + Python-specific serialization, requires Python interpreter
+- Raw `.pth` state dicts - Python-specific serialization format requiring `torch.load()`
+- Full model saves (non-mobile `.pt`) - ZIP + Python-specific serialization, requires Python interpreter
 - Any format requiring server-side inference or a Python interpreter
 
 ## Status
 
 | Format              | Package               | Status                                         |
 | ------------------- | --------------------- | ---------------------------------------------- |
-| Keras               | `@wetron/keras`       | ✅ Shipped — see `docs/plans/keras-support.md` |
+| Keras               | `@wetron/keras`       | ✅ Shipped - see `docs/plans/keras-support.md` |
 | ExecuTorch          | `@wetron/executorch`  | Planned                                        |
 | TorchScript Mobile  | `@wetron/torchscript` | Planned                                        |
 | CoreML              | `@wetron/coreml`      | Planned                                        |
@@ -40,7 +40,7 @@ Add parsers covering the most practically important ML model formats beyond ONNX
 | ------------------- | --------------------- | ------------------------ | ------------- | ------------------------------------- |
 | ExecuTorch          | `@wetron/executorch`  | `.pte`                   | FlatBuffer    | bytes[4..7] === `ET12`                |
 | TorchScript Mobile  | `@wetron/torchscript` | `.pt`                    | FlatBuffer    | bytes[4..7] === `PTMF`                |
-| CoreML              | `@wetron/coreml`      | `.mlmodel`, `.mlpackage` | Protobuf      | Field tags 200–620 or `.mlmodel` ext  |
+| CoreML              | `@wetron/coreml`      | `.mlmodel`, `.mlpackage` | Protobuf      | Field tags 200-620 or `.mlmodel` ext  |
 | TensorFlow GraphDef | `@wetron/tensorflow`  | `.pb`, `.pbtxt`          | Protobuf      | Field-1 node structure or `.pb` ext   |
 | OpenVINO IR         | `@wetron/openvino`    | `.xml`                   | XML           | `<net ` tag in first 256 bytes        |
 | ncnn                | `@wetron/ncnn`        | `.param`                 | Text          | First line is `"7767517"`             |
@@ -63,7 +63,7 @@ packages/<name>/
   tsconfig.json
 ```
 
-`parseOnnx` is async (protobufjs lazy-loads). The same async signature is used for all new parsers for consistency, even when the parse itself is synchronous — callers use `await` uniformly.
+`parseOnnx` is async (protobufjs lazy-loads). The same async signature is used for all new parsers for consistency, even when the parse itself is synchronous - callers use `await` uniformly.
 
 ---
 
@@ -102,7 +102,7 @@ Detection order (magic bytes before extension):
 | TensorFlow  | bytes[0] === 0x08 fallthrough (same as ONNX, disambiguate by filename `.pb`) |
 | ONNX        | bytes[0] === 0x08 or `.onnx` extension                                       |
 
-> **Note:** Both ONNX and TensorFlow GraphDef are protobuf with field-1 as varint — they share the 0x08 magic. Disambiguation uses file extension (`.onnx` → onnx, `.pb` → tensorflow). When no extension is provided and bytes start with 0x08, return `'onnx'` (the more common format).
+> **Note:** Both ONNX and TensorFlow GraphDef are protobuf with field-1 as varint - they share the 0x08 magic. Disambiguation uses file extension (`.onnx` -> onnx, `.pb` -> tensorflow). When no extension is provided and bytes start with 0x08, return `'onnx'` (the more common format).
 
 ### `packages/core/src/categories.ts`
 
@@ -182,7 +182,7 @@ Add op type entries for the new frameworks' naming conventions:
 
 ### `@wetron/executorch`
 
-**Scope:** ExecuTorch `.pte` files — the FlatBuffer serialization format used by Meta's ExecuTorch runtime.
+**Scope:** ExecuTorch `.pte` files - the FlatBuffer serialization format used by Meta's ExecuTorch runtime.
 
 **Wire format:** FlatBuffer with file identifier `ET12`. Parse with `flatbuffers` (same library as `@wetron/tflite`).
 
@@ -195,10 +195,10 @@ Add op type entries for the new frameworks' naming conventions:
 Program
   └── execution_plan: [ExecutionPlan]      (field 6)
         ├── name: string                    (field 4)
-        ├── operators: [Operator]           (field 16) → {name, overload}
-        ├── values: [EValue]               (field 8)  → tensor shapes/dtypes
-        ├── inputs: Int32Array             (field 10) → value indices
-        ├── outputs: Int32Array            (field 12) → value indices
+        ├── operators: [Operator]           (field 16) -> {name, overload}
+        ├── values: [EValue]               (field 8)  -> tensor shapes/dtypes
+        ├── inputs: Int32Array             (field 10) -> value indices
+        ├── outputs: Int32Array            (field 12) -> value indices
         └── chains: [Chain]               (field 14)
               └── instructions: [Instruction]  (field 8)
                     └── instr_args: union
@@ -209,17 +209,17 @@ Program
 
 **IR mapping:**
 
-- Each `KernelCall` instruction → one `GraphNode`
-- `operators[op_index].name` + `.overload` → `GraphNode.opType` (e.g. `aten::conv2d.default`)
-- `KernelCall.args`: mixed input/output value indices — heuristic: values not yet "defined" by a prior instruction become this node's outputs; already-defined values become inputs
-- `values[i].val` where val is a `Tensor` (type=5) → shape from `Tensor.sizes`, dtype from `Tensor.scalar_type`
-- `execution_plan.inputs` value indices → `ModelGraph.inputs`
-- `execution_plan.outputs` value indices → `ModelGraph.outputs`
-- `execution_plan.name` → `ModelGraph.name`
+- Each `KernelCall` instruction -> one `GraphNode`
+- `operators[op_index].name` + `.overload` -> `GraphNode.opType` (e.g. `aten::conv2d.default`)
+- `KernelCall.args`: mixed input/output value indices - heuristic: values not yet "defined" by a prior instruction become this node's outputs; already-defined values become inputs
+- `values[i].val` where val is a `Tensor` (type=5) -> shape from `Tensor.sizes`, dtype from `Tensor.scalar_type`
+- `execution_plan.inputs` value indices -> `ModelGraph.inputs`
+- `execution_plan.outputs` value indices -> `ModelGraph.outputs`
+- `execution_plan.name` -> `ModelGraph.name`
 
 **Tensor value naming:** `v{i}` where `i` is the EValue index (e.g. `v0`, `v1`, …).
 
-**`scalar_type` → dtype mapping** (same as PyTorch's `ScalarType` enum):
+**`scalar_type` -> dtype mapping** (same as PyTorch's `ScalarType` enum):
 
 | Value | dtype   |
 | ----- | ------- |
@@ -237,7 +237,7 @@ Program
 
 ### `@wetron/torchscript`
 
-**Scope:** TorchScript Mobile `.pt` files — the FlatBuffer serialization format used by PyTorch Mobile (`PTMF` identifier). Standard ZIP-based `.pt` files are out of scope (require Python-specific deserialization).
+**Scope:** TorchScript Mobile `.pt` files - the FlatBuffer serialization format used by PyTorch Mobile (`PTMF` identifier). Standard ZIP-based `.pt` files are out of scope (require Python-specific deserialization).
 
 **Wire format:** FlatBuffer with file identifier `PTMF`. Parse with `flatbuffers`.
 
@@ -248,41 +248,41 @@ Program
 
 ```
 Module (root table)
-  ├── methods: Uint32Array               (field 8)  → IValue indices
-  ├── ivalues: [IValue]                  (field 12) → all values
-  └── jit_constants: Uint32Array        (field 22) → constant IValue indices
+  ├── methods: Uint32Array               (field 8)  -> IValue indices
+  ├── ivalues: [IValue]                  (field 12) -> all values
+  └── jit_constants: Uint32Array        (field 22) -> constant IValue indices
 
 IValue.val: union (field 4)
-  └── type=16 → Function
-        ├── qn: string                   (field 4)  → qualified name
-        ├── operators: [Operator]        (field 8)  → {name, overload_name}
-        └── instructions: [Instruction] (field 6, stride=8) → bytecode
+  └── type=16 -> Function
+        ├── qn: string                   (field 4)  -> qualified name
+        ├── operators: [Operator]        (field 8)  -> {name, overload_name}
+        └── instructions: [Instruction] (field 6, stride=8) -> bytecode
 
 Instruction (struct, 8 bytes):
-  ├── op: int8    (offset 0) — 1=CALL (operator call)
-  ├── n: uint16   (offset 2) — arg count
-  └── x: int32   (offset 4) — operator index (when op=1)
+  ├── op: int8    (offset 0) - 1=CALL (operator call)
+  ├── n: uint16   (offset 2) - arg count
+  └── x: int32   (offset 4) - operator index (when op=1)
 ```
 
 **IR mapping:**
 
 - Find all `Function` IValues (union type = 16)
 - For each function, iterate instructions where `op == 1` (CALL):
-  - `operators[x]` → op name: `{name}.{overload_name}` (e.g. `aten::conv2d.default`)
+  - `operators[x]` -> op name: `{name}.{overload_name}` (e.g. `aten::conv2d.default`)
   - One `GraphNode` per CALL instruction
-- Build a linear graph within each function: function inputs → op_0 → op_1 → … → function outputs
+- Build a linear graph within each function: function inputs -> op_0 -> op_1 -> … -> function outputs
 - Functions with qualified name `__torch__.forward` or `__torch__._call_impl` become the primary graph
 - `Module.methods` identifies which IValues are entry points
 
 **Op name format:** `{operator.name}/{operator.overload_name}` when overload_name is non-empty, else just `{operator.name}`.
 
-No tensor shape info is available in PTMF — `GraphValue.shape` is always `null`.
+No tensor shape info is available in PTMF - `GraphValue.shape` is always `null`.
 
 ---
 
 ### `@wetron/coreml`
 
-**Scope:** NeuralNetwork format only (covers the vast majority of production `.mlmodel` files). MLProgram (the newer IR-based format) is out of scope — treat unsupported model types as `ParseError`.
+**Scope:** NeuralNetwork format only (covers the vast majority of production `.mlmodel` files). MLProgram (the newer IR-based format) is out of scope - treat unsupported model types as `ParseError`.
 
 **Wire format:** Protocol Buffers, using the CoreML model specification proto. Use `protobufjs` with a descriptor JSON generated from Apple's published `CoreML.proto` (same approach as `@wetron/onnx`).
 
@@ -301,18 +301,18 @@ Model
               └── <layer>: { ... } ← one of: convolution, innerProduct, activation, pooling, batchnorm, ...
 ```
 
-The `NeuralNetworkLayer` has a `oneof layer` field — the field name is the op type (e.g., `convolution`, `activation`, `pooling`). Model inputs/outputs come from `Model.description.input` and `Model.description.output` (array of `FeatureDescription` with name + type).
+The `NeuralNetworkLayer` has a `oneof layer` field - the field name is the op type (e.g., `convolution`, `activation`, `pooling`). Model inputs/outputs come from `Model.description.input` and `Model.description.output` (array of `FeatureDescription` with name + type).
 
 **IR mapping:**
 
-- `layers[i].name` → `GraphNode.name`
-- Field name of the `oneof layer` → `GraphNode.opType`
-- `layers[i].input` / `layers[i].output` → `GraphNode.inputs` / `GraphNode.outputs`
-- `Model.description.input[j]` → `ModelGraph.inputs` (name from `FeatureDescription.name`; shape from `ArrayFeatureType.shape` if present)
-- `Model.description.output[j]` → `ModelGraph.outputs`
+- `layers[i].name` -> `GraphNode.name`
+- Field name of the `oneof layer` -> `GraphNode.opType`
+- `layers[i].input` / `layers[i].output` -> `GraphNode.inputs` / `GraphNode.outputs`
+- `Model.description.input[j]` -> `ModelGraph.inputs` (name from `FeatureDescription.name`; shape from `ArrayFeatureType.shape` if present)
+- `Model.description.output[j]` -> `ModelGraph.outputs`
 - Attributes: skip for now (layer-specific params vary widely)
 
-**Descriptor:** Generate `coreml-descriptor.json` from Apple's `Model.proto` (available at `apple/coremltools` repo). Only include message types needed for NeuralNetwork traversal — prune weight data fields.
+**Descriptor:** Generate `coreml-descriptor.json` from Apple's `Model.proto` (available at `apple/coremltools` repo). Only include message types needed for NeuralNetwork traversal - prune weight data fields.
 
 ---
 
@@ -336,42 +336,42 @@ GraphDef
         └── attr: { [key]: AttrValue }
 ```
 
-Input references format: `"name"` (output slot 0), `"name:N"` (output slot N), `"^name"` (control dependency — skip these). Strip the `:N` suffix when building edge names.
+Input references format: `"name"` (output slot 0), `"name:N"` (output slot N), `"^name"` (control dependency - skip these). Strip the `:N` suffix when building edge names.
 
 `GraphDef` has no explicit output node list. Outputs are inferred: any node that is not referenced in any other node's `input` list is an output. Inputs are nodes of op type `Placeholder` or `PlaceholderV2`.
 
-SavedModel format: binary-decode outer `SavedModel` message → take `meta_graphs[0].graph_def` → parse as `GraphDef`.
+SavedModel format: binary-decode outer `SavedModel` message -> take `meta_graphs[0].graph_def` -> parse as `GraphDef`.
 
 **Detection note:** TF `.pb` files start with `0x08` (same as ONNX). When `detectFormat` returns `'onnx'` but the ONNX parse fails, `parseModel` does NOT retry as TF. The caller must pass a filename with `.pb` extension, or the format must be explicitly specified.
 
 **IR mapping:**
 
-- `node[i].op` === `'Placeholder'` / `'PlaceholderV2'` → `ModelGraph.inputs` (shape from `attr.shape`)
-- Output nodes (no consumers) → `ModelGraph.outputs`
-- All other nodes → `ModelGraph.nodes`
-- `node[i].name` → `GraphNode.name`
-- `node[i].op` → `GraphNode.opType`
-- `node[i].input` (filtered: skip `^` control deps, strip `:N`) → `GraphNode.inputs`
+- `node[i].op` === `'Placeholder'` / `'PlaceholderV2'` -> `ModelGraph.inputs` (shape from `attr.shape`)
+- Output nodes (no consumers) -> `ModelGraph.outputs`
+- All other nodes -> `ModelGraph.nodes`
+- `node[i].name` -> `GraphNode.name`
+- `node[i].op` -> `GraphNode.opType`
+- `node[i].input` (filtered: skip `^` control deps, strip `:N`) -> `GraphNode.inputs`
 - Outputs: `[node[i].name]` (each TF node has one implicit output named after the node)
 
 **Attributes:** Map `AttrValue` to `AttributeValue`:
 
-- `i` (int64) → `number`
-- `f` (float) → `number`
-- `b` (bool) → `boolean`
-- `s` (bytes/string) → `string`
-- `list.i` → `number[]`
-- `list.f` → `number[]`
-- `list.s` → `string[]`
+- `i` (int64) -> `number`
+- `f` (float) -> `number`
+- `b` (bool) -> `boolean`
+- `s` (bytes/string) -> `string`
+- `list.i` -> `number[]`
+- `list.f` -> `number[]`
+- `list.s` -> `string[]`
 - Skip `tensor`, `func`, `placeholder`, `shape`, `type` (not in `AttributeValue`)
 
 ---
 
 ### `@wetron/openvino`
 
-**Scope:** OpenVINO IR v10/v11 XML format (`.xml`). The paired `.bin` weights file is not loaded — graph structure only.
+**Scope:** OpenVINO IR v10/v11 XML format (`.xml`). The paired `.bin` weights file is not loaded - graph structure only.
 
-**Wire format:** XML. Parse with `DOMParser` (browser native — no dependencies).
+**Wire format:** XML. Parse with `DOMParser` (browser native - no dependencies).
 
 **Package:** `packages/openvino/`
 **Dependencies:** none
@@ -407,16 +407,16 @@ SavedModel format: binary-decode outer `SavedModel` message → take `meta_graph
 **IR mapping:**
 
 - Tensor name = `"layer_id:port_id"` (e.g., `"0:0"`, `"1:2"`)
-- `type === "Parameter"` → `ModelGraph.inputs`; shape from `<output><port><dim>` children
-- `type === "Result"` → `ModelGraph.outputs`; shape from `<input><port><dim>` children
-- All other layers → `ModelGraph.nodes`
-- `layer.getAttribute('name')` → `GraphNode.name`
-- `layer.getAttribute('type')` → `GraphNode.opType`
-- `GraphNode.inputs`: for each `<input><port>`, resolve edge where `to-layer=id, to-port=portId` → `"fromLayer:fromPort"`
+- `type === "Parameter"` -> `ModelGraph.inputs`; shape from `<output><port><dim>` children
+- `type === "Result"` -> `ModelGraph.outputs`; shape from `<input><port><dim>` children
+- All other layers -> `ModelGraph.nodes`
+- `layer.getAttribute('name')` -> `GraphNode.name`
+- `layer.getAttribute('type')` -> `GraphNode.opType`
+- `GraphNode.inputs`: for each `<input><port>`, resolve edge where `to-layer=id, to-port=portId` -> `"fromLayer:fromPort"`
 - `GraphNode.outputs`: `"id:portId"` for each `<output><port>`
-- Attributes: `<data>` element attributes → `GraphNode.attributes` (all values as strings or numbers)
+- Attributes: `<data>` element attributes -> `GraphNode.attributes` (all values as strings or numbers)
 
-**dtype:** read from `port.getAttribute('precision')` — map `FP32` → `float32`, `FP16` → `float16`, `I32` → `int32`, `I64` → `int64`, `U8` → `uint8`, `BOOL` → `bool`.
+**dtype:** read from `port.getAttribute('precision')` - map `FP32` -> `float32`, `FP16` -> `float16`, `I32` -> `int32`, `I64` -> `int64`, `U8` -> `uint8`, `BOOL` -> `bool`.
 
 ---
 
@@ -449,22 +449,22 @@ ReLU         relu1         1 1  conv1_out  relu1_out
 
 **IR mapping:**
 
-- Layer `type === 'Input'` (or `MemoryData`) → `ModelGraph.inputs` (name = first output blob name)
-- Infer outputs: blobs not consumed by any layer → `ModelGraph.outputs`
-- All other layers → `ModelGraph.nodes`
-- `name` → `GraphNode.name`
-- `type` → `GraphNode.opType`
-- Input blob names → `GraphNode.inputs`
-- Output blob names → `GraphNode.outputs`
-- Key=value params → `GraphNode.attributes` (parse value as number if numeric, else string; array params with `-key` prefix produce `number[]`)
+- Layer `type === 'Input'` (or `MemoryData`) -> `ModelGraph.inputs` (name = first output blob name)
+- Infer outputs: blobs not consumed by any layer -> `ModelGraph.outputs`
+- All other layers -> `ModelGraph.nodes`
+- `name` -> `GraphNode.name`
+- `type` -> `GraphNode.opType`
+- Input blob names -> `GraphNode.inputs`
+- Output blob names -> `GraphNode.outputs`
+- Key=value params -> `GraphNode.attributes` (parse value as number if numeric, else string; array params with `-key` prefix produce `number[]`)
 
-**Shape:** ncnn `.param` carries no shape info — `GraphValue.shape` is always `null`. `dtype` is always `null`.
+**Shape:** ncnn `.param` carries no shape info - `GraphValue.shape` is always `null`. `dtype` is always `null`.
 
 ---
 
 ### `@wetron/gguf`
 
-**Scope:** Graph structure reconstruction from tensor naming conventions. GGUF has no explicit DAG — nodes and edges are synthesized from tensor name prefixes.
+**Scope:** Graph structure reconstruction from tensor naming conventions. GGUF has no explicit DAG - nodes and edges are synthesized from tensor name prefixes.
 
 **Wire format:** Custom little-endian binary. Parse with `DataView`. No dependencies.
 
@@ -488,25 +488,25 @@ GGUF models have a repeating block structure identified by tensor name prefixes.
 
 Tensor naming conventions (LLaMA/transformer family):
 
-- `token_embd.weight` → embedding layer
-- `blk.N.*` → transformer block N (attention + FFN)
-- `output_norm.weight` → final normalization
-- `output.weight` → LM head
+- `token_embd.weight` -> embedding layer
+- `blk.N.*` -> transformer block N (attention + FFN)
+- `output_norm.weight` -> final normalization
+- `output.weight` -> LM head
 
 Node synthesis rules:
 
 1. Group tensors by prefix: `token_embd`, `blk.0`, `blk.1`, ..., `blk.N`, `output_norm`, `output`
-2. Each group → one `GraphNode`:
-   - `opType`: inferred from prefix (`blk.N` → `TransformerBlock`, `token_embd` → `Embedding`, `output_norm` → `LayerNorm`, `output` → `Linear`)
+2. Each group -> one `GraphNode`:
+   - `opType`: inferred from prefix (`blk.N` -> `TransformerBlock`, `token_embd` -> `Embedding`, `output_norm` -> `LayerNorm`, `output` -> `Linear`)
    - `name`: group prefix
-   - `inputs` / `outputs`: sequential — `blk.N` output → `blk.N+1` input; token_embd → blk.0; last blk → output_norm → output
+   - `inputs` / `outputs`: sequential - `blk.N` output -> `blk.N+1` input; token_embd -> blk.0; last blk -> output_norm -> output
 3. `ModelGraph.inputs`: `[{ name: 'input_ids', shape: null, dtype: null }]`
 4. `ModelGraph.outputs`: `[{ name: 'logits', shape: null, dtype: null }]`
 
 **Metadata** (from KV pairs) mapped to `ModelGraph.name` and top-level attributes:
 
-- `general.name` or `general.architecture` → `ModelGraph.name`
-- `llm.context_length`, `llm.embedding_length`, `llm.block_count`, `llm.attention.head_count` → attributes on a synthetic `Config` node inserted before `token_embd`
+- `general.name` or `general.architecture` -> `ModelGraph.name`
+- `llm.context_length`, `llm.embedding_length`, `llm.block_count`, `llm.attention.head_count` -> attributes on a synthetic `Config` node inserted before `token_embd`
 
 > This parser produces a coarse architectural overview, not a fine-grained op graph. The node count equals the number of logical layer groups, not the number of tensor operations.
 
@@ -521,7 +521,7 @@ String: uint32 length + UTF-8 bytes. Array: uint32 type + uint64 count + values.
 
 ---
 
-## `packages/core/src/index.ts` — `parseModel` extension
+## `packages/core/src/index.ts` - `parseModel` extension
 
 ```ts
 export async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph> {
@@ -580,16 +580,16 @@ export async function parseModel(bytes: Uint8Array, filename?: string): Promise<
 
 ## op category additions to `packages/core/src/categories.ts`
 
-The `CATEGORY_MAP` in `categories.ts` is extended — no structural changes, just new entries.
+The `CATEGORY_MAP` in `categories.ts` is extended - no structural changes, just new entries.
 
 Potential name collisions to watch:
 
-- `Attention` — already mapped to `'attention'` ✓
-- `LSTM`, `GRU`, `RNN` — already mapped to `'recurrent'` ✓
-- `MatMul`, `Conv`, `Relu` etc. — already present ✓
-- New TF names: `AddV2`, `ConcatV2`, `Conv2D`, `DepthwiseConv2dNative`, `FusedBatchNormV3`, etc. — all new
-- New OpenVINO names: `Convolution`, `Parameter`, `Result`, `Interpolate` — new
-- New ncnn names: `BinaryOp`, `UnaryOp`, `Pooling`, `InnerProduct`, `MemoryData` — new
+- `Attention` - already mapped to `'attention'` ✓
+- `LSTM`, `GRU`, `RNN` - already mapped to `'recurrent'` ✓
+- `MatMul`, `Conv`, `Relu` etc. - already present ✓
+- New TF names: `AddV2`, `ConcatV2`, `Conv2D`, `DepthwiseConv2dNative`, `FusedBatchNormV3`, etc. - all new
+- New OpenVINO names: `Convolution`, `Parameter`, `Result`, `Interpolate` - new
+- New ncnn names: `BinaryOp`, `UnaryOp`, `Pooling`, `InnerProduct`, `MemoryData` - new
 
 ---
 
@@ -611,11 +611,11 @@ Each test asserts: node count > 0, no undefined `opType`, at least one input and
 
 ## Out of Scope
 
-- CoreML MLProgram (new IR-based format) — defer until NeuralNetwork support is proven
-- TensorFlow text protobuf (`.pbtxt`) — low demand for browser parsing
-- TensorFlow SavedModel ZIP unpacking — defer; focus on bare `.pb` first
-- ncnn binary `.param.bin` — `.param` text covers most use cases
-- ONNX model with external data (`.onnx` + `.onnx_data`) — out of scope per existing design
-- PyTorch `.pth` and non-mobile `.pt` — require Python-specific serialization; use ExecuTorch or TorchScript Mobile instead
+- CoreML MLProgram (new IR-based format) - defer until NeuralNetwork support is proven
+- TensorFlow text protobuf (`.pbtxt`) - low demand for browser parsing
+- TensorFlow SavedModel ZIP unpacking - defer; focus on bare `.pb` first
+- ncnn binary `.param.bin` - `.param` text covers most use cases
+- ONNX model with external data (`.onnx` + `.onnx_data`) - out of scope per existing design
+- PyTorch `.pth` and non-mobile `.pt` - require Python-specific serialization; use ExecuTorch or TorchScript Mobile instead
 - Weights / tensor data for any format
 - Quantization metadata display

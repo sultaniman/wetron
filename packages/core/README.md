@@ -11,11 +11,11 @@ bun add @wetron/core
 ## API
 
 ```ts
-// Detect format from magic bytes — never throws, returns "unknown" on no match
+// Detect format from magic bytes - never throws, returns "unknown" on no match
 type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
-// Parse a model file — dispatches to the right parser based on format detection
+// Parse a model file - dispatches to the right parser based on format detection
 async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
 // Convert IR to ReactFlow / SvelteFlow nodes and edges (Dagre layout, top-to-bottom)
@@ -24,7 +24,7 @@ function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEd
 // Op category from opType string
 function opCategory(opType: string): OpCategory;
 
-// Named input slot labels for known ops (e.g. Conv → ["X","W","B"])
+// Named input slot labels for known ops (e.g. Conv -> ["X","W","B"])
 function opInputLabels(opType: string): readonly string[];
 ```
 

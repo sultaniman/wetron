@@ -1,4 +1,4 @@
-# Styling Drift Prevention — Design Spec
+# Styling Drift Prevention - Design Spec
 
 **Date:** 2026-05-01
 **Status:** Approved
@@ -9,12 +9,12 @@ Color token values and CSS variable values are hand-copied between `packages/rea
 
 The drift risk sits in two layers:
 
-1. **Design tokens in `theme.ts`** — `CATEGORY_THEME`, `MINIMAP_THEME`, `EDGE_THEME` are defined separately in each package with the same values.
-2. **CSS custom property values** — canvas/controls vars (`--xy-*`) and panel vars (`--panel-*`, currently `--wp-*`) are hardcoded in React's `.css` files and mirrored in Svelte's embedded `<style>` blocks.
+1. **Design tokens in `theme.ts`** - `CATEGORY_THEME`, `MINIMAP_THEME`, `EDGE_THEME` are defined separately in each package with the same values.
+2. **CSS custom property values** - canvas/controls vars (`--xy-*`) and panel vars (`--panel-*`, currently `--wp-*`) are hardcoded in React's `.css` files and mirrored in Svelte's embedded `<style>` blocks.
 
 ## Solution
 
-A new `packages/tokens/` package (`@wetron/tokens`) becomes the single source of truth for all color and CSS variable values. Initial values are sourced from React's existing files — React is authoritative.
+A new `packages/tokens/` package (`@wetron/tokens`) becomes the single source of truth for all color and CSS variable values. Initial values are sourced from React's existing files - React is authoritative.
 
 ---
 
@@ -92,12 +92,12 @@ PANEL_VARS: {
 ### `packages/react/src/model-graph-view/model-graph-view.css`
 
 - No structural changes
-- Values must match `CANVAS_VARS` in `@wetron/tokens` — they are the rendered form of those tokens
+- Values must match `CANVAS_VARS` in `@wetron/tokens` - they are the rendered form of those tokens
 
 ### `packages/react/src/node-property-panel/node-property-panel.module.css`
 
 - Rename every `--wp-*` custom property to `--panel-*` (11 variables)
-- No other changes — values must match `PANEL_VARS` in `@wetron/tokens`
+- No other changes - values must match `PANEL_VARS` in `@wetron/tokens`
 
 ---
 
@@ -119,11 +119,11 @@ PANEL_VARS: {
 
 - All `--wp-*` references renamed to `--panel-*`
 - Hardcoded `--panel-*` color values replaced with Svelte `style:` bindings using `PANEL_VARS[isDark ? 'dark' : 'light']` on the panel root element
-- Sub-components that inherit vars via CSS cascade are unaffected — only the root element needs the bindings
+- Sub-components that inherit vars via CSS cascade are unaffected - only the root element needs the bindings
 
 ---
 
-## CSS variable rename: `--wp-*` → `--panel-*`
+## CSS variable rename: `--wp-*` -> `--panel-*`
 
 | Old name              | New name                 |
 | --------------------- | ------------------------ |
@@ -143,8 +143,8 @@ PANEL_VARS: {
 
 ## Out of scope
 
-- **Chip type colors** (`chip[data-type="str"]` etc.) — values are structurally tied to CSS attribute selectors; extracting to a TS dict would require generating CSS rules at runtime. Deferred.
-- **Icon box colors** — same reason as chip type colors. Deferred.
+- **Chip type colors** (`chip[data-type="str"]` etc.) - values are structurally tied to CSS attribute selectors; extracting to a TS dict would require generating CSS rules at runtime. Deferred.
+- **Icon box colors** - same reason as chip type colors. Deferred.
 
 ---
 

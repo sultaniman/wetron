@@ -1,6 +1,6 @@
 ---
 title: "Svelte"
-description: "ModelGraphView and NodePropertyPanel Svelte 5 components for Wetron — built on @xyflow/svelte with runes and CSS custom property theming."
+description: "ModelGraphView and NodePropertyPanel Svelte 5 components for Wetron - built on @xyflow/svelte with runes and CSS custom property theming."
 lead: "Drop-in components built on @xyflow/svelte."
 weight: 20
 ---
@@ -59,16 +59,16 @@ type ExportHelpers = {
 
 ### Props
 
-| Prop            | Type                                    | Description                                                  |
-| --------------- | --------------------------------------- | ------------------------------------------------------------ |
-| `target`        | `PanelTarget \| null`                   | Selected node, edge, or tensor. `null` renders nothing.      |
-| `colorMode`     | `"light" \| "dark" \| "system"`         | Theme.                                                       |
-| `opsets`        | `ReadonlyMap<string, number>`           | Op domain → version (ONNX only). Shown in node header.       |
-| `inputSources`  | `ReadonlyMap<string, string>`           | Tensor name → producing op type. Used to colour input chips. |
-| `tensorShapes`  | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels.                                  |
-| `onTensorClick` | `(name: string) => void`                | Called when a tensor name chip is clicked.                   |
-| `onBack`        | `() => void`                            | Shows a back arrow when provided.                            |
-| `onClose`       | `() => void`                            | Shows a close button when provided.                          |
+| Prop            | Type                                    | Description                                                   |
+| --------------- | --------------------------------------- | ------------------------------------------------------------- |
+| `target`        | `PanelTarget \| null`                   | Selected node, edge, or tensor. `null` renders nothing.       |
+| `colorMode`     | `"light" \| "dark" \| "system"`         | Theme.                                                        |
+| `opsets`        | `ReadonlyMap<string, number>`           | Op domain -> version (ONNX only). Shown in node header.       |
+| `inputSources`  | `ReadonlyMap<string, string>`           | Tensor name -> producing op type. Used to colour input chips. |
+| `tensorShapes`  | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels.                                   |
+| `onTensorClick` | `(name: string) => void`                | Called when a tensor name chip is clicked.                    |
+| `onBack`        | `() => void`                            | Shows a back arrow when provided.                             |
+| `onClose`       | `() => void`                            | Shows a close button when provided.                           |
 
 ## PanelTarget type
 

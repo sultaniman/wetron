@@ -9,7 +9,7 @@ export function parseKerasMetadataPb(bytes: Uint8Array): ModelGraph {
   while (reader.pos < reader.len) {
     const tag = reader.uint32();
     if (tag >>> 3 === 1) {
-      // field 1 — Keras model config as JSON string
+      // field 1 - Keras model config as JSON string
       const json = reader.string();
       let raw: unknown;
       try {

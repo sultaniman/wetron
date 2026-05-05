@@ -32,7 +32,7 @@ const OP_INPUT_LABELS: Record<string, readonly string[]> = {
     "y_scale",
     "y_zero_point",
   ],
-  // Shape/indexing ops — commonly fed by folded Constants
+  // Shape/indexing ops - commonly fed by folded Constants
   Reshape: ["data", "shape"],
   Expand: ["input", "shape"],
   Tile: ["input", "repeats"],

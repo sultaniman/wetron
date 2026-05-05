@@ -35,7 +35,7 @@ export interface ModelGraph {
       readonly dtype: string | null;
     }
   >;
-  /** Operator domain → opset version (ONNX only; empty string = standard ai.onnx domain). */
+  /** Operator domain -> opset version (ONNX only; empty string = standard ai.onnx domain). */
   readonly opsets?: ReadonlyMap<string, number>;
   /** Non-fatal parse warnings (skipped/degraded nodes). Absent when empty. */
   readonly warnings?: readonly ParseWarning[];

@@ -1,4 +1,4 @@
-# wetron — Graph UX Polish Design
+# wetron - Graph UX Polish Design
 
 **Date:** 2026-04-30
 **Status:** Approved
@@ -8,17 +8,17 @@
 
 Five improvements targeting netron UX parity:
 
-1. **Fan-out Connection Properties** — edge click shows all consumer nodes for a tensor, not just one target
-2. **Edge highlighting** — clicking an edge highlights every edge carrying the same tensor in red
-3. **Panel close button** — × button to dismiss the properties panel
-4. **Weight shapes on node cards** — Conv/Gemm/etc. cards show `W 〈shape〉` / `B 〈shape〉` rows; node path name removed from cards
-5. **Misc polish** — remove ReactFlow watermark; hide empty ONNX optional inputs in OpPanel
+1. **Fan-out Connection Properties** - edge click shows all consumer nodes for a tensor, not just one target
+2. **Edge highlighting** - clicking an edge highlights every edge carrying the same tensor in red
+3. **Panel close button** - × button to dismiss the properties panel
+4. **Weight shapes on node cards** - Conv/Gemm/etc. cards show `W 〈shape〉` / `B 〈shape〉` rows; node path name removed from cards
+5. **Misc polish** - remove ReactFlow watermark; hide empty ONNX optional inputs in OpPanel
 
 ---
 
 ## Data Model Changes (`@wetron/core`)
 
-### `ModelGraph` — add `initializers`
+### `ModelGraph` - add `initializers`
 
 `packages/core/src/ir.ts`:
 
@@ -40,7 +40,7 @@ export interface ModelGraph {
 
 All existing `ModelGraph` literals in tests gain `initializers: new Map()`.
 
-### `op-inputs.ts` — new file
+### `op-inputs.ts` - new file
 
 `packages/core/src/op-inputs.ts`:
 
@@ -98,7 +98,7 @@ export function opInputLabels(opType: string): readonly string[] {
 
 Exported from `packages/core/src/index.ts`.
 
-### `FlowEdge.data` — add node names
+### `FlowEdge.data` - add node names
 
 `packages/core/src/transform.ts`, `FlowEdge.data` gains two fields:
 
@@ -139,7 +139,7 @@ flowEdges.push({
 });
 ```
 
-### `GraphNodeData` — add `weightInputs`
+### `GraphNodeData` - add `weightInputs`
 
 `packages/core/src/transform.ts`:
 
@@ -241,7 +241,7 @@ for (let i = 0; i < numTensors; i++) {
 
 ## Panel Changes (`@wetron/react`)
 
-### `PanelTarget` — `EdgeTarget` fan-out shape
+### `PanelTarget` - `EdgeTarget` fan-out shape
 
 `packages/react/src/node-property-panel.tsx`:
 
@@ -259,7 +259,7 @@ export type PanelTarget =
   | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```
 
-### `EdgePanel` — render fan-out
+### `EdgePanel` - render fan-out
 
 ```tsx
 type EdgeData = {
@@ -375,7 +375,7 @@ export const EDGE_THEME = {
 } as const;
 ```
 
-### `ModelGraphView` — controlled highlight prop
+### `ModelGraphView` - controlled highlight prop
 
 `packages/react/src/model-graph-view.tsx`:
 
@@ -409,7 +409,7 @@ const edges = useMemo(
 );
 ```
 
-### `handleEdgeClick` — fan-out aggregation
+### `handleEdgeClick` - fan-out aggregation
 
 ```ts
 const handleEdgeClick = useCallback(
@@ -538,8 +538,8 @@ const handleBack = useCallback(() => {
 ### `packages/core/test/transform.test.ts`
 
 - `SIMPLE_GRAPH` gains `initializers: new Map()`
-- New test: Conv node with an initializer entry → `weightInputs` populated with correct `label`, `name`, `shape`
-- New test: Relu node with no initializer inputs → `weightInputs` is `undefined` or empty
+- New test: Conv node with an initializer entry -> `weightInputs` populated with correct `label`, `name`, `shape`
+- New test: Relu node with no initializer inputs -> `weightInputs` is `undefined` or empty
 - New test: edges carry `sourceNodeName` and `targetNodeName`
 
 ### `packages/onnx/test/parse.test.ts`
@@ -572,5 +572,5 @@ const handleBack = useCallback(() => {
 - Positional slot labels on IO nodes
 - Attribute expand/collapse (`+` toggle)
 - Hover tooltips on truncated tensor names in panel
-- Weight value display (requires weight deserialization — blocked by CLAUDE.md)
+- Weight value display (requires weight deserialization - blocked by CLAUDE.md)
 - Dark mode close button styling

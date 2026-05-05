@@ -1,6 +1,6 @@
 ---
 title: "Adding a Parser"
-description: "Step-by-step guide to adding a new model format parser to the Wetron monorepo — package setup, IR integration, format detection, and testing."
+description: "Step-by-step guide to adding a new model format parser to the Wetron monorepo - package setup, IR integration, format detection, and testing."
 lead: "Each format is an independent package. Adding one follows a consistent pattern."
 weight: 10
 ---
@@ -36,11 +36,11 @@ export function parse<Format>(bytes: Uint8Array): ModelGraph {
 
 Rules:
 
-- Import IR types from `@wetron/core/ir` — never redefine them.
-- Import exotic dtype readers from `@wetron/core/dtypes` — never inline shims.
+- Import IR types from `@wetron/core/ir` - never redefine them.
+- Import exotic dtype readers from `@wetron/core/dtypes` - never inline shims.
 - Use native Web APIs: `DataView`, `TextDecoder`, `DecompressionStream`.
 - Use `protobufjs` for protobuf formats, `flatbuffers` for FlatBuffers formats.
-- Return graph structure only — no weight data.
+- Return graph structure only - no weight data.
 - Attach non-fatal issues as `warnings` on the returned `ModelGraph` rather than throwing.
 
 ### 3. Register format detection
@@ -54,7 +54,7 @@ if (bytes[4] === 0x45 && bytes[5] === 0x54 && bytes[6] === 0x31 && bytes[7] === 
 }
 ```
 
-`detectFormat` must always return a `Format` string — never throw.
+`detectFormat` must always return a `Format` string - never throw.
 
 ### 4. Add to the unified entry
 
@@ -84,7 +84,7 @@ test("parses test model", () => {
 });
 ```
 
-Add a real model file to `test-models/`. Node count must match what Netron shows for the same file — use `netron-main/` as a reference for schema field layouts.
+Add a real model file to `test-models/`. Node count must match what Netron shows for the same file - use `netron-main/` as a reference for schema field layouts.
 
 ## Package.json template
 
@@ -108,9 +108,9 @@ Add a real model file to `test-models/`. Node count must match what Netron shows
 
 ## What NOT to do
 
-- Don't deserialize weight data — graph structure only.
-- Don't copy netron's internal reader classes — `parseMyFormat(bytes)` is the entire public API.
-- Don't inline dtype shims — import from `@wetron/core/dtypes`.
+- Don't deserialize weight data - graph structure only.
+- Don't copy netron's internal reader classes - `parseMyFormat(bytes)` is the entire public API.
+- Don't inline dtype shims - import from `@wetron/core/dtypes`.
 - Don't patch `DataView.prototype` or `BigInt.prototype`.
-- Don't throw from `detectFormat` — return `"unknown"`.
-- Don't skip failing tests — fix them before reporting done.
+- Don't throw from `detectFormat` - return `"unknown"`.
+- Don't skip failing tests - fix them before reporting done.

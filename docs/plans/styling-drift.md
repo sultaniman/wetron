@@ -14,29 +14,29 @@
 
 **Created:**
 
-- `packages/tokens/src/index.ts` — all design token dictionaries
+- `packages/tokens/src/index.ts` - all design token dictionaries
 - `packages/tokens/package.json`
 - `packages/tokens/tsconfig.json`
 - `packages/tokens/test/index.test.ts`
 
 **Modified:**
 
-- `packages/react/package.json` — add `@wetron/tokens` dependency
-- `packages/react/src/theme.ts` — import+re-export CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME from tokens
-- `packages/react/src/node-property-panel/node-property-panel.module.css` — rename `--wp-*` → `--panel-*` (11 vars)
-- `packages/svelte/package.json` — add `@wetron/tokens` dependency
-- `packages/svelte/src/theme.ts` — import CATEGORY_THEME as CATEGORY_COLORS from tokens, spread + add icon field
-- `packages/svelte/src/model-graph-view.svelte` — remove `--xy-*` from `:global()` CSS, apply via inline style from CANVAS_VARS; use MINIMAP_THEME + EDGE_THEME
-- `packages/svelte/src/node-property-panel/node-property-panel.svelte` — apply PANEL_VARS via inline style
-- `packages/svelte/src/node-property-panel/op-panel.svelte` — remove local CATEGORY_THEME, import from tokens; use `--panel-*` vars
-- `packages/svelte/src/node-property-panel/edge-panel.svelte` — use `--panel-*` vars
-- `packages/svelte/src/node-property-panel/tensor-panel.svelte` — use `--panel-*` vars
-- `packages/svelte/src/node-property-panel/io-panel.svelte` — use `--panel-*` vars
-- `packages/svelte/src/node-property-panel/section-label.svelte` — use `--panel-label`
-- `packages/svelte/src/node-property-panel/row.svelte` — use `--panel-*` vars
-- `packages/svelte/src/node-property-panel/attr-row.svelte` — use `--panel-*` vars
-- `packages/svelte/src/node-property-panel/chip.svelte` — use `--panel-chip-*` base vars
-- `packages/svelte/src/node-property-panel/close-button.svelte` — use `--panel-*` vars
+- `packages/react/package.json` - add `@wetron/tokens` dependency
+- `packages/react/src/theme.ts` - import+re-export CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME from tokens
+- `packages/react/src/node-property-panel/node-property-panel.module.css` - rename `--wp-*` -> `--panel-*` (11 vars)
+- `packages/svelte/package.json` - add `@wetron/tokens` dependency
+- `packages/svelte/src/theme.ts` - import CATEGORY_THEME as CATEGORY_COLORS from tokens, spread + add icon field
+- `packages/svelte/src/model-graph-view.svelte` - remove `--xy-*` from `:global()` CSS, apply via inline style from CANVAS_VARS; use MINIMAP_THEME + EDGE_THEME
+- `packages/svelte/src/node-property-panel/node-property-panel.svelte` - apply PANEL_VARS via inline style
+- `packages/svelte/src/node-property-panel/op-panel.svelte` - remove local CATEGORY_THEME, import from tokens; use `--panel-*` vars
+- `packages/svelte/src/node-property-panel/edge-panel.svelte` - use `--panel-*` vars
+- `packages/svelte/src/node-property-panel/tensor-panel.svelte` - use `--panel-*` vars
+- `packages/svelte/src/node-property-panel/io-panel.svelte` - use `--panel-*` vars
+- `packages/svelte/src/node-property-panel/section-label.svelte` - use `--panel-label`
+- `packages/svelte/src/node-property-panel/row.svelte` - use `--panel-*` vars
+- `packages/svelte/src/node-property-panel/attr-row.svelte` - use `--panel-*` vars
+- `packages/svelte/src/node-property-panel/chip.svelte` - use `--panel-chip-*` base vars
+- `packages/svelte/src/node-property-panel/close-button.svelte` - use `--panel-*` vars
 
 ---
 
@@ -135,7 +135,7 @@ test("PANEL_VARS light and dark have the same 11 keys", () => {
 }
 ```
 
-- [ ] **Step 3: Run the test — expect import failure**
+- [ ] **Step 3: Run the test - expect import failure**
 
 ```bash
 bun test packages/tokens
@@ -186,7 +186,7 @@ export const EDGE_THEME = {
   selectedStrokeWidth: 2,
 } as const;
 
-// Keys are CSS custom property names — consumers can apply via style attribute or setProperty.
+// Keys are CSS custom property names - consumers can apply via style attribute or setProperty.
 export const CANVAS_VARS = {
   light: {
     "--xy-background-color-default": "#f8f8fc",
@@ -339,7 +339,7 @@ git commit -m "feat(@wetron/react): source design tokens from @wetron/tokens"
 
 ---
 
-## Task 3: Rename `--wp-*` → `--panel-*` in React CSS
+## Task 3: Rename `--wp-*` -> `--panel-*` in React CSS
 
 **Files:**
 
@@ -351,9 +351,9 @@ Use search-and-replace across the entire file. Every occurrence of `--wp-` becom
 
 The affected lines are:
 
-- Line 3–13: variable definitions under `.panel { ... }` — rename keys
-- Line 27–38: dark theme overrides under `.panel[data-theme="dark"]` — rename keys
-- Every `var(--wp-*)` reference throughout the file — rename to `var(--panel-*)`
+- Line 3-13: variable definitions under `.panel { ... }` - rename keys
+- Line 27-38: dark theme overrides under `.panel[data-theme="dark"]` - rename keys
+- Every `var(--wp-*)` reference throughout the file - rename to `var(--panel-*)`
 
 Final result: no `--wp-` appears anywhere in the file.
 
@@ -614,7 +614,7 @@ Replace the entire `<style>` block with:
 </style>
 ```
 
-The dark mode overrides are removed — the vars now carry both modes, switched by the inline style.
+The dark mode overrides are removed - the vars now carry both modes, switched by the inline style.
 
 - [ ] **Step 4: Commit**
 
@@ -654,7 +654,7 @@ The pattern for all sub-components: replace hardcoded hex values with `var(--pan
 | `#f0f0f0` (hover) | `#2a2a3a` | `var(--panel-close-hover)` |
 | `#222` | `#f0f0f0` | `var(--panel-text)` |
 
-**Out of scope** (keep as-is): icon box colors (`[data-kind="tensor"]` etc.) and chip type colors (`[data-type="str"]` etc.) — these remain as structural hardcoded CSS since they can't cleanly map to a generic var.
+**Out of scope** (keep as-is): icon box colors (`[data-kind="tensor"]` etc.) and chip type colors (`[data-type="str"]` etc.) - these remain as structural hardcoded CSS since they can't cleanly map to a generic var.
 
 - [ ] **Step 1: Update `section-label.svelte`**
 
@@ -841,11 +841,11 @@ Find and replace only these two rules:
 
 All type-specific rules (`.chip[data-type="str"]` etc.) remain exactly as-is.
 
-- [ ] **Step 6: Update `op-panel.svelte` — remove local CATEGORY_THEME and fix style**
+- [ ] **Step 6: Update `op-panel.svelte` - remove local CATEGORY_THEME and fix style**
 
 **Script block changes:**
 
-Remove only the local `CATEGORY_THEME` constant (lines 12–27). Keep `GLYPH_CATS` and all icon rendering logic unchanged.
+Remove only the local `CATEGORY_THEME` constant (lines 12-27). Keep `GLYPH_CATS` and all icon rendering logic unchanged.
 
 Add this import at the top of the script block:
 
@@ -853,9 +853,9 @@ Add this import at the top of the script block:
 import { CATEGORY_THEME } from "@wetron/tokens";
 ```
 
-The existing usage `const color = $derived(isDark ? CATEGORY_THEME[cat].dark : CATEGORY_THEME[cat].light)` continues to work — tokens exports `{ light: string; dark: string }` per category.
+The existing usage `const color = $derived(isDark ? CATEGORY_THEME[cat].dark : CATEGORY_THEME[cat].light)` continues to work - tokens exports `{ light: string; dark: string }` per category.
 
-**Style block changes** — replace the `.header`, `.section`, and `.nodeSubtitle` rules and remove their dark overrides:
+**Style block changes** - replace the `.header`, `.section`, and `.nodeSubtitle` rules and remove their dark overrides:
 
 ```css
 <style>

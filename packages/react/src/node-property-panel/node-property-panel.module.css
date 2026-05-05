@@ -67,7 +67,7 @@
   color: var(--icon-box-color, inherit);
 }
 
-/* Static panel icon colors — light */
+/* Static panel icon colors - light */
 .iconBox[data-kind="tensor"] {
   background: #e6f4ea;
   color: #34a853;
@@ -85,7 +85,7 @@
   color: #1565c0;
 }
 
-/* Static panel icon colors — dark */
+/* Static panel icon colors - dark */
 .panel[data-theme="dark"] .iconBox[data-kind="tensor"] {
   background: color-mix(in oklch, #4caf50 12%, #1e1e2e);
   color: #4caf50;

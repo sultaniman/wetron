@@ -195,7 +195,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
 
   // Annotate each flow edge with Dagre's intermediate waypoints so the edge
   // component can draw a catmull-rom spline that routes around intermediate nodes.
-  // Multiple flow edges sharing the same source→target pair reuse the same points.
+  // Multiple flow edges sharing the same source->target pair reuse the same points.
   const ptCache = new Map<string, readonly { x: number; y: number }[]>();
   for (let i = 0; i < flowEdges.length; i++) {
     const fe = flowEdges[i];
@@ -205,7 +205,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
       const raw = (
         g.edge(fe.source, fe.target) as { points?: { x: number; y: number }[] } | undefined
       )?.points;
-      // Slice off first and last — those are dagre's node-center estimates;
+      // Slice off first and last - those are dagre's node-center estimates;
       // the edge component uses xyflow's actual handle positions instead.
       pts = raw && raw.length > 2 ? raw.slice(1, raw.length - 1) : [];
       ptCache.set(key, pts);

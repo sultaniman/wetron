@@ -1,7 +1,7 @@
 ---
 title: "Theming"
-description: "CSS custom properties for Wetron components — override node card, tooltip, and property panel tokens without rebuilding."
-lead: "All visual tokens are CSS custom properties — override any of them without rebuilding."
+description: "CSS custom properties for Wetron components - override node card, tooltip, and property panel tokens without rebuilding."
+lead: "All visual tokens are CSS custom properties - override any of them without rebuilding."
 weight: 30
 ---
 
@@ -54,7 +54,7 @@ weight: 30
 
 ## Node category colours
 
-Category accent colours come from `@wetron/tokens` and are applied as tinted backgrounds on node cards. They are not CSS custom properties — customise them by passing a modified `CATEGORY_THEME` map if you fork the theme layer.
+Category accent colours come from `@wetron/tokens` and are applied as tinted backgrounds on node cards. They are not CSS custom properties - customise them by passing a modified `CATEGORY_THEME` map if you fork the theme layer.
 
 | Category        | Colour (light) |
 | --------------- | -------------- |

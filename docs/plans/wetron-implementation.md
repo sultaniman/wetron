@@ -4,7 +4,7 @@
 
 **Goal:** Build a TypeScript monorepo with ONNX + TFLite parsers, shared IR, and React/Svelte rendering layers under the `@wetron/` scope.
 
-**Architecture:** Five workspace packages — `@wetron/core` (IR, dtypes, detect, transform, unified entry), `@wetron/onnx` (protobufjs parser), `@wetron/tflite` (flatbuffers decoder), `@wetron/react` (@xyflow/react renderer), `@wetron/svelte` (@xyflow/svelte renderer). All parsers output the same readonly `ModelGraph` IR. Layout (dagre) lives in core, shared by both renderers.
+**Architecture:** Five workspace packages - `@wetron/core` (IR, dtypes, detect, transform, unified entry), `@wetron/onnx` (protobufjs parser), `@wetron/tflite` (flatbuffers decoder), `@wetron/react` (@xyflow/react renderer), `@wetron/svelte` (@xyflow/svelte renderer). All parsers output the same readonly `ModelGraph` IR. Layout (dagre) lives in core, shared by both renderers.
 
 **Tech Stack:** Bun workspaces + runtime, TypeScript 5, protobufjs/light (ONNX), flatbuffers npm (TFLite), dagre, @xyflow/react v12, @xyflow/svelte, @testing-library/react, happy-dom, bun:test
 
@@ -323,7 +323,7 @@ Expected: two files in `test-models/`, each > 0 bytes.
 
 ```bash
 git add package.json tsconfig.json packages/ test-models/
-git commit -m "chore: repo scaffold — packages, tsconfigs, test models"
+git commit -m "chore: repo scaffold - packages, tsconfigs, test models"
 ```
 
 ---
@@ -379,7 +379,7 @@ test("ModelGraph type is assignable", () => {
 cd packages/core && bun test test/ir.test.ts
 ```
 
-Expected: `FAIL` — `Cannot find module '../src/ir.ts'`
+Expected: `FAIL` - `Cannot find module '../src/ir.ts'`
 
 - [ ] **Step 3: Write `packages/core/src/ir.ts`**
 
@@ -424,7 +424,7 @@ export class ParseError extends Error {
 cd packages/core && bun test test/ir.test.ts
 ```
 
-Expected: `PASS` — 2 tests pass.
+Expected: `PASS` - 2 tests pass.
 
 - [ ] **Step 5: Commit**
 
@@ -519,7 +519,7 @@ test("readFloat16 stub handles native or fallback", () => {
 cd packages/core && bun test test/dtypes.test.ts
 ```
 
-Expected: `FAIL` — module not found.
+Expected: `FAIL` - module not found.
 
 - [ ] **Step 3: Write `packages/core/src/dtypes.ts`**
 
@@ -533,7 +533,7 @@ export function readBfloat16(view: DataView, offset: number, le: boolean): numbe
   return _f32[0];
 }
 
-// Float16 — use DataView.getFloat16 if available, otherwise manual decode
+// Float16 - use DataView.getFloat16 if available, otherwise manual decode
 const _hasNativeFloat16 = typeof DataView.prototype.getFloat16 === "function";
 
 export function readFloat16(view: DataView, offset: number, le: boolean): number {
@@ -601,7 +601,7 @@ export function readFloat8e5m2(view: DataView, offset: number): number {
   return _float8e5m2[view.getUint8(offset)];
 }
 
-// Float4 e2m1 — 16-entry lookup table
+// Float4 e2m1 - 16-entry lookup table
 const _float4e2m1 = [0, 0.5, 1, 1.5, 2, 3, 4, 6, -0, -0.5, -1, -1.5, -2, -3, -4, -6];
 
 export function readFloat4e2m1(view: DataView, byteOffset: number, highNibble: boolean): number {
@@ -621,7 +621,7 @@ export function readInt4(view: DataView, byteOffset: number, highNibble: boolean
   return u >= 8 ? u - 16 : u;
 }
 
-// Generic bit-level reads (cross-byte not supported — operates within a single byte)
+// Generic bit-level reads (cross-byte not supported - operates within a single byte)
 export function readUintBits(
   view: DataView,
   byteOffset: number,
@@ -663,7 +663,7 @@ export function readFloat128(_view: DataView, _offset: number): never {
 cd packages/core && bun test test/dtypes.test.ts
 ```
 
-Expected: `PASS` — 7 tests pass.
+Expected: `PASS` - 7 tests pass.
 
 - [ ] **Step 5: Commit**
 
@@ -773,7 +773,7 @@ test("parseOnnx throws ParseError on garbage input", async () => {
 cd packages/onnx && bun test test/parse.test.ts
 ```
 
-Expected: `FAIL` — `Cannot find module '../src/parse.ts'`
+Expected: `FAIL` - `Cannot find module '../src/parse.ts'`
 
 - [ ] **Step 3: Write `packages/onnx/src/parse.ts`**
 
@@ -935,7 +935,7 @@ git commit -m "feat(@wetron/onnx): add ONNX parser with protobufjs"
 
 - [ ] **Step 1: Write `packages/tflite/src/builtin-ops.ts`**
 
-Extracted from `netron-main/source/tflite-schema.js` — number-keyed entries only:
+Extracted from `netron-main/source/tflite-schema.js` - number-keyed entries only:
 
 ```typescript
 export const BUILTIN_OP_NAMES: Record<number, string> = {
@@ -1233,7 +1233,7 @@ test("parseTflite throws ParseError on garbage input", () => {
 cd packages/tflite && bun test test/parse.test.ts
 ```
 
-Expected: `FAIL` — module not found.
+Expected: `FAIL` - module not found.
 
 - [ ] **Step 3: Write `packages/tflite/src/parse.ts`**
 
@@ -1244,7 +1244,7 @@ import { ParseError } from "@wetron/core/ir";
 import { BUILTIN_OP_NAMES } from "./builtin-ops.ts";
 import { TENSOR_TYPE_NAMES } from "./tensor-types.ts";
 
-// FlatBuffers vtable field to vtable-offset mapping: field N → vtable offset 4 + N*2
+// FlatBuffers vtable field to vtable-offset mapping: field N -> vtable offset 4 + N*2
 function field(n: number): number {
   return 4 + n * 2;
 }
@@ -1520,7 +1520,7 @@ test("returns unknown for unrecognized bytes", () => {
 cd packages/core && bun test test/detect.test.ts
 ```
 
-Expected: `FAIL` — module not found.
+Expected: `FAIL` - module not found.
 
 - [ ] **Step 3: Write `packages/core/src/detect.ts`**
 
@@ -1551,7 +1551,7 @@ export function detectFormat(bytes: Uint8Array, filename?: string): Format {
 cd packages/core && bun test test/detect.test.ts
 ```
 
-Expected: `PASS` — 6 tests pass.
+Expected: `PASS` - 6 tests pass.
 
 - [ ] **Step 5: Commit**
 
@@ -1596,7 +1596,7 @@ test("produces correct node count", () => {
 
 test("produces correct edge count", () => {
   const { edges } = modelGraphToFlow(SIMPLE_GRAPH);
-  // x→conv1, conv1→relu1, relu1→output:y = 3
+  // x->conv1, conv1->relu1, relu1->output:y = 3
   expect(edges.length).toBe(3);
 });
 
@@ -1638,7 +1638,7 @@ test("edge sources and targets reference existing node ids", () => {
 cd packages/core && bun test test/transform.test.ts
 ```
 
-Expected: `FAIL` — module not found.
+Expected: `FAIL` - module not found.
 
 - [ ] **Step 3: Write `packages/core/src/transform.ts`**
 
@@ -1749,7 +1749,7 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
 cd packages/core && bun test test/transform.test.ts
 ```
 
-Expected: `PASS` — 6 tests pass.
+Expected: `PASS` - 6 tests pass.
 
 - [ ] **Step 5: Commit**
 
@@ -2163,7 +2163,7 @@ test("re-exports detectFormat", () => {
 cd packages/core && bun test test/index.test.ts
 ```
 
-Expected: `FAIL` — module not found.
+Expected: `FAIL` - module not found.
 
 - [ ] **Step 3: Write `packages/core/src/index.ts`**
 
@@ -2222,8 +2222,8 @@ git commit -m "feat(@wetron/core): add unified parseModel entry point"
 
 After all tasks complete:
 
-- [ ] `parseOnnx` round-trips `mnist-12.onnx` without throwing — verify with `bun test --cwd packages/onnx`
-- [ ] `parseTflite` round-trips `mobilenet_v2.tflite` without throwing — verify with `bun test --cwd packages/tflite`
+- [ ] `parseOnnx` round-trips `mnist-12.onnx` without throwing - verify with `bun test --cwd packages/onnx`
+- [ ] `parseTflite` round-trips `mobilenet_v2.tflite` without throwing - verify with `bun test --cwd packages/tflite`
 - [ ] Node count in parser tests matches netron UI for each model
 - [ ] No `any` in public API: `bunx tsc --noEmit` in each package
 - [ ] `bun test` passes clean across core, onnx, tflite, react

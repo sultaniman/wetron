@@ -1,6 +1,6 @@
 # @wetron/torchscript
 
-TorchScript model parser for wetron. Reads `.pt` files (ZIP-based and FlatBuffers Mobile format) and returns a `ModelGraph` IR. Graph structure only — no weight tensors are deserialized.
+TorchScript model parser for wetron. Reads `.pt` files (ZIP-based and FlatBuffers Mobile format) and returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
 
 ## Install
 
@@ -25,11 +25,11 @@ Throws `ParseError` from `@wetron/core/ir` on malformed input.
 
 **ZIP-based** (`torch.jit.save`): detected by `PK\x03\x04` magic, reads `bytecode.pkl`.
 
-**FlatBuffers Mobile** (`.ptl`): detected by `PTMF` at bytes 4–7, reads operator calls from instruction bytecode.
+**FlatBuffers Mobile** (`.ptl`): detected by `PTMF` at bytes 4-7, reads operator calls from instruction bytecode.
 
-Both produce a linear graph: `input → op_0 → op_1 → … → output`.
+Both produce a linear graph: `input -> op_0 -> op_1 -> … -> output`.
 
 ## Notes
 
-- `ModelGraph.initializers` and `tensorShapes` are always empty — weight data and shape inference are not performed.
+- `ModelGraph.initializers` and `tensorShapes` are always empty - weight data and shape inference are not performed.
 - Non-fatal per-method errors are attached as `warnings` on the returned `ModelGraph`.

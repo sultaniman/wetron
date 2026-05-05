@@ -38,13 +38,13 @@ function decodeBytes(s: unknown): string {
   return "";
 }
 
-// Strip port suffix: "node:0" → "node"
+// Strip port suffix: "node:0" -> "node"
 function stripPort(name: string): string {
   const colon = name.lastIndexOf(":");
   return colon >= 0 ? name.slice(0, colon) : name;
 }
 
-// Control dependencies start with ^ — skip them
+// Control dependencies start with ^ - skip them
 function isControlDep(name: string): boolean {
   return name.startsWith("^");
 }

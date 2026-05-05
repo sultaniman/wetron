@@ -2,7 +2,7 @@
 
 ## Problem
 
-ML practitioners iterate models frequently — adding layers, changing op types, tuning
+ML practitioners iterate models frequently - adding layers, changing op types, tuning
 hyperparameters, quantizing. Comparing two checkpoints visually is tedious: open both
 in separate tabs, scroll to matching sections, mentally reconcile differences. A diff
 view surfaces structural changes (added/removed/changed nodes) as a first-class visual.
@@ -22,13 +22,13 @@ back to a structural match: same `opType` + same input/output arity + same posit
 topological order within a tolerance window. Unmatched nodes are added/removed.
 
 ```
-exact name match       → matched
-name miss + structural → fuzzy-matched (flagged as "moved")
-no match in A          → added
-no match in B          → removed
-matched, opType diff   → changed
-matched, attr diff     → modified
-matched, identical     → unchanged
+exact name match       -> matched
+name miss + structural -> fuzzy-matched (flagged as "moved")
+no match in A          -> added
+no match in B          -> removed
+matched, opType diff   -> changed
+matched, attr diff     -> modified
+matched, identical     -> unchanged
 ```
 
 ## Data model
@@ -92,7 +92,7 @@ Three modes selectable by the consumer via a `diffMode` prop:
 | `"a"`     | Show model A layout, colour nodes by diff                               |
 | `"split"` | Side-by-side: two graph views linked by matched node highlight on hover |
 
-`"split"` mode is out of scope for v1 — render one graph at a time.
+`"split"` mode is out of scope for v1 - render one graph at a time.
 
 ## Panel integration
 
@@ -102,20 +102,20 @@ has `kind !== "unchanged"`. Shows:
 - For `changed`/`moved`: attribute before/after comparison table
 - For `added`/`removed`: full attribute list with add/remove badge
 
-New `PanelTarget` union member is not needed — the existing `GraphNode` target works;
+New `PanelTarget` union member is not needed - the existing `GraphNode` target works;
 the panel reads diff data from the `diff` prop.
 
 ## Open questions (decide before implementing)
 
-1. **Fuzzy match threshold** — how many hops in topological order before we give up and
+1. **Fuzzy match threshold** - how many hops in topological order before we give up and
    call it added+removed? Start with ±5 nodes.
-2. **Edge diff** — should added/removed edges be highlighted? Requires edge identity
+2. **Edge diff** - should added/removed edges be highlighted? Requires edge identity
    (tensorName is not stable across models). Defer to v2.
-3. **Split mode** — high value for quantisation comparison; schedule for v2.
-4. **GraphDiff in IR** — should `diffGraphs` live in `@wetron/core/src/diff.ts` as a
+3. **Split mode** - high value for quantisation comparison; schedule for v2.
+4. **GraphDiff in IR** - should `diffGraphs` live in `@wetron/core/src/diff.ts` as a
    new named export, or inline in `index.ts`? Separate file is cleaner.
 
 ## Effort
 
-~3–4 days. Algorithm + data model are the bulk; renderer changes are a styling layer on
+~3-4 days. Algorithm + data model are the bulk; renderer changes are a styling layer on
 existing node components.

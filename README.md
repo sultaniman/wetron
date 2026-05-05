@@ -1,8 +1,8 @@
 # wetron
 
-A browser-based neural network model visualizer — open a model and explore its computation graph interactively.
+A browser-based neural network model visualizer - open a model and explore its computation graph interactively.
 
-Graph structure only — no weight data is read or stored.
+Graph structure only - no weight data is read or stored.
 
 ## Packages
 
@@ -16,11 +16,11 @@ Graph structure only — no weight data is read or stored.
 | `@wetron/executorch`  | ExecuTorch `.pte` parser (flatbuffers)                    |
 | `@wetron/react`       | React graph view and property panel                       |
 | `@wetron/svelte`      | Svelte graph view and property panel                      |
-| `@wetron/tokens`      | Theme constants (colors, CSS vars) — no dependencies      |
+| `@wetron/tokens`      | Theme constants (colors, CSS vars) - no dependencies      |
 
 `@wetron/tokens` is intentionally standalone: zero runtime or peer dependencies, usable without any other wetron package.
 
-> **Keeping tokens in sync with core:** `OpCategory` is defined in both `@wetron/core` and `@wetron/tokens`. If you add a new category, update both — then update `CATEGORY_THEME` in `tokens/src/index.ts`. `bun test packages/tokens` enforces this at runtime.
+> **Keeping tokens in sync with core:** `OpCategory` is defined in both `@wetron/core` and `@wetron/tokens`. If you add a new category, update both - then update `CATEGORY_THEME` in `tokens/src/index.ts`. `bun test packages/tokens` enforces this at runtime.
 
 ## Install
 
@@ -32,7 +32,7 @@ bun add @wetron/react
 bun add @wetron/core
 ```
 
-`@wetron/react` depends on `@wetron/core`, and `@wetron/core` depends on all parser packages — so a single install covers everything.
+`@wetron/react` depends on `@wetron/core`, and `@wetron/core` depends on all parser packages - so a single install covers everything.
 
 Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@phosphor-icons/react >=2`, `@base-ui/react >=1`.
 
@@ -65,7 +65,7 @@ bun install
 ### Build
 
 ```sh
-bun run build        # all packages (core libs → parsers → core index → react/tokens)
+bun run build        # all packages (core libs -> parsers -> core index -> react/tokens)
 ```
 
 ### Test
@@ -90,12 +90,12 @@ cd docs && bun install && bun run dev   # Hugo site at localhost:1313
 
 ## Documentation
 
-- [Guide](docs/content/docs/guide/) — installation, quick start, architecture
-- [API Reference](docs/content/docs/api/) — parseModel, detectFormat, IR types
-- [Formats](docs/content/docs/formats/) — ONNX, TFLite, Keras, TorchScript, ExecuTorch
-- [Rendering](docs/content/docs/rendering/) — React, Svelte, theming tokens
-- [Contributing](docs/content/docs/contributing/) — adding a new parser
-- [llms.md](docs/llms.md) — machine-readable summary for LLM context
+- [Guide](docs/content/docs/guide/) - installation, quick start, architecture
+- [API Reference](docs/content/docs/api/) - parseModel, detectFormat, IR types
+- [Formats](docs/content/docs/formats/) - ONNX, TFLite, Keras, TorchScript, ExecuTorch
+- [Rendering](docs/content/docs/rendering/) - React, Svelte, theming tokens
+- [Contributing](docs/content/docs/contributing/) - adding a new parser
+- [llms.md](docs/llms.md) - machine-readable summary for LLM context
 
 ## Constraints
 

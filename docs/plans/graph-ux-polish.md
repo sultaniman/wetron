@@ -17,7 +17,7 @@
 | File                                                | Change                                                                                      |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `packages/core/src/ir.ts`                           | Add `initializers` to `ModelGraph`                                                          |
-| `packages/core/src/op-inputs.ts`                    | **New** — `opInputLabels(opType)`                                                           |
+| `packages/core/src/op-inputs.ts`                    | **New** - `opInputLabels(opType)`                                                           |
 | `packages/core/src/transform.ts`                    | `FlowEdge.data` node names; `GraphNodeData.weightInputs`                                    |
 | `packages/core/src/index.ts`                        | Export `opInputLabels`                                                                      |
 | `packages/core/test/transform.test.ts`              | Update `SIMPLE_GRAPH`; add edge name + weightInputs tests                                   |
@@ -37,7 +37,7 @@
 
 ---
 
-## Task 1: Core data model — IR, op-inputs, transform
+## Task 1: Core data model - IR, op-inputs, transform
 
 **Files:**
 
@@ -121,11 +121,11 @@ test("Relu node with no label table entry has undefined weightInputs", () => {
 bun test packages/core/test/transform.test.ts
 ```
 
-Expected: FAIL — `data.sourceNodeName` is undefined, `data.weightInputs` is undefined, TypeScript errors on `initializers` missing from `SIMPLE_GRAPH`.
+Expected: FAIL - `data.sourceNodeName` is undefined, `data.weightInputs` is undefined, TypeScript errors on `initializers` missing from `SIMPLE_GRAPH`.
 
 - [ ] **Step 4: Add `initializers` to `ModelGraph` in `ir.ts`**
 
-`packages/core/src/ir.ts` — add one field to the interface:
+`packages/core/src/ir.ts` - add one field to the interface:
 
 ```ts
 export interface ModelGraph {
@@ -195,7 +195,7 @@ export function opInputLabels(opType: string): readonly string[] {
 
 Add `import { opInputLabels } from './op-inputs.ts';` at the top.
 
-Update `FlowEdge` type — add `sourceNodeName` and `targetNodeName` to `data`:
+Update `FlowEdge` type - add `sourceNodeName` and `targetNodeName` to `data`:
 
 ```ts
 export type FlowEdge = {
@@ -324,7 +324,7 @@ git commit -m "feat(core): add ModelGraph.initializers, op-inputs labels, FlowEd
 
 ---
 
-## Task 2: ONNX parser — populate initializers
+## Task 2: ONNX parser - populate initializers
 
 **Files:**
 
@@ -367,7 +367,7 @@ test("initializer names do not appear in graph.inputs", async () => {
 bun test packages/onnx
 ```
 
-Expected: FAIL — `graph.initializers` is undefined (not yet a property of the returned object).
+Expected: FAIL - `graph.initializers` is undefined (not yet a property of the returned object).
 
 - [ ] **Step 3: Update `parseOnnx` in `packages/onnx/src/parse.ts`**
 
@@ -425,7 +425,7 @@ git commit -m "feat(onnx): populate ModelGraph.initializers from protobuf initia
 
 ---
 
-## Task 3: TFLite parser — populate initializers
+## Task 3: TFLite parser - populate initializers
 
 **Files:**
 
@@ -459,7 +459,7 @@ test("graph input tensors are not in initializers", async () => {
 bun test packages/tflite
 ```
 
-Expected: FAIL — `graph.initializers` is undefined.
+Expected: FAIL - `graph.initializers` is undefined.
 
 - [ ] **Step 3: Update `parseTflite` in `packages/tflite/src/parse.ts`**
 
@@ -522,7 +522,7 @@ git commit -m "feat(tflite): populate ModelGraph.initializers from constant tens
 
 ---
 
-## Task 4: Panel changes — fan-out EdgeTarget, EdgePanel, close button, empty inputs
+## Task 4: Panel changes - fan-out EdgeTarget, EdgePanel, close button, empty inputs
 
 **Files:**
 
@@ -613,7 +613,7 @@ describe("onClose", () => {
 bun test packages/react/test/node-property-panel.test.tsx
 ```
 
-Expected: FAIL — `conv_0` and `relu_0` not found; close button tests fail.
+Expected: FAIL - `conv_0` and `relu_0` not found; close button tests fail.
 
 - [ ] **Step 3: Update `PanelTarget` type and `EdgePanel` in `node-property-panel.tsx`**
 
@@ -1002,7 +1002,7 @@ test("renders no weight content when weightInputs is undefined", () => {
 bun test packages/react/test/graph-node.test.tsx
 ```
 
-Expected: FAIL — `W`, `〈64×3×3×3〉` etc. not found.
+Expected: FAIL - `W`, `〈64×3×3×3〉` etc. not found.
 
 - [ ] **Step 3: Update `graph-node.tsx` to render weight rows**
 
@@ -1021,7 +1021,7 @@ In `packages/react/src/nodes/graph-node.tsx`, replace the children passed to `No
 }
 ```
 
-Import `css` from `'./node.module.css'` if not already imported (check the file — it imports from `'../theme.ts'` etc., add `import css from './node.module.css';` if missing).
+Import `css` from `'./node.module.css'` if not already imported (check the file - it imports from `'../theme.ts'` etc., add `import css from './node.module.css';` if missing).
 
 - [ ] **Step 4: Add CSS classes to `node.module.css`**
 
@@ -1169,21 +1169,21 @@ git commit -m "feat(demo): wire selectedEdgeTensorName, handleClose, fix handleB
 
 ## Self-Review Checklist
 
-- [x] `ModelGraph.initializers` in IR → Task 1
-- [x] `op-inputs.ts` with `opInputLabels` → Task 1
-- [x] `FlowEdge.data` sourceNodeName/targetNodeName → Task 1
-- [x] `GraphNodeData.weightInputs` → Task 1
-- [x] ONNX parser populates initializers → Task 2
-- [x] TFLite parser populates initializers → Task 3
-- [x] `PanelTarget` EdgeTarget fan-out shape → Task 4
-- [x] `EdgePanel` renders from.name and all to[] entries → Task 4
-- [x] `onClose` prop + × button → Task 4
-- [x] Empty input filtering → Task 4
-- [x] `EDGE_THEME` in theme.ts → Task 5
-- [x] `selectedEdgeTensorName` prop on ModelGraphView → Task 5
-- [x] Fan-out aggregation in `handleEdgeClick` → Task 5
-- [x] `proOptions={{ hideAttribution: true }}` → Task 5
-- [x] Weight rows on node cards → Task 6
-- [x] Node name removed from cards → Task 6
-- [x] App.tsx state wiring → Task 7
-- [x] `handleBack` nested setState fixed → Task 7
+- [x] `ModelGraph.initializers` in IR -> Task 1
+- [x] `op-inputs.ts` with `opInputLabels` -> Task 1
+- [x] `FlowEdge.data` sourceNodeName/targetNodeName -> Task 1
+- [x] `GraphNodeData.weightInputs` -> Task 1
+- [x] ONNX parser populates initializers -> Task 2
+- [x] TFLite parser populates initializers -> Task 3
+- [x] `PanelTarget` EdgeTarget fan-out shape -> Task 4
+- [x] `EdgePanel` renders from.name and all to[] entries -> Task 4
+- [x] `onClose` prop + × button -> Task 4
+- [x] Empty input filtering -> Task 4
+- [x] `EDGE_THEME` in theme.ts -> Task 5
+- [x] `selectedEdgeTensorName` prop on ModelGraphView -> Task 5
+- [x] Fan-out aggregation in `handleEdgeClick` -> Task 5
+- [x] `proOptions={{ hideAttribution: true }}` -> Task 5
+- [x] Weight rows on node cards -> Task 6
+- [x] Node name removed from cards -> Task 6
+- [x] App.tsx state wiring -> Task 7
+- [x] `handleBack` nested setState fixed -> Task 7

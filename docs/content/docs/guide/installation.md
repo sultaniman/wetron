@@ -1,7 +1,7 @@
 ---
 title: "Installation"
-description: "How to install Wetron packages for React or Svelte — a single install covers all parsers since @wetron/core lists them as dependencies."
-lead: "A single install covers everything — parsers are dependencies of @wetron/core."
+description: "How to install Wetron packages for React or Svelte - a single install covers all parsers since @wetron/core lists them as dependencies."
+lead: "A single install covers everything - parsers are dependencies of @wetron/core."
 weight: 20
 ---
 
@@ -11,7 +11,7 @@ weight: 20
 bun add @wetron/react
 ```
 
-`@wetron/react` → `@wetron/core` → all parser packages. One command installs the renderer, core, and all five format parsers.
+`@wetron/react` -> `@wetron/core` -> all parser packages. One command installs the renderer, core, and all five format parsers.
 
 Peer dependencies you must install separately:
 
@@ -39,7 +39,7 @@ bun add svelte @xyflow/svelte phosphor-svelte
 
 ## Core only (no renderer)
 
-If you only need parsing — custom rendering, server-side analysis, or testing:
+If you only need parsing - custom rendering, server-side analysis, or testing:
 
 ```bash
 bun add @wetron/core

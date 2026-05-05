@@ -47,7 +47,7 @@
     systemIsDark
   );
 
-  // $state object in context — child nodes read .resolved inside $derived,
+  // $state object in context - child nodes read .resolved inside $derived,
   // creating an explicit signal subscription that re-fires on theme change.
   const colorCtx: { resolved: 'light' | 'dark' } = $state({ resolved: 'light' });
   $effect.pre(() => { colorCtx.resolved = isDark ? 'dark' : 'light'; });
@@ -77,7 +77,7 @@
 
   // $state.raw prevents @xyflow/svelte from seeing deeply-reactive proxies;
   // it mutates node objects internally (computed dims/positions) and that would
-  // write back through Svelte's proxy, invalidating rawFlow → infinite loop.
+  // write back through Svelte's proxy, invalidating rawFlow -> infinite loop.
   let flowNodes = $state.raw(untrack(() => rawFlow.nodes));
   $effect.pre(() => {
     flowNodes = rawFlow.nodes;
@@ -283,7 +283,7 @@
     --wetron-category-unknown:       #757575;
   }
 
-  /* ── Node defaults — remove XY Flow's default border/shadow on nodes ── */
+  /* ── Node defaults - remove XY Flow's default border/shadow on nodes ── */
   :global(.wetron-graph .svelte-flow__node) {
     border: none;
     border-radius: 0;

@@ -14,20 +14,20 @@
 
 | File                                         | Action                                                   |
 | -------------------------------------------- | -------------------------------------------------------- |
-| `packages/core/src/categories.ts`            | Create — `OpCategory` type + `opCategory()`              |
-| `packages/core/src/index.ts`                 | Modify — export `OpCategory`, `opCategory`               |
-| `packages/core/test/categories.test.ts`      | Create — unit tests                                      |
-| `packages/react/src/theme.ts`                | Create — `CategoryTheme` + `CATEGORY_THEME`              |
-| `packages/react/src/ColorModeContext.ts`     | Create — React context + `resolveColorMode()`            |
-| `packages/react/src/nodes/GraphNode.tsx`     | Modify — B·3 layout                                      |
-| `packages/react/src/nodes/IoNode.tsx`        | Modify — B·3 IO layout                                   |
-| `packages/react/src/ModelGraphView.tsx`      | Modify — `colorMode` prop + context + defaultEdgeOptions |
-| `packages/react/test/GraphNode.test.tsx`     | Create — render tests                                    |
-| `packages/svelte/src/theme.ts`               | Create — same tokens as react/theme.ts                   |
-| `packages/svelte/src/ColorModeContext.ts`    | Create — Svelte context helpers                          |
-| `packages/svelte/src/nodes/GraphNode.svelte` | Modify — B·3 layout                                      |
-| `packages/svelte/src/nodes/IoNode.svelte`    | Modify — B·3 IO layout                                   |
-| `packages/svelte/src/ModelGraphView.svelte`  | Modify — `colorMode` prop + setContext                   |
+| `packages/core/src/categories.ts`            | Create - `OpCategory` type + `opCategory()`              |
+| `packages/core/src/index.ts`                 | Modify - export `OpCategory`, `opCategory`               |
+| `packages/core/test/categories.test.ts`      | Create - unit tests                                      |
+| `packages/react/src/theme.ts`                | Create - `CategoryTheme` + `CATEGORY_THEME`              |
+| `packages/react/src/ColorModeContext.ts`     | Create - React context + `resolveColorMode()`            |
+| `packages/react/src/nodes/GraphNode.tsx`     | Modify - B·3 layout                                      |
+| `packages/react/src/nodes/IoNode.tsx`        | Modify - B·3 IO layout                                   |
+| `packages/react/src/ModelGraphView.tsx`      | Modify - `colorMode` prop + context + defaultEdgeOptions |
+| `packages/react/test/GraphNode.test.tsx`     | Create - render tests                                    |
+| `packages/svelte/src/theme.ts`               | Create - same tokens as react/theme.ts                   |
+| `packages/svelte/src/ColorModeContext.ts`    | Create - Svelte context helpers                          |
+| `packages/svelte/src/nodes/GraphNode.svelte` | Modify - B·3 layout                                      |
+| `packages/svelte/src/nodes/IoNode.svelte`    | Modify - B·3 IO layout                                   |
+| `packages/svelte/src/ModelGraphView.svelte`  | Modify - `colorMode` prop + setContext                   |
 
 ---
 
@@ -348,7 +348,7 @@ export const CATEGORY_THEME: Record<OpCategory, CategoryTheme> = {
 };
 ```
 
-Note: spec uses italic `_f_` for activation — the Unicode italic small f is `ƒ` (U+0192), which renders well in monospace.
+Note: spec uses italic `_f_` for activation - the Unicode italic small f is `ƒ` (U+0192), which renders well in monospace.
 
 - [ ] **Step 2: Run react tests to confirm nothing broke**
 
@@ -453,7 +453,7 @@ function renderWithMode(
   name = "",
   colorMode: "light" | "dark" | "system" = "light",
 ) {
-  // GraphNodeComponent expects NodeProps — we pass a minimal compatible object
+  // GraphNodeComponent expects NodeProps - we pass a minimal compatible object
   const props = makeProps(opType, name) as unknown as Parameters<typeof GraphNodeComponent>[0];
   return render(
     React.createElement(
@@ -505,7 +505,7 @@ describe("GraphNodeComponent", () => {
 bun test packages/react/test/GraphNode.test.tsx
 ```
 
-Expected: FAIL — icon characters not found in DOM.
+Expected: FAIL - icon characters not found in DOM.
 
 - [ ] **Step 3: Update `GraphNode.tsx`**
 
@@ -610,7 +610,7 @@ git commit -m "feat(react): update GraphNode to B·3 layout with category themin
 
 - Modify: `packages/react/src/nodes/IoNode.tsx`
 
-No separate test file — IoNode is already covered by ModelGraphView.test.tsx; we'll check icons render.
+No separate test file - IoNode is already covered by ModelGraphView.test.tsx; we'll check icons render.
 
 - [ ] **Step 1: Update `IoNode.tsx`**
 
@@ -801,7 +801,7 @@ git commit -m "feat(react): add colorMode prop to ModelGraphView with context pr
 
 ---
 
-### Task 8: `packages/react/src/index.ts` — export ColorMode type
+### Task 8: `packages/react/src/index.ts` - export ColorMode type
 
 **Files:**
 

@@ -45,7 +45,7 @@ type PanelTarget =
 
 ## Implementation notes
 
-- `ModelGraphView` calls `modelGraphToFlow` from `@wetron/core/transform` internally — consumers pass a `ModelGraph`, not raw flow nodes.
+- `ModelGraphView` calls `modelGraphToFlow` from `@wetron/core/transform` internally - consumers pass a `ModelGraph`, not raw flow nodes.
 - Uses Svelte 5 runes (`$state`, `$derived`, `$effect`).
 - `colorMode="system"` reads `prefers-color-scheme` via a media query listener.
 - Theme colors for node categories come from `@wetron/tokens`.

@@ -1,6 +1,6 @@
 # @wetron/tflite
 
-TFLite model parser for wetron. Reads `.tflite` flatbuffer files and returns a `ModelGraph` IR. Graph structure only — no weight tensors are deserialized.
+TFLite model parser for wetron. Reads `.tflite` flatbuffer files and returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
 
 ## Install
 

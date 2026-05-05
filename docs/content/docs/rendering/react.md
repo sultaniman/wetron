@@ -1,6 +1,6 @@
 ---
 title: "React"
-description: "ModelGraphView and NodePropertyPanel React components for Wetron — built on @xyflow/react with full TypeScript types and CSS custom property theming."
+description: "ModelGraphView and NodePropertyPanel React components for Wetron - built on @xyflow/react with full TypeScript types and CSS custom property theming."
 lead: "Drop-in components built on @xyflow/react."
 weight: 10
 ---
@@ -17,7 +17,7 @@ import "@wetron/react/styles.css";
 import { ModelGraphView } from "@wetron/react";
 
 <ModelGraphView
-  graph={graph} // ModelGraph — required
+  graph={graph} // ModelGraph - required
   onTargetClick={setSelected} // (target: PanelTarget) => void
   colorMode="system" // "light" | "dark" | "system" (default: "system")
   onWarnings={(w) => console.warn(w)} // called when graph has parse warnings
@@ -45,9 +45,9 @@ Renders the full interactive graph. Nodes are coloured by operator category. Cli
 import { NodePropertyPanel } from "@wetron/react";
 
 <NodePropertyPanel
-  target={selected} // PanelTarget | null — null renders nothing
+  target={selected} // PanelTarget | null - null renders nothing
   colorMode="system"
-  opsets={graph?.opsets} // ReadonlyMap<string, number> — ONNX domain versions
+  opsets={graph?.opsets} // ReadonlyMap<string, number> - ONNX domain versions
   tensorShapes={graph?.tensorShapes} // shape info for edge panels
   onTensorClick={(name) => {}} // called when a tensor name chip is clicked
   onBack={() => {}} // shows a back arrow when provided
@@ -57,16 +57,16 @@ import { NodePropertyPanel } from "@wetron/react";
 
 ### Props
 
-| Prop            | Type                                    | Description                                                  |
-| --------------- | --------------------------------------- | ------------------------------------------------------------ |
-| `target`        | `PanelTarget \| null`                   | Selected node, edge, or tensor. `null` renders nothing.      |
-| `colorMode`     | `"light" \| "dark" \| "system"`         | Theme. `"system"` follows `prefers-color-scheme`.            |
-| `opsets`        | `ReadonlyMap<string, number>`           | Op domain → version (ONNX only). Shown in node header.       |
-| `inputSources`  | `ReadonlyMap<string, string>`           | Tensor name → producing op type. Used to colour input chips. |
-| `tensorShapes`  | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels.                                  |
-| `onTensorClick` | `(name: string) => void`                | Called when a tensor name chip is clicked.                   |
-| `onBack`        | `() => void`                            | Shows a back arrow when provided.                            |
-| `onClose`       | `() => void`                            | Shows a close button when provided.                          |
+| Prop            | Type                                    | Description                                                   |
+| --------------- | --------------------------------------- | ------------------------------------------------------------- |
+| `target`        | `PanelTarget \| null`                   | Selected node, edge, or tensor. `null` renders nothing.       |
+| `colorMode`     | `"light" \| "dark" \| "system"`         | Theme. `"system"` follows `prefers-color-scheme`.             |
+| `opsets`        | `ReadonlyMap<string, number>`           | Op domain -> version (ONNX only). Shown in node header.       |
+| `inputSources`  | `ReadonlyMap<string, string>`           | Tensor name -> producing op type. Used to colour input chips. |
+| `tensorShapes`  | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels.                                   |
+| `onTensorClick` | `(name: string) => void`                | Called when a tensor name chip is clicked.                    |
+| `onBack`        | `() => void`                            | Shows a back arrow when provided.                             |
+| `onClose`       | `() => void`                            | Shows a close button when provided.                           |
 
 ## PanelTarget type
 

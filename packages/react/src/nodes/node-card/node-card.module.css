@@ -4,7 +4,7 @@
   border: 1px solid var(--wetron-node-border, #e0e0e0);
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  /* fixed width — must match NODE_W in packages/core/src/transform.ts */
+  /* fixed width - must match NODE_W in packages/core/src/transform.ts */
   width: 220px;
   box-sizing: border-box;
   /* prevent consumer app's global line-height from inflating node height */

@@ -1,6 +1,6 @@
 # @wetron/executorch
 
-ExecuTorch model parser. Reads `.pte` FlatBuffers files and returns a `ModelGraph` IR. Graph structure only — no weight tensors are deserialized.
+ExecuTorch model parser. Reads `.pte` FlatBuffers files and returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
 
 ## API
 
@@ -12,10 +12,10 @@ Throws `ParseError` (from `@wetron/core/ir`) on malformed input or missing `ET12
 
 ## What gets parsed
 
-- Root `Program` table → first `ExecutionPlan`
-- Operator list from `ExecutionPlan.operators` — name + overload → `op_type` string
-- `EValue` list scanned for Tensor entries → shape and dtype for `tensorShapes`
-- `Chain` instructions → `KernelCall` entries → operator index resolved to op type
+- Root `Program` table -> first `ExecutionPlan`
+- Operator list from `ExecutionPlan.operators` - name + overload -> `op_type` string
+- `EValue` list scanned for Tensor entries -> shape and dtype for `tensorShapes`
+- `Chain` instructions -> `KernelCall` entries -> operator index resolved to op type
 - Inputs/outputs from `ExecutionPlan.inputs` and `ExecutionPlan.outputs` value indices
 
 ## ScalarType mapping
@@ -34,12 +34,12 @@ Throws `ParseError` (from `@wetron/core/ir`) on malformed input or missing `ET12
 
 ## Graph construction
 
-KernelCall arguments are categorised by whether their EValue index was already produced by a prior instruction. First occurrence → output tensor; subsequent occurrence → input tensor. This matches the ExecuTorch execution model where each value index is written exactly once.
+KernelCall arguments are categorised by whether their EValue index was already produced by a prior instruction. First occurrence -> output tensor; subsequent occurrence -> input tensor. This matches the ExecuTorch execution model where each value index is written exactly once.
 
 ## Implementation notes
 
 - Uses `flatbuffers` npm package for FlatBuffers decoding via raw vtable offsets.
-- Detected by `ET12` at bytes 4–7.
+- Detected by `ET12` at bytes 4-7.
 - Only the first execution plan is parsed (multi-plan programs are rare in practice).
 - Non-fatal per-instruction errors are attached as `warnings` on the returned `ModelGraph`.
-- `ModelGraph.initializers` is always empty — constant buffers are not parsed.
+- `ModelGraph.initializers` is always empty - constant buffers are not parsed.

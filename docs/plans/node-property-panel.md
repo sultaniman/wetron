@@ -15,11 +15,11 @@
 | File                                             | Change                                                                     |
 | ------------------------------------------------ | -------------------------------------------------------------------------- |
 | `packages/core/src/transform.ts`                 | Add `graphValue?: GraphValue` to `GraphNodeData`; populate it for IO nodes |
-| `packages/react/src/NodePropertyPanel.tsx`       | **New** — `PanelTarget`, `isGraphNode`, `NodePropertyPanel`                |
+| `packages/react/src/NodePropertyPanel.tsx`       | **New** - `PanelTarget`, `isGraphNode`, `NodePropertyPanel`                |
 | `packages/react/src/ModelGraphView.tsx`          | Replace `onNodeClick` with `onTargetClick`; wire IO clicks                 |
 | `packages/react/src/index.ts`                    | Export `NodePropertyPanel` and `PanelTarget`                               |
 | `packages/react/package.json`                    | Add `@phosphor-icons/react` to peer + dev deps                             |
-| `packages/react/test/NodePropertyPanel.test.tsx` | **New** — component tests                                                  |
+| `packages/react/test/NodePropertyPanel.test.tsx` | **New** - component tests                                                  |
 | `apps/demo/src/App.tsx`                          | Add selected state, panel layout, `onTargetClick` wiring                   |
 
 ---
@@ -223,7 +223,7 @@ describe("NodePropertyPanel", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests — expect failure**
+- [ ] **Step 2: Run tests - expect failure**
 
 ```bash
 cd packages/react && bun test test/NodePropertyPanel.test.tsx
@@ -502,7 +502,7 @@ export function NodePropertyPanel({ target }: { target: PanelTarget | null }) {
 }
 ```
 
-- [ ] **Step 4: Run tests — expect pass**
+- [ ] **Step 4: Run tests - expect pass**
 
 ```bash
 cd packages/react && bun test test/NodePropertyPanel.test.tsx

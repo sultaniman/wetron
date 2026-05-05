@@ -1,6 +1,6 @@
 # @wetron/keras
 
-Keras model parser for wetron. Reads `.keras` ZIP archive files and returns a `ModelGraph` IR. Supports `Sequential` and `Functional` model classes. Graph structure only — no weight tensors are deserialized.
+Keras model parser for wetron. Reads `.keras` ZIP archive files and returns a `ModelGraph` IR. Supports `Sequential` and `Functional` model classes. Graph structure only - no weight tensors are deserialized.
 
 ## Install
 
@@ -25,11 +25,11 @@ Throws `ParseError` from `@wetron/core/ir` on malformed input, missing `config.j
 
 - `config.json` inside the `.keras` ZIP archive
 - `Sequential` and `Functional` model classes
-- Layer `class_name` → `opType`, layer `config` → node `attributes`
+- Layer `class_name` -> `opType`, layer `config` -> node `attributes`
 - Edges resolved from `inbound_nodes` for Functional models; chained sequentially for Sequential models
 - Input shapes from `InputLayer` batch shapes
 
 ## Notes
 
-- Weight data lives in separate `.weights.h5` files — not parsed.
+- Weight data lives in separate `.weights.h5` files - not parsed.
 - `ModelGraph.initializers` is always empty.

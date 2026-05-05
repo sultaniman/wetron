@@ -35,5 +35,5 @@ for (const [key, value] of Object.entries(CANVAS_VARS.light)) {
 
 ## Notes
 
-- No dependency on `@wetron/core` — can be used standalone.
+- No dependency on `@wetron/core` - can be used standalone.
 - `OpCategory` type is defined locally in this package.

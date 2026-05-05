@@ -5,14 +5,14 @@ Shared foundation for the wetron monorepo. Provides the IR types all parsers pro
 ## Exports
 
 ```ts
-// Unified entry — detects format from magic bytes, dynamic-imports the right parser
+// Unified entry - detects format from magic bytes, dynamic-imports the right parser
 async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
-// Format detection — never throws, returns "unknown" on no match
+// Format detection - never throws, returns "unknown" on no match
 type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
-// IR → ReactFlow / SvelteFlow nodes and edges, Dagre layout applied (top-to-bottom)
+// IR -> ReactFlow / SvelteFlow nodes and edges, Dagre layout applied (top-to-bottom)
 function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] };
 
 // Op category from opType string
@@ -35,18 +35,18 @@ type OpCategory =
   | "unknown";
 function opCategory(opType: string): OpCategory;
 
-// Named input slot labels for known ops (e.g. Conv → ["X","W","B"])
+// Named input slot labels for known ops (e.g. Conv -> ["X","W","B"])
 function opInputLabels(opType: string): readonly string[];
 ```
 
 ## Sub-path exports
 
-- `@wetron/core/ir` — IR types and `ParseError`
-- `@wetron/core/dtypes` — exotic numeric readers (bfloat16, float8, int4, …)
-- `@wetron/core/detect` — `detectFormat` standalone
-- `@wetron/core/transform` — `modelGraphToFlow` and flow types
-- `@wetron/core/edge-path` — edge routing geometry
-- `@wetron/core/panel-utils` — property panel helpers
+- `@wetron/core/ir` - IR types and `ParseError`
+- `@wetron/core/dtypes` - exotic numeric readers (bfloat16, float8, int4, …)
+- `@wetron/core/detect` - `detectFormat` standalone
+- `@wetron/core/transform` - `modelGraphToFlow` and flow types
+- `@wetron/core/edge-path` - edge routing geometry
+- `@wetron/core/panel-utils` - property panel helpers
 
 ## IR types (`@wetron/core/ir`)
 
@@ -78,7 +78,7 @@ interface ModelGraph {
     string,
     { shape: readonly number[] | null; dtype: string | null }
   >;
-  readonly opsets?: ReadonlyMap<string, number>; // domain → version (ONNX only; "" = ai.onnx)
+  readonly opsets?: ReadonlyMap<string, number>; // domain -> version (ONNX only; "" = ai.onnx)
   readonly warnings?: readonly ParseWarning[];
 }
 
@@ -148,8 +148,8 @@ type FlowEdge = {
 
 ## Constraints
 
-- No weight deserialization — graph structure only.
+- No weight deserialization - graph structure only.
 - `detectFormat` always returns `Format`, never throws.
 - Do not patch `DataView.prototype` or `BigInt.prototype`.
-- Use `bigIntToNumber(v: bigint): number` from `@wetron/core/dtypes` for BigInt → number (throws `RangeError` if outside safe integer range).
-- All exotic dtype readers live in `@wetron/core/dtypes` — parsers import from there, never inline shims.
+- Use `bigIntToNumber(v: bigint): number` from `@wetron/core/dtypes` for BigInt -> number (throws `RangeError` if outside safe integer range).
+- All exotic dtype readers live in `@wetron/core/dtypes` - parsers import from there, never inline shims.

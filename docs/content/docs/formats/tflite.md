@@ -1,6 +1,6 @@
 ---
 title: "TFLite"
-description: "TensorFlow Lite model parser for Wetron — parses .tflite FlatBuffers files synchronously, including built-in ops, custom ops, and dtype mapping."
+description: "TensorFlow Lite model parser for Wetron - parses .tflite FlatBuffers files synchronously, including built-in ops, custom ops, and dtype mapping."
 lead: "Parses `.tflite` FlatBuffers files synchronously using the flatbuffers npm package."
 weight: 20
 ---
@@ -11,7 +11,7 @@ import { parseTflite } from "@wetron/tflite";
 const graph = parseTflite(bytes: Uint8Array): ModelGraph
 ```
 
-Synchronous — no `await` needed.
+Synchronous - no `await` needed.
 
 ## What is parsed
 
@@ -49,5 +49,5 @@ Detects both:
 
 ## Notes
 
-- Initializer buffers (weight data) are skipped — only shape and dtype are recorded in `ModelGraph.initializers`.
+- Initializer buffers (weight data) are skipped - only shape and dtype are recorded in `ModelGraph.initializers`.
 - Synchronous because FlatBuffers decoding requires no async I/O.

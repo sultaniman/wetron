@@ -1,4 +1,4 @@
-# wetron — Node Color Theme Design
+# wetron - Node Color Theme Design
 
 ## Summary
 
@@ -6,7 +6,7 @@ Color-coded graph nodes for `@wetron/react` (and `@wetron/svelte` in parity). Ea
 
 ---
 
-## Node Layout — B·3
+## Node Layout - B·3
 
 ```
 ┌──────────────────────────────────┐
@@ -23,7 +23,7 @@ Color-coded graph nodes for `@wetron/react` (and `@wetron/svelte` in parity). Ea
 - Pill: monospace badge, `border-radius: 5px`, category background tint + colored text
 - Icon: monospace Unicode symbol, category color at 70% opacity, right-aligned
 - Name: `10px`, muted (`#999` light / `#4a4a5a` dark), truncated with ellipsis
-- Padding: `10px 12px` — comfortable vertical breathing room
+- Padding: `10px 12px` - comfortable vertical breathing room
 
 ---
 
@@ -74,7 +74,7 @@ Category resolution lives in `packages/core/src/categories.ts`:
 export function opCategory(opType: string): OpCategory;
 ```
 
-This is pure — no React/Svelte imports. Both renderer packages import it from `@wetron/core`.
+This is pure - no React/Svelte imports. Both renderer packages import it from `@wetron/core`.
 
 ---
 
@@ -96,7 +96,7 @@ Nodes read `colorMode` from a React context set by `ModelGraphView`, and select 
 
 ## Edges
 
-`defaultEdgeOptions={{ type: 'straight' }}` on the `<ReactFlow>` component. No changes to `transform.ts` — edges remain `type`-less there; the default is overridden globally in the component.
+`defaultEdgeOptions={{ type: 'straight' }}` on the `<ReactFlow>` component. No changes to `transform.ts` - edges remain `type`-less there; the default is overridden globally in the component.
 
 ---
 
@@ -104,12 +104,12 @@ Nodes read `colorMode` from a React context set by `ModelGraphView`, and select 
 
 | File                                         | Purpose                                               |
 | -------------------------------------------- | ----------------------------------------------------- |
-| `packages/core/src/categories.ts`            | `opCategory(opType)` — pure, no deps                  |
+| `packages/core/src/categories.ts`            | `opCategory(opType)` - pure, no deps                  |
 | `packages/react/src/theme.ts`                | `CATEGORY_THEME` record + `CategoryTheme` type        |
 | `packages/react/src/nodes/GraphNode.tsx`     | Updated node component (B·3 layout)                   |
 | `packages/react/src/nodes/IoNode.tsx`        | Updated IO node (same theme, ↓/↑ icons)               |
 | `packages/react/src/ModelGraphView.tsx`      | Add `colorMode` prop + context + straight edges       |
-| `packages/svelte/src/theme.ts`               | Svelte parity — same tokens, same `opCategory` import |
+| `packages/svelte/src/theme.ts`               | Svelte parity - same tokens, same `opCategory` import |
 | `packages/svelte/src/nodes/GraphNode.svelte` | Svelte parity node                                    |
 | `packages/svelte/src/nodes/IoNode.svelte`    | Svelte parity IO node                                 |
 

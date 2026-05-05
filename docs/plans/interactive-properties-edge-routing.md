@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add smoothstep edges with arrowheads, pan-on-scroll, edge-click → CONNECTION PROPERTIES panel, and tensor drill-down from the node panel.
+**Goal:** Add smoothstep edges with arrowheads, pan-on-scroll, edge-click -> CONNECTION PROPERTIES panel, and tensor drill-down from the node panel.
 
 **Architecture:** Extend `FlowEdge` in `@wetron/core` with a `data` field carrying tensor metadata. Extend `PanelTarget` in `@wetron/react` with two new union cases (`edge` and `tensor`). Wire `onEdgeClick` in `ModelGraphView` and `onTensorClick` in `NodePropertyPanel`, with `App.tsx` resolving tensor lookup from the graph.
 
@@ -19,7 +19,7 @@
 | `packages/react/src/ModelGraphView.tsx`          | Add `MarkerType` arrowhead via `defaultEdgeOptions`; add `panOnScroll`/zoom config; wire `onEdgeClick`                                                      |
 | `packages/react/src/NodePropertyPanel.tsx`       | Extend `PanelTarget`; add `isEdgeTarget`/`isTensorTarget` guards; add `onTensorClick` prop; add `EdgePanel`/`TensorPanel`; make input/output rows clickable |
 | `packages/react/test/NodePropertyPanel.test.tsx` | Add tests for edge target, tensor target, and `onTensorClick` callback                                                                                      |
-| `apps/demo/src/App.tsx`                          | Add `handleTensorClick` that resolves name → shape/dtype from graph; pass `onTensorClick` to `NodePropertyPanel`                                            |
+| `apps/demo/src/App.tsx`                          | Add `handleTensorClick` that resolves name -> shape/dtype from graph; pass `onTensorClick` to `NodePropertyPanel`                                           |
 
 ---
 
@@ -37,7 +37,7 @@ Add to `packages/core/test/transform.test.ts`:
 ```ts
 test("edges carry tensorName matching the connecting tensor", () => {
   const { edges } = modelGraphToFlow(SIMPLE_GRAPH);
-  // x → conv1
+  // x -> conv1
   const e0 = edges.find((e) => e.source === "input::x");
   expect(e0).toBeDefined();
   expect(e0!.data.tensorName).toBe("x");
@@ -65,7 +65,7 @@ test("edges have type smoothstep", () => {
 bun test packages/core/test/transform.test.ts
 ```
 
-Expected: 3 failures — `e0!.data` is undefined, type is `'default'`.
+Expected: 3 failures - `e0!.data` is undefined, type is `'default'`.
 
 - [ ] **Step 3: Update FlowEdge type and modelGraphToFlow in transform.ts**
 
@@ -230,7 +230,7 @@ git commit -m "feat(core): add edge data (tensorName, opTypes) and smoothstep ty
 
 ---
 
-## Task 2: Update ModelGraphView — arrowheads, pan/zoom, edge click
+## Task 2: Update ModelGraphView - arrowheads, pan/zoom, edge click
 
 **Files:**
 
@@ -353,7 +353,7 @@ git commit -m "feat(react): smoothstep edges, arrowheads, pan-on-scroll, meta+sc
 
 ---
 
-## Task 3: Extend NodePropertyPanel — new panel views and tensor click
+## Task 3: Extend NodePropertyPanel - new panel views and tensor click
 
 **Files:**
 
@@ -438,7 +438,7 @@ describe("onTensorClick", () => {
 bun test packages/react/test/NodePropertyPanel.test.tsx
 ```
 
-Expected: failures — `mockEdgeTarget` renders nothing, `onTensorClick` not wired.
+Expected: failures - `mockEdgeTarget` renders nothing, `onTensorClick` not wired.
 
 - [ ] **Step 3: Replace the full contents of NodePropertyPanel.tsx**
 

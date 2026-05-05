@@ -2,10 +2,10 @@
 
 TF SavedModel parser for wetron. Reads `.pb` files in two formats:
 
-- **`saved_model.pb`** — TensorFlow SavedModel GraphDef (raw TF ops)
-- **`keras_metadata.pb`** — Keras layer metadata protobuf
+- **`saved_model.pb`** - TensorFlow SavedModel GraphDef (raw TF ops)
+- **`keras_metadata.pb`** - Keras layer metadata protobuf
 
-Returns a `ModelGraph` IR. Graph structure only — no weight tensors are deserialized.
+Returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
 
 ## Install
 
@@ -43,20 +43,20 @@ The first byte determines which variant is parsed:
 
 - Layer graph from the embedded `keras_metadata` JSON
 - Supported topologies: `Sequential`, `Functional`
-- `InputLayer` entries → `ModelGraph.inputs`
-- Layer `class_name` → node `opType`
-- Layer config fields → node `attributes`
+- `InputLayer` entries -> `ModelGraph.inputs`
+- Layer `class_name` -> node `opType`
+- Layer config fields -> node `attributes`
 
 ### saved_model.pb
 
-- First `MetaGraphDef` → `GraphDef` nodes
-- `Placeholder` nodes → `ModelGraph.inputs`
-- All other ops → `ModelGraph.nodes`
+- First `MetaGraphDef` -> `GraphDef` nodes
+- `Placeholder` nodes -> `ModelGraph.inputs`
+- All other ops -> `ModelGraph.nodes`
 - Output nodes inferred as nodes whose outputs are never consumed as inputs
 
 ## Notes
 
-- `ModelGraph.initializers` is always empty — weight data is not parsed.
+- `ModelGraph.initializers` is always empty - weight data is not parsed.
 - `Const` nodes (weight constants) appear as graph nodes with category `constant`.
 - Control dependencies (inputs prefixed with `^`) are ignored.
 - Port suffixes (`:0`, `:1`) are stripped from input tensor names.

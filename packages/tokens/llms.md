@@ -1,6 +1,6 @@
 # @wetron/tokens
 
-Design tokens for wetron graph visualization components. Exports theme colors for op categories, minimap and edge themes, and CSS custom property maps for canvas and panel styling. Zero dependencies — all types are inlined.
+Design tokens for wetron graph visualization components. Exports theme colors for op categories, minimap and edge themes, and CSS custom property maps for canvas and panel styling. Zero dependencies - all types are inlined.
 
 ## API
 
@@ -57,5 +57,5 @@ Apply `CANVAS_VARS` and `PANEL_VARS` via inline `style` or `element.style.setPro
 
 ## Notes
 
-- `OpCategory` is defined locally — this package has no dependency on `@wetron/core`.
+- `OpCategory` is defined locally - this package has no dependency on `@wetron/core`.
 - Can be installed and used independently of all other wetron packages.

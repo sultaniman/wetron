@@ -6,8 +6,8 @@ TF2 SavedModel directories (produced by `model.save()` in Keras 2.x/TF 2.x) cann
 by any existing wetron parser. The directory contains two parseable protobuf files with different
 levels of abstraction:
 
-- `keras_metadata.pb` — Keras model config as an embedded JSON string; high-level layer graph
-- `saved_model.pb` — TF computation graph (GraphDef + NodeDefs); low-level TF op graph
+- `keras_metadata.pb` - Keras model config as an embedded JSON string; high-level layer graph
+- `saved_model.pb` - TF computation graph (GraphDef + NodeDefs); low-level TF op graph
 
 Users drop individual `.pb` files. Both file types are detected as the new `"savedmodel"` format
 and dispatched to the appropriate parser.
@@ -18,9 +18,9 @@ New package `@wetron/savedmodel`. Exports one function `parseSavedModel(bytes)` 
 auto-detects which file type it received by inspecting the first two bytes, then returns the
 appropriate `ModelGraph`.
 
-- `keras_metadata.pb` — first byte `0x0a` (field 1, wire type 2) → Keras layer graph
-- `saved_model.pb` — first two bytes `0x08 0x01` (field 1 varint = schema version 1) → TF op graph
-- Anything else → `ParseError("savedmodel", ...)`
+- `keras_metadata.pb` - first byte `0x0a` (field 1, wire type 2) -> Keras layer graph
+- `saved_model.pb` - first two bytes `0x08 0x01` (field 1 varint = schema version 1) -> TF op graph
+- Anything else -> `ParseError("savedmodel", ...)`
 
 The two parsers produce graphs at different granularities. Switching between views is a UI
 concern (the user drops the other file); the parser itself has no mode toggle.
@@ -32,8 +32,8 @@ packages/savedmodel/
   src/
     index.ts              # export parseSavedModel
     parse.ts              # auto-detect, dispatch to sub-parsers
-    parse-keras-meta.ts   # keras_metadata.pb → Keras layer ModelGraph
-    parse-tf-graph.ts     # saved_model.pb → TF op ModelGraph
+    parse-keras-meta.ts   # keras_metadata.pb -> Keras layer ModelGraph
+    parse-tf-graph.ts     # saved_model.pb -> TF op ModelGraph
     tf.proto              # hand-authored minimal TF proto schema (committed to repo)
     tf-descriptor.json    # generated from tf.proto via protobufjs-cli (committed to repo)
   test/
@@ -45,10 +45,10 @@ packages/savedmodel/
 
 ### Dependencies
 
-- `@wetron/core` — IR types, `ParseError`
-- `@wetron/keras` — re-uses `buildKerasGraph(config)` to avoid duplicating Functional/Sequential
+- `@wetron/core` - IR types, `ParseError`
+- `@wetron/keras` - re-uses `buildKerasGraph(config)` to avoid duplicating Functional/Sequential
   builder logic
-- `protobufjs` — workspace-level dep, already present
+- `protobufjs` - workspace-level dep, already present
 
 ## Changes to Existing Packages
 
@@ -91,7 +91,7 @@ export type { KerasModelConfig } from "./parse.ts";
 ## Parser: keras_metadata.pb
 
 Field 1 of the proto is the full Keras model config as a JSON string. Parse using
-`protobufjs/light`'s `Reader` without a schema — scan for field tag 1, read as string:
+`protobufjs/light`'s `Reader` without a schema - scan for field tag 1, read as string:
 
 ```ts
 function parseKerasMetadataPb(bytes: Uint8Array): ModelGraph {
@@ -155,18 +155,18 @@ The descriptor JSON is committed to the repo (same pattern as `onnx-descriptor.j
 
 For each `NodeDef`:
 
-- `name` → `GraphNode.name`
-- `op` → `GraphNode.opType`
-- `input[]` → `GraphNode.inputs` after stripping control dependencies (`^nodeName`) and
-  normalising port suffixes (`nodeName:0` → `nodeName`)
-- `attr` → `GraphNode.attributes` (string attrs decoded with `TextDecoder`, shapes mapped to
+- `name` -> `GraphNode.name`
+- `op` -> `GraphNode.opType`
+- `input[]` -> `GraphNode.inputs` after stripping control dependencies (`^nodeName`) and
+  normalising port suffixes (`nodeName:0` -> `nodeName`)
+- `attr` -> `GraphNode.attributes` (string attrs decoded with `TextDecoder`, shapes mapped to
   `number[]`)
-- outputs — each node's single output is its own name (TF convention for output 0)
+- outputs - each node's single output is its own name (TF convention for output 0)
 
 `tensorShapes` is populated from `AttrValue.shape` where present on nodes that expose `_output_shapes`.
 
 Output inference: Nodes whose output tensor is never consumed as another node's input are
-graph outputs — same approach as `buildFunctional` in the keras parser.
+graph outputs - same approach as `buildFunctional` in the keras parser.
 
 Inputs: Nodes with no inputs (typically `Placeholder` ops) become `ModelGraph.inputs`. Shape
 and dtype are read from their `shape` and `dtype` attributes.
@@ -175,7 +175,7 @@ and dtype are read from their `shape` and `dtype` attributes.
 
 All errors use `ParseError("savedmodel", context)` matching the format string.
 
-Non-fatal issues (node missing name/op) emit `ParseWarning` entries and skip the node — same
+Non-fatal issues (node missing name/op) emit `ParseWarning` entries and skip the node - same
 pattern as the keras parser.
 
 ## Testing
@@ -184,7 +184,7 @@ Fixtures: copy `saved_model.pb` and `keras_metadata.pb` from the sample model in
 
 ```ts
 // parse.test.ts
-test("keras_metadata.pb → Keras layer graph", () => {
+test("keras_metadata.pb -> Keras layer graph", () => {
   const bytes = readFileSync("../../test-models/ResNet2DGE2E-keras_metadata.pb");
   const graph = parseSavedModel(new Uint8Array(bytes));
   expect(graph.name).toBe("ResNet2DGE2E");
@@ -192,7 +192,7 @@ test("keras_metadata.pb → Keras layer graph", () => {
   expect(graph.nodes.some((n) => n.opType === "Conv2D")).toBe(true);
 });
 
-test("saved_model.pb → TF op graph", () => {
+test("saved_model.pb -> TF op graph", () => {
   const bytes = readFileSync("../../test-models/ResNet2DGE2E-saved_model.pb");
   const graph = parseSavedModel(new Uint8Array(bytes));
   expect(graph.nodes.length).toBeGreaterThan(0);
@@ -225,8 +225,8 @@ Root `package.json` build scripts updated similarly. `bump-version.ts` gets
 
 ## Out of Scope
 
-- SavedModel directory loading (multi-file drag) — browser File API limitation for now
-- Weight/variable deserialization — graph structure only, per project convention
-- `saved_model.pb` → Keras layer view (Keras config is not embedded in `saved_model.pb`; users
+- SavedModel directory loading (multi-file drag) - browser File API limitation for now
+- Weight/variable deserialization - graph structure only, per project convention
+- `saved_model.pb` -> Keras layer view (Keras config is not embedded in `saved_model.pb`; users
   drop `keras_metadata.pb` for that view)
 - Older TF1 frozen graph `.pb` files (different proto structure, separate effort if needed)

@@ -1,6 +1,6 @@
 # @wetron/tflite
 
-TFLite model parser. Reads `.tflite` flatbuffer files synchronously and returns a `ModelGraph` IR. Graph structure only — no weight tensors are deserialized.
+TFLite model parser. Reads `.tflite` flatbuffer files synchronously and returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
 
 ## API
 
@@ -35,5 +35,5 @@ Throws `ParseError` (from `@wetron/core/ir`) on malformed input.
 - Uses the `flatbuffers` npm package with a pre-generated TypeScript schema in `src/`.
 - Detects both TFL3 (`TFL3` at offset 4) and ODLF/LiteRT (`ODLF` at offset 4) magic bytes.
 - Op names are resolved from the TFLite `BuiltinOperator` enum; custom ops use their `custom_code` string.
-- Initializer buffers (weight data) are skipped — only shape and dtype are recorded in `ModelGraph.initializers`.
+- Initializer buffers (weight data) are skipped - only shape and dtype are recorded in `ModelGraph.initializers`.
 - Synchronous because FlatBuffers decoding requires no async I/O.

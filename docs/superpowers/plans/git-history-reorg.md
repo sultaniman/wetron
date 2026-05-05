@@ -10,7 +10,7 @@
 
 ---
 
-## Proposed New History (20 commits, oldest → newest)
+## Proposed New History (20 commits, oldest -> newest)
 
 | #   | New commit message                                                         | Source commits (squashed)                                                                                                                     |
 | --- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -27,11 +27,11 @@
 | 11  | `add edge data, smoothstep edges, edge click`                              | `554696e`, `b876f5d`, `5872c95`, `b8c2fc9`                                                                                                    |
 | 12  | `move to CSS modules, shared NodeCard, kebab-case`                         | `7404c57`, `e913744`                                                                                                                          |
 | 13  | `add EdgePanel, TensorPanel, UX polish, hybrid icons`                      | `5bbacaf`, `d20e03a`, `3518107`, `8cf0991`, `f806996`, `98d1198`                                                                              |
-| 14  | `add Keras parser — ZIP, Sequential, Functional models`                    | `9d8d1dc`, `a4f9ef8`, `5f3dcd0`, `375bffd`, `98c59dd`, `85c05e2`                                                                              |
+| 14  | `add Keras parser - ZIP, Sequential, Functional models`                    | `9d8d1dc`, `a4f9ef8`, `5f3dcd0`, `375bffd`, `98c59dd`, `85c05e2`                                                                              |
 | 15  | `add initializers, opInputLabels, weightInputs, wire Keras`                | `31c8894`, `1f158e7`, `f082bd6`, `f5e076a`, `35ad4b1`, `6e9c1c4`                                                                              |
 | 16  | `add edge panel, weight shapes, panel facelift`                            | `e3d56d9`, `c991952`, `c0b317b`, `7ecba8c`, `5ca4893`, `7f0b805`, `716970d`                                                                   |
 | 17  | `fix Keras tensor names, inbound_nodes, op icons, add MobileNetV2 tests`   | `258dd13`, `58f7dfa`, `b59ce69`, `ce53620`, `68030b8`                                                                                         |
-| 18  | `bring Svelte to parity with React — styles, icons, reactivity`            | `be01fcb`, `ca8fa89`, `a41091f`, `e3ea256`, `dd3f77b`, `9ce2ed5`, `4de9d33`, `d710c01`, `4131da1`, `901504f`                                  |
+| 18  | `bring Svelte to parity with React - styles, icons, reactivity`            | `be01fcb`, `ca8fa89`, `a41091f`, `e3ea256`, `dd3f77b`, `9ce2ed5`, `4de9d33`, `d710c01`, `4131da1`, `901504f`                                  |
 | 19  | `add Svelte demo, FlowNode dimensions, React node subtitle, clean up docs` | `13a89d4`, `24507e9`, `6b2152c`, `78f74ec`                                                                                                    |
 | 20  | `add styling drift prevention spec and plan, format code`                  | `ced7da9`, `c7c85a6`, `badfc03`, `2d985f0`                                                                                                    |
 
@@ -39,7 +39,7 @@
 
 ## Files
 
-- No files created or modified — this is a pure git history rewrite.
+- No files created or modified - this is a pure git history rewrite.
 
 ---
 
@@ -77,11 +77,11 @@ Or if using a different editor:
 GIT_SEQUENCE_EDITOR="vim" git rebase -i --root
 ```
 
-This opens 103 lines — one per commit — in oldest-to-newest order.
+This opens 103 lines - one per commit - in oldest-to-newest order.
 
 - [ ] **Step 2: Apply the rebase instructions below**
 
-Rewrite the file so it matches the 20-group squash plan. Each group uses `pick` on the first commit and `squash` (or `s`) on all subsequent commits within that group. The order of lines must match the table above (groups 1–20, oldest first).
+Rewrite the file so it matches the 20-group squash plan. Each group uses `pick` on the first commit and `squash` (or `s`) on all subsequent commits within that group. The order of lines must match the table above (groups 1-20, oldest first).
 
 Complete rebase TODO (paste this verbatim, replacing the editor contents):
 
@@ -91,7 +91,7 @@ pick 02ce065 docs: add wetron design spec
 s aaea276 docs: add wetron implementation plan
 s 08866bf chore: ignore .worktrees directory
 s 283c426 chore: move docs to docs/specs and docs/plans
-s cb7ed46 chore: repo scaffold — packages, tsconfigs, test models
+s cb7ed46 chore: repo scaffold - packages, tsconfigs, test models
 s 8b9ea38 chore: upgrade all dependencies to latest versions
 
 # Group 2: core IR + dtypes
@@ -104,7 +104,7 @@ s 2fb47ea fix(@wetron/core): remove any casts in readFloat16, add float8/Tier-3 
 pick c3c3296 chore(@wetron/onnx): add ONNX proto and compiled descriptor
 s b9dddb6 feat(@wetron/onnx): add ONNX parser with protobufjs
 s 797c9e5 fix(@wetron/onnx): import bigIntToNumber from @wetron/core/dtypes instead of inlining
-s ac75077 fix(@wetron/onnx): fix readFileSync→Bun.file, pin node count, fix docString fallback, module-level TextDecoder
+s ac75077 fix(@wetron/onnx): fix readFileSync->Bun.file, pin node count, fix docString fallback, module-level TextDecoder
 
 # Group 4: TFLite parser
 pick e56e7cd feat(@wetron/tflite): add builtin op names and tensor type map
@@ -126,7 +126,7 @@ pick 119888b feat(@wetron/svelte): add ModelGraphView with custom nodes
 # Group 8: demo app
 pick e680717 feat: add demo React app in apps/demo
 s fd78b54 chore: fix type errors and test env for tsc + bun test
-s cac72ae feat: implement wetron — ONNX + TFLite parsers, React/Svelte renderers, demo app
+s cac72ae feat: implement wetron - ONNX + TFLite parsers, React/Svelte renderers, demo app
 
 # Group 9: NodePropertyPanel
 pick 6945d4a docs: add node property panel design spec
@@ -176,7 +176,7 @@ s 98d1198 docs(demo): clarify intermediate tensor null shape/dtype in handleTens
 # Group 14: Keras parser
 pick 9d8d1dc feat(@wetron/keras): scaffold package with stub parseKeras
 s a4f9ef8 feat(@wetron/keras): ZIP extraction and config.json parsing
-s 5f3dcd0 feat(@wetron/keras): Sequential model → ModelGraph IR
+s 5f3dcd0 feat(@wetron/keras): Sequential model -> ModelGraph IR
 s 375bffd feat(@wetron/keras): Functional model IR with merge layer support
 s 98c59dd feat(@wetron/core): add Keras layer category mappings
 s 85c05e2 feat(onnx): add initializers tests
@@ -231,26 +231,26 @@ s 2d985f0 format code
 ```
 
 - [ ] **Step 3: For each squash, the editor will prompt for a combined message. Use these:**
-  - Group 1 → `scaffold repo, add initial docs, upgrade deps`
-  - Group 2 → `add IR types, ParseError, dtype utilities`
-  - Group 3 → `add ONNX parser with protobufjs`
-  - Group 4 → `add TFLite FlatBuffers parser`
-  - Group 5 → `add format detection, dagre layout, parseModel entry`
-  - Group 6 → `add React ModelGraphView with custom nodes`
-  - Group 7 → `add Svelte ModelGraphView with custom nodes`
-  - Group 8 → `add React demo app, fix type errors, wire parsers`
-  - Group 9 → `add NodePropertyPanel with Phosphor icons`
-  - Group 10 → `add op categories, B·3 layout, color mode`
-  - Group 11 → `add edge data, smoothstep edges, edge click`
-  - Group 12 → `move to CSS modules, shared NodeCard, kebab-case`
-  - Group 13 → `add EdgePanel, TensorPanel, UX polish, hybrid icons`
-  - Group 14 → `add Keras parser — ZIP, Sequential, Functional models`
-  - Group 15 → `add initializers, opInputLabels, weightInputs, wire Keras`
-  - Group 16 → `add edge panel, weight shapes, panel facelift`
-  - Group 17 → `fix Keras tensor names, inbound_nodes, op icons, add MobileNetV2 tests`
-  - Group 18 → `bring Svelte to parity with React — styles, icons, reactivity`
-  - Group 19 → `add Svelte demo, FlowNode dimensions, React node subtitle, clean up docs`
-  - Group 20 → `add styling drift prevention spec and plan, format code`
+  - Group 1 -> `scaffold repo, add initial docs, upgrade deps`
+  - Group 2 -> `add IR types, ParseError, dtype utilities`
+  - Group 3 -> `add ONNX parser with protobufjs`
+  - Group 4 -> `add TFLite FlatBuffers parser`
+  - Group 5 -> `add format detection, dagre layout, parseModel entry`
+  - Group 6 -> `add React ModelGraphView with custom nodes`
+  - Group 7 -> `add Svelte ModelGraphView with custom nodes`
+  - Group 8 -> `add React demo app, fix type errors, wire parsers`
+  - Group 9 -> `add NodePropertyPanel with Phosphor icons`
+  - Group 10 -> `add op categories, B·3 layout, color mode`
+  - Group 11 -> `add edge data, smoothstep edges, edge click`
+  - Group 12 -> `move to CSS modules, shared NodeCard, kebab-case`
+  - Group 13 -> `add EdgePanel, TensorPanel, UX polish, hybrid icons`
+  - Group 14 -> `add Keras parser - ZIP, Sequential, Functional models`
+  - Group 15 -> `add initializers, opInputLabels, weightInputs, wire Keras`
+  - Group 16 -> `add edge panel, weight shapes, panel facelift`
+  - Group 17 -> `fix Keras tensor names, inbound_nodes, op icons, add MobileNetV2 tests`
+  - Group 18 -> `bring Svelte to parity with React - styles, icons, reactivity`
+  - Group 19 -> `add Svelte demo, FlowNode dimensions, React node subtitle, clean up docs`
+  - Group 20 -> `add styling drift prevention spec and plan, format code`
 
 ---
 
@@ -270,7 +270,7 @@ Expected: exactly 20 lines, matching the table above in order (newest first).
 bun test
 ```
 
-Expected: all tests pass. If any fail, the rebase introduced a conflict or ordering issue — compare against the backup tag to diagnose:
+Expected: all tests pass. If any fail, the rebase introduced a conflict or ordering issue - compare against the backup tag to diagnose:
 
 ```bash
 git diff backup/pre-reorg HEAD -- packages/

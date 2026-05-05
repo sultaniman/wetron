@@ -56,7 +56,7 @@ export const EDGE_THEME = {
   selectedStrokeWidth: 2,
 } as const;
 
-// Keys are CSS custom property names — consumers can apply via style attribute or setProperty.
+// Keys are CSS custom property names - consumers can apply via style attribute or setProperty.
 export const CANVAS_VARS = {
   light: {
     "--xy-background-color-default": "#f8f8fc",
