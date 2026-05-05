@@ -8,7 +8,7 @@ weight: 10
 Import the stylesheet once in your entry point:
 
 ```ts
-import "@wetron/react/dist/index.css";
+import "@wetron/react/styles.css";
 ```
 
 ## ModelGraphView
@@ -59,18 +59,34 @@ import { NodePropertyPanel } from "@wetron/react";
 ```ts
 type PanelTarget =
   | GraphNode
+  | { graphValue: GraphValue; direction: "input" | "output" }
   | {
       edge: {
         tensorName: string;
-        sourceOpType: string;
-        shape: readonly number[] | null;
-        dtype: string | null;
+        from: { opType: string; name: string };
+        to: Array<{ opType: string; name: string }>;
       };
     }
   | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```
 
-Use `isGraphNode(target)` from `@wetron/react` to narrow the type.
+Use `isGraphNode(target)` from `@wetron/react` to narrow to `GraphNode`.
+
+## ModelGraphViewHandle (ref)
+
+Pass a `ref` to `ModelGraphView` to get imperative control:
+
+```ts
+const ref = useRef<ModelGraphViewHandle>(null);
+
+type ModelGraphViewHandle = {
+  fitAll: () => Promise<void>;
+  getViewport: () => { x: number; y: number; zoom: number };
+  setViewport: (vp: { x: number; y: number; zoom: number }) => void;
+  getNodesBounds: () => { x: number; y: number; width: number; height: number };
+  getViewportElement: () => HTMLElement | null;
+};
+```
 
 ## Peer dependencies
 

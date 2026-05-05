@@ -21,6 +21,7 @@ All parsing runs in the browser via native Web APIs — `ArrayBuffer`, `DataView
 | `@wetron/keras`       | Keras 3 `.keras` archive parser                                   |
 | `@wetron/torchscript` | TorchScript Mobile and ZIP-based `.pt` parser                     |
 | `@wetron/executorch`  | ExecuTorch `.pte` FlatBuffers parser                              |
+| `@wetron/savedmodel`  | TF SavedModel `.pb` and Keras metadata `.pb` parser               |
 | `@wetron/react`       | ReactFlow-based graph view and property panel                     |
 | `@wetron/svelte`      | SvelteFlow-based graph view and property panel                    |
 | `@wetron/tokens`      | Design tokens (category colours, CSS custom properties)           |
@@ -43,11 +44,12 @@ model file
 
 `parseModel` and `detectFormat` identify formats from magic bytes, with filename extension as a tiebreaker. `detectFormat` always returns a format string — never throws.
 
-| Format             | Detection                          |
-| ------------------ | ---------------------------------- |
-| ONNX               | protobuf field 1 varint tag `0x08` |
-| TFLite             | `TFL3` or `ODLF` at offset 4       |
-| Keras              | ZIP magic + `config.json` entry    |
-| TorchScript ZIP    | ZIP magic + `bytecode.pkl` entry   |
-| TorchScript Mobile | `PTMF` at offset 4                 |
-| ExecuTorch         | `ET12` at offset 4                 |
+| Format             | Detection                                      |
+| ------------------ | ---------------------------------------------- |
+| SavedModel         | `.pb` filename extension (checked before ONNX) |
+| ONNX               | protobuf field 1 varint tag `0x08`             |
+| TFLite             | `TFL3` or `ODLF` at offset 4                   |
+| Keras              | ZIP magic + `config.json` entry                |
+| TorchScript ZIP    | ZIP magic + `bytecode.pkl` entry               |
+| TorchScript Mobile | `PTMF` at offset 4                             |
+| ExecuTorch         | `ET12` at offset 4                             |

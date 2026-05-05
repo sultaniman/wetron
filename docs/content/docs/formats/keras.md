@@ -8,7 +8,7 @@ weight: 30
 ```ts
 import { parseKeras } from "@wetron/keras";
 
-const graph = await parseKeras(bytes: Uint8Array): Promise<ModelGraph>
+const graph = parseKeras(bytes); // synchronous, returns ModelGraph
 ```
 
 ## What is parsed

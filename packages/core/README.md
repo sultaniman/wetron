@@ -12,7 +12,7 @@ bun add @wetron/core
 
 ```ts
 // Detect format from magic bytes — never throws, returns "unknown" on no match
-type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown";
+type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // Parse a model file — dispatches to the right parser based on format detection
@@ -73,11 +73,12 @@ interface GraphValue {
 
 ## Format detection
 
-| Format             | Detection                          |
-| ------------------ | ---------------------------------- |
-| ONNX               | protobuf field 1 varint tag `0x08` |
-| TFLite             | `TFL3` or `ODLF` at offset 4       |
-| Keras              | ZIP magic + `config.json` entry    |
-| TorchScript ZIP    | ZIP magic + `bytecode.pkl`         |
-| TorchScript Mobile | `PTMF` at offset 4                 |
-| ExecuTorch         | `ET12` at offset 4                 |
+| Format             | Detection                                      |
+| ------------------ | ---------------------------------------------- |
+| SavedModel         | `.pb` filename extension (checked before ONNX) |
+| ONNX               | protobuf field 1 varint tag `0x08`             |
+| TFLite             | `TFL3` or `ODLF` at offset 4                   |
+| Keras              | ZIP magic + `config.json` entry                |
+| TorchScript ZIP    | ZIP magic + `bytecode.pkl`                     |
+| TorchScript Mobile | `PTMF` at offset 4                             |
+| ExecuTorch         | `ET12` at offset 4                             |

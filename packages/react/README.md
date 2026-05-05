@@ -13,7 +13,7 @@ bun add @wetron/react
 ```tsx
 import { parseModel } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
-import "@wetron/react/dist/index.css";
+import "@wetron/react/styles.css";
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = await parseModel(bytes, file.name);
@@ -29,12 +29,25 @@ function ModelGraphView(props: {
   graph: ModelGraph;
   onTargetClick?: (target: PanelTarget) => void;
   colorMode?: "light" | "dark" | "system"; // default: "system"
+  selectedEdgeTensorName?: string | null;
+  searchQuery?: string;
+  onWarnings?: (warnings: readonly ParseWarning[]) => void;
+  ref?: React.Ref<ModelGraphViewHandle>;
 }): JSX.Element;
+
+type ModelGraphViewHandle = {
+  fitAll: () => Promise<void>;
+  getViewport: () => { x: number; y: number; zoom: number };
+  setViewport: (vp: { x: number; y: number; zoom: number }) => void;
+  getNodesBounds: () => { x: number; y: number; width: number; height: number };
+  getViewportElement: () => HTMLElement | null;
+};
 
 function NodePropertyPanel(props: {
   target: PanelTarget | null;
   colorMode?: "light" | "dark" | "system";
   opsets?: ReadonlyMap<string, number>;
+  inputSources?: ReadonlyMap<string, string>;
   tensorShapes?: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
@@ -43,24 +56,28 @@ function NodePropertyPanel(props: {
 
 type PanelTarget =
   | GraphNode
+  | { graphValue: GraphValue; direction: "input" | "output" }
   | {
       edge: {
         tensorName: string;
-        sourceOpType: string;
-        shape: readonly number[] | null;
-        dtype: string | null;
+        from: { opType: string; name: string };
+        to: Array<{ opType: string; name: string }>;
       };
     }
   | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```
+
+Use `isGraphNode(target)` from `@wetron/react` to narrow to `GraphNode`.
+
+````
 
 ## Stylesheet
 
 Import once in your entry point:
 
 ```ts
-import "@wetron/react/dist/index.css";
-```
+import "@wetron/react/styles.css";
+````
 
 ## Theming
 
