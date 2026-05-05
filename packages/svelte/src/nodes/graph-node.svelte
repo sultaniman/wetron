@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { GraphNodeData } from '@wetron/core/transform';
   import { opCategory } from '@wetron/core';
-  import { CATEGORY_THEME } from '../theme.ts';
   import { consumeColorMode } from '../color-mode-context.ts';
   import NodeCard from './node-card.svelte';
 
@@ -9,8 +8,7 @@
 
   const isDark = $derived(consumeColorMode() === 'dark');
   const cat = $derived(opCategory(data.opType));
-  const theme = $derived(CATEGORY_THEME[cat]);
-  const color = $derived(isDark ? theme.dark : theme.light);
+  const color = $derived(`var(--wetron-category-${cat})`);
   const hasWeights = $derived(data.weightInputs != null && data.weightInputs.length > 0);
   const displayName = $derived(data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined);
   const ariaLabel = $derived(displayName ? `${data.opType}, ${displayName}` : data.opType);

@@ -2,16 +2,14 @@
   import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon } from 'phosphor-svelte';
   import type { GraphNode } from '@wetron/core/ir';
   import { opCategory } from '@wetron/core';
-  import { CATEGORY_THEME } from '@wetron/tokens';
   import CategoryIcon from '../nodes/category-icon.svelte';
   import Row from './row.svelte';
   import AttrRow from './attr-row.svelte';
   import SectionLabel from './section-label.svelte';
   import PanelHeader from './panel-header.svelte';
 
-  let { node, isDark, inputSources, onTensorClick, onBack, opsets }: {
+  let { node, inputSources, onTensorClick, onBack, opsets }: {
     node: GraphNode;
-    isDark: boolean;
     inputSources?: ReadonlyMap<string, string>;
     onTensorClick?: (name: string) => void;
     onBack?: () => void;
@@ -27,8 +25,8 @@
   }
 
   const cat = $derived(opCategory(node.opType));
-  const color = $derived(isDark ? CATEGORY_THEME[cat].dark : CATEGORY_THEME[cat].light);
-  const iconBg = $derived(color + '20');
+  const color = $derived(`var(--wetron-category-${cat})`);
+  const iconBg = $derived(`color-mix(in oklch, var(--wetron-category-${cat}) 12%, transparent)`);
   const module = $derived(formatModule(node.domain, opsets));
   const visibleInputs = $derived(node.inputs.filter(n => n !== ''));
   const attrEntries = $derived(Object.entries(node.attributes));
@@ -45,7 +43,7 @@
     {#each visibleInputs as name (name)}
       {@const sourceOp = inputSources?.get(name)}
       {@const sourceCat = sourceOp ? opCategory(sourceOp) : null}
-      {@const sourceColor = sourceCat ? (isDark ? CATEGORY_THEME[sourceCat].dark : CATEGORY_THEME[sourceCat].light) : undefined}
+      {@const sourceColor = sourceCat ? `var(--wetron-category-${sourceCat})` : undefined}
       <Row label={name} chip={sourceOp ?? 'tensor'} chipColor={sourceColor} onClick={onTensorClick ? () => onTensorClick!(name) : undefined} />
     {/each}
   </div>

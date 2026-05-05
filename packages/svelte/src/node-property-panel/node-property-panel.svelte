@@ -62,7 +62,7 @@
   >
     {#if onClose}<CloseButton {onClose} />{/if}
     {#if isGraphNode(target)}
-      <OpPanel node={target} {isDark} {inputSources} {onTensorClick} {onBack} {opsets} />
+      <OpPanel node={target} {inputSources} {onTensorClick} {onBack} {opsets} />
     {:else if isEdgeTarget(target)}
       <EdgePanel edge={target.edge} {tensorShapes} {onBack} />
     {:else if isTensorTarget(target)}
@@ -85,5 +85,43 @@
     border: 1px solid var(--panel-border);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
     color: var(--panel-text);
+  }
+
+  :global(.panel[data-theme="dark"]) {
+    --wetron-category-input:         #4caf50;
+    --wetron-category-output:        #42a5f5;
+    --wetron-category-conv:          #7986cb;
+    --wetron-category-activation:    #ef5350;
+    --wetron-category-normalization: #26a69a;
+    --wetron-category-pooling:       #ab47bc;
+    --wetron-category-reshape:       #90a4ae;
+    --wetron-category-math:          #ce93d8;
+    --wetron-category-reduction:     #64b5f6;
+    --wetron-category-merge:         #9fa8da;
+    --wetron-category-attention:     #4db6ac;
+    --wetron-category-recurrent:     #aed581;
+    --wetron-category-quantization:  #bcaaa4;
+    --wetron-category-constant:      #4fc3f7;
+    --wetron-category-logic:         #4dd0e1;
+    --wetron-category-unknown:       #9e9e9e;
+  }
+
+  :global(.panel[data-theme="light"]) {
+    --wetron-category-input:         #2e7d32;
+    --wetron-category-output:        #1565c0;
+    --wetron-category-conv:          #3949ab;
+    --wetron-category-activation:    #c0392b;
+    --wetron-category-normalization: #00695c;
+    --wetron-category-pooling:       #6a1b9a;
+    --wetron-category-reshape:       #546e7a;
+    --wetron-category-math:          #7b1fa2;
+    --wetron-category-reduction:     #0277bd;
+    --wetron-category-merge:         #5c6bc0;
+    --wetron-category-attention:     #00695c;
+    --wetron-category-recurrent:     #558b2f;
+    --wetron-category-quantization:  #795548;
+    --wetron-category-constant:      #0277bd;
+    --wetron-category-logic:         #00838f;
+    --wetron-category-unknown:       #757575;
   }
 </style>

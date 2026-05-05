@@ -46,7 +46,6 @@ export function NodeCard({
       style={
         {
           "--node-color": colors.color,
-          "--node-icon-color": colors.color + "B3",
           ...(selected
             ? {
                 borderColor: colors.color,

@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { GraphNodeData } from '@wetron/core/transform';
-  import { CATEGORY_THEME } from '../theme.ts';
   import { consumeColorMode } from '../color-mode-context.ts';
   import NodeCard from './node-card.svelte';
 
@@ -9,8 +8,7 @@
   const isInput = $derived(data.opType === 'Input');
   const isDark = $derived(consumeColorMode() === 'dark');
   const cat = $derived(isInput ? 'input' as const : 'output' as const);
-  const theme = $derived(CATEGORY_THEME[cat]);
-  const color = $derived(isDark ? theme.dark : theme.light);
+  const color = $derived(`var(--wetron-category-${cat})`);
   const meta = $derived(
     [data.shape ? `[${data.shape.join(' × ')}]` : null, data.dtype]
       .filter(Boolean).join(' ')

@@ -1,16 +1,13 @@
 import React from "react";
 import type { Node, NodeProps } from "@xyflow/react";
 import type { GraphNodeData } from "@wetron/core/transform";
-import { CATEGORY_THEME, CATEGORY_ICON } from "../theme.ts";
-import { useColorMode } from "../color-mode-context.ts";
+import { CATEGORY_ICON } from "../theme.ts";
 import { NodeCard } from "./node-card/node-card.tsx";
 
 export function IoNodeComponent({ data, selected }: NodeProps<Node<GraphNodeData>>) {
   const isInput = data.opType === "Input";
-  const isDark = useColorMode() === "dark";
   const cat = isInput ? ("input" as const) : ("output" as const);
-  const theme = CATEGORY_THEME[cat];
-  const color = isDark ? theme.dark : theme.light;
+  const color = `var(--wetron-category-${cat})`;
   const meta = [data.shape ? `[${data.shape.join(" × ")}]` : null, data.dtype]
     .filter(Boolean)
     .join(" ");

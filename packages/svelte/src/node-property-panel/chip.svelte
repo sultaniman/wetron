@@ -3,7 +3,7 @@
 </script>
 
 {#if color}
-  <span class="chip" style="background: {color}22; color: {color};">{label}</span>
+  <span class="chip" style="background: color-mix(in oklch, {color} 12%, transparent); color: {color};">{label}</span>
 {:else}
   <span class="chip" data-type={label}>{label}</span>
 {/if}

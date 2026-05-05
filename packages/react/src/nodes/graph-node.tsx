@@ -2,16 +2,13 @@ import React from "react";
 import type { Node, NodeProps } from "@xyflow/react";
 import type { GraphNodeData } from "@wetron/core/transform";
 import { opCategory } from "@wetron/core";
-import { CATEGORY_THEME, opIcon } from "../theme.ts";
-import { useColorMode } from "../color-mode-context.ts";
+import { opIcon } from "../theme.ts";
 import { NodeCard } from "./node-card/node-card.tsx";
 import css from "./node-card/node-card.module.css";
 
 export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeData>>) {
-  const isDark = useColorMode() === "dark";
   const cat = opCategory(data.opType);
-  const theme = CATEGORY_THEME[cat];
-  const color = isDark ? theme.dark : theme.light;
+  const color = `var(--wetron-category-${cat})`;
   const hasWeights = data.weightInputs != null && data.weightInputs.length > 0;
   const displayName = data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined;
   return (

@@ -7,10 +7,19 @@
   /* fixed width — must match NODE_W in packages/core/src/transform.ts */
   width: 220px;
   box-sizing: border-box;
+  /* prevent consumer app's global line-height from inflating node height */
+  line-height: 1;
   cursor: pointer;
   transition:
     box-shadow 0.12s,
     border-color 0.12s;
+  /* defensive resets against consumer CSS resets */
+  font-family: monospace;
+  font-size: 13px;
+  text-align: left;
+  letter-spacing: normal;
+  word-spacing: normal;
+  border-style: solid;
 }
 
 .card:hover {
@@ -47,7 +56,7 @@
   justify-content: center;
   flex-shrink: 0;
   margin-left: auto;
-  color: var(--node-icon-color);
+  color: color-mix(in oklch, var(--node-color) 70%, transparent);
   width: 16px;
   height: 16px;
 }
