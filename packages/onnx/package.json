@@ -1,6 +1,6 @@
 {
   "name": "@wetron/onnx",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "ONNX model parser — extracts graph structure (nodes, edges, shapes) from .onnx files",
   "keywords": [
     "graph",
@@ -31,7 +31,6 @@
     }
   },
   "dependencies": {
-    "@wetron/core": "workspace:*",
-    "protobufjs": "^8.0.3"
+    "@wetron/core": "workspace:*"
   }
 }
