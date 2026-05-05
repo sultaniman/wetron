@@ -1,5 +1,5 @@
 import { ByteBuffer } from "flatbuffers";
-import { unzipSync } from "fflate";
+import { unzipSync } from "fflate/browser";
 import type { ModelGraph, GraphNode, ParseWarning } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 

@@ -1,4 +1,4 @@
-import { unzipSync } from "fflate";
+import { unzipSync } from "fflate/browser";
 import type {
   ModelGraph,
   GraphNode,
@@ -19,7 +19,7 @@ type KerasLayerEntry = {
   inbound_nodes: KerasInboundNode[];
 };
 
-type KerasModelConfig = {
+export type KerasModelConfig = {
   class_name: string;
   config: {
     name: string;
@@ -236,6 +236,13 @@ function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[]): Mod
   };
 }
 
+export function buildKerasGraph(model: KerasModelConfig): ModelGraph {
+  const warnings: ParseWarning[] = [];
+  if (model.class_name === "Sequential") return buildSequential(model, warnings);
+  if (model.class_name === "Functional") return buildFunctional(model, warnings);
+  throw new ParseError("savedmodel", `Unsupported model class: ${model.class_name}`);
+}
+
 export function parseKeras(bytes: Uint8Array): ModelGraph {
   let files: Record<string, Uint8Array>;
   try {
@@ -263,8 +270,5 @@ export function parseKeras(bytes: Uint8Array): ModelGraph {
   const model = raw as KerasModelConfig;
   if (!model?.config?.layers) throw new ParseError("keras", "config.json missing config.layers");
 
-  const warnings: ParseWarning[] = [];
-  if (model.class_name === "Sequential") return buildSequential(model, warnings);
-  if (model.class_name === "Functional") return buildFunctional(model, warnings);
-  throw new ParseError("keras", `Unsupported model class: ${model.class_name}`);
+  return buildKerasGraph(model);
 }
