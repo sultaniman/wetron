@@ -53,3 +53,9 @@ test("weight rows render label and shape when weightInputs provided", () => {
   expect(screen.getByText("W")).toBeDefined();
   expect(screen.getByText("〈64×3×3×3〉")).toBeDefined();
 });
+
+test("color prop uses CSS category var not hex", () => {
+  const { container } = renderNode("Conv");
+  const card = container.querySelector('[data-nodetype="graphNode"]')!;
+  expect(card.style.getPropertyValue("--node-color")).toBe("var(--wetron-category-conv)");
+});

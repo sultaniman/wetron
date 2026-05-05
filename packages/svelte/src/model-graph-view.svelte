@@ -21,14 +21,14 @@
   interface Props {
     graph: ModelGraph;
     onTargetClick?: (target: PanelTarget) => void;
-    onwarnings?: (warnings: readonly ParseWarning[]) => void;
+    onWarnings?: (warnings: readonly ParseWarning[]) => void;
     selectedEdgeTensorName?: string | null;
     searchQuery?: string;
     colorMode?: ColorMode;
     exportRef?: ExportHelpers | null;
   }
 
-  let { graph, onTargetClick, onwarnings, selectedEdgeTensorName = null, searchQuery = '', colorMode = 'system', exportRef = $bindable<ExportHelpers | null>(null) }: Props = $props();
+  let { graph, onTargetClick, onWarnings, selectedEdgeTensorName = null, searchQuery = '', colorMode = 'system', exportRef = $bindable<ExportHelpers | null>(null) }: Props = $props();
 
   let systemIsDark = $state(resolveColorMode('system') === 'dark');
 
@@ -69,7 +69,7 @@
   );
 
   $effect(() => {
-    onwarnings?.(graph.warnings ?? []);
+    onWarnings?.(graph.warnings ?? []);
   });
 
   const rawFlow = $derived(modelGraphToFlow(graph));
@@ -176,8 +176,12 @@
 
 <style>
   .wetron-graph {
+    all: revert;
     width: 100%;
     height: 100%;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
   }
 
   /* ── Handles ── */
@@ -239,6 +243,44 @@
   :global(.wetron-graph[data-theme="light"] .svelte-flow__controls-button:hover) {
     background-color: #f0f0f8;
     color: #333;
+  }
+
+  :global(.wetron-graph[data-theme="dark"]) {
+    --wetron-category-input:         #4caf50;
+    --wetron-category-output:        #42a5f5;
+    --wetron-category-conv:          #7986cb;
+    --wetron-category-activation:    #ef5350;
+    --wetron-category-normalization: #26a69a;
+    --wetron-category-pooling:       #ab47bc;
+    --wetron-category-reshape:       #90a4ae;
+    --wetron-category-math:          #ce93d8;
+    --wetron-category-reduction:     #64b5f6;
+    --wetron-category-merge:         #9fa8da;
+    --wetron-category-attention:     #4db6ac;
+    --wetron-category-recurrent:     #aed581;
+    --wetron-category-quantization:  #bcaaa4;
+    --wetron-category-constant:      #4fc3f7;
+    --wetron-category-logic:         #4dd0e1;
+    --wetron-category-unknown:       #9e9e9e;
+  }
+
+  :global(.wetron-graph[data-theme="light"]) {
+    --wetron-category-input:         #2e7d32;
+    --wetron-category-output:        #1565c0;
+    --wetron-category-conv:          #3949ab;
+    --wetron-category-activation:    #c0392b;
+    --wetron-category-normalization: #00695c;
+    --wetron-category-pooling:       #6a1b9a;
+    --wetron-category-reshape:       #546e7a;
+    --wetron-category-math:          #7b1fa2;
+    --wetron-category-reduction:     #0277bd;
+    --wetron-category-merge:         #5c6bc0;
+    --wetron-category-attention:     #00695c;
+    --wetron-category-recurrent:     #558b2f;
+    --wetron-category-quantization:  #795548;
+    --wetron-category-constant:      #0277bd;
+    --wetron-category-logic:         #00838f;
+    --wetron-category-unknown:       #757575;
   }
 
   /* ── Node defaults — remove XY Flow's default border/shadow on nodes ── */

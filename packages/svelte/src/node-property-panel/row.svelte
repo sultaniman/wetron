@@ -1,6 +1,7 @@
 <script lang="ts">
   import Chip from './chip.svelte';
   import { CaretRightIcon } from 'phosphor-svelte';
+  import Tooltip from '../tooltip.svelte';
 
   let { label, value, chip, chipColor, onClick }: {
     label: string;
@@ -17,7 +18,9 @@
   role={onClick ? 'button' : undefined}
   onclick={onClick}
 >
-  <span class="label">{label}</span>
+  <Tooltip text={label} onlyIfOverflow>
+    <span class="label">{label}</span>
+  </Tooltip>
   {#if value}<span class="value">{value}</span>{/if}
   <Chip label={chip} color={chipColor} />
   {#if onClick}<span class="caret"><CaretRightIcon size={9} /></span>{/if}

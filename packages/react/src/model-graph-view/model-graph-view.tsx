@@ -108,7 +108,11 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
   );
 
   return (
-    <div data-theme={isDark ? "dark" : "light"} style={{ width: "100%", height: "100%" }}>
+    <div
+      className="wetron-root"
+      data-theme={isDark ? "dark" : "light"}
+      style={{ width: "100%", height: "100%" }}
+    >
       <ReactFlow
         colorMode={colorMode}
         nodes={nodes}

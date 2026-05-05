@@ -3,6 +3,7 @@
   import { Handle, Position } from '@xyflow/svelte';
   import type { OpCategory } from '@wetron/core';
   import CategoryIcon from './category-icon.svelte';
+  import Tooltip from '../tooltip.svelte';
 
   interface Props {
     nodeType: 'graphNode' | 'ioNode';
@@ -57,7 +58,6 @@
       ? `0 0 0 2px color-mix(in oklch, ${color} 25%, transparent), 0 1px 4px rgba(0,0,0,0.08)`
       : undefined
   );
-  const iconColor = $derived(color + 'B3');
 </script>
 
 <div
@@ -70,20 +70,23 @@
   style:border="1px solid {cardBorder}"
   style:box-shadow={selectedShadow}
   style:--node-color={color}
-  style:--node-icon-color={iconColor}
   style:--node-muted={muted}
 >
   {#if topHandle}
     <Handle type="target" position={Position.Top} />
   {/if}
   <div class="header-row">
-    <span class="pill">{pill}</span>
+    <Tooltip text={pill} onlyIfOverflow>
+      <span class="pill">{pill}</span>
+    </Tooltip>
     <span class="icon">
       <CategoryIcon {cat} {op} size={16} />
     </span>
   </div>
   {#if subtitle}
-    <div class="subtitle">{subtitle}</div>
+    <Tooltip text={subtitle} onlyIfOverflow>
+      <div class="subtitle">{subtitle}</div>
+    </Tooltip>
   {/if}
   {@render children?.()}
   {#if bottomHandle}
@@ -97,9 +100,17 @@
     border-radius: 4px;
     width: 220px; /* must match NODE_W in transform.ts */
     box-sizing: border-box;
+    line-height: 1;
     cursor: pointer;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     transition: box-shadow 0.12s, border-color 0.12s;
+    /* defensive resets against consumer CSS resets */
+    font-family: monospace;
+    font-size: 13px;
+    text-align: left;
+    letter-spacing: normal;
+    word-spacing: normal;
+    border-style: solid;
   }
   .card:hover {
     box-shadow: 0 2px 10px rgba(0,0,0,0.13);
@@ -126,7 +137,7 @@
     align-items: center;
     flex-shrink: 0;
     margin-left: auto;
-    color: var(--node-icon-color);
+    color: color-mix(in oklch, var(--node-color) 70%, transparent);
   }
   .subtitle {
     display: inline-block;

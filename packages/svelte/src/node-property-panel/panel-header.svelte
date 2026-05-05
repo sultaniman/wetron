@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import BackButton from './back-button.svelte';
+  import Tooltip from '../tooltip.svelte';
 
   let { title, subtitle, extraSubtitle, iconKind, iconBg, iconColor, onBack, icon }: {
     title: string;
@@ -20,9 +21,19 @@
     {@render icon()}
   </div>
   <div class="titleWrap">
-    <div class="nodeTitle">{title}</div>
-    {#if subtitle}<div class="nodeSubtitle" title={subtitle}>{subtitle}</div>{/if}
-    {#if extraSubtitle}<div class="nodeSubtitle" title={extraSubtitle}>{extraSubtitle}</div>{/if}
+    <Tooltip text={title} onlyIfOverflow>
+      <div class="nodeTitle">{title}</div>
+    </Tooltip>
+    {#if subtitle}
+      <Tooltip text={subtitle} onlyIfOverflow>
+        <div class="nodeSubtitle">{subtitle}</div>
+      </Tooltip>
+    {/if}
+    {#if extraSubtitle}
+      <Tooltip text={extraSubtitle} onlyIfOverflow>
+        <div class="nodeSubtitle">{extraSubtitle}</div>
+      </Tooltip>
+    {/if}
   </div>
 </div>
 
@@ -52,7 +63,13 @@
   :global([data-theme="dark"]) .iconBox[data-kind="input"]  { background: color-mix(in oklch, #4caf50 12%, #1e1e2e); color: #4caf50; }
   :global([data-theme="dark"]) .iconBox[data-kind="output"] { background: color-mix(in oklch, #42a5f5 12%, #1e1e2e); color: #42a5f5; }
   .titleWrap { min-width: 0; flex: 1; overflow: hidden; }
-  .nodeTitle { font-weight: 700; font-size: 13px; }
+  .nodeTitle {
+    font-weight: 700;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .nodeSubtitle {
     font-size: 10px;
     color: var(--panel-subtitle);

@@ -47,7 +47,7 @@ function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
             className={css.expandBtn}
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
-              setExpanded((v: boolean) => !v);
+              setExpanded((v) => !v);
             }}
           >
             {expanded ? "▴" : "···"}
@@ -106,7 +106,11 @@ export function OpPanel({
           <Tooltip text={node.opType} onlyIfOverflow>
             <div className={css.nodeTitle}>{node.opType}</div>
           </Tooltip>
-          {module && <div className={css.nodeSubtitle}>{module}</div>}
+          {module && (
+            <Tooltip text={module} onlyIfOverflow>
+              <div className={css.nodeSubtitle}>{module}</div>
+            </Tooltip>
+          )}
           {node.name && (
             <Tooltip text={node.name} onlyIfOverflow>
               <div className={css.nodeSubtitle}>{node.name}</div>
