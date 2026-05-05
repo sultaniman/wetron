@@ -133,14 +133,6 @@ const ATEN_OP_ICON: Partial<Record<string, IconEntry>> = {
   scatter_add: { kind: "component", Component: DotsNineIcon },
 };
 
-export function opIcon(opType: string, cat: OpCategory): IconEntry {
-  const exact = OP_ICON[opType];
-  if (exact) return exact;
-  const base = opBase(opType);
-  if (base) return ATEN_OP_ICON[base] ?? CATEGORY_ICON[cat];
-  return CATEGORY_ICON[cat];
-}
-
 export const OP_ICON: Partial<Record<string, IconEntry>> = {
   // reshape-category overrides (ONNX / Keras)
   Reshape: { kind: "component", Component: BoundingBoxIcon },
@@ -227,3 +219,11 @@ export const OP_ICON: Partial<Record<string, IconEntry>> = {
   EQUAL: { kind: "glyph", char: "=" },
   NOT_EQUAL: { kind: "glyph", char: "≠" },
 };
+
+export function opIcon(opType: string, cat: OpCategory): IconEntry {
+  const exact = OP_ICON[opType];
+  if (exact) return exact;
+  const base = opBase(opType);
+  if (base) return ATEN_OP_ICON[base] ?? CATEGORY_ICON[cat];
+  return CATEGORY_ICON[cat];
+}

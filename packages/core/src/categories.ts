@@ -1,3 +1,19 @@
+// Op type -> category lookup.
+//
+// Two maps with different normalization rules:
+//
+//   CATEGORY_MAP - keyed by `opType.toLowerCase().replace(/_/g, "")`. Covers ONNX
+//   PascalCase ("Conv"), TFLite UPPER_SNAKE_CASE ("CONV_2D"), Keras class names
+//   ("Conv2D"), and TF raw ops ("FusedBatchNormV3"). After normalization these
+//   collapse to a single key - e.g. "Conv2D", "CONV_2D", "conv2d" all -> "conv2d".
+//
+//   ATEN_MAP - keyed by the bare op base from `opBase()` (no normalization).
+//   Used for PyTorch namespace ops "aten::add", "aten::leaky_relu" - base names
+//   keep their underscores ("leaky_relu") and are case-sensitive lowercase.
+//
+// Lookup order in `opCategory`: CATEGORY_MAP first, then ATEN_MAP via opBase,
+// then "unknown". Keep both maps in sync if you add a new category.
+
 export type OpCategory =
   | "input"
   | "output"
@@ -16,8 +32,6 @@ export type OpCategory =
   | "logic"
   | "unknown";
 
-// Keys are normalized: toLowerCase().replace(/_/g, "")
-// Covers ONNX (PascalCase), TFLite (UPPER_SNAKE_CASE), Keras (class names), TF raw ops
 const CATEGORY_MAP: Record<string, OpCategory> = {
   // I/O
   input: "input",
@@ -655,7 +669,7 @@ const ATEN_MAP: Record<string, OpCategory> = {
   __setitem__: "merge",
 };
 
-/** Extracts the base op name from an aten namespace op (e.g. "aten::add.int" → "add"). Returns null for non-aten ops. */
+/** Extracts the base op name from an aten namespace op (e.g. "aten::add.int" -> "add"). Returns null for non-aten ops. */
 export function opBase(opType: string): string | null {
   const sep = opType.indexOf("::");
   if (sep === -1) return null;
