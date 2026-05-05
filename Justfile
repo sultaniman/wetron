@@ -14,6 +14,7 @@ build:
     cd packages/keras       && bunx tsup
     cd packages/executorch  && bunx tsup
     cd packages/torchscript && bunx tsup
+    cd packages/savedmodel  && bunx tsup
     cd packages/core        && bunx tsup --config tsup.index.config.ts
     cd packages/tokens      && bunx tsup
     cd packages/react       && bunx vite build
@@ -21,7 +22,7 @@ build:
 
 # Run the test suite
 test:
-    bun test packages/core packages/onnx packages/tflite packages/keras packages/executorch packages/torchscript packages/tokens packages/react packages/svelte
+    bun test packages/core packages/onnx packages/tflite packages/keras packages/executorch packages/torchscript packages/savedmodel packages/tokens packages/react packages/svelte
 
 # Build then test
 check: build test
@@ -39,6 +40,7 @@ publish:
     cd packages/keras       && bun publish --access public
     cd packages/executorch  && bun publish --access public
     cd packages/torchscript && bun publish --access public
+    cd packages/savedmodel  && bun publish --access public
     cd packages/core        && bun publish --access public
     cd packages/react       && bun publish --access public
     cd packages/svelte      && bun publish --access public
@@ -51,6 +53,7 @@ preview:
     cd packages/keras       && bun publish --dry-run --access public
     cd packages/executorch  && bun publish --dry-run --access public
     cd packages/torchscript && bun publish --dry-run --access public
+    cd packages/savedmodel  && bun publish --dry-run --access public
     cd packages/core        && bun publish --dry-run --access public
     cd packages/react       && bun publish --dry-run --access public
     cd packages/svelte      && bun publish --dry-run --access public

@@ -1,0 +1,39 @@
+{
+  "name": "@wetron/savedmodel",
+  "version": "0.0.7",
+  "description": "TF SavedModel parser — extracts graph structure from keras_metadata.pb and saved_model.pb files",
+  "keywords": [
+    "graph",
+    "keras",
+    "model-parser",
+    "neural-network",
+    "savedmodel",
+    "tensorflow",
+    "visualization"
+  ],
+  "homepage": "https://codeberg.org/askar/wetron",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://codeberg.org/askar/wetron.git",
+    "directory": "packages/savedmodel"
+  },
+  "files": [
+    "README.md",
+    "dist",
+    "llms.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*",
+    "@wetron/keras": "workspace:*"
+  }
+}

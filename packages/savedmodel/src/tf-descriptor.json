@@ -1,0 +1,65 @@
+{
+  "nested": {
+    "SavedModel": {
+      "fields": {
+        "savedModelSchemaVersion": { "type": "int64", "id": 1 },
+        "metaGraphs": { "rule": "repeated", "type": "MetaGraphDef", "id": 2 }
+      }
+    },
+    "MetaGraphDef": {
+      "fields": {
+        "graphDef": { "type": "GraphDef", "id": 2 }
+      }
+    },
+    "GraphDef": {
+      "fields": {
+        "node": { "rule": "repeated", "type": "NodeDef", "id": 1 }
+      }
+    },
+    "NodeDef": {
+      "fields": {
+        "name": { "type": "string", "id": 1 },
+        "op": { "type": "string", "id": 2 },
+        "input": { "rule": "repeated", "type": "string", "id": 3 },
+        "attr": { "keyType": "string", "type": "AttrValue", "id": 5 }
+      }
+    },
+    "AttrValue": {
+      "oneofs": {
+        "value": { "oneof": ["list", "s", "i", "f", "b", "type", "shape"] }
+      },
+      "fields": {
+        "list": { "type": "ListValue", "id": 1 },
+        "s": { "type": "bytes", "id": 2 },
+        "i": { "type": "int64", "id": 3 },
+        "f": { "type": "float", "id": 4 },
+        "b": { "type": "bool", "id": 5 },
+        "type": { "type": "int32", "id": 6 },
+        "shape": { "type": "TensorShapeProto", "id": 7 }
+      }
+    },
+    "ListValue": {
+      "fields": {
+        "s": { "rule": "repeated", "type": "bytes", "id": 2 },
+        "i": { "rule": "repeated", "type": "int64", "id": 3 },
+        "f": { "rule": "repeated", "type": "float", "id": 4 },
+        "b": { "rule": "repeated", "type": "bool", "id": 5 },
+        "type": { "rule": "repeated", "type": "int32", "id": 6 },
+        "shape": { "rule": "repeated", "type": "TensorShapeProto", "id": 7 }
+      }
+    },
+    "TensorShapeProto": {
+      "fields": {
+        "dim": { "rule": "repeated", "type": "Dim", "id": 2 },
+        "unknownRank": { "type": "bool", "id": 3 }
+      },
+      "nested": {
+        "Dim": {
+          "fields": {
+            "size": { "type": "int64", "id": 1 }
+          }
+        }
+      }
+    }
+  }
+}

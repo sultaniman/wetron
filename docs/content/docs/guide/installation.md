@@ -22,7 +22,7 @@ bun add react react-dom @xyflow/react @phosphor-icons/react @base-ui/react
 Import the stylesheet once in your entry point:
 
 ```ts
-import "@wetron/react/dist/index.css";
+import "@wetron/react/styles.css";
 ```
 
 ## Svelte

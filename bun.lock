@@ -69,43 +69,44 @@
     },
     "packages/core": {
       "name": "@wetron/core",
-      "version": "0.0.5",
+      "version": "0.0.7",
       "dependencies": {
         "@wetron/executorch": "workspace:*",
         "@wetron/keras": "workspace:*",
         "@wetron/onnx": "workspace:*",
+        "@wetron/savedmodel": "workspace:*",
         "@wetron/tflite": "workspace:*",
         "@wetron/torchscript": "workspace:*",
         "dagre": "^0.8.5",
         "fflate": "^0.8.2",
         "flatbuffers": "^25.9.23",
+        "protobufjs": "^8.0.3",
       },
     },
     "packages/executorch": {
       "name": "@wetron/executorch",
-      "version": "0.0.5",
+      "version": "0.0.7",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/keras": {
       "name": "@wetron/keras",
-      "version": "0.0.5",
+      "version": "0.0.7",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/onnx": {
       "name": "@wetron/onnx",
-      "version": "0.0.5",
+      "version": "0.0.7",
       "dependencies": {
         "@wetron/core": "workspace:*",
-        "protobufjs": "^8.0.3",
       },
     },
     "packages/react": {
       "name": "@wetron/react",
-      "version": "0.0.5",
+      "version": "0.0.7",
       "dependencies": {
         "@wetron/core": "workspace:*",
         "@wetron/tokens": "workspace:*",
@@ -121,9 +122,17 @@
         "react-dom": ">=18",
       },
     },
+    "packages/savedmodel": {
+      "name": "@wetron/savedmodel",
+      "version": "0.0.7",
+      "dependencies": {
+        "@wetron/core": "workspace:*",
+        "@wetron/keras": "workspace:*",
+      },
+    },
     "packages/svelte": {
       "name": "@wetron/svelte",
-      "version": "0.0.5",
+      "version": "0.0.7",
       "dependencies": {
         "@wetron/core": "workspace:*",
         "@wetron/tokens": "workspace:*",
@@ -136,20 +145,22 @@
     },
     "packages/tflite": {
       "name": "@wetron/tflite",
-      "version": "0.0.5",
+      "version": "0.0.7",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/tokens": {
       "name": "@wetron/tokens",
-      "version": "0.0.5",
+      "version": "0.0.7",
     },
     "packages/torchscript": {
       "name": "@wetron/torchscript",
-      "version": "0.0.5",
+      "version": "0.0.7",
       "dependencies": {
         "@wetron/core": "workspace:*",
+        "fflate": "^0.8.2",
+        "flatbuffers": "^25.9.23",
       },
     },
   },
@@ -417,6 +428,8 @@
     "@wetron/onnx": ["@wetron/onnx@workspace:packages/onnx"],
 
     "@wetron/react": ["@wetron/react@workspace:packages/react"],
+
+    "@wetron/savedmodel": ["@wetron/savedmodel@workspace:packages/savedmodel"],
 
     "@wetron/svelte": ["@wetron/svelte@workspace:packages/svelte"],
 

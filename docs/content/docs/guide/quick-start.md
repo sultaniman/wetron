@@ -12,7 +12,7 @@ import { useState } from "react";
 import { parseModel } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
 import type { ModelGraph, PanelTarget } from "@wetron/react";
-import "@wetron/react/dist/index.css";
+import "@wetron/react/styles.css";
 
 export default function App() {
   const [graph, setGraph] = useState<ModelGraph | null>(null);

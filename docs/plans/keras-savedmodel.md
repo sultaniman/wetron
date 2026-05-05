@@ -189,14 +189,14 @@ test("keras_metadata.pb → Keras layer graph", () => {
   const graph = parseSavedModel(new Uint8Array(bytes));
   expect(graph.name).toBe("ResNet2DGE2E");
   expect(graph.inputs[0].name).toBe("input_1");
-  expect(graph.nodes.some(n => n.opType === "Conv2D")).toBe(true);
+  expect(graph.nodes.some((n) => n.opType === "Conv2D")).toBe(true);
 });
 
 test("saved_model.pb → TF op graph", () => {
   const bytes = readFileSync("../../test-models/ResNet2DGE2E-saved_model.pb");
   const graph = parseSavedModel(new Uint8Array(bytes));
   expect(graph.nodes.length).toBeGreaterThan(0);
-  expect(graph.nodes.some(n => n.opType === "Conv2D")).toBe(true);
+  expect(graph.nodes.some((n) => n.opType === "Conv2D")).toBe(true);
 });
 
 test("unknown .pb content throws ParseError", () => {

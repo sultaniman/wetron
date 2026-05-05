@@ -133,7 +133,14 @@ export default function App() {
     const PAD = 60;
     const imgW = Math.ceil(bounds.width + PAD * 2);
     const imgH = Math.ceil(bounds.height + PAD * 2);
-    const vp = getViewportForBounds(bounds, imgW, imgH, 0.1, 4, PAD / Math.max(bounds.width, bounds.height));
+    const vp = getViewportForBounds(
+      bounds,
+      imgW,
+      imgH,
+      0.1,
+      4,
+      PAD / Math.max(bounds.width, bounds.height),
+    );
     const dataUrl = await toPng(el, {
       cacheBust: true,
       pixelRatio: 2,
@@ -276,7 +283,7 @@ export default function App() {
           Open model
           <input
             type="file"
-            accept=".onnx,.tflite,.keras,.pte,.pt"
+            accept=".onnx,.tflite,.keras,.pte,.pt,.pb"
             style={{ display: "none" }}
             onChange={onFileChange}
           />
@@ -402,7 +409,7 @@ function DropZone({
         Drop a model file here
       </div>
       <div style={{ color: isDark ? "#888" : "#888", fontSize: 13 }}>
-        Supports .onnx, .tflite and .keras
+        Supports .onnx, .tflite, .keras, .pt, .pte and .pb
       </div>
     </div>
   );

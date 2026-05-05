@@ -1,4 +1,11 @@
-export type Format = "onnx" | "tflite" | "keras" | "executorch" | "torchscript" | "unknown";
+export type Format =
+  | "onnx"
+  | "tflite"
+  | "keras"
+  | "executorch"
+  | "torchscript"
+  | "savedmodel"
+  | "unknown";
 
 export function detectFormat(bytes: Uint8Array, filename?: string): Format {
   if (bytes.length >= 8) {
@@ -30,6 +37,9 @@ export function detectFormat(bytes: Uint8Array, filename?: string): Format {
     if (filename?.endsWith(".pt") || filename?.endsWith(".ptl")) return "torchscript";
     return "keras";
   }
+
+  // .pb files share the 0x08 first byte with ONNX protobuf — check filename first
+  if (filename?.endsWith(".pb")) return "savedmodel";
 
   // ONNX: protobuf field 1 varint tag = 0x08
   if (bytes.length > 0 && bytes[0] === 0x08) return "onnx";

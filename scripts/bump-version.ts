@@ -14,6 +14,7 @@ const packages = [
   "packages/keras",
   "packages/executorch",
   "packages/torchscript",
+  "packages/savedmodel",
   "packages/react",
   "packages/svelte",
 ];

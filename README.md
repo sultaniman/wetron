@@ -6,17 +6,17 @@ Graph structure only — no weight data is read or stored.
 
 ## Packages
 
-| Package | Description |
-| --- | --- |
-| `@wetron/core` | IR types, format detection, dtype utilities, Dagre layout |
-| `@wetron/onnx` | ONNX parser (protobufjs) |
-| `@wetron/tflite` | TFLite parser (flatbuffers) |
-| `@wetron/keras` | Keras `.keras` archive parser |
-| `@wetron/torchscript` | TorchScript Mobile and ZIP-based `.pt` parser |
-| `@wetron/executorch` | ExecuTorch `.pte` parser (flatbuffers) |
-| `@wetron/react` | React graph view and property panel |
-| `@wetron/svelte` | Svelte graph view and property panel |
-| `@wetron/tokens` | Theme constants (colors, CSS vars) — no dependencies |
+| Package               | Description                                               |
+| --------------------- | --------------------------------------------------------- |
+| `@wetron/core`        | IR types, format detection, dtype utilities, Dagre layout |
+| `@wetron/onnx`        | ONNX parser (protobufjs)                                  |
+| `@wetron/tflite`      | TFLite parser (flatbuffers)                               |
+| `@wetron/keras`       | Keras `.keras` archive parser                             |
+| `@wetron/torchscript` | TorchScript Mobile and ZIP-based `.pt` parser             |
+| `@wetron/executorch`  | ExecuTorch `.pte` parser (flatbuffers)                    |
+| `@wetron/react`       | React graph view and property panel                       |
+| `@wetron/svelte`      | Svelte graph view and property panel                      |
+| `@wetron/tokens`      | Theme constants (colors, CSS vars) — no dependencies      |
 
 `@wetron/tokens` is intentionally standalone: zero runtime or peer dependencies, usable without any other wetron package.
 
@@ -47,9 +47,9 @@ const graph = await parseModel(bytes, file.name); // auto-detects format from ma
 
 ```tsx
 import { ModelGraphView } from "@wetron/react";
-import "@wetron/react/dist/index.css";
+import "@wetron/react/styles.css";
 
-<ModelGraphView graph={graph} colorMode="system" />
+<ModelGraphView graph={graph} colorMode="system" />;
 ```
 
 See the [docs](docs/) for the full API reference, Svelte examples, and theming tokens.

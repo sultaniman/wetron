@@ -58,5 +58,10 @@ export async function parseModel(bytes: Uint8Array, filename?: string): Promise<
     return parseTorchscript(bytes);
   }
 
+  if (format === "savedmodel") {
+    const { parseSavedModel } = await import("@wetron/savedmodel");
+    return parseSavedModel(bytes);
+  }
+
   throw new ParseError("unknown", `Cannot detect format${filename ? ` for "${filename}"` : ""}`);
 }

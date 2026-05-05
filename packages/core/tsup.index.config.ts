@@ -14,6 +14,7 @@ export default defineConfig({
     "@wetron/keras",
     "@wetron/executorch",
     "@wetron/torchscript",
+    "@wetron/savedmodel",
     "dagre",
   ],
 });
