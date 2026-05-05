@@ -26,14 +26,24 @@
   let history = $state<PanelTarget[]>([]);
   let selectedEdgeTensorName = $state<string | null>(null);
   let colorMode = $state<ColorMode>('system');
+  let searchQuery = $state('');
 
-  function resolveMode(mode: ColorMode): 'light' | 'dark' {
-    if (mode !== 'system') return mode;
-    try { return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
-    catch { return 'light'; }
-  }
+  let systemIsDark = $state(
+    (() => { try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch { return false; } })()
+  );
 
-  let isDark = $derived(resolveMode(colorMode) === 'dark');
+  $effect(() => {
+    if (colorMode !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    systemIsDark = mq.matches;
+    const handler = (e: MediaQueryListEvent) => { systemIsDark = e.matches; };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  });
+
+  const isDark = $derived(
+    colorMode === 'dark' ? true : colorMode === 'light' ? false : systemIsDark
+  );
 
   const chrome = $derived({
     bg: isDark ? '#16161e' : '#fff',
@@ -70,6 +80,7 @@
     selected = null;
     history = [];
     selectedEdgeTensorName = null;
+    searchQuery = '';
     try {
       const buf = await file.arrayBuffer();
       const parsed = await parseModel(new Uint8Array(buf), file.name);
@@ -164,22 +175,28 @@
       </span>
     {/if}
     {#if appState.status === 'ready'}
+      <input
+        type="search"
+        placeholder="Search ops…"
+        bind:value={searchQuery}
+        style="margin-left:auto;padding:5px 10px;background:transparent;color:{chrome.text};border:1px solid {chrome.border};border-radius:6px;font-size:13px;outline:none;width:180px"
+      />
       <button
         onclick={exportPng}
-        style="margin-left:auto;padding:5px 12px;background:transparent;color:{chrome.muted};border:1px solid {chrome.border};border-radius:6px;cursor:pointer;font-size:12px;font-weight:500"
+        style="padding:5px 12px;background:transparent;color:{chrome.muted};border:1px solid {chrome.border};border-radius:6px;cursor:pointer;font-size:12px;font-weight:500"
       >
         Export PNG
       </button>
     {/if}
     <button
       onclick={cycleMode}
-      style="{appState.status !== 'ready' ? 'margin-left:auto;' : ''}padding:5px 12px;background:transparent;color:{chrome.muted};border:1px solid {chrome.border};border-radius:6px;cursor:pointer;font-size:12px;font-weight:500"
+      style="{appState.status !== 'ready' ? 'margin-left:auto;' : ''}padding:5px 12px;background:transparent;color:{chrome.muted};border:1px solid {chrome.border};border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;"
     >
       {MODE_LABEL[colorMode]}
     </button>
     <label style="padding:6px 14px;background:#1a73e8;color:#fff;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500">
       Open model
-      <input type="file" accept=".onnx,.tflite,.keras" style="display:none" onchange={onFileChange} />
+      <input type="file" accept=".onnx,.tflite,.keras,.pb,.pte,.pt" style="display:none" onchange={onFileChange} />
     </label>
   </header>
 
@@ -201,7 +218,7 @@
       >
         <div style="color:{isDark ? '#e0e0e0' : '#333'}"><ArrowUpIcon size={48} /></div>
         <div style="font-weight:600;color:{isDark ? '#e0e0e0' : '#333'}">Drop a model file here</div>
-        <div style="color:#888;font-size:13px">Supports .onnx, .tflite and .keras</div>
+        <div style="color:#888;font-size:13px">Supports .onnx, .tflite, .keras, .pt, .pte and .pb</div>
       </div>
     {:else if appState.status === 'loading'}
       <div style="display:flex;align-items:center;justify-content:center;height:100%;color:{chrome.muted}">
@@ -224,6 +241,7 @@
           {graph}
           onTargetClick={handleTargetClick}
           {selectedEdgeTensorName}
+          {searchQuery}
           {colorMode}
           bind:exportRef={graphExport}
         />
