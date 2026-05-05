@@ -384,7 +384,6 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
   FusedBatchNormV2: "normalization",
   FusedBatchNormV3: "normalization",
 
-  MaxPool: "pooling",
   MaxPool3D: "pooling",
   AvgPool: "pooling",
   AvgPool3D: "pooling",
