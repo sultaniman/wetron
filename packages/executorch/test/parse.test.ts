@@ -13,7 +13,6 @@ test("parseExecutorch: add.pte parses successfully", () => {
   expect(graph.nodes.every((n) => typeof n.opType === "string" && n.opType.length > 0)).toBe(true);
   expect(graph.inputs.length).toBeGreaterThan(0);
   expect(graph.outputs.length).toBeGreaterThan(0);
-  expect(graph.nodes.every((n) => n.opType !== undefined)).toBe(true);
 });
 
 test("parseExecutorch: rejects non-ET12 bytes", () => {

@@ -362,6 +362,57 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
 
   AdditiveAttention: "attention",
 
+  // TF raw graph ops (SavedModel GraphDef nodes)
+  BiasAdd: "math",
+  AddV2: "math",
+  Rsqrt: "math",
+  RealDiv: "math",
+  FloorMod: "math",
+  MatrixBandPart: "math",
+  Cast: "math",
+
+  Const: "constant",
+  VarHandleOp: "constant",
+  ReadVariableOp: "constant",
+  VariableV2: "constant",
+  Range: "constant",
+  Fill: "constant",
+  ZerosLike: "constant",
+  OnesLike: "constant",
+
+  FusedBatchNorm: "normalization",
+  FusedBatchNormV2: "normalization",
+  FusedBatchNormV3: "normalization",
+
+  MaxPool: "pooling",
+  MaxPool3D: "pooling",
+  AvgPool: "pooling",
+  AvgPool3D: "pooling",
+
+  Identity: "reshape",
+  StridedSlice: "reshape",
+  ExpandDims: "reshape",
+  Pack: "reshape",
+  Unpack: "reshape",
+  PadV2: "reshape",
+  MirrorPad: "reshape",
+  BroadcastTo: "reshape",
+  CropAndResize: "reshape",
+
+  ConcatV2: "merge",
+  GatherV2: "merge",
+  GatherNd: "merge",
+  SplitV: "merge",
+  ResourceGather: "merge",
+  DynamicPartition: "merge",
+  DynamicStitch: "merge",
+
+  Sum: "reduction",
+  Mean: "reduction",
+  Prod: "reduction",
+
+  Dropout: "activation",
+
   SimpleRNN: "recurrent",
   Bidirectional: "recurrent",
   TimeDistributed: "recurrent",

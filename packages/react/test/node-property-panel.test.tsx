@@ -1,6 +1,6 @@
 // @happy-dom
 import { test, expect, describe, afterEach } from "bun:test";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent, act } from "@testing-library/react";
 import React from "react";
 import { NodePropertyPanel } from "../src/node-property-panel/node-property-panel.tsx";
 import type { GraphNode, GraphValue } from "@wetron/core/ir";
@@ -16,8 +16,9 @@ const mockOp: GraphNode = {
 };
 
 describe("op panel", () => {
-  test("shows opType, name, inputs, and attributes", () => {
+  test("shows opType, name, inputs, and attributes", async () => {
     render(React.createElement(NodePropertyPanel, { target: mockOp }));
+    await act(async () => {});
     expect(screen.getByText("Conv")).toBeDefined();
     expect(screen.getByText("conv_0")).toBeDefined();
     expect(screen.getByText("data")).toBeDefined();
@@ -32,30 +33,32 @@ describe("op panel", () => {
 });
 
 describe("IO panel", () => {
-  test("shows name, shape, dtype for tensor with shape", () => {
+  test("shows name, shape, dtype for tensor with shape", async () => {
     const tensor: GraphValue = { name: "data", shape: [1, 3, 224, 224], dtype: "float32" };
     render(
       React.createElement(NodePropertyPanel, {
         target: { graphValue: tensor, direction: "input" },
       }),
     );
+    await act(async () => {});
     expect(screen.getByText("data")).toBeDefined();
     expect(screen.getByText("[1 × 3 × 224 × 224]")).toBeDefined();
     expect(screen.getByText("float32")).toBeDefined();
   });
 
-  test("omits shape/dtype rows when null", () => {
+  test("omits shape/dtype rows when null", async () => {
     const { container } = render(
       React.createElement(NodePropertyPanel, {
         target: { graphValue: { name: "x", shape: null, dtype: null }, direction: "input" },
       }),
     );
+    await act(async () => {});
     expect(container.textContent).not.toContain("shape");
   });
 });
 
 describe("edge panel", () => {
-  test("shows tensor name, from and to nodes", () => {
+  test("shows tensor name, from and to nodes", async () => {
     render(
       React.createElement(NodePropertyPanel, {
         target: {
@@ -67,6 +70,7 @@ describe("edge panel", () => {
         },
       }),
     );
+    await act(async () => {});
     expect(screen.getByText("h")).toBeDefined();
     expect(screen.getByText("Conv")).toBeDefined();
     expect(screen.getByText("Relu")).toBeDefined();
@@ -74,7 +78,7 @@ describe("edge panel", () => {
 });
 
 describe("onClose and onTensorClick", () => {
-  test("close button fires onClose and is absent without it", () => {
+  test("close button fires onClose when provided", async () => {
     let closed = false;
     render(
       React.createElement(NodePropertyPanel, {
@@ -84,15 +88,18 @@ describe("onClose and onTensorClick", () => {
         },
       }),
     );
+    await act(async () => {});
     fireEvent.click(screen.getByLabelText("Close"));
     expect(closed).toBe(true);
+  });
 
-    cleanup();
+  test("close button absent without onClose", async () => {
     render(React.createElement(NodePropertyPanel, { target: mockOp }));
+    await act(async () => {});
     expect(screen.queryByLabelText("Close")).toBeNull();
   });
 
-  test("onTensorClick fires with correct tensor name", () => {
+  test("onTensorClick fires with correct tensor name", async () => {
     let clicked = "";
     render(
       React.createElement(NodePropertyPanel, {
@@ -102,6 +109,7 @@ describe("onClose and onTensorClick", () => {
         },
       }),
     );
+    await act(async () => {});
     fireEvent.click(screen.getByText("data"));
     expect(clicked).toBe("data");
   });

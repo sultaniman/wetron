@@ -7,5 +7,5 @@ export default defineConfig({
   sourcemap: true,
   tsconfig: "../../tsconfig.build.json",
   clean: true,
-  external: ["@wetron/core", "flatbuffers"],
+  external: ["@wetron/core", "flatbuffers", "fflate"],
 });
