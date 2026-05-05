@@ -1,7 +1,7 @@
 ---
 title: "TorchScript"
-description: "TorchScript parser for Wetron — handles both ZIP-based torch.jit.save files and FlatBuffers Mobile .ptl format, synchronously."
-lead: "Parses `.pt` files — ZIP-based (`torch.jit.save`) and FlatBuffers Mobile format."
+description: "TorchScript parser for Wetron - handles both ZIP-based torch.jit.save files and FlatBuffers Mobile .ptl format, synchronously."
+lead: "Parses `.pt` files - ZIP-based (`torch.jit.save`) and FlatBuffers Mobile format."
 weight: 40
 ---
 
@@ -17,19 +17,26 @@ Synchronous.
 
 ### ZIP-based (`torch.jit.save`)
 
-Detected by `PK\x03\x04` ZIP magic at offset 0. Reads `bytecode.pkl` from the archive and decodes the Python binary serialization stream (protocol 2/4) — extracts operator names and overloads as metadata. No code is executed.
+Detected by `PK\x03\x04` ZIP magic at offset 0. Reads `bytecode.pkl` from the archive and decodes the Python binary serialization stream (protocol 2/4) - extracts operator names and overloads as metadata. No code is executed.
 
 Operators are extracted as `(name, overload, n)` tuples from the `operators` section of the bytecode.
 
 ### FlatBuffers Mobile (`.ptl`)
 
-Detected by `PTMF` at bytes 4–7. Reads the Module root table, walks `methods` → IValue references → Function entries, and extracts operator calls from instruction bytecode. Opcode 0 (`OP`) indicates a call to a registered operator.
+Detected by `PTMF` at bytes 4-7. Reads the Module root table, walks `methods` -> IValue references -> Function entries, and extracts operator calls from instruction bytecode. Opcode 0 (`OP`) indicates a call to a registered operator.
 
 Falls back to scanning all IValues for Function type if the methods array yields nothing.
 
 ## Graph structure
 
-Both variants produce a **linear graph**: `input → op_0 → op_1 → … → output`.
+Both variants produce a **synthesised linear graph**: `input -> op_0 -> op_1 -> … -> output`.
+
+> **Fidelity caveat.** TorchScript bytecode does not record explicit dataflow at
+> the level Wetron parses (it records only the ordered sequence of operator
+> calls). The visualiser therefore chains operators in execution order and
+> produces a straight line, regardless of branching, parallel paths, or shared
+> tensors in the original model. Use this view to inspect the _operator
+> sequence_, not the dataflow graph.
 
 ```
 input
@@ -43,9 +50,13 @@ op_1  (e.g. aten::batch_norm)
 output
 ```
 
+The op type strings (`aten::conv2d`, `aten::leaky_relu`, …) are still accurate
+and remain useful for category classification, icon assignment, and operator
+inventory.
+
 ## Notes
 
-- `ModelGraph.initializers` is always empty — weight data is not parsed.
-- `ModelGraph.tensorShapes` is always empty — shape inference is not performed.
+- `ModelGraph.initializers` is always empty - weight data is not parsed.
+- `ModelGraph.tensorShapes` is always empty - shape inference is not performed.
 - Non-fatal per-method errors are attached as `warnings` on the returned graph.
 - Uses `flatbuffers` for Mobile format and `fflate` for ZIP extraction.

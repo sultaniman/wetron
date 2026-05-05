@@ -29,12 +29,12 @@ import { parseTorchscript } from "@wetron/torchscript";
 import { parseExecutorch } from "@wetron/executorch";
 import { parseSavedModel } from "@wetron/savedmodel";
 
-const graph = await parseOnnx(bytes); // async
-const graph = parseTflite(bytes); // sync
-const graph = parseKeras(bytes); // sync
-const graph = parseTorchscript(bytes); // sync
-const graph = parseExecutorch(bytes); // sync
-const graph = parseSavedModel(bytes); // sync
+const graph = parseOnnx(bytes);
+const graph = parseTflite(bytes);
+const graph = parseKeras(bytes);
+const graph = parseTorchscript(bytes);
+const graph = parseExecutorch(bytes);
+const graph = parseSavedModel(bytes);
 ```
 
 ## detectFormat
@@ -47,17 +47,17 @@ type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "save
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 ```
 
-Returns a format string — never throws. Useful for showing format badges in a UI before parsing.
+Returns a format string - never throws. Useful for showing format badges in a UI before parsing.
 
-| Format        | Detection                                                        |
-| ------------- | ---------------------------------------------------------------- |
-| `savedmodel`  | `.pb` filename extension (checked before ONNX)                   |
-| `onnx`        | protobuf field 1 varint tag `0x08`                               |
-| `tflite`      | `TFL3` or `ODLF` at offset 4                                     |
-| `keras`       | ZIP magic `PK\x03\x04` + `.keras` extension (default for ZIP)    |
+| Format        | Detection                                                       |
+| ------------- | --------------------------------------------------------------- |
+| `savedmodel`  | `.pb` filename extension (checked before ONNX)                  |
+| `onnx`        | protobuf field 1 varint tag `0x08`                              |
+| `tflite`      | `TFL3` or `ODLF` at offset 4                                    |
+| `keras`       | ZIP magic `PK\x03\x04` + `.keras` extension (default for ZIP)   |
 | `torchscript` | ZIP magic `PK\x03\x04` + `.pt`/`.ptl` extension, or `PTMF` at 4 |
-| `executorch`  | `ET12` at offset 4                                               |
-| `unknown`     | no match                                                         |
+| `executorch`  | `ET12` at offset 4                                              |
+| `unknown`     | no match                                                        |
 
 ## modelGraphToFlow
 
@@ -67,7 +67,7 @@ import { modelGraphToFlow } from "@wetron/core";
 function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] };
 ```
 
-Converts a `ModelGraph` to layout-positioned `FlowNode[]` and `FlowEdge[]` ready for ReactFlow or SvelteFlow. Dagre is applied top-to-bottom. Used internally by the renderer packages — call it directly only if you're building a custom renderer.
+Converts a `ModelGraph` to layout-positioned `FlowNode[]` and `FlowEdge[]` ready for ReactFlow or SvelteFlow. Dagre is applied top-to-bottom. Used internally by the renderer packages - call it directly only if you're building a custom renderer.
 
 ## opCategory
 
@@ -105,4 +105,4 @@ import { opInputLabels } from "@wetron/core";
 function opInputLabels(opType: string): readonly string[];
 ```
 
-Returns named input slot labels for known ops (e.g. `Conv` → `["X", "W", "B"]`). Returns an empty array for unrecognised ops.
+Returns named input slot labels for known ops (e.g. `Conv` -> `["X", "W", "B"]`). Returns an empty array for unrecognised ops.

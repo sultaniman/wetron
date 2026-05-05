@@ -1,19 +1,19 @@
 # wetron
 
-Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, TorchScript, ExecuTorch, and TensorFlow SavedModel files into a shared IR and renders the computation graph. Graph structure only — no weight data is read or stored anywhere in the stack.
+Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, TorchScript, ExecuTorch, and TensorFlow SavedModel files into a shared IR and renders the computation graph. Graph structure only - no weight data is read or stored anywhere in the stack.
 
 ## Packages
 
-- `@wetron/core` — shared IR types, format detection, dtype utilities, Dagre layout, unified `parseModel` entry point
-- `@wetron/onnx` — ONNX parser (protobufjs)
-- `@wetron/tflite` — TFLite parser (flatbuffers), synchronous
-- `@wetron/keras` — Keras `.keras` archive parser (fflate)
-- `@wetron/torchscript` — TorchScript Mobile and ZIP-based parser (flatbuffers + custom bytecode decoder)
-- `@wetron/executorch` — ExecuTorch `.pte` parser (flatbuffers)
-- `@wetron/savedmodel` — TensorFlow SavedModel `.pb` parser (protobufjs); handles both `saved_model.pb` TF op graphs and `keras_metadata.pb` Keras layer graphs
-- `@wetron/react` — React components: `ModelGraphView`, `NodePropertyPanel` (peer: react 18+, @xyflow/react 12+, @phosphor-icons/react 2+, @base-ui/react 1+)
-- `@wetron/svelte` — Svelte components: `ModelGraphView`, `NodePropertyPanel` (peer: svelte 5+, @xyflow/svelte 1.5+, phosphor-svelte 3+)
-- `@wetron/tokens` — design tokens: category colors, CSS vars — zero dependencies, all types inlined
+- `@wetron/core` - shared IR types, format detection, dtype utilities, Dagre layout, unified `parseModel` entry point
+- `@wetron/onnx` - ONNX parser (protobufjs)
+- `@wetron/tflite` - TFLite parser (flatbuffers), synchronous
+- `@wetron/keras` - Keras `.keras` archive parser (fflate)
+- `@wetron/torchscript` - TorchScript Mobile and ZIP-based parser (flatbuffers + custom bytecode decoder)
+- `@wetron/executorch` - ExecuTorch `.pte` parser (flatbuffers)
+- `@wetron/savedmodel` - TensorFlow SavedModel `.pb` parser (protobufjs); handles both `saved_model.pb` TF op graphs and `keras_metadata.pb` Keras layer graphs
+- `@wetron/react` - React components: `ModelGraphView`, `NodePropertyPanel` (peer: react 18+, @xyflow/react 12+, @phosphor-icons/react 2+, @base-ui/react 1+)
+- `@wetron/svelte` - Svelte components: `ModelGraphView`, `NodePropertyPanel` (peer: svelte 5+, @xyflow/svelte 1.5+, phosphor-svelte 3+)
+- `@wetron/tokens` - design tokens: category colors, CSS vars - zero dependencies, all types inlined
 
 ## Core IR types (`@wetron/core/ir`)
 
@@ -45,7 +45,7 @@ interface ModelGraph {
     string,
     { shape: readonly number[] | null; dtype: string | null }
   >;
-  readonly opsets?: ReadonlyMap<string, number>; // domain → version (ONNX only; "" = ai.onnx)
+  readonly opsets?: ReadonlyMap<string, number>; // domain -> version (ONNX only; "" = ai.onnx)
   readonly warnings?: readonly ParseWarning[];
 }
 
@@ -64,14 +64,14 @@ class ParseError extends Error {
 ## Public API (`@wetron/core`)
 
 ```ts
-// Unified entry — detects format from magic bytes, dispatches to parser
+// Unified entry - detects format from magic bytes, dispatches to parser
 async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
-// Format detection — never throws, returns "unknown" on no match
+// Format detection - never throws, returns "unknown" on no match
 type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
-// IR → ReactFlow / SvelteFlow nodes and edges with Dagre layout applied
+// IR -> ReactFlow / SvelteFlow nodes and edges with Dagre layout applied
 function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] };
 
 // Op category classification
@@ -94,7 +94,7 @@ type OpCategory =
   | "unknown";
 function opCategory(opType: string): OpCategory;
 
-// Named input slot labels for known ops (e.g. Conv → ["X","W","B"])
+// Named input slot labels for known ops (e.g. Conv -> ["X","W","B"])
 function opInputLabels(opType: string): readonly string[];
 ```
 
@@ -102,13 +102,13 @@ function opInputLabels(opType: string): readonly string[];
 
 ```ts
 // @wetron/onnx
-async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph>;
+function parseOnnx(bytes: Uint8Array): ModelGraph; // sync
 
 // @wetron/tflite
 function parseTflite(bytes: Uint8Array): ModelGraph; // sync
 
 // @wetron/keras
-async function parseKeras(bytes: Uint8Array): Promise<ModelGraph>;
+function parseKeras(bytes: Uint8Array): ModelGraph; // sync
 
 // @wetron/torchscript
 function parseTorchscript(bytes: Uint8Array): ModelGraph; // sync; handles ZIP and FlatBuffers Mobile
@@ -122,24 +122,24 @@ function parseSavedModel(bytes: Uint8Array): ModelGraph; // sync; handles saved_
 
 ## Format detection (magic bytes)
 
-| Format             | Detection                                         |
-| ------------------ | ------------------------------------------------- |
-| ONNX               | protobuf field 1 varint tag `0x08`                |
-| TFLite             | `TFL3` or `ODLF` at offset 4                      |
-| Keras              | ZIP magic `PK\x03\x04` + `config.json` entry      |
-| TorchScript ZIP    | ZIP magic `PK\x03\x04` + `.pt`/`.ptl` extension   |
-| TorchScript Mobile | `PTMF` at offset 4                                |
-| ExecuTorch         | `ET12` at offset 4                                |
-| SavedModel         | `.pb` filename extension (checked before ONNX)    |
+| Format             | Detection                                       |
+| ------------------ | ----------------------------------------------- |
+| ONNX               | protobuf field 1 varint tag `0x08`              |
+| TFLite             | `TFL3` or `ODLF` at offset 4                    |
+| Keras              | ZIP magic `PK\x03\x04` + `config.json` entry    |
+| TorchScript ZIP    | ZIP magic `PK\x03\x04` + `.pt`/`.ptl` extension |
+| TorchScript Mobile | `PTMF` at offset 4                              |
+| ExecuTorch         | `ET12` at offset 4                              |
+| SavedModel         | `.pb` filename extension (checked before ONNX)  |
 
 ## Architecture rules
 
-- All IR types live in `@wetron/core/src/ir.ts` — parsers import from there.
-- Exotic dtype readers (bfloat16, float8, int4, etc.) live in `@wetron/core/src/dtypes.ts` — never inline in parsers.
+- All IR types live in `@wetron/core/src/ir.ts` - parsers import from there.
+- Exotic dtype readers (bfloat16, float8, int4, etc.) live in `@wetron/core/src/dtypes.ts` - never inline in parsers.
 - `detectFormat` must always return a `Format` string, never throw.
-- No weight deserialization anywhere — graph structure only.
+- No weight deserialization anywhere - graph structure only.
 - No patching of `DataView.prototype` or `BigInt.prototype`.
-- Use `bigIntToNumber(v)` from `@wetron/core/dtypes` for BigInt → number (throws RangeError if out of safe range).
+- Use `bigIntToNumber(v)` from `@wetron/core/dtypes` for BigInt -> number (throws RangeError if out of safe range).
 
 ## Platform constraints (browser-only)
 
@@ -152,7 +152,7 @@ function parseSavedModel(bytes: Uint8Array): ModelGraph; // sync; handles saved_
 
 ## Adding a parser
 
-1. Create `packages/<format>/src/parse.ts` — export a single parse function returning `ModelGraph`.
+1. Create `packages/<format>/src/parse.ts` - export a single parse function returning `ModelGraph`.
 2. Import IR types from `@wetron/core/ir`, dtype readers from `@wetron/core/dtypes`.
 3. Register magic bytes in `@wetron/core/src/detect.ts` and add a dynamic import branch in `@wetron/core/src/index.ts`.
-4. Test against real model files in `test-models/` — node count must match netron's UI for the same file.
+4. Test against real model files in `test-models/` - node count must match netron's UI for the same file.

@@ -1,7 +1,7 @@
 ---
 title: "Quick Start"
-description: "A complete working example: file input → parsed ModelGraph → interactive ReactFlow or SvelteFlow visualisation with property panel."
-lead: "A complete example — file input to interactive graph in under 20 lines."
+description: "A complete working example: file input -> parsed ModelGraph -> interactive ReactFlow or SvelteFlow visualisation with property panel."
+lead: "A complete example - file input to interactive graph in under 20 lines."
 weight: 30
 ---
 
@@ -10,8 +10,9 @@ weight: 30
 ```tsx
 import { useState } from "react";
 import { parseModel } from "@wetron/core";
+import type { ModelGraph } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
-import type { ModelGraph, PanelTarget } from "@wetron/react";
+import type { PanelTarget } from "@wetron/react";
 import "@wetron/react/styles.css";
 
 export default function App() {

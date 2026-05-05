@@ -1,6 +1,6 @@
 ---
 title: "Core Types"
-description: "Complete IR type definitions from @wetron/core/ir — ModelGraph, GraphNode, GraphValue, ParseWarning, ParseError, and flow types."
+description: "Complete IR type definitions from @wetron/core/ir - ModelGraph, GraphNode, GraphValue, ParseWarning, ParseError, and flow types."
 lead: "The shared intermediate representation all parsers emit."
 weight: 20
 ---
@@ -29,7 +29,7 @@ interface ModelGraph {
     string,
     { shape: readonly number[] | null; dtype: string | null }
   >;
-  readonly opsets?: ReadonlyMap<string, number>; // ONNX only — domain → opset version ("" = ai.onnx)
+  readonly opsets?: ReadonlyMap<string, number>; // ONNX only - domain -> opset version ("" = ai.onnx)
   readonly warnings?: readonly ParseWarning[];
 }
 ```
@@ -40,7 +40,7 @@ interface ModelGraph {
 interface GraphNode {
   readonly name: string;
   readonly opType: string;
-  readonly domain?: string; // ONNX only — absent means standard ai.onnx domain
+  readonly domain?: string; // ONNX only - absent means standard ai.onnx domain
   readonly inputs: readonly string[]; // tensor names consumed
   readonly outputs: readonly string[]; // tensor names produced
   readonly attributes: Readonly<Record<string, AttributeValue>>;
@@ -128,6 +128,13 @@ type FlowEdge = {
   source: string;
   target: string;
   type: "modelEdge";
-  data: { tensorName: string; sourceOpType: string };
+  data: {
+    readonly tensorName: string;
+    readonly sourceOpType: string;
+    readonly sourceNodeName: string;
+    readonly targetOpType: string;
+    readonly targetNodeName: string;
+    readonly points?: readonly { x: number; y: number }[];
+  };
 };
 ```

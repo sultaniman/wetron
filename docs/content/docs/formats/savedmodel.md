@@ -1,7 +1,7 @@
 ---
 title: "SavedModel"
-description: "TF SavedModel parser for Wetron — reads saved_model.pb GraphDef files and keras_metadata.pb Keras layer graphs."
-lead: "Parses `.pb` files — TF SavedModel GraphDef and Keras metadata variants."
+description: "TF SavedModel parser for Wetron - reads saved_model.pb GraphDef files and keras_metadata.pb Keras layer graphs."
+lead: "Parses `.pb` files - TF SavedModel GraphDef and Keras metadata variants."
 weight: 60
 ---
 
@@ -11,7 +11,7 @@ import { parseSavedModel } from "@wetron/savedmodel";
 const graph = parseSavedModel(bytes); // synchronous, returns ModelGraph
 ```
 
-Or use the unified entry point — `.pb` files are routed here automatically:
+Or use the unified entry point - `.pb` files are routed here automatically:
 
 ```ts
 import { parseModel } from "@wetron/core";
@@ -26,17 +26,17 @@ const graph = await parseModel(bytes, "model.pb");
 Detected by first byte `0x0a` (protobuf field 1, length-delimited). Contains a Keras layer graph serialized as JSON inside the protobuf.
 
 - Supported topologies: `Sequential`, `Functional`
-- `InputLayer` entries → `ModelGraph.inputs` (excluded from `nodes`)
-- Layer `class_name` → node `opType`
-- Layer config fields → node `attributes`
+- `InputLayer` entries -> `ModelGraph.inputs` (excluded from `nodes`)
+- Layer `class_name` -> node `opType`
+- Layer config fields -> node `attributes`
 - Edges resolved from `inbound_nodes` for Functional; chained for Sequential
 
 ### saved_model.pb
 
-Detected by first byte `0x08` (protobuf field 1, varint — schema version). Contains a TensorFlow GraphDef with raw TF ops.
+Detected by first byte `0x08` (protobuf field 1, varint - schema version). Contains a TensorFlow GraphDef with raw TF ops.
 
-- `Placeholder` nodes → `ModelGraph.inputs`
-- All other ops → `ModelGraph.nodes`
+- `Placeholder` nodes -> `ModelGraph.inputs`
+- All other ops -> `ModelGraph.nodes`
 - Output nodes inferred as nodes whose outputs are never consumed as inputs
 - `Const` nodes appear as `constant`-category nodes
 
@@ -59,8 +59,13 @@ Softmax (output)
 ## Notes
 
 - `parseModel` detects `.pb` by filename extension; the first-byte check then selects the variant.
-- `ModelGraph.initializers` is always empty — weight data is not parsed.
+- `ModelGraph.initializers` is always empty - weight data is not parsed.
 - Control dependencies (inputs prefixed with `^`) are ignored.
-- Port suffixes (`:0`, `:1`) are stripped from input tensor names.
+- Port suffixes (`:0`, `:1`) are stripped from input tensor names. As a
+  consequence, multi-output ops (`Split`, `TopK`, …) cannot be fully
+  disambiguated - every consumer of `split:0`, `split:1` is recorded as a
+  consumer of `split`. Connectivity is preserved; per-port labelling is not.
+- Each node is recorded with a single output named after the node itself.
+  Multi-output TF ops are visualised as if they had one fan-out.
 - Non-fatal per-node errors are attached as `warnings` on the returned graph.
 - Throws `ParseError` if the file is too short or has unrecognized first byte.
