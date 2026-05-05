@@ -69,15 +69,13 @@ type PanelTarget =
 
 Use `isGraphNode(target)` from `@wetron/react` to narrow to `GraphNode`.
 
-````
-
 ## Stylesheet
 
 Import once in your entry point:
 
 ```ts
 import "@wetron/react/styles.css";
-````
+```
 
 ## Theming
 
