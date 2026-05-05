@@ -10,7 +10,7 @@ async function loadModel() {
 }
 
 test("mnist-12: 12 nodes, 1 input (float32), 1 output, initializers not in inputs", async () => {
-  const graph = await parseOnnx(await loadModel());
+  const graph = parseOnnx(await loadModel());
   expect(graph.nodes.length).toBe(12);
   expect(graph.nodes.every((n) => n.opType.length > 0)).toBe(true);
   expect(graph.inputs.length).toBe(1);
@@ -22,8 +22,6 @@ test("mnist-12: 12 nodes, 1 input (float32), 1 output, initializers not in input
   for (const name of graph.initializers.keys()) expect(inputNames.has(name)).toBe(false);
 });
 
-test("throws ParseError on garbage input", async () => {
-  await expect(parseOnnx(new Uint8Array([0x00, 0x01, 0x02, 0x03]))).rejects.toBeInstanceOf(
-    ParseError,
-  );
+test("throws ParseError on garbage input", () => {
+  expect(() => parseOnnx(new Uint8Array([0x00, 0x01, 0x02, 0x03]))).toThrow(ParseError);
 });

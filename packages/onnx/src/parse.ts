@@ -107,7 +107,7 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
         }
         return String(b);
       });
-    // TENSOR, GRAPH, SPARSE_TENSOR, TYPE_PROTO and list variants are skipped —
+    // TENSOR, GRAPH, SPARSE_TENSOR, TYPE_PROTO and list variants are skipped -
     // wetron only deserializes graph structure, not tensor data or subgraphs
     default:
       return "";
@@ -128,7 +128,7 @@ function mapValueInfo(vi: Record<string, unknown>): GraphValue {
   };
 }
 
-export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
+export function parseOnnx(bytes: Uint8Array): ModelGraph {
   const root = getRoot();
   const ModelProto = root.lookupType("onnx.ModelProto");
 
@@ -256,7 +256,7 @@ export async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph> {
     tensorShapes.set(gv.name, { shape: gv.shape, dtype: gv.dtype });
   }
 
-  // Intermediate tensors — only present if the model has been shape-inferred
+  // Intermediate tensors - only present if the model has been shape-inferred
   const rawValueInfo = (graph["valueInfo"] as Array<Record<string, unknown>> | null) ?? [];
   for (const vi of rawValueInfo) {
     const gv = mapValueInfo(vi);

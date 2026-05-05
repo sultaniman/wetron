@@ -1,6 +1,6 @@
 # @wetron/onnx
 
-ONNX model parser for wetron. Reads `.onnx` files and returns a `ModelGraph` IR. Graph structure only — no weight tensors are deserialized.
+ONNX model parser for wetron. Reads `.onnx` files and returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
 
 ## Install
 
@@ -16,7 +16,7 @@ Included automatically when you install `@wetron/core` or `@wetron/react`.
 import { parseOnnx } from "@wetron/onnx";
 
 const bytes = new Uint8Array(await file.arrayBuffer());
-const graph = await parseOnnx(bytes); // async
+const graph = parseOnnx(bytes);
 ```
 
 Throws `ParseError` from `@wetron/core/ir` on malformed input.

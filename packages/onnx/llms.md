@@ -1,11 +1,11 @@
 # @wetron/onnx
 
-ONNX model parser. Reads `.onnx` files via protobufjs and returns a `ModelGraph` IR. Graph structure only — no weight tensors are deserialized.
+ONNX model parser. Reads `.onnx` files via protobufjs and returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
 
 ## API
 
 ```ts
-async function parseOnnx(bytes: Uint8Array): Promise<ModelGraph>;
+function parseOnnx(bytes: Uint8Array): ModelGraph;
 ```
 
 Throws `ParseError` (from `@wetron/core/ir`) on malformed input.
@@ -35,6 +35,6 @@ Throws `ParseError` (from `@wetron/core/ir`) on malformed input.
 
 - Uses `protobufjs/light` with a pre-generated `onnx-descriptor.json` (bundled in `src/`).
 - `int64`/`uint64` attribute values from protobufjs `Long` objects are converted via `bigIntToNumber` from `@wetron/core/dtypes`.
-- Initializers (weight tensors) are recorded in `ModelGraph.initializers` with shape and dtype only — raw data is not read.
+- Initializers (weight tensors) are recorded in `ModelGraph.initializers` with shape and dtype only - raw data is not read.
 - `ModelGraph.tensorShapes` is populated from the graph's `value_info` field, covering intermediate activations.
-- Node attributes are extracted as `AttributeValue` — `GRAPH` and `SPARSE_TENSOR` attribute types are skipped.
+- Node attributes are extracted as `AttributeValue` - `GRAPH` and `SPARSE_TENSOR` attribute types are skipped.
