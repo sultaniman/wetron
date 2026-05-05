@@ -29,7 +29,7 @@ sectionFooter = false
 editPage = false
 lastMod = false
 repoHost = "GitHub"
-docsRepo = "https://github.com/wetron/wetron"
+docsRepo = "https://github.com/sultaniman/wetron"
 docsRepoBranch = "main"
 docsRepoSubPath = "docs"
 
