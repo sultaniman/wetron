@@ -49,7 +49,7 @@ model file
 | SavedModel         | `.pb` filename extension (checked before ONNX) |
 | ONNX               | protobuf field 1 varint tag `0x08`             |
 | TFLite             | `TFL3` or `ODLF` at offset 4                   |
-| Keras              | ZIP magic + `config.json` entry                |
-| TorchScript ZIP    | ZIP magic + `bytecode.pkl` entry               |
+| Keras              | ZIP magic + `.keras` extension (default for ZIP) |
+| TorchScript ZIP    | ZIP magic + `.pt`/`.ptl` extension               |
 | TorchScript Mobile | `PTMF` at offset 4                             |
 | ExecuTorch         | `ET12` at offset 4                             |

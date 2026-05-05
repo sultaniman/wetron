@@ -81,7 +81,7 @@ Thrown by all parsers on unrecoverable failures:
 
 ```ts
 class ParseError extends Error {
-  readonly format: string; // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown"
+  readonly format: string; // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown"
   readonly context: string; // human-readable description of the failure
 }
 ```

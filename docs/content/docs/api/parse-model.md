@@ -27,12 +27,14 @@ import { parseTflite } from "@wetron/tflite";
 import { parseKeras } from "@wetron/keras";
 import { parseTorchscript } from "@wetron/torchscript";
 import { parseExecutorch } from "@wetron/executorch";
+import { parseSavedModel } from "@wetron/savedmodel";
 
 const graph = await parseOnnx(bytes); // async
 const graph = parseTflite(bytes); // sync
-const graph = await parseKeras(bytes); // async (ZIP extraction)
+const graph = parseKeras(bytes); // sync
 const graph = parseTorchscript(bytes); // sync
 const graph = parseExecutorch(bytes); // sync
+const graph = parseSavedModel(bytes); // sync
 ```
 
 ## detectFormat
@@ -40,21 +42,22 @@ const graph = parseExecutorch(bytes); // sync
 ```ts
 import { detectFormat } from "@wetron/core";
 
-type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown";
+type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 ```
 
 Returns a format string — never throws. Useful for showing format badges in a UI before parsing.
 
-| Format        | Magic bytes                                                    |
-| ------------- | -------------------------------------------------------------- |
-| `onnx`        | protobuf field 1 varint tag `0x08`                             |
-| `tflite`      | `TFL3` or `ODLF` at offset 4                                   |
-| `keras`       | ZIP magic `PK\x03\x04` + `config.json` entry                   |
-| `torchscript` | ZIP magic `PK\x03\x04` + `bytecode.pkl`, or `PTMF` at offset 4 |
-| `executorch`  | `ET12` at offset 4                                             |
-| `unknown`     | no match                                                       |
+| Format        | Detection                                                        |
+| ------------- | ---------------------------------------------------------------- |
+| `savedmodel`  | `.pb` filename extension (checked before ONNX)                   |
+| `onnx`        | protobuf field 1 varint tag `0x08`                               |
+| `tflite`      | `TFL3` or `ODLF` at offset 4                                     |
+| `keras`       | ZIP magic `PK\x03\x04` + `.keras` extension (default for ZIP)    |
+| `torchscript` | ZIP magic `PK\x03\x04` + `.pt`/`.ptl` extension, or `PTMF` at 4 |
+| `executorch`  | `ET12` at offset 4                                               |
+| `unknown`     | no match                                                         |
 
 ## modelGraphToFlow
 

@@ -27,7 +27,7 @@ export default function App() {
 
   return (
     <>
-      <input type="file" accept=".onnx,.tflite,.keras,.pt,.pte" onChange={handleFile} />
+      <input type="file" accept=".onnx,.tflite,.keras,.pt,.pte,.pb" onChange={handleFile} />
       {graph && <ModelGraphView graph={graph} onTargetClick={setSelected} colorMode="system" />}
       <NodePropertyPanel
         target={selected}
@@ -57,7 +57,7 @@ export default function App() {
   }
 </script>
 
-<input type="file" accept=".onnx,.tflite,.keras,.pt,.pte" onchange={handleFile} />
+<input type="file" accept=".onnx,.tflite,.keras,.pt,.pte,.pb" onchange={handleFile} />
 {#if graph}
   <ModelGraphView {graph} onTargetClick={(t) => selected = t} colorMode="system" />
 {/if}
@@ -89,6 +89,6 @@ try {
 import { detectFormat } from "@wetron/core";
 
 const format = detectFormat(bytes, file.name);
-// "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown"
+// "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown"
 // never throws
 ```

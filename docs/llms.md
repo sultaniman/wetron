@@ -1,6 +1,6 @@
 # wetron
 
-Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, TorchScript, and ExecuTorch files into a shared IR and renders the computation graph. Graph structure only — no weight data is read or stored anywhere in the stack.
+Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, TorchScript, ExecuTorch, and TensorFlow SavedModel files into a shared IR and renders the computation graph. Graph structure only — no weight data is read or stored anywhere in the stack.
 
 ## Packages
 
@@ -10,6 +10,7 @@ Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, Torc
 - `@wetron/keras` — Keras `.keras` archive parser (fflate)
 - `@wetron/torchscript` — TorchScript Mobile and ZIP-based parser (flatbuffers + custom bytecode decoder)
 - `@wetron/executorch` — ExecuTorch `.pte` parser (flatbuffers)
+- `@wetron/savedmodel` — TensorFlow SavedModel `.pb` parser (protobufjs); handles both `saved_model.pb` TF op graphs and `keras_metadata.pb` Keras layer graphs
 - `@wetron/react` — React components: `ModelGraphView`, `NodePropertyPanel` (peer: react 18+, @xyflow/react 12+, @phosphor-icons/react 2+, @base-ui/react 1+)
 - `@wetron/svelte` — Svelte components: `ModelGraphView`, `NodePropertyPanel` (peer: svelte 5+, @xyflow/svelte 1.5+, phosphor-svelte 3+)
 - `@wetron/tokens` — design tokens: category colors, CSS vars — zero dependencies, all types inlined
@@ -55,7 +56,7 @@ interface ParseWarning {
 }
 
 class ParseError extends Error {
-  readonly format: string; // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown"
+  readonly format: string; // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown"
   readonly context: string; // human-readable description of failure
 }
 ```
@@ -67,7 +68,7 @@ class ParseError extends Error {
 async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
 // Format detection — never throws, returns "unknown" on no match
-type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown";
+type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // IR → ReactFlow / SvelteFlow nodes and edges with Dagre layout applied
@@ -114,18 +115,22 @@ function parseTorchscript(bytes: Uint8Array): ModelGraph; // sync; handles ZIP a
 
 // @wetron/executorch
 function parseExecutorch(bytes: Uint8Array): ModelGraph; // sync
+
+// @wetron/savedmodel
+function parseSavedModel(bytes: Uint8Array): ModelGraph; // sync; handles saved_model.pb and keras_metadata.pb
 ```
 
 ## Format detection (magic bytes)
 
-| Format             | Detection                                    |
-| ------------------ | -------------------------------------------- |
-| ONNX               | protobuf field 1 varint tag `0x08`           |
-| TFLite             | `TFL3` or `ODLF` at offset 4                 |
-| Keras              | ZIP magic `PK\x03\x04` + `config.json` entry |
-| TorchScript ZIP    | ZIP magic `PK\x03\x04` + `bytecode.pkl`      |
-| TorchScript Mobile | `PTMF` at offset 4                           |
-| ExecuTorch         | `ET12` at offset 4                           |
+| Format             | Detection                                         |
+| ------------------ | ------------------------------------------------- |
+| ONNX               | protobuf field 1 varint tag `0x08`                |
+| TFLite             | `TFL3` or `ODLF` at offset 4                      |
+| Keras              | ZIP magic `PK\x03\x04` + `config.json` entry      |
+| TorchScript ZIP    | ZIP magic `PK\x03\x04` + `.pt`/`.ptl` extension   |
+| TorchScript Mobile | `PTMF` at offset 4                                |
+| ExecuTorch         | `ET12` at offset 4                                |
+| SavedModel         | `.pb` filename extension (checked before ONNX)    |
 
 ## Architecture rules
 

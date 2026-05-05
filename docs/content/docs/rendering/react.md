@@ -20,10 +20,24 @@ import { ModelGraphView } from "@wetron/react";
   graph={graph} // ModelGraph — required
   onTargetClick={setSelected} // (target: PanelTarget) => void
   colorMode="system" // "light" | "dark" | "system" (default: "system")
+  onWarnings={(w) => console.warn(w)} // called when graph has parse warnings
+  selectedEdgeTensorName={null} // highlights the matching edge
+  searchQuery="" // dims nodes that don't match the query
 />;
 ```
 
 Renders the full interactive graph. Nodes are coloured by operator category. Click a node or edge to receive a `PanelTarget` you can pass to `NodePropertyPanel`.
+
+### Props
+
+| Prop                     | Type                                          | Description                                       |
+| ------------------------ | --------------------------------------------- | ------------------------------------------------- |
+| `graph`                  | `ModelGraph`                                  | Required. The parsed model graph.                 |
+| `onTargetClick`          | `(target: PanelTarget) => void`               | Called when a node or edge is clicked.            |
+| `colorMode`              | `"light" \| "dark" \| "system"`               | Theme. `"system"` follows `prefers-color-scheme`. |
+| `onWarnings`             | `(warnings: readonly ParseWarning[]) => void` | Called when the graph has parse warnings.         |
+| `selectedEdgeTensorName` | `string \| null`                              | Highlights the matching edge.                     |
+| `searchQuery`            | `string`                                      | Dims nodes that don't match the query.            |
 
 ## NodePropertyPanel
 

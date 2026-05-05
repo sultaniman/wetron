@@ -9,7 +9,7 @@ Shared foundation for the wetron monorepo. Provides the IR types all parsers pro
 async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
 // Format detection — never throws, returns "unknown" on no match
-type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "unknown";
+type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // IR → ReactFlow / SvelteFlow nodes and edges, Dagre layout applied (top-to-bottom)
@@ -136,14 +136,15 @@ type FlowEdge = {
 
 ## Format detection (magic bytes)
 
-| Format             | Detection                                    |
-| ------------------ | -------------------------------------------- |
-| ONNX               | protobuf field 1 varint tag `0x08`           |
-| TFLite             | `TFL3` or `ODLF` at offset 4                 |
-| Keras              | ZIP magic `PK\x03\x04` + `config.json` entry |
-| TorchScript ZIP    | ZIP magic `PK\x03\x04` + `bytecode.pkl`      |
-| TorchScript Mobile | `PTMF` at offset 4                           |
-| ExecuTorch         | `ET12` at offset 4                           |
+| Format             | Detection                                       |
+| ------------------ | ----------------------------------------------- |
+| ONNX               | protobuf field 1 varint tag `0x08`              |
+| TFLite             | `TFL3` or `ODLF` at offset 4                    |
+| Keras              | ZIP magic `PK\x03\x04` + `.keras` extension     |
+| TorchScript ZIP    | ZIP magic `PK\x03\x04` + `.pt`/`.ptl` extension |
+| TorchScript Mobile | `PTMF` at offset 4                              |
+| ExecuTorch         | `ET12` at offset 4                              |
+| SavedModel         | `.pb` filename extension (checked before ONNX)  |
 
 ## Constraints
 

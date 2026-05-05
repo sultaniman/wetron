@@ -2,7 +2,7 @@
 title: "SavedModel"
 description: "TF SavedModel parser for Wetron — reads saved_model.pb GraphDef files and keras_metadata.pb Keras layer graphs."
 lead: "Parses `.pb` files — TF SavedModel GraphDef and Keras metadata variants."
-weight: 50
+weight: 60
 ---
 
 ```ts
