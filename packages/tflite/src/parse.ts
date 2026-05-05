@@ -4,7 +4,7 @@ import { ParseError } from "@wetron/core/ir";
 import { BUILTIN_OP_NAMES } from "./builtin-ops.ts";
 import { TENSOR_TYPE_NAMES } from "./tensor-types.ts";
 
-// FlatBuffers vtable field index → vtable offset
+// FlatBuffers vtable field index -> vtable offset
 function field(n: number): number {
   return 4 + n * 2;
 }
@@ -169,7 +169,12 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
       const opInputs: string[] = [];
       for (let j = 0; j < numOpInputs; j++) {
         const idx = vecInt32(bb, op, 1, j);
-        if (idx < 0) continue; // -1 = optional input, skip
+        // -1 = optional input. Push empty string instead of skipping so slot
+        // indices match opInputLabels (e.g. TRANSPOSE_CONV slot 3 = "bias").
+        if (idx < 0) {
+          opInputs.push("");
+          continue;
+        }
         opInputs.push(idx < tensors.length ? tensors[idx].name : `tensor_${idx}`);
       }
 

@@ -171,7 +171,7 @@ function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[]): Mod
   const { layers } = model.config;
   const nodes: GraphNode[] = [];
   const inputs: GraphValue[] = [];
-  const outputMap = new Map<string, string>(); // layerName → synthetic output tensor name
+  const outputMap = new Map<string, string>(); // layerName -> synthetic output tensor name
   const consumedTensors = new Set<string>();
 
   for (let i = 0; i < layers.length; i++) {
@@ -240,7 +240,7 @@ export function buildKerasGraph(model: KerasModelConfig): ModelGraph {
   const warnings: ParseWarning[] = [];
   if (model.class_name === "Sequential") return buildSequential(model, warnings);
   if (model.class_name === "Functional") return buildFunctional(model, warnings);
-  throw new ParseError("savedmodel", `Unsupported model class: ${model.class_name}`);
+  throw new ParseError("keras", `Unsupported model class: ${model.class_name}`);
 }
 
 export function parseKeras(bytes: Uint8Array): ModelGraph {
