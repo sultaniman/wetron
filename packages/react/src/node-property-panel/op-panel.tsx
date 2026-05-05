@@ -87,7 +87,11 @@ export function OpPanel({
   const theme = CATEGORY_THEME[cat];
   const color = isDark ? theme.dark : theme.light;
   const iconEntry = OP_ICON[node.opType] ?? CATEGORY_ICON[cat];
-  const visibleInputs = node.inputs.filter((name) => name !== "");
+  // Preserve the original slot index so the React key is unique even when a
+  // node consumes the same tensor twice (e.g. Add(x, x)).
+  const visibleInputs = node.inputs
+    .map((name, slot) => ({ name, slot }))
+    .filter(({ name }) => name !== "");
   const attrEntries = Object.entries(node.attributes);
   const module = formatModule(node.domain, opsets);
   return (
@@ -121,7 +125,7 @@ export function OpPanel({
       {visibleInputs.length > 0 && (
         <div className={css.section}>
           <SectionLabel icon={<ArrowCircleDownIcon size={12} />} title="Inputs" />
-          {visibleInputs.map((name) => {
+          {visibleInputs.map(({ name, slot }) => {
             const sourceOp = inputSources?.get(name);
             const sourceCat = sourceOp ? opCategory(sourceOp) : null;
             const sourceColor = sourceCat
@@ -131,7 +135,7 @@ export function OpPanel({
               : undefined;
             return (
               <Row
-                key={name}
+                key={`${slot}::${name}`}
                 label={name}
                 chip={sourceOp ?? "tensor"}
                 chipColor={sourceColor}
@@ -146,7 +150,7 @@ export function OpPanel({
           <SectionLabel icon={<ArrowCircleUpIcon size={12} />} title="Outputs" />
           {node.outputs.map((name, i) => (
             <Row
-              key={name || `output_${i}`}
+              key={`${i}::${name}`}
               label={name || `output_${i}`}
               value=""
               chip="tensor"

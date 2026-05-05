@@ -67,8 +67,22 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
   const nodeIdToOpType = new Map<string, string>();
   const nodeIdToName = new Map<string, string>();
 
-  for (const gv of graph.inputs) {
-    const id = `input::${gv.name}`;
+  // Disambiguate IO nodes that share a name. The name is normally unique, but
+  // some malformed graphs duplicate it; appending the index keeps FlowNode.id
+  // unique without breaking the common case.
+  const usedIoIds = new Set<string>();
+  const uniqueIoId = (prefix: string, name: string, i: number): string => {
+    const base = `${prefix}::${name}`;
+    if (!usedIoIds.has(base)) {
+      usedIoIds.add(base);
+      return base;
+    }
+    return `${base}#${i}`;
+  };
+
+  for (let i = 0; i < graph.inputs.length; i++) {
+    const gv = graph.inputs[i];
+    const id = uniqueIoId("input", gv.name, i);
     flowNodes.push({
       id,
       type: "ioNode",
@@ -136,8 +150,9 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     nodeIdToName.set(id, node.name || `${node.opType}_${i}`);
   }
 
-  for (const gv of graph.outputs) {
-    const id = `output::${gv.name}`;
+  for (let i = 0; i < graph.outputs.length; i++) {
+    const gv = graph.outputs[i];
+    const id = uniqueIoId("output", gv.name, i);
     flowNodes.push({
       id,
       type: "ioNode",
@@ -164,11 +179,15 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
   for (const fn of flowNodes) {
     if (fn.type === "ioNode" && fn.data.opType === "Input") continue;
 
-    for (const inputName of fn.data.inputs) {
+    // Slot index is part of the edge id so a node consuming the same tensor
+    // in two slots (e.g. Add(x, x), MatMul(x, x.T)) produces two distinct
+    // FlowEdge.id values - otherwise React Flow keys collide.
+    for (let slot = 0; slot < fn.data.inputs.length; slot++) {
+      const inputName = fn.data.inputs[slot];
       const srcId = outputToNodeId.get(inputName);
       if (srcId) {
         flowEdges.push({
-          id: `${srcId}=>${fn.id}::${inputName}`,
+          id: `${srcId}=>${fn.id}::${inputName}#${slot}`,
           source: srcId,
           target: fn.id,
           type: "modelEdge",

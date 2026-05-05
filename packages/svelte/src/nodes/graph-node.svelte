@@ -33,7 +33,7 @@
 >
   {#if hasWeights && data.weightInputs}
     <div class="meta">
-      {#each data.weightInputs as w}
+      {#each data.weightInputs as w (w.slot)}
         <div
           class="weight-row"
           aria-label="{w.label} weight, shape {w.shape.join('×')}, {w.dtype}"

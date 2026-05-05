@@ -28,7 +28,7 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
       {data.weightInputs && data.weightInputs.length > 0
         ? data.weightInputs.map((w) => (
             <div
-              key={w.name}
+              key={w.slot}
               className={css.weightRow}
               aria-label={`${w.label} weight, shape ${w.shape.join("×")}, ${w.dtype}`}
               data-weight-name={w.name}

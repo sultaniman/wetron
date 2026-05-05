@@ -28,7 +28,9 @@
   const color = $derived(`var(--wetron-category-${cat})`);
   const iconBg = $derived(`color-mix(in oklch, var(--wetron-category-${cat}) 12%, transparent)`);
   const module = $derived(formatModule(node.domain, opsets));
-  const visibleInputs = $derived(node.inputs.filter(n => n !== ''));
+  // Preserve slot index so the {#each} key is unique even when a node consumes
+  // the same tensor twice (e.g. Add(x, x)).
+  const visibleInputs = $derived(node.inputs.map((name, slot) => ({ name, slot })).filter(({ name }) => name !== ''));
   const attrEntries = $derived(Object.entries(node.attributes));
 </script>
 
@@ -40,7 +42,7 @@
     <SectionLabel title="Inputs">
       {#snippet icon()}<ArrowCircleDownIcon size={12} />{/snippet}
     </SectionLabel>
-    {#each visibleInputs as name (name)}
+    {#each visibleInputs as { name, slot } (`${slot}::${name}`)}
       {@const sourceOp = inputSources?.get(name)}
       {@const sourceCat = sourceOp ? opCategory(sourceOp) : null}
       {@const sourceColor = sourceCat ? `var(--wetron-category-${sourceCat})` : undefined}
@@ -53,7 +55,7 @@
     <SectionLabel title="Outputs">
       {#snippet icon()}<ArrowCircleUpIcon size={12} />{/snippet}
     </SectionLabel>
-    {#each node.outputs as name, i (name || `output_${i}`)}
+    {#each node.outputs as name, i (`${i}::${name}`)}
       <Row label={name || `output_${i}`} value="" chip="tensor" onClick={name && onTensorClick ? () => onTensorClick!(name) : undefined} />
     {/each}
   </div>

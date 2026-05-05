@@ -53,3 +53,47 @@ test("Conv node gets weightInputs with labels and shapes from initializers", () 
   expect(conv?.data.weightInputs?.[0].label).toBe("W");
   expect(conv?.data.weightInputs?.[0].shape).toEqual([64, 3, 3, 3]);
 });
+
+test("FlowNode and FlowEdge ids are unique", () => {
+  const { nodes, edges } = modelGraphToFlow(GRAPH);
+  expect(new Set(nodes.map((n) => n.id)).size).toBe(nodes.length);
+  expect(new Set(edges.map((e) => e.id)).size).toBe(edges.length);
+});
+
+test("edge ids are unique when a node consumes the same tensor in two slots", () => {
+  // Add(x, x) - same input tensor in slot 0 and slot 1.
+  const graph: ModelGraph = {
+    name: "selfadd",
+    inputs: [{ name: "x", shape: [1], dtype: "float32" }],
+    outputs: [{ name: "y", shape: [1], dtype: "float32" }],
+    nodes: [{ name: "add", opType: "Add", inputs: ["x", "x"], outputs: ["y"], attributes: {} }],
+    initializers: new Map(),
+    tensorShapes: new Map(),
+  };
+  const { edges } = modelGraphToFlow(graph);
+  // 2 edges from input::x to Add (one per slot) + 1 from Add to output::y.
+  expect(edges.length).toBe(3);
+  expect(new Set(edges.map((e) => e.id)).size).toBe(edges.length);
+  const addInputs = edges.filter((e) => e.source.startsWith("input::"));
+  expect(addInputs.length).toBe(2);
+  expect(new Set(addInputs.map((e) => e.id)).size).toBe(2);
+});
+
+test("FlowNode ids are unique when two graph inputs share a name", () => {
+  // Pathological but possible in malformed graphs.
+  const graph: ModelGraph = {
+    name: "dup",
+    inputs: [
+      { name: "x", shape: [1], dtype: "float32" },
+      { name: "x", shape: [2], dtype: "float32" },
+    ],
+    outputs: [{ name: "y", shape: [1], dtype: "float32" }],
+    nodes: [{ name: "id", opType: "Identity", inputs: ["x"], outputs: ["y"], attributes: {} }],
+    initializers: new Map(),
+    tensorShapes: new Map(),
+  };
+  const { nodes } = modelGraphToFlow(graph);
+  const inputIds = nodes.filter((n) => n.data.opType === "Input").map((n) => n.id);
+  expect(inputIds.length).toBe(2);
+  expect(new Set(inputIds).size).toBe(2);
+});
