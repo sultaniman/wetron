@@ -57,6 +57,20 @@ function vecInt32(bb: ByteBuffer, table: number, fieldN: number, i: number): num
   return bb.readInt32(vec + i * 4);
 }
 
+// Struct (inline) vector: elements packed with no indirection, each `stride` bytes.
+// Returns the absolute byte offset of element i, or -1 if the field is absent.
+function vecStructBase(
+  bb: ByteBuffer,
+  table: number,
+  fieldN: number,
+  i: number,
+  stride: number,
+): number {
+  const off = voff(bb, table, fieldN);
+  if (!off) return -1;
+  return bb.__vector(table + off) + i * stride;
+}
+
 const TFLITE_MAGIC = [
   [0x54, 0x46, 0x4c, 0x33], // TFL3
   [0x4f, 0x44, 0x4c, 0x46], // ODLF (LiteRT)
@@ -143,15 +157,37 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
     const buf = vecTable(bb, model, 4, i);
     bufferHasData.push(vecLen(bb, buf, 0) > 0);
   }
+
+  // Slice each non-empty buffer once. Buffer.data is a vector<ubyte>; flatbuffers
+  // stores it contiguously, so we view directly into the model bytes (zero copy).
+  const bufferBytes: (Uint8Array | undefined)[] = [];
+  for (let i = 0; i < numBuffers; i++) {
+    const buf = vecTable(bb, model, 4, i);
+    const len = vecLen(bb, buf, 0);
+    if (len === 0) {
+      bufferBytes.push(undefined);
+      continue;
+    }
+    const start = vecStructBase(bb, buf, 0, 0, 1);
+    bufferBytes.push(start >= 0 ? bytes.subarray(start, start + len) : undefined);
+  }
+
   const inputIdxSet = new Set(inputIdxs);
   const outputIdxSet = new Set(outputIdxs);
   const initializers = new Map<string, { shape: readonly number[]; dtype: string }>();
+  const weightBytes = new Map<string, Uint8Array>();
+  let totalWeightBytes = 0;
   for (let i = 0; i < numTensors; i++) {
     const tensorTable = vecTable(bb, subgraph, 0, i);
     const bufIdx = uint32_(bb, tensorTable, 2, 0);
     if (bufIdx > 0 && bufferHasData[bufIdx] && !inputIdxSet.has(i) && !outputIdxSet.has(i)) {
       const t = tensors[i];
       initializers.set(t.name, { shape: t.shape as readonly number[], dtype: t.dtype });
+      const buf = bufferBytes[bufIdx];
+      if (buf) {
+        weightBytes.set(t.name, buf);
+        totalWeightBytes += buf.byteLength;
+      }
     }
   }
 
@@ -220,6 +256,11 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
     nodes,
     initializers,
     tensorShapes,
+    fileSizeBytes: bytes.byteLength,
+    weights: {
+      totalBytes: totalWeightBytes,
+      get: (name: string) => weightBytes.get(name),
+    },
     ...(warnings.length ? { warnings } : {}),
   };
 }
