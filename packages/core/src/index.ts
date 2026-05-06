@@ -9,6 +9,7 @@ export type {
   AttributeValue,
   PanelTarget,
   ParseWarning,
+  WeightSource,
 } from "./ir.ts";
 export { detectFormat } from "./detect.ts";
 export type { Format } from "./detect.ts";

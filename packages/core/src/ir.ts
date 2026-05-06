@@ -37,6 +37,10 @@ export interface ModelGraph {
   >;
   /** Operator domain -> opset version (ONNX only; empty string = standard ai.onnx domain). */
   readonly opsets?: ReadonlyMap<string, number>;
+  /** Size of the source file in bytes. Used for the >20MB weight gate. */
+  readonly fileSizeBytes: number;
+  /** Lazy accessor for initializer bytes. Absent for parsers that do not surface weights. */
+  readonly weights?: WeightSource;
   /** Non-fatal parse warnings (skipped/degraded nodes). Absent when empty. */
   readonly warnings?: readonly ParseWarning[];
 }
@@ -46,6 +50,14 @@ export type ParseWarning = {
   readonly context: string;
   readonly nodeIndex?: number;
 };
+
+export interface WeightSource {
+  /** Total weight bytes across all initializers in the model. */
+  readonly totalBytes: number;
+  /** Get raw bytes for one initializer. Returns undefined if name unknown
+   *  or this format/parser does not expose weights. May throw on decode error. */
+  get(name: string): Uint8Array | undefined;
+}
 
 export type PanelTarget =
   | GraphNode
