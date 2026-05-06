@@ -55,7 +55,7 @@ function layerName(layer: KerasLayerEntry): string | null {
   return name;
 }
 
-function buildSequential(model: KerasModelConfig, warnings: ParseWarning[]): ModelGraph {
+function buildSequential(model: KerasModelConfig, warnings: ParseWarning[], fileSizeBytes: number): ModelGraph {
   const { layers } = model.config;
   const nodes: GraphNode[] = [];
   const inputs: GraphValue[] = [];
@@ -123,6 +123,7 @@ function buildSequential(model: KerasModelConfig, warnings: ParseWarning[]): Mod
     nodes,
     initializers: new Map(),
     tensorShapes,
+    fileSizeBytes,
     ...(warnings.length ? { warnings } : {}),
   };
 }
@@ -167,7 +168,7 @@ function resolveInbounds(
   return tensor ? [tensor] : [];
 }
 
-function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[]): ModelGraph {
+function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[], fileSizeBytes: number): ModelGraph {
   const { layers } = model.config;
   const nodes: GraphNode[] = [];
   const inputs: GraphValue[] = [];
@@ -232,14 +233,15 @@ function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[]): Mod
     nodes,
     initializers: new Map(),
     tensorShapes,
+    fileSizeBytes,
     ...(warnings.length ? { warnings } : {}),
   };
 }
 
-export function buildKerasGraph(model: KerasModelConfig): ModelGraph {
+export function buildKerasGraph(model: KerasModelConfig, fileSizeBytes = 0): ModelGraph {
   const warnings: ParseWarning[] = [];
-  if (model.class_name === "Sequential") return buildSequential(model, warnings);
-  if (model.class_name === "Functional") return buildFunctional(model, warnings);
+  if (model.class_name === "Sequential") return buildSequential(model, warnings, fileSizeBytes);
+  if (model.class_name === "Functional") return buildFunctional(model, warnings, fileSizeBytes);
   throw new ParseError("keras", `Unsupported model class: ${model.class_name}`);
 }
 
@@ -270,5 +272,5 @@ export function parseKeras(bytes: Uint8Array): ModelGraph {
   const model = raw as KerasModelConfig;
   if (!model?.config?.layers) throw new ParseError("keras", "config.json missing config.layers");
 
-  return buildKerasGraph(model);
+  return buildKerasGraph(model, bytes.byteLength);
 }

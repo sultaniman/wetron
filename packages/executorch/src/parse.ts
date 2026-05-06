@@ -165,6 +165,7 @@ export function parseExecutorch(bytes: Uint8Array): ModelGraph {
     nodes,
     initializers: new Map(),
     tensorShapes,
+    fileSizeBytes: bytes.byteLength,
     ...(warnings.length ? { warnings } : {}),
   };
 }

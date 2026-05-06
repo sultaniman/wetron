@@ -4,7 +4,7 @@ import { ParseError } from "@wetron/core/ir";
 import type { KerasModelConfig } from "@wetron/keras";
 import { buildKerasGraph } from "@wetron/keras";
 
-export function parseKerasMetadataPb(bytes: Uint8Array): ModelGraph {
+export function parseKerasMetadataPb(bytes: Uint8Array, fileSizeBytes: number): ModelGraph {
   const reader = Reader.create(bytes);
   while (reader.pos < reader.len) {
     const tag = reader.uint32();
@@ -20,7 +20,7 @@ export function parseKerasMetadataPb(bytes: Uint8Array): ModelGraph {
           `keras_metadata.pb: JSON parse failed: ${e instanceof Error ? e.message : String(e)}`,
         );
       }
-      return buildKerasGraph(raw as KerasModelConfig);
+      return buildKerasGraph(raw as KerasModelConfig, fileSizeBytes);
     }
     reader.skipType(tag & 0x7);
   }

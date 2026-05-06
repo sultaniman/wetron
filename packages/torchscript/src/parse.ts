@@ -299,6 +299,7 @@ function parseZipTorchscript(bytes: Uint8Array): ModelGraph {
     nodes,
     initializers: new Map(),
     tensorShapes: new Map(),
+    fileSizeBytes: bytes.byteLength,
   };
 }
 
@@ -406,6 +407,7 @@ export function parseTorchscript(bytes: Uint8Array): ModelGraph {
     nodes,
     initializers: new Map(),
     tensorShapes: new Map(),
+    fileSizeBytes: bytes.byteLength,
     ...(warnings.length ? { warnings } : {}),
   };
 }

@@ -76,7 +76,7 @@ function shapeFromTf(tfShape: TfShape): readonly number[] | null {
   return tfShape.dim.map((d) => longToNumber(d.size ?? -1));
 }
 
-export function parseTfGraph(bytes: Uint8Array): ModelGraph {
+export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGraph {
   const root = getRoot();
   const SavedModelType = root.lookupType("SavedModel");
 
@@ -184,6 +184,7 @@ export function parseTfGraph(bytes: Uint8Array): ModelGraph {
     nodes,
     initializers: new Map(),
     tensorShapes,
+    fileSizeBytes,
     ...(warnings.length ? { warnings } : {}),
   };
 }
