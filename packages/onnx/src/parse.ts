@@ -224,6 +224,60 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
   const initializerNames = new Set(rawInitializers.map((i) => String(i["name"] ?? "")));
   const filteredInputs = rawInputs.filter((vi) => !initializerNames.has(String(vi["name"] ?? "")));
 
+  // Decode raw weight bytes for each initializer (lazy contract — but cheap to
+  // build the index once at parse time since protobufjs already decoded them).
+  const TYPED_FIELDS: ReadonlyArray<{ field: string; bytesPer: number; kind: "f32" | "f64" | "i32" | "i64" | "u32" | "u64" }> = [
+    { field: "floatData", bytesPer: 4, kind: "f32" },
+    { field: "doubleData", bytesPer: 8, kind: "f64" },
+    { field: "int32Data", bytesPer: 4, kind: "i32" },
+    { field: "int64Data", bytesPer: 8, kind: "i64" },
+    { field: "uint64Data", bytesPer: 8, kind: "u64" },
+  ];
+
+  function bytesForInitializer(init: Record<string, unknown>): Uint8Array | undefined {
+    const raw = init["rawData"];
+    if (raw instanceof Uint8Array) return raw;
+    if (typeof raw === "string" && raw.length > 0) {
+      try {
+        return Uint8Array.from(atob(raw), (c) => c.charCodeAt(0));
+      } catch {
+        return undefined;
+      }
+    }
+    for (const f of TYPED_FIELDS) {
+      const arr = init[f.field] as Array<unknown> | null | undefined;
+      if (!arr || arr.length === 0) continue;
+      const buf = new ArrayBuffer(arr.length * f.bytesPer);
+      const view = new DataView(buf);
+      for (let i = 0; i < arr.length; i++) {
+        const v = arr[i];
+        const off = i * f.bytesPer;
+        switch (f.kind) {
+          case "f32": view.setFloat32(off, Number(v), true); break;
+          case "f64": view.setFloat64(off, Number(v), true); break;
+          case "i32": view.setInt32(off, Number(v), true); break;
+          case "i64": view.setBigInt64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true); break;
+          case "u32": view.setUint32(off, Number(v), true); break;
+          case "u64": view.setBigUint64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true); break;
+        }
+      }
+      return new Uint8Array(buf);
+    }
+    return undefined;
+  }
+
+  const weightBytes = new Map<string, Uint8Array>();
+  let totalWeightBytes = 0;
+  for (const init of rawInitializers) {
+    const name = String(init["name"] ?? "");
+    if (!name) continue;
+    const buf = bytesForInitializer(init);
+    if (buf) {
+      weightBytes.set(name, buf);
+      totalWeightBytes += buf.byteLength;
+    }
+  }
+
   const initializers = new Map(
     rawInitializers.map((init) => {
       const name = String(init["name"] ?? "");
@@ -276,6 +330,11 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
     initializers,
     tensorShapes,
     opsets,
+    fileSizeBytes: bytes.byteLength,
+    weights: {
+      totalBytes: totalWeightBytes,
+      get: (name: string) => weightBytes.get(name),
+    },
     ...(warnings.length ? { warnings } : {}),
   };
 }
