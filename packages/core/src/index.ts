@@ -15,6 +15,9 @@ export { detectFormat } from "./detect.ts";
 export type { Format } from "./detect.ts";
 export { modelGraphToFlow } from "./transform.ts";
 export type { FlowNode, FlowEdge, GraphNodeData } from "./transform.ts";
+export { decodeWeight, decodeFirstN } from "./weight-decoder.ts";
+export { computeStats } from "./weight-stats.ts";
+export type { WeightStats } from "./weight-stats.ts";
 
 import { detectFormat } from "./detect.ts";
 import type { ModelGraph } from "./ir.ts";
