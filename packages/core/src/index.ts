@@ -26,6 +26,7 @@ import { ParseError } from "./ir.ts";
 export function filterGraph(graph: ModelGraph, query: string): ReadonlySet<string> {
   const q = query.trim().toLowerCase();
   if (!q) return new Set();
+
   const matches = new Set<string>();
   for (const node of graph.nodes) {
     if (node.opType.toLowerCase().includes(q) || node.name.toLowerCase().includes(q)) {

@@ -27,6 +27,7 @@ const DTYPES: Record<string, DtypeInfo> = {
 function decode(bytes: Uint8Array, dtype: string, count: number): DecodedArray | null {
   const info = DTYPES[dtype];
   if (!info) return null;
+
   const max = Math.floor(bytes.byteLength / info.bytesPerEl);
   const n = Math.min(count, max);
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -35,11 +36,13 @@ function decode(bytes: Uint8Array, dtype: string, count: number): DecodedArray |
     for (let i = 0; i < n; i++) out[i] = info.read(view, i * info.bytesPerEl) as number;
     return out;
   }
+
   if (info.outKind === "i32") {
     const out = new Int32Array(n);
     for (let i = 0; i < n; i++) out[i] = info.read(view, i * info.bytesPerEl) as number;
     return out;
   }
+
   const out = new BigInt64Array(n);
   for (let i = 0; i < n; i++) out[i] = info.read(view, i * info.bytesPerEl) as bigint;
   return out;

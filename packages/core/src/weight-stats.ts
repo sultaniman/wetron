@@ -28,8 +28,8 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
       mean: 0,
       std: 0,
       zeros: 0,
-      histogram: new Array(HIST_BINS).fill(0),
-      heatmap: new Array(HEAT_CELLS).fill(0),
+      histogram: Array.from({ length: HIST_BINS }, () => 0),
+      heatmap: Array.from({ length: HEAT_CELLS }, () => 0),
       chunkSize: 1,
     };
   }
@@ -51,7 +51,7 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
   const variance = sumSq / n - mean * mean;
   const std = Math.sqrt(Math.max(0, variance));
 
-  const histogram = new Array(HIST_BINS).fill(0);
+  const histogram = Array.from({ length: HIST_BINS }, () => 0);
   const range = max - min;
   if (range > 0) {
     const inv = HIST_BINS / range;
@@ -65,7 +65,7 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
     histogram[Math.floor(HIST_BINS / 2)] = n;
   }
 
-  const heatmap = new Array(HEAT_CELLS).fill(0);
+  const heatmap = Array.from({ length: HEAT_CELLS }, () => 0);
   const chunkSize = Math.max(1, Math.floor(n / HEAT_CELLS));
   for (let c = 0; c < HEAT_CELLS; c++) {
     const start = c * chunkSize;

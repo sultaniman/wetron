@@ -19,6 +19,7 @@ export function readFloat16(view: DataView, offset: number, le: boolean): number
   if (_hasNativeFloat16) {
     return (view as DataViewWithFloat16).getFloat16(offset, le);
   }
+
   const u16 = view.getUint16(offset, le);
   const sign = (u16 >> 15) & 1;
   const exp = (u16 >> 10) & 0x1f;
@@ -28,6 +29,7 @@ export function readFloat16(view: DataView, offset: number, le: boolean): number
     const val = (frac / 1024) * Math.pow(2, -14);
     return sign ? -val : val;
   }
+
   const val = (1 + frac / 1024) * Math.pow(2, exp - 15);
   return sign ? -val : val;
 }
@@ -39,6 +41,7 @@ const _float8e4m3fn: Float32Array = (() => {
     const sign = (i >> 7) & 1;
     const exp = (i >> 3) & 0xf;
     const man = i & 0x7;
+
     let val: number;
     if (exp === 0xf && man === 0x7) {
       val = NaN;
@@ -49,6 +52,7 @@ const _float8e4m3fn: Float32Array = (() => {
     }
     t[i] = sign ? -val : val;
   }
+
   return t;
 })();
 
@@ -63,6 +67,7 @@ const _float8e5m2: Float32Array = (() => {
     const sign = (i >> 7) & 1;
     const exp = (i >> 2) & 0x1f;
     const man = i & 0x3;
+
     let val: number;
     if (exp === 0x1f) {
       val = man === 0 ? Infinity : NaN;
@@ -71,6 +76,7 @@ const _float8e5m2: Float32Array = (() => {
     } else {
       val = (1 + man / 4) * Math.pow(2, exp - 15);
     }
+
     t[i] = sign ? -val : val;
   }
   return t;
