@@ -3,10 +3,16 @@ import { ArrowUpIcon } from "@phosphor-icons/react";
 import { toPng } from "html-to-image";
 import { getViewportForBounds } from "@xyflow/react";
 import { parseModel } from "@wetron/core";
+import { loadSavedModelWeights, attachCheckpointToGraph } from "@wetron/savedmodel";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
 import type { ModelGraphViewHandle } from "@wetron/react";
 import type { ModelGraph } from "@wetron/core";
 import type { PanelTarget, ColorMode } from "@wetron/react";
+
+type WeightsLoad =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "error"; message: string };
 
 function resolveMode(mode: ColorMode): "light" | "dark" {
   if (mode !== "system") return mode;
@@ -34,6 +40,7 @@ export default function App() {
   const [selectedEdgeTensorName, setSelectedEdgeTensorName] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [colorMode, setColorMode] = useState<ColorMode>("system");
+  const [weightsLoad, setWeightsLoad] = useState<WeightsLoad>({ status: "idle" });
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const graphViewRef = useRef<ModelGraphViewHandle>(null);
   const [resolvedMode, setResolvedMode] = useState<"light" | "dark">(() => resolveMode("system"));
@@ -60,6 +67,7 @@ export default function App() {
     setHistory([]);
     setSelectedEdgeTensorName(null);
     setSearchQuery("");
+    setWeightsLoad({ status: "idle" });
     try {
       const buf = await file.arrayBuffer();
       const graph = await parseModel(new Uint8Array(buf), file.name);
@@ -72,6 +80,42 @@ export default function App() {
       });
     }
   }, []);
+
+  const loadWeights = useCallback(async (files: FileList) => {
+    const list = Array.from(files);
+    const indexFile = list.find((f) => f.name.endsWith(".index"));
+    const dataFile = list.find((f) => /\.data-\d{5}-of-\d{5}$/.test(f.name));
+    if (!indexFile || !dataFile) {
+      setWeightsLoad({
+        status: "error",
+        message:
+          "Pick both files: variables.index and variables.data-00000-of-00001",
+      });
+      return;
+    }
+    setWeightsLoad({ status: "loading" });
+    try {
+      const loaded = await loadSavedModelWeights(indexFile, dataFile);
+      setState((prev) => {
+        if (prev.status !== "ready") return prev;
+        return { ...prev, graph: attachCheckpointToGraph(prev.graph, loaded) };
+      });
+      setWeightsLoad({ status: "idle" });
+    } catch (e) {
+      setWeightsLoad({
+        status: "error",
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }, []);
+
+  const onWeightsChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) loadWeights(e.target.files);
+      e.target.value = "";
+    },
+    [loadWeights],
+  );
 
   const tensorSources = useMemo<ReadonlyMap<string, string>>(() => {
     if (state.status !== "ready") return new Map();
@@ -235,6 +279,47 @@ export default function App() {
               width: 180,
             }}
           />
+        )}
+        {state.status === "ready" && state.graph.hasExternalWeights && !state.graph.weights && (
+          <label
+            title="Pick variables.index + variables.data-XXXXX-of-XXXXX from the SavedModel directory"
+            style={{
+              padding: "5px 12px",
+              background: weightsLoad.status === "loading" ? chrome.faint : "transparent",
+              color:
+                weightsLoad.status === "error" ? "#d93025" : chrome.muted,
+              border: `1px solid ${weightsLoad.status === "error" ? "#d93025" : chrome.border}`,
+              borderRadius: 6,
+              cursor: weightsLoad.status === "loading" ? "wait" : "pointer",
+              fontSize: 12,
+              fontWeight: 500,
+            }}
+          >
+            {weightsLoad.status === "loading"
+              ? "Loading…"
+              : weightsLoad.status === "error"
+                ? `Weights: ${weightsLoad.message}`
+                : "Load weights…"}
+            <input
+              type="file"
+              multiple
+              style={{ display: "none" }}
+              onChange={onWeightsChange}
+              disabled={weightsLoad.status === "loading"}
+            />
+          </label>
+        )}
+        {state.status === "ready" && state.graph.weights && (
+          <span
+            style={{
+              padding: "5px 10px",
+              color: chrome.muted,
+              fontSize: 12,
+            }}
+            title={`${state.graph.weights.totalBytes.toLocaleString()} bytes loaded`}
+          >
+            ✓ weights loaded
+          </span>
         )}
         {state.status === "ready" && (
           <button

@@ -54,20 +54,36 @@ describe("filterGraph", () => {
 });
 
 describe("parseModel dispatch", () => {
-  const cases: Array<{ format: string; path: string }> = [
-    { format: "onnx", path: "../../../test-models/mnist-12.onnx" },
-    { format: "tflite", path: "../../../test-models/mobilenet_v2.tflite" },
-    { format: "keras", path: "../../../test-models/mobilenet.keras" },
-    { format: "savedmodel", path: "../../../test-models/small_saved_model.pb" },
-    { format: "executorch", path: "../../../test-models/add.pte" },
-    { format: "torchscript", path: "../../../test-models/div_tensor.pt" },
+  const cases: Array<{ format: string; path: string; filename: string }> = [
+    { format: "onnx", path: "../../../test-models/mnist-12.onnx", filename: "mnist-12.onnx" },
+    {
+      format: "tflite",
+      path: "../../../test-models/mobilenet_v2.tflite",
+      filename: "mobilenet_v2.tflite",
+    },
+    {
+      format: "keras",
+      path: "../../../test-models/mobilenet.keras",
+      filename: "mobilenet.keras",
+    },
+    {
+      format: "savedmodel",
+      path: "../../../test-models/small_saved_model.pb",
+      filename: "small_saved_model.pb",
+    },
+    { format: "executorch", path: "../../../test-models/add.pte", filename: "add.pte" },
+    {
+      format: "torchscript",
+      path: "../../../test-models/div_tensor.pt",
+      filename: "div_tensor.pt",
+    },
   ];
 
-  for (const { format, path } of cases) {
+  for (const { format, path, filename } of cases) {
     test(`routes ${format} to its parser`, async () => {
       const url = new URL(path, import.meta.url);
       const bytes = new Uint8Array(await Bun.file(url).arrayBuffer());
-      const graph = await parseModel(bytes);
+      const graph = await parseModel(bytes, filename);
       expect(graph).toBeDefined();
       expect(graph.nodes.length).toBeGreaterThan(0);
     });
