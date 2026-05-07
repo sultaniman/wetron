@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { ModelGraph } from "@wetron/core/ir";
 import { decodeWeight, computeStats } from "@wetron/core";
 import type { WeightStats } from "@wetron/core";
@@ -7,8 +7,9 @@ import { BackButton } from "./panel-ui.tsx";
 import { Tooltip } from "../tooltip.tsx";
 import { formatVal, isIntegerDtype } from "./format-val.ts";
 import { VirtualValues } from "./virtual-values.tsx";
-import { pickColormap, colorForCell } from "./heatmap-color.ts";
+import { WeightHistogram, WeightHeatmap } from "./weight-viz.tsx";
 import css from "./node-property-panel.module.css";
+import wcss from "./weight-panel.module.css";
 
 const SIZE_THRESHOLD = 20 * 1024 * 1024;
 
@@ -58,6 +59,18 @@ export function WeightPanel({
     graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined,
   );
   const [viz, setViz] = useState<"dist" | "heat">("dist");
+
+  // Auto-enable on the transition from no-weights to weights-loaded so a user
+  // who opens this panel before loading external weights (TF2 SavedModel) sees
+  // stats appear automatically once the load completes. Don't override a manual toggle.
+  const prevHadWeights = useRef(graph.weights !== undefined);
+  useEffect(() => {
+    const has = graph.weights !== undefined;
+    if (has && !prevHadWeights.current && graph.fileSizeBytes <= SIZE_THRESHOLD) {
+      setShowWeights(true);
+    }
+    prevHadWeights.current = has;
+  }, [graph.weights, graph.fileSizeBytes]);
 
   const dtype = target.dtype ?? "";
 
@@ -126,17 +139,26 @@ export function WeightPanel({
       </div>
 
       <div className={css.section}>
-        <div className={css.toggleRow}>
+        <div className={wcss.toggleRow}>
           <span>Show weights</span>
           <button
             data-testid="show-weights-switch"
-            className={`${css.switch}${showWeights ? "" : ` ${css.switchOff}`}`}
+            className={`${wcss.switch}${showWeights ? "" : ` ${wcss.switchOff}`}`}
             onClick={() => setShowWeights((v) => !v)}
             aria-label="Show weights"
+            disabled={graph.hasExternalWeights && graph.weights === undefined}
           />
         </div>
-        {isLarge && !showWeights && (
-          <div className={css.sizeNote}>
+        {graph.hasExternalWeights && graph.weights === undefined && (
+          <div className={wcss.sizeNote}>
+            <strong>Weights live in an external checkpoint.</strong>
+            <br />
+            Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see
+            stats and plots for this tensor.
+          </div>
+        )}
+        {isLarge && !showWeights && !(graph.hasExternalWeights && graph.weights === undefined) && (
+          <div className={wcss.sizeNote}>
             <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong>
             <br />
             Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
@@ -146,21 +168,21 @@ export function WeightPanel({
 
       {loaded && (
         <div className={css.section}>
-          <div className={css.sectionLabelRow}>
+          <div className={wcss.sectionLabelRow}>
             <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
             <Tabs.Root value={viz} onValueChange={(v) => setViz(v as "dist" | "heat")}>
-              <Tabs.List className={css.seg}>
+              <Tabs.List className={wcss.seg}>
                 <Tabs.Tab
                   value="dist"
                   data-testid="viz-dist"
-                  className={viz === "dist" ? css.segOn : ""}
+                  className={viz === "dist" ? wcss.segOn : ""}
                 >
                   dist
                 </Tabs.Tab>
                 <Tabs.Tab
                   value="heat"
                   data-testid="viz-heat"
-                  className={viz === "heat" ? css.segOn : ""}
+                  className={viz === "heat" ? wcss.segOn : ""}
                 >
                   heat
                 </Tabs.Tab>
@@ -188,78 +210,18 @@ export function WeightPanel({
             <span className={css.rowValue}>{loaded.stats.zeros}</span>
           </div>
 
-          {viz === "dist" && (
-            <div data-testid="histogram" className={css.spark}>
-              {loaded.stats.histogram.map((count, i) => {
-                const bins = loaded.stats.histogram.length;
-                const binWidth = (loaded.stats.max - loaded.stats.min) / bins;
-                const binStart = loaded.stats.min + i * binWidth;
-                const binEnd = loaded.stats.min + (i + 1) * binWidth;
-                const maxCount = Math.max(...loaded.stats.histogram, 1);
-                const pct = (count / maxCount) * 100;
-                const tip = `[${formatVal(binStart, dtype || "float32")}, ${formatVal(binEnd, dtype || "float32")}) · ${count.toLocaleString()} value${count === 1 ? "" : "s"}`;
-                return <span key={i} title={tip} style={{ height: `${Math.max(2, pct)}%` }} />;
-              })}
-            </div>
+          {viz === "dist" && <WeightHistogram stats={loaded.stats} dtype={dtype} />}
+          {viz === "heat" && (
+            <WeightHeatmap stats={loaded.stats} dtype={dtype} isDark={isDark} />
           )}
-
-          {viz === "heat" &&
-            (() => {
-              // Auto-scale tile colors by the cell-mean range so subtle variation
-              // between chunks is visible even when the tensor's overall min/max is wide.
-              const cells = loaded.stats.heatmap;
-              let cellMin = Infinity;
-              let cellMax = -Infinity;
-              for (const v of cells) {
-                if (v < cellMin) cellMin = v;
-                if (v > cellMax) cellMax = v;
-              }
-              const colormap = pickColormap(cellMin, cellMax);
-              return (
-                <>
-                  <div
-                    className={css.heatCaption}
-                    title={`Each tile is the arithmetic mean of ${loaded.stats.chunkSize.toLocaleString()} consecutive values from the flattened tensor (row-major order). The 16×8 grid divides the tensor into ${cells.length} chunks; the final chunk may be smaller if the tensor count is not divisible by ${cells.length}. Colors are auto-scaled to the chunk-mean range so small differences are visible.`}
-                  >
-                    Tile = mean of {loaded.stats.chunkSize.toLocaleString()} consecutive value
-                    {loaded.stats.chunkSize === 1 ? "" : "s"}
-                  </div>
-                  <div data-testid="heatmap" className={css.heat}>
-                    {cells.map((val, i) => {
-                      const start = i * loaded.stats.chunkSize;
-                      const tip = `mean ${formatVal(val, dtype || "float32")} · indices [${start}…${start + loaded.stats.chunkSize - 1}]`;
-                      return (
-                        <span
-                          key={i}
-                          title={tip}
-                          style={{
-                            background: colorForCell(val, cellMin, cellMax, colormap, isDark),
-                          }}
-                        />
-                      );
-                    })}
-                  </div>
-                  <div className={css.heatLegend}>
-                    <div className={`${css.heatLegendBar} ${css.heatLegendBarSequential}`} />
-                    <div
-                      className={css.heatLegendTicks}
-                      title="Range of chunk means (auto-scaled). May be narrower than the tensor's full min/max."
-                    >
-                      <span>{formatVal(cellMin, dtype || "float32")}</span>
-                      <span>{formatVal(cellMax, dtype || "float32")}</span>
-                    </div>
-                  </div>
-                </>
-              );
-            })()}
         </div>
       )}
 
       {loaded && showWeights && (
         <div className={css.sectionLast}>
-          <div className={css.sectionLabelRow}>
+          <div className={wcss.sectionLabelRow}>
             <span>Values</span>
-            <span className={css.valuesMeta}>{loaded.values.length.toLocaleString()} values</span>
+            <span className={wcss.valuesMeta}>{loaded.values.length.toLocaleString()} values</span>
           </div>
           <VirtualValues
             data-testid="values-grid"

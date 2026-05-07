@@ -14,6 +14,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import "./model-graph-view.css";
 import type { ModelGraph, PanelTarget, ParseWarning } from "@wetron/core/ir";
+import type { LayoutDirection } from "@wetron/core/transform";
 import { GraphNodeComponent } from "../nodes/graph-node.tsx";
 import { IoNodeComponent } from "../nodes/io-node.tsx";
 import { ModelEdge } from "../edges/model-edge.tsx";
@@ -61,15 +62,20 @@ type Props = {
   colorMode?: ColorMode;
   selectedEdgeTensorName?: string | null;
   searchQuery?: string;
+  /** Layout direction. Defaults to "TB" (top-to-bottom). Use "LR" for left-to-right pipelines. */
+  rankdir?: LayoutDirection;
 };
 
 const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>(function Inner(
-  { graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, colorMode },
+  { graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, colorMode, rankdir },
   ref,
 ) {
   const isDark = useColorMode() === "dark";
   const rf = useReactFlow();
-  const { nodes: rawNodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
+  const { nodes: rawNodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(
+    graph,
+    rankdir,
+  );
   const matchedNames = searchQuery ? filterGraph(graph, searchQuery) : EMPTY_NAMES;
   const nodes = useNodeDim(rawNodes, matchedNames);
   const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark, matchedNames);

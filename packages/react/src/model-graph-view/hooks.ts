@@ -8,16 +8,21 @@ import {
   type NodeMouseHandler,
 } from "@xyflow/react";
 import type { MouseEvent } from "react";
-import { modelGraphToFlow, type GraphNodeData, type FlowEdge } from "@wetron/core/transform";
+import {
+  modelGraphToFlow,
+  type GraphNodeData,
+  type FlowEdge,
+  type LayoutDirection,
+} from "@wetron/core/transform";
 import type { ModelGraph, PanelTarget } from "@wetron/core/ir";
 import { EDGE_THEME } from "../theme.ts";
 
 type FlowEdgeData = FlowEdge["data"];
 
-export function useModelNodes(graph: ModelGraph) {
+export function useModelNodes(graph: ModelGraph, rankdir: LayoutDirection = "TB") {
   const { nodes: layoutNodes, edges: layoutEdges } = useMemo(
-    () => modelGraphToFlow(graph),
-    [graph],
+    () => modelGraphToFlow(graph, { rankdir }),
+    [graph, rankdir],
   );
   const [nodes, setNodes, onNodesChange] = useNodesState(layoutNodes as Node<GraphNodeData>[]);
   useEffect(() => {
