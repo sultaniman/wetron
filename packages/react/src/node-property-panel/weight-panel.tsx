@@ -4,6 +4,7 @@ import { decodeWeight, computeStats } from "@wetron/core";
 import type { WeightStats } from "@wetron/core";
 import { Tabs } from "@base-ui/react/tabs";
 import { BackButton } from "./panel-ui.tsx";
+import { Tooltip } from "../tooltip.tsx";
 import { formatVal, isIntegerDtype } from "./format-val.ts";
 import { VirtualValues } from "./virtual-values.tsx";
 import { pickColormap, colorForCell } from "./heatmap-color.ts";
@@ -97,7 +98,9 @@ export function WeightPanel({
         </div>
         <div className={css.headerText}>
           <div className={css.nodeTitle}>Weight</div>
-          <div className={css.nodeSubtitle}>{target.name}</div>
+          <Tooltip text={target.name} onlyIfOverflow>
+            <div className={css.nodeSubtitle}>{target.name}</div>
+          </Tooltip>
         </div>
       </div>
 
@@ -191,9 +194,14 @@ export function WeightPanel({
           {viz === "dist" && (
             <div data-testid="histogram" className={css.spark}>
               {loaded.stats.histogram.map((count, i) => {
+                const bins = loaded.stats.histogram.length;
+                const binWidth = (loaded.stats.max - loaded.stats.min) / bins;
+                const binStart = loaded.stats.min + i * binWidth;
+                const binEnd = loaded.stats.min + (i + 1) * binWidth;
                 const maxCount = Math.max(...loaded.stats.histogram, 1);
                 const pct = (count / maxCount) * 100;
-                return <span key={i} style={{ height: `${Math.max(2, pct)}%` }} />;
+                const tip = `[${formatVal(binStart, dtype || "float32")}, ${formatVal(binEnd, dtype || "float32")}) · ${count.toLocaleString()} value${count === 1 ? "" : "s"}`;
+                return <span key={i} title={tip} style={{ height: `${Math.max(2, pct)}%` }} />;
               })}
             </div>
           )}
@@ -202,7 +210,10 @@ export function WeightPanel({
             const colormap = pickColormap(loaded.stats.min, loaded.stats.max);
             return (
               <>
-                <div className={css.heatCaption}>
+                <div
+                  className={css.heatCaption}
+                  title={`Each tile is the arithmetic mean of ${loaded.stats.chunkSize.toLocaleString()} consecutive values from the flattened tensor (row-major order). The 16×8 grid divides the tensor into ${loaded.stats.heatmap.length} chunks; the final chunk may be smaller if the tensor count is not divisible by ${loaded.stats.heatmap.length}.`}
+                >
                   Tile = mean of {loaded.stats.chunkSize.toLocaleString()} consecutive value{loaded.stats.chunkSize === 1 ? "" : "s"}
                 </div>
                 <div data-testid="heatmap" className={css.heat}>

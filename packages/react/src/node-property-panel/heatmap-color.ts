@@ -14,11 +14,11 @@ const STOPS_LIGHT: readonly string[] = [
 ];
 
 const STOPS_DARK: readonly string[] = [
-  "#1e3a8a",
-  "#1e40af",
-  "#2563eb",
-  "#60a5fa",
   "#bfdbfe",
+  "#93c5fd",
+  "#3b82f6",
+  "#1d4ed8",
+  "#1e3a8a",
 ];
 
 export function colorForCell(

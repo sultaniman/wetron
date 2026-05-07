@@ -43,11 +43,15 @@
   --wetron-panel-chip-bg: #262646;
   --wetron-panel-chip-color: #a0a0c0;
   --wetron-panel-close-hover: #2a2a3a;
-  --wetron-heat-stop-0: #1e3a8a;
-  --wetron-heat-stop-1: #1e40af;
-  --wetron-heat-stop-2: #2563eb;
-  --wetron-heat-stop-3: #60a5fa;
-  --wetron-heat-stop-4: #bfdbfe;
+  --wetron-heat-stop-0: #bfdbfe;
+  --wetron-heat-stop-1: #93c5fd;
+  --wetron-heat-stop-2: #3b82f6;
+  --wetron-heat-stop-3: #1d4ed8;
+  --wetron-heat-stop-4: #1e3a8a;
+  --wetron-seg-bg: rgba(255, 255, 255, 0.06);
+  --wetron-seg-color: #94a3b8;
+  --wetron-seg-on-bg: rgba(255, 255, 255, 0.12);
+  --wetron-seg-on-color: #93c5fd;
 }
 
 .header {
@@ -471,7 +475,7 @@
 
 .seg {
   display: inline-flex;
-  background: #f1f5f9;
+  background: var(--wetron-seg-bg, #f1f5f9);
   border-radius: 6px;
   padding: 2px;
 }
@@ -483,16 +487,16 @@
   padding: 3px 8px;
   border-radius: 4px;
   cursor: pointer;
-  color: #64748b;
+  color: var(--wetron-seg-color, #64748b);
   outline: none;
 }
 .seg button:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--wetron-seg-on-color, #2563eb);
   outline-offset: 1px;
 }
 .segOn {
-  background: #fff !important;
-  color: #2563eb !important;
+  background: var(--wetron-seg-on-bg, #fff) !important;
+  color: var(--wetron-seg-on-color, #2563eb) !important;
   font-weight: 600;
 }
 
