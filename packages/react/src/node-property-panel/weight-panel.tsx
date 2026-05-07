@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import type { ModelGraph } from "@wetron/core/ir";
 import { decodeWeight, computeStats } from "@wetron/core";
 import type { WeightStats } from "@wetron/core";
+import { Tabs } from "@base-ui/react/tabs";
 import { BackButton } from "./panel-ui.tsx";
 import { formatVal, isIntegerDtype } from "./format-val.ts";
 import { VirtualValues } from "./virtual-values.tsx";
@@ -142,22 +143,27 @@ export function WeightPanel({
         <div className={css.section}>
           <div className={css.sectionLabelRow}>
             <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
-            <span className={css.seg}>
-              <button
-                data-testid="viz-dist"
-                className={viz === "dist" ? css.segOn : ""}
-                onClick={() => setViz("dist")}
-              >
-                dist
-              </button>
-              <button
-                data-testid="viz-heat"
-                className={viz === "heat" ? css.segOn : ""}
-                onClick={() => setViz("heat")}
-              >
-                heat
-              </button>
-            </span>
+            <Tabs.Root
+              value={viz}
+              onValueChange={(v) => setViz(v as "dist" | "heat")}
+            >
+              <Tabs.List className={css.seg}>
+                <Tabs.Tab
+                  value="dist"
+                  data-testid="viz-dist"
+                  className={viz === "dist" ? css.segOn : ""}
+                >
+                  dist
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="heat"
+                  data-testid="viz-heat"
+                  className={viz === "heat" ? css.segOn : ""}
+                >
+                  heat
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.Root>
           </div>
 
           <div className={css.row}>

@@ -15,9 +15,9 @@ export function colorForCell(value: number, min: number, max: number, kind: Colo
     if (t < 0) return mix("#f8fafc", "#1d4ed8", -t);
     return mix("#f8fafc", "#dc2626", t);
   }
-  // sequential: pale blue -> deep blue, t in [0,1].
+  // sequential: pale green -> deep green, t in [0,1].
   const t = (value - min) / (max - min);
-  return mix("#e0f2fe", "#1e40af", Math.max(0, Math.min(1, t)));
+  return mix("#dcfce7", "#15803d", Math.max(0, Math.min(1, t)));
 }
 
 /** linear interpolation between two #rrggbb colors. amount in [0,1]. */

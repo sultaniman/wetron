@@ -464,6 +464,11 @@
   border-radius: 4px;
   cursor: pointer;
   color: #64748b;
+  outline: none;
+}
+.seg button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
 }
 .segOn {
   background: #fff !important;
@@ -504,7 +509,7 @@
   border-radius: 3px;
 }
 .heatLegendBarSequential {
-  background: linear-gradient(to right, #e0f2fe, #1e40af);
+  background: linear-gradient(to right, #dcfce7, #15803d);
 }
 .heatLegendBarDiverging {
   background: linear-gradient(to right, #1d4ed8 0%, #f8fafc 50%, #dc2626 100%);

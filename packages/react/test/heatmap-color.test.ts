@@ -34,12 +34,14 @@ describe("colorForCell", () => {
     const c = colorForCell(1, -1, 1, "diverging");
     expect(c).toBe("rgb(220,38,38)");
   });
-  test("sequential min -> pale blue", () => {
+  test("sequential min -> pale green", () => {
     const c = colorForCell(0, 0, 255, "sequential");
-    expect(c).toBe("rgb(224,242,254)");
+    // pale green #dcfce7 -> rgb(220,252,231)
+    expect(c).toBe("rgb(220,252,231)");
   });
-  test("sequential max -> deep blue", () => {
+  test("sequential max -> deep green", () => {
     const c = colorForCell(255, 0, 255, "sequential");
-    expect(c).toBe("rgb(30,64,175)");
+    // deep green #15803d -> rgb(21,128,61)
+    expect(c).toBe("rgb(21,128,61)");
   });
 });
