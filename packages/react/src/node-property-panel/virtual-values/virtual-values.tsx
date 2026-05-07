@@ -30,13 +30,17 @@ export function VirtualValues({
     overscan: 6,
   });
 
-  const alignClass = align === "right" ? virtualValuesCss.gridAlignRight : virtualValuesCss.gridAlignCenter;
+  const alignClass =
+    align === "right" ? virtualValuesCss.gridAlignRight : virtualValuesCss.gridAlignCenter;
 
   return (
     <ScrollArea.Root className={virtualValuesCss.valuesScrollRoot} data-testid={testId}>
       <ScrollArea.Viewport ref={parentRef} className={virtualValuesCss.valuesScrollViewport}>
         <ScrollArea.Content>
-          <div className={virtualValuesCss.gridVals} style={{ height: v.getTotalSize(), position: "relative" }}>
+          <div
+            className={virtualValuesCss.gridVals}
+            style={{ height: v.getTotalSize(), position: "relative" }}
+          >
             {v.getVirtualItems().map((row) => (
               <div
                 key={row.index}

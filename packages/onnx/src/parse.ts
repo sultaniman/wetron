@@ -222,7 +222,8 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
       }
     }
 
-    const prefixed = (name: string): string => (internalNames.has(name) ? `${prefix}/${name}` : name);
+    const prefixed = (name: string): string =>
+      internalNames.has(name) ? `${prefix}/${name}` : name;
 
     for (const init of subInits) {
       const name = String(init["name"] ?? "");

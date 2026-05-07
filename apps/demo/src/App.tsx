@@ -88,8 +88,7 @@ export default function App() {
     if (!indexFile || !dataFile) {
       setWeightsLoad({
         status: "error",
-        message:
-          "Pick both files: variables.index and variables.data-00000-of-00001",
+        message: "Pick both files: variables.index and variables.data-00000-of-00001",
       });
       return;
     }
@@ -286,8 +285,7 @@ export default function App() {
             style={{
               padding: "5px 12px",
               background: weightsLoad.status === "loading" ? chrome.faint : "transparent",
-              color:
-                weightsLoad.status === "error" ? "#d93025" : chrome.muted,
+              color: weightsLoad.status === "error" ? "#d93025" : chrome.muted,
               border: `1px solid ${weightsLoad.status === "error" ? "#d93025" : chrome.border}`,
               borderRadius: 6,
               cursor: weightsLoad.status === "loading" ? "wait" : "pointer",

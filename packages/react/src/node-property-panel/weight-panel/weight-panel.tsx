@@ -1,4 +1,4 @@
-import {JSX, useEffect, useMemo, useRef, useState } from "react";
+import { JSX, useEffect, useMemo, useRef, useState } from "react";
 import type { ModelGraph } from "@wetron/core/ir";
 import { decodeWeight, computeStats } from "@wetron/core";
 import type { WeightStats } from "@wetron/core";
@@ -192,11 +192,15 @@ export function WeightPanel({
 
           <div className={propertyPanelCss.row}>
             <span className={propertyPanelCss.rowLabel}>min</span>
-            <span className={propertyPanelCss.rowValue}>{formatVal(loaded.stats.min, dtype || "float32")}</span>
+            <span className={propertyPanelCss.rowValue}>
+              {formatVal(loaded.stats.min, dtype || "float32")}
+            </span>
           </div>
           <div className={propertyPanelCss.row}>
             <span className={propertyPanelCss.rowLabel}>max</span>
-            <span className={propertyPanelCss.rowValue}>{formatVal(loaded.stats.max, dtype || "float32")}</span>
+            <span className={propertyPanelCss.rowValue}>
+              {formatVal(loaded.stats.max, dtype || "float32")}
+            </span>
           </div>
           <div className={propertyPanelCss.row}>
             <span className={propertyPanelCss.rowLabel}>{"μ ± σ"}</span>
@@ -211,9 +215,7 @@ export function WeightPanel({
           </div>
 
           {viz === "dist" && <WeightHistogram stats={loaded.stats} dtype={dtype} />}
-          {viz === "heat" && (
-            <WeightHeatmap stats={loaded.stats} dtype={dtype} isDark={isDark} />
-          )}
+          {viz === "heat" && <WeightHeatmap stats={loaded.stats} dtype={dtype} isDark={isDark} />}
         </div>
       )}
 
@@ -221,7 +223,9 @@ export function WeightPanel({
         <div className={propertyPanelCss.sectionLast}>
           <div className={weightPanelCss.sectionLabelRow}>
             <span>Values</span>
-            <span className={weightPanelCss.valuesMeta}>{loaded.values.length.toLocaleString()} values</span>
+            <span className={weightPanelCss.valuesMeta}>
+              {loaded.values.length.toLocaleString()} values
+            </span>
           </div>
           <VirtualValues
             data-testid="values-grid"

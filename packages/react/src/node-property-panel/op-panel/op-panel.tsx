@@ -104,7 +104,10 @@ export function OpPanel({
         </div>
       )}
       {node.outputs.length > 0 && (
-        <div className={`${propertyPanelCss.section} ${propertyPanelCss.scrollSection}`} data-scroll="true">
+        <div
+          className={`${propertyPanelCss.section} ${propertyPanelCss.scrollSection}`}
+          data-scroll="true"
+        >
           <SectionLabel icon={<ArrowCircleUpIcon size={12} />} title="Outputs" />
           {node.outputs.map((name, i) => (
             <Row

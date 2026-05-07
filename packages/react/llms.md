@@ -94,17 +94,17 @@ import "@wetron/react/dist/index.css";
 
 The 5-stop sequential colormap (heatmap legend bar) reads from CSS variables, so themes can re-skin it without rebuilding:
 
-| Variable                | Light     | Dark      | Controls                          |
-| ----------------------- | --------- | --------- | --------------------------------- |
-| `--wetron-heat-stop-0`  | `#eff6ff` | `#bfdbfe` | colormap stop 0 (low values)      |
-| `--wetron-heat-stop-1`  | `#bfdbfe` | `#93c5fd` | colormap stop 1                   |
-| `--wetron-heat-stop-2`  | `#60a5fa` | `#3b82f6` | colormap stop 2 (mid)             |
-| `--wetron-heat-stop-3`  | `#2563eb` | `#1d4ed8` | colormap stop 3                   |
-| `--wetron-heat-stop-4`  | `#1e3a8a` | `#1e3a8a` | colormap stop 4 (high values)     |
-| `--wetron-seg-bg`       | `#f1f5f9` | `rgba(255,255,255,.06)` | segmented (`dist|heat`) bg |
-| `--wetron-seg-color`    | `#64748b` | `#94a3b8` | inactive tab text color           |
-| `--wetron-seg-on-bg`    | `#fff`    | `rgba(255,255,255,.12)` | active tab bg                     |
-| `--wetron-seg-on-color` | `#2563eb` | `#f1f5f9` | active tab text color             |
+| Variable                | Light     | Dark                    | Controls                      |
+| ----------------------- | --------- | ----------------------- | ----------------------------- | --------- |
+| `--wetron-heat-stop-0`  | `#eff6ff` | `#bfdbfe`               | colormap stop 0 (low values)  |
+| `--wetron-heat-stop-1`  | `#bfdbfe` | `#93c5fd`               | colormap stop 1               |
+| `--wetron-heat-stop-2`  | `#60a5fa` | `#3b82f6`               | colormap stop 2 (mid)         |
+| `--wetron-heat-stop-3`  | `#2563eb` | `#1d4ed8`               | colormap stop 3               |
+| `--wetron-heat-stop-4`  | `#1e3a8a` | `#1e3a8a`               | colormap stop 4 (high values) |
+| `--wetron-seg-bg`       | `#f1f5f9` | `rgba(255,255,255,.06)` | segmented (`dist              | heat`) bg |
+| `--wetron-seg-color`    | `#64748b` | `#94a3b8`               | inactive tab text color       |
+| `--wetron-seg-on-bg`    | `#fff`    | `rgba(255,255,255,.12)` | active tab bg                 |
+| `--wetron-seg-on-color` | `#2563eb` | `#f1f5f9`               | active tab text color         |
 
 Both themes ramp pale → deep low-to-high, so the same data renders with consistent direction across modes. Tile colors are JS-computed (light vs dark stop arrays selected via `isDark` prop); the legend bar uses the matching CSS variables so the two stay in sync.
 

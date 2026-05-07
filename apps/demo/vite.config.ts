@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     conditions: ["source", "browser", "module"],
+    dedupe: ["react", "react-dom"],
   },
   server: {
     watch: {

@@ -59,7 +59,10 @@ export function NodePropertyPanel({
   return (
     <div className={propertyPanelCss.panel} data-theme={theme}>
       {onClose && <CloseButton onClose={onClose} />}
-      <ScrollArea.Root key={isGraphNode(target) ? target.name : "other"} className={propertyPanelCss.scrollRoot}>
+      <ScrollArea.Root
+        key={isGraphNode(target) ? target.name : "other"}
+        className={propertyPanelCss.scrollRoot}
+      >
         <ScrollArea.Viewport className={propertyPanelCss.scrollViewport}>
           <ScrollArea.Content>
             <div className={propertyPanelCss.scrollContent}>

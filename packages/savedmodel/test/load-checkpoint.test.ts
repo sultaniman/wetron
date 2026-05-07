@@ -137,10 +137,7 @@ describe("loadSavedModelWeights", () => {
     const dataBytes = new Uint8Array(dataBuf.buffer);
 
     const indexFile = new File([indexBytes.buffer as ArrayBuffer], "variables.index");
-    const dataFile = new File(
-      [dataBytes.buffer as ArrayBuffer],
-      "variables.data-00000-of-00001",
-    );
+    const dataFile = new File([dataBytes.buffer as ArrayBuffer], "variables.data-00000-of-00001");
 
     const { weights, metas } = await loadSavedModelWeights(indexFile, dataFile);
 
@@ -174,10 +171,7 @@ describe("loadSavedModelWeights", () => {
     const dataBytes = new Uint8Array(new Float32Array([1, 2]).buffer);
 
     const indexFile = new File([indexBytes.buffer as ArrayBuffer], "variables.index");
-    const dataFile = new File(
-      [dataBytes.buffer as ArrayBuffer],
-      "variables.data-00000-of-00001",
-    );
+    const dataFile = new File([dataBytes.buffer as ArrayBuffer], "variables.data-00000-of-00001");
 
     const { weights } = await loadSavedModelWeights(indexFile, dataFile);
     expect(weights.get("does/not/exist")).toBeUndefined();

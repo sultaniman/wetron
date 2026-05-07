@@ -9,6 +9,7 @@ import type {
 } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 import { bigIntToNumber } from "@wetron/core/dtypes";
+import { TF_DTYPE } from "./tf-dtype.ts";
 import descriptor from "./tf-descriptor.json" with { type: "json" };
 
 let _root: Root | null = null;
@@ -88,24 +89,6 @@ function shapeFromTf(tfShape: TfShape): readonly number[] | null {
   if (!tfShape.dim) return [];
   return tfShape.dim.map((d) => longToNumber(d.size ?? -1));
 }
-
-// TF DataType enum (subset wetron actually surfaces — see tensorflow/core/framework/types.proto)
-const TF_DTYPE: Record<number, string> = {
-  1: "float32",
-  2: "float64",
-  3: "int32",
-  4: "uint8",
-  5: "int16",
-  6: "int8",
-  7: "string",
-  9: "int64",
-  10: "bool",
-  14: "bfloat16",
-  17: "uint16",
-  19: "float16",
-  22: "uint32",
-  23: "uint64",
-};
 
 export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGraph {
   const root = getRoot();

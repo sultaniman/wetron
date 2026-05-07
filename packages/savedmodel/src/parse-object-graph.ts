@@ -16,20 +16,9 @@
  * we scan for the proto start rather than relying on a fixed offset.
  */
 
-const _dec = new TextDecoder();
+import { readVarint } from "./varint.ts";
 
-function readVarint(view: DataView, pos: number): [number, number] {
-  let result = 0;
-  let shift = 0;
-  let p = pos;
-  while (p < view.byteLength && p - pos < 10) {
-    const b = view.getUint8(p++);
-    result += (b & 0x7f) * Math.pow(2, shift);
-    if (!(b & 0x80)) break;
-    shift += 7;
-  }
-  return [result, p];
-}
+const _dec = new TextDecoder();
 
 function findString(value: Uint8Array, fieldNum: number): string | null {
   const view = new DataView(value.buffer, value.byteOffset, value.byteLength);
@@ -65,10 +54,7 @@ function parseSerializedTensor(value: Uint8Array): { fullName: string; key: stri
   return null;
 }
 
-function parseTrackableObject(
-  value: Uint8Array,
-  out: Map<string, string>,
-): void {
+function parseTrackableObject(value: Uint8Array, out: Map<string, string>): void {
   const view = new DataView(value.buffer, value.byteOffset, value.byteLength);
   let pos = 0;
   while (pos < value.length) {

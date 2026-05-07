@@ -1,4 +1,6 @@
 import { ParseError } from "@wetron/core/ir";
+import { readVarint } from "./varint.ts";
+import { TF_DTYPE } from "./tf-dtype.ts";
 
 export interface CheckpointMeta {
   readonly dtype: string;
@@ -11,34 +13,6 @@ export interface CheckpointMeta {
 const MAGIC_LO = 0x8b80fb57;
 const MAGIC_HI = 0xdb477524;
 const FOOTER_LENGTH = 48;
-
-const TF_DTYPE: Record<number, string> = {
-  1: "float32",
-  2: "float64",
-  3: "int32",
-  4: "uint8",
-  5: "int16",
-  6: "int8",
-  9: "int64",
-  10: "bool",
-  14: "bfloat16",
-  17: "float16",
-  19: "uint32",
-  21: "uint64",
-};
-
-function readVarint(view: DataView, pos: number): [number, number] {
-  let result = 0;
-  let shift = 0;
-  let p = pos;
-  while (p < view.byteLength && p - pos < 10) {
-    const b = view.getUint8(p++);
-    result += (b & 0x7f) * Math.pow(2, shift);
-    if (!(b & 0x80)) break;
-    shift += 7;
-  }
-  return [result, p];
-}
 
 interface BlockHandle {
   offset: number;
@@ -122,11 +96,7 @@ function parseBundleEntry(value: Uint8Array): Partial<CheckpointMeta> {
             const dimBytes = msgBytes.subarray(sp2, sp2 + slen);
             sp = sp2 + slen;
             if (sfn === 2) {
-              const dv = new DataView(
-                dimBytes.buffer,
-                dimBytes.byteOffset,
-                dimBytes.byteLength,
-              );
+              const dv = new DataView(dimBytes.buffer, dimBytes.byteOffset, dimBytes.byteLength);
               let dp = 0;
               while (dp < dimBytes.length) {
                 const [dtag, dp1] = readVarint(dv, dp);

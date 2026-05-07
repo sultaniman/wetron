@@ -16,10 +16,7 @@ const SUFFIX = "/.ATTRIBUTES/VARIABLE_VALUE";
  * Returns a new ModelGraph with `weights` populated and `tensorShapes` extended
  * with dtype/shape for each mapped variable.
  */
-export function attachCheckpointToGraph(
-  graph: ModelGraph,
-  loaded: LoadedCheckpoint,
-): ModelGraph {
+export function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpoint): ModelGraph {
   const nameToKey = new Map<string, string>();
 
   for (const node of graph.nodes) {

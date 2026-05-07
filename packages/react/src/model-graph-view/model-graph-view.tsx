@@ -72,10 +72,12 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
 ) {
   const isDark = useColorMode() === "dark";
   const rf = useReactFlow();
-  const { nodes: rawNodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(
-    graph,
-    rankdir,
-  );
+  const {
+    nodes: rawNodes,
+    onNodesChange,
+    layoutNodes,
+    layoutEdges,
+  } = useModelNodes(graph, rankdir);
   const matchedNames = searchQuery ? filterGraph(graph, searchQuery) : EMPTY_NAMES;
   const nodes = useNodeDim(rawNodes, matchedNames);
   const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark, matchedNames);
