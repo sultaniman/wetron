@@ -65,11 +65,6 @@ Items 1-2 are mostly self-funded already; items 3-7 are the realistic targets fo
 
 ## Public funding picture
 
-This page is the recurring channel. Larger one-shot funding is being pursued separately:
-
-- **NGI Zero / NLnet** - €50,000 over ~6-8 months for format coverage and a published technical report on binary layouts. [Application draft](https://github.com/sultaniman/wetron/blob/main/docs/grants/ngi-zero.md).
-- **Prototype Fund** (Germany) - €47,500 over 6 months for a self-hostable server companion project covering Python-only formats. [Application draft](https://github.com/sultaniman/wetron/blob/main/docs/grants/prototype-fund.md).
-
 Sponsorship via Open Collective and GitHub Sponsors covers the recurring maintenance and the gaps between grant cycles. Both matter; neither alone is enough.
 
 ## Current sponsors
