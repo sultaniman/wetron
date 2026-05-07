@@ -141,6 +141,21 @@ describe("onClose and onTensorClick", () => {
     expect(screen.queryByLabelText("Close")).toBeNull();
   });
 
+  test("op panel applies scroll class to inputs and outputs sections", async () => {
+    const opWithManyInputs: GraphNode = {
+      name: "concat_0",
+      opType: "Concat",
+      inputs: Array.from({ length: 30 }, (_, i) => `in_${i}`),
+      outputs: ["out"],
+      attributes: {},
+    };
+    const { container } = render(React.createElement(NodePropertyPanel, { target: opWithManyInputs }));
+    await act(async () => {});
+    const scrollers = container.querySelectorAll('[data-scroll="true"]');
+    // One for inputs, one for outputs.
+    expect(scrollers.length).toBe(2);
+  });
+
   test("onTensorClick fires with correct tensor name", async () => {
     let clicked = "";
     render(

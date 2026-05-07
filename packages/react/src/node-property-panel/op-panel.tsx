@@ -123,7 +123,7 @@ export function OpPanel({
         </div>
       </div>
       {visibleInputs.length > 0 && (
-        <div className={css.section}>
+        <div className={`${css.section} ${css.scrollSection}`} data-scroll="true">
           <SectionLabel icon={<ArrowCircleDownIcon size={12} />} title="Inputs" />
           {visibleInputs.map(({ name, slot }) => {
             const sourceOp = inputSources?.get(name);
@@ -146,7 +146,7 @@ export function OpPanel({
         </div>
       )}
       {node.outputs.length > 0 && (
-        <div className={css.section}>
+        <div className={`${css.section} ${css.scrollSection}`} data-scroll="true">
           <SectionLabel icon={<ArrowCircleUpIcon size={12} />} title="Outputs" />
           {node.outputs.map((name, i) => (
             <Row

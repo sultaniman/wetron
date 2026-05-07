@@ -584,3 +584,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.scrollSection {
+  max-height: 240px;
+  overflow-y: auto;
+}
