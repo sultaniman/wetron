@@ -1,11 +1,12 @@
 import React from "react";
 import { ScrollArea } from "@base-ui/react/scroll-area";
-import type { GraphNode, GraphValue, PanelTarget } from "@wetron/core/ir";
+import type { GraphNode, GraphValue, ModelGraph, PanelTarget } from "@wetron/core/ir";
 import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";
 import { OpPanel } from "./op-panel.tsx";
 import { IoPanel } from "./io-panel.tsx";
 import { EdgePanel } from "./edge-panel.tsx";
 import { TensorPanel } from "./tensor-panel.tsx";
+import { WeightPanel } from "./weight-panel.tsx";
 import { CloseButton } from "./panel-ui.tsx";
 import css from "./node-property-panel.module.css";
 
@@ -33,6 +34,7 @@ type TensorInfo = { readonly shape: readonly number[] | null; readonly dtype: st
 
 export function NodePropertyPanel({
   target,
+  graph,
   onTensorClick,
   onBack,
   onClose,
@@ -42,6 +44,7 @@ export function NodePropertyPanel({
   opsets,
 }: {
   target: PanelTarget | null;
+  graph?: ModelGraph;
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
   onClose?: () => void;
@@ -73,7 +76,11 @@ export function NodePropertyPanel({
               ) : isEdgeTarget(target) ? (
                 <EdgePanel edge={target.edge} tensorShapes={tensorShapes} onBack={onBack} />
               ) : isTensorTarget(target) ? (
-                <TensorPanel tensor={target.tensor} onBack={onBack} />
+                graph?.initializers.has(target.tensor.name) ? (
+                  <WeightPanel target={target.tensor} graph={graph} onBack={onBack} />
+                ) : (
+                  <TensorPanel tensor={target.tensor} onBack={onBack} />
+                )
               ) : (
                 <IoPanel
                   graphValue={target.graphValue}

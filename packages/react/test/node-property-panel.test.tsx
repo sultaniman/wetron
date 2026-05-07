@@ -77,6 +77,48 @@ describe("edge panel", () => {
   });
 });
 
+import type { ModelGraph } from "@wetron/core/ir";
+
+const graphWithInit: ModelGraph = {
+  name: "",
+  inputs: [],
+  outputs: [],
+  nodes: [],
+  initializers: new Map([["conv1.weight", { shape: [4], dtype: "float32" }]]),
+  tensorShapes: new Map([["conv1.weight", { shape: [4], dtype: "float32" }]]),
+  fileSizeBytes: 1024,
+  weights: {
+    totalBytes: 16,
+    get: () => new Uint8Array(16),
+  },
+};
+
+describe("initializer routing", () => {
+  test("renders WeightPanel header for an initializer", async () => {
+    render(
+      React.createElement(NodePropertyPanel, {
+        target: { tensor: { name: "conv1.weight", shape: [4], dtype: "float32" } },
+        graph: graphWithInit,
+      }),
+    );
+    await act(async () => {});
+    expect(screen.getByText("Weight")).toBeDefined();
+    expect(screen.getByText("conv1.weight")).toBeDefined();
+  });
+
+  test("renders TensorPanel for a non-initializer tensor", async () => {
+    render(
+      React.createElement(NodePropertyPanel, {
+        target: { tensor: { name: "activation_42", shape: [1, 64], dtype: "float32" } },
+        graph: graphWithInit,
+      }),
+    );
+    await act(async () => {});
+    expect(screen.getByText("Tensor")).toBeDefined();
+    expect(screen.getByText("activation_42")).toBeDefined();
+  });
+});
+
 describe("onClose and onTensorClick", () => {
   test("close button fires onClose when provided", async () => {
     let closed = false;
