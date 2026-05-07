@@ -512,11 +512,11 @@
 .heatLegendBarSequential {
   background: linear-gradient(
     to right,
-    #440154,
-    #3b528b,
-    #21908c,
-    #5dc863,
-    #fde725
+    #f0fdf4,
+    #bbf7d0,
+    #4ade80,
+    #16a34a,
+    #14532d
   );
 }
 .heatLegendTicks {
