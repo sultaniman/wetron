@@ -352,7 +352,7 @@ export default function App() {
               searchQuery={searchQuery}
               colorMode={colorMode}
             />
-            <div style={{ position: "absolute", top: 16, right: 16, width: 280, zIndex: 10 }}>
+            <div style={{ position: "absolute", top: 16, right: 16, width: 320, zIndex: 10 }}>
               <NodePropertyPanel
                 target={selected}
                 graph={state.status === "ready" ? state.graph : undefined}
