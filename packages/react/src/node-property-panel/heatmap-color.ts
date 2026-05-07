@@ -6,11 +6,11 @@ export function pickColormap(min: number, max: number): ColormapKind {
 }
 
 const STOPS: readonly string[] = [
-  "#ccfbf1",
-  "#5eead4",
-  "#14b8a6",
-  "#0d9488",
-  "#0f766e",
+  "#440154",
+  "#3b528b",
+  "#21908c",
+  "#5dc863",
+  "#fde725",
 ];
 
 export function colorForCell(value: number, min: number, max: number, kind: ColormapKind): string {
