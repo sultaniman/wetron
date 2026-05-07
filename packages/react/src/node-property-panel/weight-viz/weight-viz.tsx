@@ -2,6 +2,7 @@ import type { WeightStats } from "@wetron/core";
 import { formatVal } from "../format-val.ts";
 import { pickColormap, colorForCell } from "../heatmap-color.ts";
 import weightVizCss from "./weight-viz.module.css";
+import { JSX } from "react";
 
 export function WeightHistogram({
   stats,

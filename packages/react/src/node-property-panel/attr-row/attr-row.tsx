@@ -20,7 +20,7 @@ export function AttrRow({ name, value }: { name: string; value: AttributeValue }
           <button
             type="button"
             className={attrRowCss.expandBtn}
-            onClick={(e: React.MouseEvent) => {
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
               e.stopPropagation();
               e.currentTarget.blur();
               setExpanded((v) => !v);
