@@ -58,6 +58,10 @@
   --wetron-panel-chip-color: #a0a0c0;
   --wetron-panel-close-hover: #2a2a3a;
 
+  --wetron-edge-default: #7a7a9a;
+  --wetron-edge-default-opacity: 0.55;
+  --wetron-bg-pattern: #2a2a3a;
+
   /* ── Category node colors - override with .my-container [data-theme="light/dark"] { --wetron-category-*: … } ── */
   --wetron-category-input: #4caf50;
   --wetron-category-output: #42a5f5;
@@ -141,6 +145,10 @@
   --wetron-panel-chip-bg: #f0f0f0;
   --wetron-panel-chip-color: #888888;
   --wetron-panel-close-hover: #f0f0f0;
+
+  --wetron-edge-default: rgba(60, 60, 100, 0.55);
+  --wetron-edge-default-opacity: 1;
+  --wetron-bg-pattern: #d0d0d8;
 
   /* ── Category node colors ── */
   --wetron-category-input: #2e7d32;

@@ -1,5 +1,4 @@
 import { BaseEdge, type EdgeProps } from "@xyflow/react";
-import React from "react";
 import type { FlowEdge } from "@wetron/core/transform";
 import { waypointPath } from "@wetron/core/edge-path";
 

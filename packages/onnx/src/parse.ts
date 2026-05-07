@@ -71,8 +71,9 @@ function attrTypeNumber(raw: unknown): number {
   return 0;
 }
 
-function mapAttribute(a: Record<string, unknown>): AttributeValue {
+function mapAttribute(a: Record<string, unknown>, onWarn?: (ctx: string) => void): AttributeValue {
   const type = attrTypeNumber(a["type"]);
+  const attrName = String(a["name"] ?? "");
   switch (type) {
     case 1:
       return Number(a["f"] ?? 0);
@@ -86,6 +87,7 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
         try {
           return _decoder.decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)));
         } catch {
+          onWarn?.(`attribute "${attrName}": invalid base64 string`);
           return s;
         }
       }
@@ -102,6 +104,7 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
           try {
             return _decoder.decode(Uint8Array.from(atob(b), (c) => c.charCodeAt(0)));
           } catch {
+            onWarn?.(`attribute "${attrName}": invalid base64 in strings list`);
             return b;
           }
         }
@@ -186,6 +189,98 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
 
   const warnings: ParseWarning[] = [];
   const nodes: GraphNode[] = [];
+  const subgraphInits = new Map<string, { shape: number[]; dtype: string }>();
+
+  // Walk a subgraph (If/Loop/Scan body) and emit GraphNodes with prefixed names so
+  // they don't collide with the outer graph. Names that are local to the subgraph
+  // (its formal inputs, initializers, and node outputs) get prefixed; names that
+  // reference outer-scope tensors stay as-is so edges resolve to outer producers.
+  function flattenSubgraph(sub: Record<string, unknown>, prefix: string, depth: number): void {
+    if (depth > 4) {
+      warnings.push({
+        code: "subgraph_too_deep",
+        context: `Subgraph nesting at "${prefix}" exceeds depth limit (4); skipping`,
+      });
+      return;
+    }
+    const subNodes = (sub["node"] as Array<Record<string, unknown>> | null) ?? [];
+    const subInputs = (sub["input"] as Array<Record<string, unknown>> | null) ?? [];
+    const subInits = (sub["initializer"] as Array<Record<string, unknown>> | null) ?? [];
+
+    const internalNames = new Set<string>();
+    for (const inp of subInputs) {
+      const name = String(inp["name"] ?? "");
+      if (name) internalNames.add(name);
+    }
+    for (const init of subInits) {
+      const name = String(init["name"] ?? "");
+      if (name) internalNames.add(name);
+    }
+    for (const n of subNodes) {
+      for (const out of (n["output"] as string[] | null) ?? []) {
+        if (out) internalNames.add(String(out));
+      }
+    }
+
+    const prefixed = (name: string): string => (internalNames.has(name) ? `${prefix}/${name}` : name);
+
+    for (const init of subInits) {
+      const name = String(init["name"] ?? "");
+      if (!name) continue;
+      const dims = (init["dims"] as Array<unknown> | null) ?? [];
+      const dataType = init["dataType"] as number | undefined;
+      subgraphInits.set(prefixed(name), {
+        shape: dims.map((d) => longToNumber(d)),
+        dtype: ONNX_DTYPE[dataType ?? 0] ?? "unknown",
+      });
+    }
+
+    for (let j = 0; j < subNodes.length; j++) {
+      const n = subNodes[j];
+      try {
+        const origName = String(n["name"] ?? "") || `op_${j}`;
+        const opType = String(n["opType"] ?? "");
+        const domain = String(n["domain"] ?? "");
+        const attrs = (n["attribute"] as Array<Record<string, unknown>> | null) ?? [];
+        const attributes: Record<string, AttributeValue> = {};
+        for (const a of attrs) {
+          const attrName = String(a["name"] ?? "");
+          const attrType = attrTypeNumber(a["type"]);
+          if (attrType === 5) {
+            const nested = a["g"] as Record<string, unknown> | null;
+            if (nested) flattenSubgraph(nested, `${prefix}/${origName}/${attrName}`, depth + 1);
+          } else if (attrType === 10) {
+            const nestedList = (a["graphs"] as Array<Record<string, unknown>> | null) ?? [];
+            for (let k = 0; k < nestedList.length; k++) {
+              flattenSubgraph(nestedList[k], `${prefix}/${origName}/${attrName}_${k}`, depth + 1);
+            }
+          } else {
+            attributes[attrName] = mapAttribute(a, (ctx) =>
+              warnings.push({
+                code: "attribute_decode_error",
+                context: `Subgraph "${prefix}" node ${j} (${opType}) ${ctx}`,
+              }),
+            );
+          }
+        }
+
+        nodes.push({
+          name: `${prefix}/${origName}`,
+          opType,
+          ...(domain ? { domain } : {}),
+          inputs: ((n["input"] as string[] | null) ?? []).map((s) => prefixed(String(s))),
+          outputs: ((n["output"] as string[] | null) ?? []).map((s) => `${prefix}/${String(s)}`),
+          attributes,
+        } satisfies GraphNode);
+      } catch (e) {
+        warnings.push({
+          code: "subgraph_node_parse_error",
+          context: `Subgraph "${prefix}" node ${j}: ${e instanceof Error ? e.message : String(e)}`,
+        });
+      }
+    }
+  }
+
   for (let i = 0; i < rawNodes.length; i++) {
     const n = rawNodes[i];
     if (String(n["opType"] ?? "") === "Constant") {
@@ -194,18 +289,39 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
     }
     try {
       const domain = String(n["domain"] ?? "");
+      const opType = String(n["opType"] ?? "");
+      const nodeName = String(n["name"] ?? "") || `${opType}_${i}`;
+      const attrs = (n["attribute"] as Array<Record<string, unknown>> | null) ?? [];
+      const attributes: Record<string, AttributeValue> = {};
+      for (const a of attrs) {
+        const attrName = String(a["name"] ?? "");
+        const attrType = attrTypeNumber(a["type"]);
+        if (attrType === 5) {
+          const sub = a["g"] as Record<string, unknown> | null;
+          if (sub) flattenSubgraph(sub, `${nodeName}/${attrName}`, 0);
+        } else if (attrType === 10) {
+          const subs = (a["graphs"] as Array<Record<string, unknown>> | null) ?? [];
+          for (let k = 0; k < subs.length; k++) {
+            flattenSubgraph(subs[k], `${nodeName}/${attrName}_${k}`, 0);
+          }
+        } else {
+          attributes[attrName] = mapAttribute(a, (ctx) =>
+            warnings.push({
+              code: "attribute_decode_error",
+              context: `Node ${i} (${opType}) ${ctx}`,
+              nodeIndex: i,
+            }),
+          );
+        }
+      }
+
       nodes.push({
         name: String(n["name"] ?? ""),
-        opType: String(n["opType"] ?? ""),
+        opType,
         ...(domain ? { domain } : {}),
         inputs: ((n["input"] as string[] | null) ?? []).map(String),
         outputs: ((n["output"] as string[] | null) ?? []).map(String),
-        attributes: Object.fromEntries(
-          ((n["attribute"] as Array<Record<string, unknown>> | null) ?? []).map((a) => [
-            String(a["name"] ?? ""),
-            mapAttribute(a),
-          ]),
-        ),
+        attributes,
       } satisfies GraphNode);
     } catch (e) {
       warnings.push({
@@ -226,21 +342,33 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
 
   // Decode raw weight bytes for each initializer (lazy contract — but cheap to
   // build the index once at parse time since protobufjs already decoded them).
-  const TYPED_FIELDS: ReadonlyArray<{ field: string; bytesPer: number; kind: "f32" | "f64" | "i32" | "i64" | "u32" | "u64" }> = [
+  const TYPED_FIELDS: ReadonlyArray<{
+    field: string;
+    bytesPer: number;
+    kind: "f32" | "f64" | "i32" | "i64" | "u32" | "u64";
+  }> = [
     { field: "floatData", bytesPer: 4, kind: "f32" },
     { field: "doubleData", bytesPer: 8, kind: "f64" },
     { field: "int32Data", bytesPer: 4, kind: "i32" },
     { field: "int64Data", bytesPer: 8, kind: "i64" },
+    { field: "uint32Data", bytesPer: 4, kind: "u32" },
     { field: "uint64Data", bytesPer: 8, kind: "u64" },
   ];
 
-  function bytesForInitializer(init: Record<string, unknown>): Uint8Array | undefined {
+  function bytesForInitializer(
+    init: Record<string, unknown>,
+    name: string,
+  ): Uint8Array | undefined {
     const raw = init["rawData"];
     if (raw instanceof Uint8Array) return raw;
     if (typeof raw === "string" && raw.length > 0) {
       try {
         return Uint8Array.from(atob(raw), (c) => c.charCodeAt(0));
       } catch {
+        warnings.push({
+          code: "initializer_decode_error",
+          context: `Initializer "${name}" rawData is not valid base64`,
+        });
         return undefined;
       }
     }
@@ -253,12 +381,24 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
         const v = arr[i];
         const off = i * f.bytesPer;
         switch (f.kind) {
-          case "f32": view.setFloat32(off, Number(v), true); break;
-          case "f64": view.setFloat64(off, Number(v), true); break;
-          case "i32": view.setInt32(off, Number(v), true); break;
-          case "i64": view.setBigInt64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true); break;
-          case "u32": view.setUint32(off, Number(v), true); break;
-          case "u64": view.setBigUint64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true); break;
+          case "f32":
+            view.setFloat32(off, Number(v), true);
+            break;
+          case "f64":
+            view.setFloat64(off, Number(v), true);
+            break;
+          case "i32":
+            view.setInt32(off, Number(v), true);
+            break;
+          case "i64":
+            view.setBigInt64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true);
+            break;
+          case "u32":
+            view.setUint32(off, Number(v), true);
+            break;
+          case "u64":
+            view.setBigUint64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true);
+            break;
         }
       }
       return new Uint8Array(buf);
@@ -271,7 +411,7 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
   for (const init of rawInitializers) {
     const name = String(init["name"] ?? "");
     if (!name) continue;
-    const buf = bytesForInitializer(init);
+    const buf = bytesForInitializer(init, name);
     if (buf) {
       weightBytes.set(name, buf);
       totalWeightBytes += buf.byteLength;
@@ -295,6 +435,12 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
 
   // Folded Constant outputs become initializers
   for (const [name, info] of foldedConstants) {
+    initializers.set(name, info);
+  }
+
+  // Subgraph-local initializers (with prefixed names so they don't collide
+  // with outer-scope initializers of the same logical name).
+  for (const [name, info] of subgraphInits) {
     initializers.set(name, info);
   }
 

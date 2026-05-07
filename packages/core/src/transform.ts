@@ -56,10 +56,16 @@ const META_MARGIN = 5;
 const ROW_H = 19;
 const ION_H = CARD_BASE + META_MARGIN + 12; // 49
 
-export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] } {
+export type LayoutDirection = "TB" | "LR";
+
+export function modelGraphToFlow(
+  graph: ModelGraph,
+  options?: { rankdir?: LayoutDirection },
+): { nodes: FlowNode[]; edges: FlowEdge[] } {
+  const rankdir = options?.rankdir ?? "TB";
   const g = new Dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 100 });
+  g.setGraph({ rankdir, nodesep: 60, ranksep: 100 });
 
   const flowNodes: FlowNode[] = [];
   const flowEdges: FlowEdge[] = [];
@@ -109,6 +115,11 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
 
   for (let i = 0; i < graph.nodes.length; i++) {
     const node = graph.nodes[i];
+    // Nodes that are also initializers (e.g. SavedModel VarHandleOp) act as variable
+    // declarations — they're surfaced as weight metadata inside their consumers, not as
+    // standalone graph nodes. Keep them in `graph.nodes` for callers like
+    // attachCheckpointToGraph but skip them from layout/edges here.
+    if (graph.initializers.has(node.name)) continue;
     const id = `node::${i}::${node.name || node.opType}`;
     const labels = opInputLabels(node.opType);
     const weightInputsRaw = node.inputs
@@ -212,10 +223,20 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
     if (pos) fn.position = { x: pos.x - NODE_W / 2, y: pos.y - pos.height / 2 };
   }
 
+  // Count edges per source->target pair so duplicates can be fanned out symmetrically.
+  const pairCount = new Map<string, number>();
+  for (const fe of flowEdges) {
+    const key = `${fe.source}::${fe.target}`;
+    pairCount.set(key, (pairCount.get(key) ?? 0) + 1);
+  }
+
   // Annotate each flow edge with Dagre's intermediate waypoints so the edge
   // component can draw a catmull-rom spline that routes around intermediate nodes.
-  // Multiple flow edges sharing the same source->target pair reuse the same points.
+  // Edges that share a source->target pair reuse the same dagre waypoints but get
+  // a small horizontal offset per slot so they fan out instead of stacking.
   const ptCache = new Map<string, readonly { x: number; y: number }[]>();
+  const slotIndex = new Map<string, number>();
+  const FAN_STEP = 8;
   for (let i = 0; i < flowEdges.length; i++) {
     const fe = flowEdges[i];
     const key = `${fe.source}::${fe.target}`;
@@ -230,8 +251,16 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
       ptCache.set(key, pts);
     }
 
+    const total = pairCount.get(key) ?? 1;
+    const slot = slotIndex.get(key) ?? 0;
+    slotIndex.set(key, slot + 1);
+    // Center the fan around 0: for total=2 -> offsets [-FAN_STEP/2, +FAN_STEP/2];
+    // for total=3 -> [-FAN_STEP, 0, +FAN_STEP].
+    const offset = total > 1 ? (slot - (total - 1) / 2) * FAN_STEP : 0;
+
     if (pts.length > 0) {
-      flowEdges[i] = { ...fe, data: { ...fe.data, points: pts } };
+      const fanned = offset === 0 ? pts : pts.map((p) => ({ x: p.x + offset, y: p.y }));
+      flowEdges[i] = { ...fe, data: { ...fe.data, points: fanned } };
     }
   }
 

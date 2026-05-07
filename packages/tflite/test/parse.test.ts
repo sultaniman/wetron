@@ -26,3 +26,14 @@ test("throws ParseError on garbage input", () => {
     parseTflite(new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00])),
   ).toThrow(ParseError);
 });
+
+test("style_predict_quantized_256: parses quantized weights with int/uint dtypes", async () => {
+  const url = new URL("../../../test-models/style_predict_quantized_256.tflite", import.meta.url);
+  const bytes = new Uint8Array(await Bun.file(url).arrayBuffer());
+  const graph = parseTflite(bytes);
+  expect(graph.nodes.length).toBeGreaterThan(0);
+  // A quantized model must declare at least one int8 / uint8 / int16 / int32 initializer.
+  const dtypes = new Set([...graph.initializers.values()].map((i) => i.dtype));
+  const quantized = ["int8", "uint8", "int16", "int32"].some((d) => dtypes.has(d));
+  expect(quantized).toBe(true);
+});
