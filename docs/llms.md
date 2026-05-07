@@ -1,6 +1,6 @@
 # wetron
 
-Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, TorchScript, ExecuTorch, and TensorFlow SavedModel files into a shared IR and renders the computation graph. Graph structure only - no weight data is read or stored anywhere in the stack.
+Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, TorchScript, ExecuTorch, and TensorFlow SavedModel files into a shared IR and renders the computation graph. ONNX and TFLite expose initializer bytes via `ModelGraph.weights`; TF2 SavedModel weights load from the external checkpoint pair via `loadSavedModelWeights`. Decoded values feed `computeStats` for histogram + heatmap previews in the property panel.
 
 ## Packages
 
@@ -46,7 +46,15 @@ interface ModelGraph {
     { shape: readonly number[] | null; dtype: string | null }
   >;
   readonly opsets?: ReadonlyMap<string, number>; // domain -> version (ONNX only; "" = ai.onnx)
+  readonly fileSizeBytes: number; // size of source file; used for the >20MB weight gate
+  readonly weights?: WeightSource; // present when the parser surfaces initializer bytes
+  readonly hasExternalWeights?: boolean; // TF2 SavedModel: true when weights live in a checkpoint pair
   readonly warnings?: readonly ParseWarning[];
+}
+
+interface WeightSource {
+  readonly totalBytes: number;
+  get(name: string): Uint8Array | undefined; // raw initializer bytes; undefined if unknown
 }
 
 interface ParseWarning {
@@ -96,6 +104,36 @@ function opCategory(opType: string): OpCategory;
 
 // Named input slot labels for known ops (e.g. Conv -> ["X","W","B"])
 function opInputLabels(opType: string): readonly string[];
+
+// Search filter - returns the set of node names matching the query (op type or name substring)
+function filterGraph(graph: ModelGraph, query: string): ReadonlySet<string>;
+
+// Weight inspection - decode raw initializer bytes from a WeightSource into typed arrays.
+// Returns null for unknown dtypes. Output element kind: f64 for floats, i32 for ints up to 32 bits, i64 for int64/uint64.
+function decodeWeight(
+  bytes: Uint8Array,
+  dtype: string,
+  shape: readonly number[],
+): Float64Array | Int32Array | BigInt64Array | null;
+function decodeFirstN(
+  bytes: Uint8Array,
+  dtype: string,
+  n: number,
+): Float64Array | Int32Array | BigInt64Array | null;
+
+// Single-pass statistics over a decoded array - 12-bin histogram, 16x8 heatmap, count/min/max/mean/std/zeros
+interface WeightStats {
+  readonly count: number;
+  readonly min: number;
+  readonly max: number;
+  readonly mean: number;
+  readonly std: number;
+  readonly zeros: number;
+  readonly histogram: readonly number[]; // 12 fixed-width bins between min and max
+  readonly heatmap: readonly number[]; // 16 cols x 8 rows = 128, mean-of-chunk values
+  readonly chunkSize: number;
+}
+function computeStats(values: Float64Array | Int32Array): WeightStats;
 ```
 
 ## Parser APIs
@@ -118,6 +156,11 @@ function parseExecutorch(bytes: Uint8Array): ModelGraph; // sync
 
 // @wetron/savedmodel
 function parseSavedModel(bytes: Uint8Array): ModelGraph; // sync; handles saved_model.pb and keras_metadata.pb
+
+// TF2 checkpoint pair (variables.index + variables.data-00000-of-00001) -> WeightSource
+function loadSavedModelWeights(indexFile: File, dataFile: File): Promise<LoadedCheckpoint>;
+// Re-key the loaded WeightSource by graph node names (resolves VarHandleOp shared_name)
+function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpoint): ModelGraph;
 ```
 
 ## Format detection (magic bytes)
@@ -137,7 +180,7 @@ function parseSavedModel(bytes: Uint8Array): ModelGraph; // sync; handles saved_
 - All IR types live in `@wetron/core/src/ir.ts` - parsers import from there.
 - Exotic dtype readers (bfloat16, float8, int4, etc.) live in `@wetron/core/src/dtypes.ts` - never inline in parsers.
 - `detectFormat` must always return a `Format` string, never throw.
-- No weight deserialization anywhere - graph structure only.
+- Weight bytes are exposed only through `WeightSource.get(name)` - parsers never preload or cache the entire weight payload.
 - No patching of `DataView.prototype` or `BigInt.prototype`.
 - Use `bigIntToNumber(v)` from `@wetron/core/dtypes` for BigInt -> number (throws RangeError if out of safe range).
 

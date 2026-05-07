@@ -38,7 +38,9 @@ Detected by first byte `0x08` (protobuf field 1, varint - schema version). Conta
 - `Placeholder` nodes -> `ModelGraph.inputs`
 - All other ops -> `ModelGraph.nodes`
 - Output nodes inferred as nodes whose outputs are never consumed as inputs
-- `Const` nodes appear as `constant`-category nodes
+- `Const` node tensor shape and dtype are folded into `ModelGraph.initializers`; consumers see them as initializer edges in the rendered graph
+- `StatefulPartitionedCall` and `PartitionedCall` function bodies are inlined from the `library.function` table; body node names are prefixed with the call-site name to avoid collisions
+- `VarHandleOp` nodes mark variables backed by an external checkpoint - the parser sets `ModelGraph.hasExternalWeights = true` so a host app knows to load them via `loadSavedModelWeights`
 
 ## Graph structure (saved_model.pb)
 
@@ -59,7 +61,7 @@ Softmax (output)
 ## Notes
 
 - `parseModel` detects `.pb` by filename extension; the first-byte check then selects the variant.
-- `ModelGraph.initializers` is always empty - weight data is not parsed.
+- `ModelGraph.weights` is not populated by `parseSavedModel` itself. For TF2 models, load the checkpoint pair (`variables.index` + `variables.data-00000-of-00001`) with `loadSavedModelWeights` and call `attachCheckpointToGraph` to produce a graph with `weights` re-keyed by node name. See [Weights](../api/weights/).
 - Control dependencies (inputs prefixed with `^`) are ignored.
 - Port suffixes (`:0`, `:1`) are stripped from input tensor names. As a
   consequence, multi-output ops (`Split`, `TopK`, …) cannot be fully

@@ -60,5 +60,5 @@ chain, but the produced IR should not be relied on for graph rewriting.
 
 - Only the first execution plan is parsed (multi-plan programs are rare in practice).
 - Non-fatal per-instruction errors are attached as `warnings`.
-- `ModelGraph.initializers` is always empty - constant buffers are not parsed.
+- `ModelGraph.initializers` is empty and `ModelGraph.weights` is absent - constant buffer payloads are not surfaced.
 - Uses the `flatbuffers` npm package with raw vtable offset decoding.

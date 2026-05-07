@@ -40,7 +40,7 @@ Rules:
 - Import exotic dtype readers from `@wetron/core/dtypes` - never inline shims.
 - Use native Web APIs: `DataView`, `TextDecoder`, `DecompressionStream`.
 - Use `protobufjs` for protobuf formats, `flatbuffers` for FlatBuffers formats.
-- Return graph structure only - no weight data.
+- Set `ModelGraph.fileSizeBytes` to `bytes.byteLength`. Optionally expose initializer bytes via `ModelGraph.weights` (a `WeightSource` with `totalBytes` and `get(name)`) - return raw little-endian byte slices into the source buffer; do not decode them. Decoding lives in `@wetron/core/weight-decoder`.
 - Attach non-fatal issues as `warnings` on the returned `ModelGraph` rather than throwing.
 
 ### 3. Register format detection
@@ -108,7 +108,7 @@ Add a real model file to `test-models/`. Node count must match what Netron shows
 
 ## What NOT to do
 
-- Don't deserialize weight data - graph structure only.
+- Don't decode weight tensors inside the parser - expose raw bytes via `WeightSource` and let consumers call `decodeWeight` / `decodeFirstN` from `@wetron/core` on demand.
 - Don't copy netron's internal reader classes - `parseMyFormat(bytes)` is the entire public API.
 - Don't inline dtype shims - import from `@wetron/core/dtypes`.
 - Don't patch `DataView.prototype` or `BigInt.prototype`.

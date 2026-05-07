@@ -12,6 +12,7 @@ import type {
   GraphValue,
   ParseWarning,
   AttributeValue,
+  WeightSource,
 } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 ```
@@ -30,9 +31,23 @@ interface ModelGraph {
     { shape: readonly number[] | null; dtype: string | null }
   >;
   readonly opsets?: ReadonlyMap<string, number>; // ONNX only - domain -> opset version ("" = ai.onnx)
+  readonly fileSizeBytes: number; // size of the source file - drives the >20MB weight-panel gate
+  readonly weights?: WeightSource; // present when the parser surfaces initializer bytes
+  readonly hasExternalWeights?: boolean; // TF2 SavedModel - true when VarHandleOp variables need a checkpoint
   readonly warnings?: readonly ParseWarning[];
 }
 ```
+
+## WeightSource
+
+```ts
+interface WeightSource {
+  readonly totalBytes: number;
+  get(name: string): Uint8Array | undefined;
+}
+```
+
+`get(name)` returns raw little-endian bytes for the named initializer, or `undefined` if the name is unknown. The slice is a view into the parser's source buffer - no copy is made. Decode it with `decodeWeight` / `decodeFirstN` from `@wetron/core` (see [Weights](../weights/)).
 
 ## GraphNode
 

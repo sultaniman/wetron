@@ -27,7 +27,7 @@ Keras 3 serializes tensor references as `{ class_name: "__keras_tensor__", confi
 ## Notes
 
 - Uses `fflate` for ZIP decompression.
-- `ModelGraph.initializers` is always empty - weight data lives in separate `.weights.h5` files which are not parsed.
+- `ModelGraph.initializers` is empty and `ModelGraph.weights` is absent - Keras 3 stores trained weights in a separate `.weights.h5` file which this parser does not read.
 - `ModelGraph.tensorShapes` is populated from `InputLayer` batch shapes only (`null` batch dimension -> `-1`).
 - Multi-input merge layers (e.g. `Concatenate`) correctly receive multiple `inputs` entries from the `args` array in `inbound_nodes`.
 - Throws `ParseError` if `config.json` is missing, invalid JSON, or uses an unsupported model class.

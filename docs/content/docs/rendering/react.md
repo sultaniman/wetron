@@ -46,6 +46,7 @@ import { NodePropertyPanel } from "@wetron/react";
 
 <NodePropertyPanel
   target={selected} // PanelTarget | null - null renders nothing
+  graph={graph} // ModelGraph - enables the weight panel for initializer tensors
   colorMode="system"
   opsets={graph?.opsets} // ReadonlyMap<string, number> - ONNX domain versions
   tensorShapes={graph?.tensorShapes} // shape info for edge panels
@@ -57,16 +58,23 @@ import { NodePropertyPanel } from "@wetron/react";
 
 ### Props
 
-| Prop            | Type                                    | Description                                                   |
-| --------------- | --------------------------------------- | ------------------------------------------------------------- |
-| `target`        | `PanelTarget \| null`                   | Selected node, edge, or tensor. `null` renders nothing.       |
-| `colorMode`     | `"light" \| "dark" \| "system"`         | Theme. `"system"` follows `prefers-color-scheme`.             |
-| `opsets`        | `ReadonlyMap<string, number>`           | Op domain -> version (ONNX only). Shown in node header.       |
-| `inputSources`  | `ReadonlyMap<string, string>`           | Tensor name -> producing op type. Used to colour input chips. |
-| `tensorShapes`  | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels.                                   |
-| `onTensorClick` | `(name: string) => void`                | Called when a tensor name chip is clicked.                    |
-| `onBack`        | `() => void`                            | Shows a back arrow when provided.                             |
-| `onClose`       | `() => void`                            | Shows a close button when provided.                           |
+| Prop            | Type                                    | Description                                                                              |
+| --------------- | --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `target`        | `PanelTarget \| null`                   | Selected node, edge, or tensor. `null` renders nothing.                                  |
+| `graph`         | `ModelGraph`                            | Required to render the weight panel for initializer tensors. Omit to disable that panel. |
+| `colorMode`     | `"light" \| "dark" \| "system"`         | Theme. `"system"` follows `prefers-color-scheme`.                                        |
+| `opsets`        | `ReadonlyMap<string, number>`           | Op domain -> version (ONNX only). Shown in node header.                                  |
+| `inputSources`  | `ReadonlyMap<string, string>`           | Tensor name -> producing op type. Used to colour input chips.                            |
+| `tensorShapes`  | `ReadonlyMap<string, { shape, dtype }>` | Shape info for edge panels.                                                              |
+| `onTensorClick` | `(name: string) => void`                | Called when a tensor name chip is clicked.                                               |
+| `onBack`        | `() => void`                            | Shows a back arrow when provided.                                                        |
+| `onClose`       | `() => void`                            | Shows a close button when provided.                                                      |
+
+### Weight panel
+
+When `target` resolves to an initializer tensor (a name present in `graph.initializers`) and `graph` is supplied, the panel switches to the weight panel. It auto-enables decoding for models where `fileSizeBytes <= 20MB` and `graph.weights` is present, and offers an explicit "Show weights" toggle for larger files. The toggle is disabled when `graph.hasExternalWeights && !graph.weights` - the prompt to load checkpoint files is shown in that state.
+
+The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally; the histogram and heatmap visualisations come from the same `WeightStats.histogram` (12 bins) and `WeightStats.heatmap` (16 × 8 grid) documented in [Weights](../api/weights/).
 
 ## PanelTarget type
 

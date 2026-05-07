@@ -9,6 +9,8 @@ weight: 10
 
 Wetron reads neural network model files and produces a structured graph of operators, inputs, and outputs. That graph can then be rendered as an interactive diagram using the React or Svelte renderer packages.
 
+For ONNX and TFLite the parser also exposes initializer bytes through `ModelGraph.weights`, so the property panel can decode tensor previews and show histograms / heatmaps. TF2 SavedModel models load weights from the external checkpoint pair via `loadSavedModelWeights`.
+
 All parsing runs in the browser via native Web APIs - `ArrayBuffer`, `DataView`, `TextDecoder`, `DecompressionStream`. No model data leaves the device.
 
 ## Packages

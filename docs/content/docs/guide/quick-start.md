@@ -93,3 +93,33 @@ const format = detectFormat(bytes, file.name);
 // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown"
 // never throws
 ```
+
+## Inspect weights
+
+ONNX and TFLite expose initializer bytes via `graph.weights`. Decode the first few thousand values for a preview and feed them to `computeStats` for the property panel's histogram and heatmap.
+
+```ts
+import { decodeFirstN, computeStats } from "@wetron/core";
+
+const bytes = graph.weights?.get("conv1.weight");
+if (bytes) {
+  const preview = decodeFirstN(bytes, "float32", 4096);
+  if (preview instanceof Float64Array) {
+    const stats = computeStats(preview);
+    // stats.min, stats.max, stats.mean, stats.std,
+    // stats.histogram (12 bins), stats.heatmap (16x8)
+  }
+}
+```
+
+For TF2 SavedModel, load the checkpoint pair separately:
+
+```ts
+import { loadSavedModelWeights, attachCheckpointToGraph } from "@wetron/savedmodel";
+
+if (graph.hasExternalWeights) {
+  const loaded = await loadSavedModelWeights(indexFile, dataFile);
+  const withWeights = attachCheckpointToGraph(graph, loaded);
+  // withWeights.weights.get(nodeName) -> Uint8Array | undefined
+}
+```

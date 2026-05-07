@@ -106,3 +106,13 @@ function opInputLabels(opType: string): readonly string[];
 ```
 
 Returns named input slot labels for known ops (e.g. `Conv` -> `["X", "W", "B"]`). Returns an empty array for unrecognised ops.
+
+## filterGraph
+
+```ts
+import { filterGraph } from "@wetron/core";
+
+function filterGraph(graph: ModelGraph, query: string): ReadonlySet<string>;
+```
+
+Returns the set of node names whose `opType` or `name` contains `query` (case-insensitive). Empty query returns an empty set. Used by the renderer's search box to dim non-matching nodes.

@@ -56,7 +56,7 @@ inventory.
 
 ## Notes
 
-- `ModelGraph.initializers` is always empty - weight data is not parsed.
+- `ModelGraph.initializers` is empty and `ModelGraph.weights` is absent - TorchScript bytecode does not include tensor payloads at the level this parser walks.
 - `ModelGraph.tensorShapes` is always empty - shape inference is not performed.
 - Non-fatal per-method errors are attached as `warnings` on the returned graph.
 - Uses `flatbuffers` for Mobile format and `fflate` for ZIP extraction.

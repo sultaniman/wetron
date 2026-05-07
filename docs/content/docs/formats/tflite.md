@@ -15,10 +15,11 @@ Synchronous - no `await` needed.
 
 ## What is parsed
 
-- All subgraphs flattened into a single graph (multi-subgraph models are concatenated)
+- The first subgraph (`subgraphs[0]`); secondary subgraphs referenced by `If` / `While` are not yet inlined
 - Op types from the built-in `BuiltinOperator` enum; custom ops use their `custom_code` string
-- Tensor shapes and dtypes for all tensors
+- Tensor shapes and dtypes for all tensors in the parsed subgraph
 - Graph inputs and outputs from the primary subgraph
+- Initializer bytes exposed via `ModelGraph.weights.get(name)` - tensors with a non-empty buffer reference
 
 ## Detection
 
@@ -49,5 +50,5 @@ Detects both:
 
 ## Notes
 
-- Initializer buffers (weight data) are skipped - only shape and dtype are recorded in `ModelGraph.initializers`.
+- Initializer buffers are exposed lazily through `ModelGraph.weights`; consumers call `weights.get(name)` for raw bytes and `decodeWeight` / `computeStats` from `@wetron/core` to inspect values. See [Weights](../api/weights/).
 - Synchronous because FlatBuffers decoding requires no async I/O.
