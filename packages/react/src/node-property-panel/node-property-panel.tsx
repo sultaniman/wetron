@@ -1,14 +1,14 @@
 import React from "react";
 import { ScrollArea } from "@base-ui/react/scroll-area";
-import type { GraphNode, GraphValue, ModelGraph, PanelTarget } from "@wetron/core/ir";
+import type { GraphNode, ModelGraph, PanelTarget } from "@wetron/core/ir";
 import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";
-import { OpPanel } from "./op-panel.tsx";
-import { IoPanel } from "./io-panel.tsx";
-import { EdgePanel } from "./edge-panel.tsx";
-import { TensorPanel } from "./tensor-panel.tsx";
-import { WeightPanel } from "./weight-panel.tsx";
+import { OpPanel } from "./op-panel/op-panel.tsx";
+import { IoPanel } from "./io-panel/io-panel.tsx";
+import { EdgePanel } from "./edge-panel/edge-panel.tsx";
+import { TensorPanel } from "./tensor-panel/tensor-panel.tsx";
+import { WeightPanel } from "./weight-panel/weight-panel.tsx";
 import { CloseButton } from "./panel-ui.tsx";
-import css from "./node-property-panel.module.css";
+import propertyPanelCss from "./node-property-panel.module.css";
 
 export function isGraphNode(t: PanelTarget): t is GraphNode {
   return "opType" in t;
@@ -58,12 +58,12 @@ export function NodePropertyPanel({
 
   if (!target) return null;
   return (
-    <div className={css.panel} data-theme={theme}>
+    <div className={propertyPanelCss.panel} data-theme={theme}>
       {onClose && <CloseButton onClose={onClose} />}
-      <ScrollArea.Root key={isGraphNode(target) ? target.name : "other"} className={css.scrollRoot}>
-        <ScrollArea.Viewport className={css.scrollViewport}>
+      <ScrollArea.Root key={isGraphNode(target) ? target.name : "other"} className={propertyPanelCss.scrollRoot}>
+        <ScrollArea.Viewport className={propertyPanelCss.scrollViewport}>
           <ScrollArea.Content>
-            <div className={css.scrollContent}>
+            <div className={propertyPanelCss.scrollContent}>
               {isGraphNode(target) ? (
                 <OpPanel
                   node={target}
@@ -96,8 +96,8 @@ export function NodePropertyPanel({
             </div>
           </ScrollArea.Content>
         </ScrollArea.Viewport>
-        <ScrollArea.Scrollbar orientation="vertical" className={css.scrollbar}>
-          <ScrollArea.Thumb className={css.scrollThumb} />
+        <ScrollArea.Scrollbar orientation="vertical" className={propertyPanelCss.scrollbar}>
+          <ScrollArea.Thumb className={propertyPanelCss.scrollThumb} />
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
     </div>

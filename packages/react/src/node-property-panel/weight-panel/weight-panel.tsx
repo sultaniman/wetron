@@ -3,13 +3,13 @@ import type { ModelGraph } from "@wetron/core/ir";
 import { decodeWeight, computeStats } from "@wetron/core";
 import type { WeightStats } from "@wetron/core";
 import { Tabs } from "@base-ui/react/tabs";
-import { BackButton } from "./panel-ui.tsx";
-import { Tooltip } from "../tooltip.tsx";
-import { formatVal, isIntegerDtype } from "./format-val.ts";
-import { VirtualValues } from "./virtual-values.tsx";
-import { WeightHistogram, WeightHeatmap } from "./weight-viz.tsx";
-import css from "./node-property-panel.module.css";
-import wcss from "./weight-panel.module.css";
+import { BackButton } from "../panel-ui.tsx";
+import { Tooltip } from "../../tooltip.tsx";
+import { formatVal, isIntegerDtype } from "../format-val.ts";
+import { VirtualValues } from "../virtual-values/virtual-values.tsx";
+import { WeightHistogram, WeightHeatmap } from "../weight-viz/weight-viz.tsx";
+import propertyPanelCss from "../node-property-panel.module.css";
+import weightPanelCss from "./weight-panel.module.css";
 
 const SIZE_THRESHOLD = 20 * 1024 * 1024;
 
@@ -104,53 +104,53 @@ export function WeightPanel({
 
   return (
     <>
-      <div className={css.header}>
+      <div className={propertyPanelCss.header}>
         {onBack && <BackButton onBack={onBack} />}
-        <div className={css.iconBox} data-kind="weight">
-          <span className={css.glyphIcon}>W</span>
+        <div className={propertyPanelCss.iconBox} data-kind="weight">
+          <span className={propertyPanelCss.glyphIcon}>W</span>
         </div>
-        <div className={css.headerText}>
-          <div className={css.nodeTitle}>Weight</div>
+        <div className={propertyPanelCss.headerText}>
+          <div className={propertyPanelCss.nodeTitle}>Weight</div>
           <Tooltip text={target.name} onlyIfOverflow>
-            <div className={css.nodeSubtitle}>{target.name}</div>
+            <div className={propertyPanelCss.nodeSubtitle}>{target.name}</div>
           </Tooltip>
         </div>
       </div>
 
-      <div className={css.section}>
+      <div className={propertyPanelCss.section}>
         {shape && (
-          <div className={css.row}>
-            <span className={css.rowLabel}>shape</span>
-            <span className={css.rowValue}>{shapeLabel}</span>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>shape</span>
+            <span className={propertyPanelCss.rowValue}>{shapeLabel}</span>
           </div>
         )}
         {dtype && (
-          <div className={css.row}>
-            <span className={css.rowLabel}>dtype</span>
-            <span className={css.rowValue}>{dtype}</span>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>dtype</span>
+            <span className={propertyPanelCss.rowValue}>{dtype}</span>
           </div>
         )}
         {sizeBytes > 0 && (
-          <div className={css.row}>
-            <span className={css.rowLabel}>size</span>
-            <span className={css.rowValue}>{formatBytes(sizeBytes)}</span>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>size</span>
+            <span className={propertyPanelCss.rowValue}>{formatBytes(sizeBytes)}</span>
           </div>
         )}
       </div>
 
-      <div className={css.section}>
-        <div className={wcss.toggleRow}>
+      <div className={propertyPanelCss.section}>
+        <div className={weightPanelCss.toggleRow}>
           <span>Show weights</span>
           <button
             data-testid="show-weights-switch"
-            className={`${wcss.switch}${showWeights ? "" : ` ${wcss.switchOff}`}`}
+            className={`${weightPanelCss.switch}${showWeights ? "" : ` ${weightPanelCss.switchOff}`}`}
             onClick={() => setShowWeights((v) => !v)}
             aria-label="Show weights"
             disabled={graph.hasExternalWeights && graph.weights === undefined}
           />
         </div>
         {graph.hasExternalWeights && graph.weights === undefined && (
-          <div className={wcss.sizeNote}>
+          <div className={weightPanelCss.sizeNote}>
             <strong>Weights live in an external checkpoint.</strong>
             <br />
             Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see
@@ -158,7 +158,7 @@ export function WeightPanel({
           </div>
         )}
         {isLarge && !showWeights && !(graph.hasExternalWeights && graph.weights === undefined) && (
-          <div className={wcss.sizeNote}>
+          <div className={weightPanelCss.sizeNote}>
             <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong>
             <br />
             Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
@@ -167,22 +167,22 @@ export function WeightPanel({
       </div>
 
       {loaded && (
-        <div className={css.section}>
-          <div className={wcss.sectionLabelRow}>
+        <div className={propertyPanelCss.section}>
+          <div className={weightPanelCss.sectionLabelRow}>
             <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
             <Tabs.Root value={viz} onValueChange={(v) => setViz(v as "dist" | "heat")}>
-              <Tabs.List className={wcss.seg}>
+              <Tabs.List className={weightPanelCss.seg}>
                 <Tabs.Tab
                   value="dist"
                   data-testid="viz-dist"
-                  className={viz === "dist" ? wcss.segOn : ""}
+                  className={viz === "dist" ? weightPanelCss.segOn : ""}
                 >
                   dist
                 </Tabs.Tab>
                 <Tabs.Tab
                   value="heat"
                   data-testid="viz-heat"
-                  className={viz === "heat" ? wcss.segOn : ""}
+                  className={viz === "heat" ? weightPanelCss.segOn : ""}
                 >
                   heat
                 </Tabs.Tab>
@@ -190,24 +190,24 @@ export function WeightPanel({
             </Tabs.Root>
           </div>
 
-          <div className={css.row}>
-            <span className={css.rowLabel}>min</span>
-            <span className={css.rowValue}>{formatVal(loaded.stats.min, dtype || "float32")}</span>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>min</span>
+            <span className={propertyPanelCss.rowValue}>{formatVal(loaded.stats.min, dtype || "float32")}</span>
           </div>
-          <div className={css.row}>
-            <span className={css.rowLabel}>max</span>
-            <span className={css.rowValue}>{formatVal(loaded.stats.max, dtype || "float32")}</span>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>max</span>
+            <span className={propertyPanelCss.rowValue}>{formatVal(loaded.stats.max, dtype || "float32")}</span>
           </div>
-          <div className={css.row}>
-            <span className={css.rowLabel}>{"μ ± σ"}</span>
-            <span className={css.rowValue}>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>{"μ ± σ"}</span>
+            <span className={propertyPanelCss.rowValue}>
               {formatVal(loaded.stats.mean, dtype || "float32")} ±{" "}
               {formatVal(loaded.stats.std, dtype || "float32")}
             </span>
           </div>
-          <div className={css.row}>
-            <span className={css.rowLabel}>zeros</span>
-            <span className={css.rowValue}>{loaded.stats.zeros}</span>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>zeros</span>
+            <span className={propertyPanelCss.rowValue}>{loaded.stats.zeros}</span>
           </div>
 
           {viz === "dist" && <WeightHistogram stats={loaded.stats} dtype={dtype} />}
@@ -218,10 +218,10 @@ export function WeightPanel({
       )}
 
       {loaded && showWeights && (
-        <div className={css.sectionLast}>
-          <div className={wcss.sectionLabelRow}>
+        <div className={propertyPanelCss.sectionLast}>
+          <div className={weightPanelCss.sectionLabelRow}>
             <span>Values</span>
-            <span className={wcss.valuesMeta}>{loaded.values.length.toLocaleString()} values</span>
+            <span className={weightPanelCss.valuesMeta}>{loaded.values.length.toLocaleString()} values</span>
           </div>
           <VirtualValues
             data-testid="values-grid"

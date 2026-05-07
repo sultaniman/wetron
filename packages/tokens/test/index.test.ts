@@ -105,15 +105,15 @@ test("react CSS --wetron-category-* matches CATEGORY_THEME", () => {
   }
 });
 
-test("svelte component --wetron-category-* matches CATEGORY_THEME", () => {
-  const src = readFileSync(
-    resolve(import.meta.dir, "../../svelte/src/model-graph-view.svelte"),
-    "utf-8",
-  );
+test("svelte categoryVars(isDark) matches CATEGORY_THEME", async () => {
+  // Svelte's renderer computes --wetron-category-* at runtime via categoryVars() rather
+  // than inlining them in the component CSS, so this test verifies that runtime mapping
+  // produces the same values as the source-of-truth CATEGORY_THEME table.
+  const { categoryVars } = await import("../../svelte/src/category-vars.ts");
+  const light = categoryVars(false);
+  const dark = categoryVars(true);
   for (const [cat, colors] of Object.entries(CATEGORY_THEME)) {
-    const lightVar = extractCssVar(src, `--wetron-category-${cat}`, `data-theme="light"`);
-    const darkVar = extractCssVar(src, `--wetron-category-${cat}`, `data-theme="dark"`);
-    expect(lightVar?.toLowerCase()).toBe(colors.light.toLowerCase());
-    expect(darkVar?.toLowerCase()).toBe(colors.dark.toLowerCase());
+    expect(light[`--wetron-category-${cat}`]?.toLowerCase()).toBe(colors.light.toLowerCase());
+    expect(dark[`--wetron-category-${cat}`]?.toLowerCase()).toBe(colors.dark.toLowerCase());
   }
 });

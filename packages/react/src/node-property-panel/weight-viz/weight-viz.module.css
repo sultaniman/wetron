@@ -1,0 +1,59 @@
+.spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 46px;
+  margin-top: 6px;
+}
+.spark span {
+  flex: 1;
+  background: #3b82f6;
+  border-radius: 1px 1px 0 0;
+  opacity: 0.85;
+}
+
+.heat {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 1px;
+  margin-top: 6px;
+}
+.heat span {
+  aspect-ratio: 1 / 1;
+}
+
+.heatLegend {
+  margin-top: 6px;
+  font-size: 9px;
+  color: var(--wetron-panel-subtitle);
+  font-family: ui-monospace, Menlo, monospace;
+}
+.heatLegendBar {
+  height: 6px;
+  border-radius: 3px;
+}
+.heatLegendBarSequential {
+  background: linear-gradient(
+    to right,
+    var(--wetron-heat-stop-0),
+    var(--wetron-heat-stop-1),
+    var(--wetron-heat-stop-2),
+    var(--wetron-heat-stop-3),
+    var(--wetron-heat-stop-4)
+  );
+}
+.heatLegendTicks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+}
+.heatLegendTicks span {
+  flex: 0 0 auto;
+}
+
+.heatCaption {
+  font-size: 9px;
+  color: var(--wetron-panel-subtitle);
+  margin: 6px 0 4px;
+  font-family: ui-monospace, Menlo, monospace;
+}

@@ -2,7 +2,7 @@
 import { test, expect, describe, afterEach, beforeEach } from "bun:test";
 import { render, screen, cleanup, act } from "@testing-library/react";
 import React from "react";
-import { VirtualValues } from "../src/node-property-panel/virtual-values.tsx";
+import { VirtualValues } from "../src/node-property-panel/virtual-values/virtual-values.tsx";
 
 // happy-dom returns 0 for offsetHeight; stub it so the virtualizer sees a
 // non-zero container and renders rows.

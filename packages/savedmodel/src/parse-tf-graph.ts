@@ -126,11 +126,49 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   const readToVar = new Map<string, string>();
   let hasVarHandleOp = false;
 
+  // tf.saved_model.save() always emits __saver_save / __saver_restore signatures alongside
+  // the inference signature. They're checkpoint plumbing, not the model — drop them so the
+  // rendered graph doesn't show duplicate-looking branches whose weight chips don't resolve.
+  // Mark nodes consuming `saver_filename` (the saver Placeholder), then transitively mark
+  // upstream nodes whose only remaining consumers are in the excluded set.
+  const saveRestoreExcluded = new Set<string>();
+  for (const raw of rawNodes) {
+    const name = raw.name;
+    if (!name) continue;
+    const ins = (raw.input ?? []).filter((inp) => !isControlDep(inp)).map(stripPort);
+    if (ins.includes("saver_filename")) saveRestoreExcluded.add(name);
+  }
+  // Transitive sweep: producers consumed only by excluded nodes also become excluded.
+  for (let pass = 0; pass < 4; pass++) {
+    let changed = false;
+    for (const raw of rawNodes) {
+      const name = raw.name;
+      if (!name || saveRestoreExcluded.has(name)) continue;
+      let consumers = 0;
+      let excludedConsumers = 0;
+      for (const other of rawNodes) {
+        const oname = other.name;
+        if (!oname) continue;
+        const otherIns = (other.input ?? []).filter((i) => !isControlDep(i)).map(stripPort);
+        if (otherIns.includes(name)) {
+          consumers++;
+          if (saveRestoreExcluded.has(oname)) excludedConsumers++;
+        }
+      }
+      if (consumers > 0 && consumers === excludedConsumers) {
+        saveRestoreExcluded.add(name);
+        changed = true;
+      }
+    }
+    if (!changed) break;
+  }
+
   // Pass 1: identify VarHandleOp and ReadVariableOp so we can fold + rewrite in pass 2.
   for (const raw of rawNodes) {
     const name = raw.name;
     const op = raw.op;
     if (!name || !op) continue;
+    if (saveRestoreExcluded.has(name)) continue;
 
     if (op === "VarHandleOp") {
       hasVarHandleOp = true;
@@ -169,6 +207,8 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       if (op === "ReadVariableOp" || op === "VarIsInitializedOp" || op === "AssignVariableOp") {
         continue;
       }
+      // Skip the save/restore signature plus everything that fed only into it.
+      if (saveRestoreExcluded.has(name)) continue;
 
       // Filter control deps, strip ports, and rewrite ReadVariableOp inputs to the underlying
       // VarHandleOp so consumers reference the variable directly (matches ONNX initializer model).
@@ -237,9 +277,10 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
     tensorShapes.set(varName, { shape: info.shape, dtype: info.dtype });
   }
 
-  // Graph outputs: nodes whose output tensors are never consumed as another node's input
+  // Graph outputs: nodes whose output tensors are never consumed as another node's input.
+  // Skip initializers (VarHandleOps) — they're declarations, never real outputs.
   const outputs: GraphValue[] = nodes
-    .filter((n) => !consumedTensors.has(n.outputs[0]))
+    .filter((n) => !consumedTensors.has(n.outputs[0]) && !initializers.has(n.name))
     .map((n) => ({ name: n.name, shape: null, dtype: null }));
 
   return {

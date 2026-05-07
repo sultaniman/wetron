@@ -1,9 +1,9 @@
 import React from "react";
 import { ArrowFatDownIcon, ArrowFatUpIcon } from "@phosphor-icons/react";
 import type { GraphValue } from "@wetron/core/ir";
-import { Row, BackButton } from "./panel-ui.tsx";
-import { Tooltip } from "../tooltip.tsx";
-import css from "./node-property-panel.module.css";
+import { Row, BackButton } from "../panel-ui.tsx";
+import { Tooltip } from "../../tooltip.tsx";
+import propertyPanelCss from "../node-property-panel.module.css";
 
 export function IoPanel({
   graphValue,
@@ -17,19 +17,19 @@ export function IoPanel({
   const isInput = direction === "input";
   return (
     <>
-      <div className={css.header}>
+      <div className={propertyPanelCss.header}>
         {onBack && <BackButton onBack={onBack} />}
-        <div className={css.iconBox} data-kind={direction}>
+        <div className={propertyPanelCss.iconBox} data-kind={direction}>
           {isInput ? <ArrowFatDownIcon size={15} /> : <ArrowFatUpIcon size={15} />}
         </div>
-        <div className={css.headerText}>
+        <div className={propertyPanelCss.headerText}>
           <Tooltip text={graphValue.name} onlyIfOverflow>
-            <div className={css.nodeTitle}>{graphValue.name}</div>
+            <div className={propertyPanelCss.nodeTitle}>{graphValue.name}</div>
           </Tooltip>
-          <div className={css.nodeSubtitle}>{direction}</div>
+          <div className={propertyPanelCss.nodeSubtitle}>{direction}</div>
         </div>
       </div>
-      <div className={css.sectionLast}>
+      <div className={propertyPanelCss.sectionLast}>
         {graphValue.shape !== null && (
           <Row label="shape" value={`[${graphValue.shape.join(" × ")}]`} chip="int[]" />
         )}

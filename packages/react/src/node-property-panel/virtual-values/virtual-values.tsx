@@ -1,7 +1,8 @@
 import React, { useRef } from "react";
 import { ScrollArea } from "@base-ui/react/scroll-area";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import css from "./node-property-panel.module.css";
+import propertyPanelCss from "../node-property-panel.module.css";
+import virtualValuesCss from "./virtual-values.module.css";
 
 const ROW_HEIGHT = 16;
 const COLS = 5;
@@ -29,17 +30,17 @@ export function VirtualValues({
     overscan: 6,
   });
 
-  const alignClass = align === "right" ? css.gridAlignRight : css.gridAlignCenter;
+  const alignClass = align === "right" ? virtualValuesCss.gridAlignRight : virtualValuesCss.gridAlignCenter;
 
   return (
-    <ScrollArea.Root className={css.valuesScrollRoot} data-testid={testId}>
-      <ScrollArea.Viewport ref={parentRef} className={css.valuesScrollViewport}>
+    <ScrollArea.Root className={virtualValuesCss.valuesScrollRoot} data-testid={testId}>
+      <ScrollArea.Viewport ref={parentRef} className={virtualValuesCss.valuesScrollViewport}>
         <ScrollArea.Content>
-          <div className={css.gridVals} style={{ height: v.getTotalSize(), position: "relative" }}>
+          <div className={virtualValuesCss.gridVals} style={{ height: v.getTotalSize(), position: "relative" }}>
             {v.getVirtualItems().map((row) => (
               <div
                 key={row.index}
-                className={`${css.gridRow} ${alignClass}`}
+                className={`${virtualValuesCss.gridRow} ${alignClass}`}
                 style={{ top: row.start, height: ROW_HEIGHT }}
               >
                 {Array.from({ length: COLS }, (_, c) => {
@@ -54,8 +55,8 @@ export function VirtualValues({
           </div>
         </ScrollArea.Content>
       </ScrollArea.Viewport>
-      <ScrollArea.Scrollbar orientation="vertical" className={css.scrollbar}>
-        <ScrollArea.Thumb className={css.scrollThumb} />
+      <ScrollArea.Scrollbar orientation="vertical" className={propertyPanelCss.scrollbar}>
+        <ScrollArea.Thumb className={propertyPanelCss.scrollThumb} />
       </ScrollArea.Scrollbar>
     </ScrollArea.Root>
   );
