@@ -11,6 +11,11 @@
   --wetron-panel-chip-bg: #f0f0f0;
   --wetron-panel-chip-color: #888;
   --wetron-panel-close-hover: #f0f0f0;
+  --wetron-heat-stop-0: #f5f3ff;
+  --wetron-heat-stop-1: #ddd6fe;
+  --wetron-heat-stop-2: #a78bfa;
+  --wetron-heat-stop-3: #7c3aed;
+  --wetron-heat-stop-4: #4c1d95;
 
   position: relative;
   width: 320px;
@@ -23,6 +28,7 @@
   border: 1px solid var(--wetron-panel-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   color: var(--wetron-panel-text);
+  contain: paint;
 }
 
 .panel[data-theme="dark"] {
@@ -37,6 +43,11 @@
   --wetron-panel-chip-bg: #262646;
   --wetron-panel-chip-color: #a0a0c0;
   --wetron-panel-close-hover: #2a2a3a;
+  --wetron-heat-stop-0: #312e81;
+  --wetron-heat-stop-1: #5b21b6;
+  --wetron-heat-stop-2: #7e22ce;
+  --wetron-heat-stop-3: #a855f7;
+  --wetron-heat-stop-4: #d8b4fe;
 }
 
 .header {
@@ -321,6 +332,17 @@
 .scrollViewport::-webkit-scrollbar {
   display: none;
 }
+
+.scrollRoot:focus,
+.scrollRoot:focus-visible,
+.scrollViewport:focus,
+.scrollViewport:focus-visible,
+.valuesScrollRoot:focus,
+.valuesScrollRoot:focus-visible,
+.valuesScrollViewport:focus,
+.valuesScrollViewport:focus-visible {
+  outline: none;
+}
 .scrollbar {
   position: absolute;
   top: 2px;
@@ -512,11 +534,11 @@
 .heatLegendBarSequential {
   background: linear-gradient(
     to right,
-    #1e3a8a,
-    #3b82f6,
-    #fde68a,
-    #f97316,
-    #7f1d1d
+    var(--wetron-heat-stop-0),
+    var(--wetron-heat-stop-1),
+    var(--wetron-heat-stop-2),
+    var(--wetron-heat-stop-3),
+    var(--wetron-heat-stop-4)
   );
 }
 .heatLegendTicks {
@@ -526,13 +548,6 @@
 }
 .heatLegendTicks span {
   flex: 0 0 auto;
-}
-.heatLegendCaption {
-  margin-top: 4px;
-  text-align: center;
-  font-size: 9px;
-  color: var(--wetron-panel-subtitle);
-  letter-spacing: 0.04em;
 }
 
 .heatCaption {

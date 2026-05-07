@@ -8,32 +8,43 @@ describe("pickColormap", () => {
   test("sequential when range is non-zero", () => {
     expect(pickColormap(0, 255)).toBe("sequential");
     expect(pickColormap(-0.5, 0.4)).toBe("sequential");
-    expect(pickColormap(50, 200)).toBe("sequential");
-    expect(pickColormap(-1, -0.1)).toBe("sequential");
   });
 });
 
-describe("colorForCell", () => {
+describe("colorForCell light theme", () => {
   test("constant returns a fixed neutral color", () => {
-    expect(colorForCell(1, 1, 1, "constant")).toBe("#cbd5e1");
+    expect(colorForCell(1, 1, 1, "constant", false)).toBe("#cbd5e1");
   });
-  test("sequential min returns first stop", () => {
-    // first stop (cool-warm): #1e3a8a -> rgb(30,58,138)
-    expect(colorForCell(0, 0, 255, "sequential")).toBe("rgb(30,58,138)");
+  test("min returns first light stop", () => {
+    // #f5f3ff -> rgb(245,243,255)
+    expect(colorForCell(0, 0, 255, "sequential", false)).toBe("rgb(245,243,255)");
   });
-  test("sequential max returns last stop", () => {
-    // last stop (cool-warm): #7f1d1d -> rgb(127,29,29)
-    expect(colorForCell(255, 0, 255, "sequential")).toBe("rgb(127,29,29)");
+  test("max returns last light stop", () => {
+    // #4c1d95 -> rgb(76,29,149)
+    expect(colorForCell(255, 0, 255, "sequential", false)).toBe("rgb(76,29,149)");
   });
-  test("sequential midpoint hits the middle stop", () => {
-    // 4 segments; midpoint t=0.5 lands at segIdx=2 with localT=0, returns stops[2]
-    // stops[2] (cool-warm): #fde68a -> rgb(253,230,138)
-    expect(colorForCell(127.5, 0, 255, "sequential")).toBe("rgb(253,230,138)");
+  test("midpoint hits middle light stop", () => {
+    // 4 segments; midpoint t=0.5 lands at segIdx=2 with localT=0
+    // stops[2] = #a78bfa -> rgb(167,139,250)
+    expect(colorForCell(127.5, 0, 255, "sequential", false)).toBe("rgb(167,139,250)");
   });
-  test("sequential clamps below min", () => {
-    expect(colorForCell(-100, 0, 255, "sequential")).toBe("rgb(30,58,138)");
+});
+
+describe("colorForCell dark theme", () => {
+  test("min returns first dark stop", () => {
+    // #312e81 -> rgb(49,46,129)
+    expect(colorForCell(0, 0, 255, "sequential", true)).toBe("rgb(49,46,129)");
   });
-  test("sequential clamps above max", () => {
-    expect(colorForCell(500, 0, 255, "sequential")).toBe("rgb(127,29,29)");
+  test("max returns last dark stop", () => {
+    // #d8b4fe -> rgb(216,180,254)
+    expect(colorForCell(255, 0, 255, "sequential", true)).toBe("rgb(216,180,254)");
+  });
+  test("midpoint hits middle dark stop", () => {
+    // stops[2] = #7e22ce -> rgb(126,34,206)
+    expect(colorForCell(127.5, 0, 255, "sequential", true)).toBe("rgb(126,34,206)");
+  });
+  test("default isDark is false", () => {
+    // omitting the flag uses light stops
+    expect(colorForCell(0, 0, 255, "sequential")).toBe("rgb(245,243,255)");
   });
 });

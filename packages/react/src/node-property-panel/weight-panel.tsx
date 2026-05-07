@@ -46,10 +46,12 @@ export function WeightPanel({
   target,
   graph,
   onBack,
+  isDark = false,
 }: {
   target: { name: string; shape: readonly number[] | null; dtype: string | null };
   graph: ModelGraph;
   onBack?: () => void;
+  isDark?: boolean;
 }): JSX.Element {
   const [showWeights, setShowWeights] = useState(
     graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined,
@@ -211,7 +213,7 @@ export function WeightPanel({
                       <span
                         key={i}
                         title={tip}
-                        style={{ background: colorForCell(val, loaded.stats.min, loaded.stats.max, colormap) }}
+                        style={{ background: colorForCell(val, loaded.stats.min, loaded.stats.max, colormap, isDark) }}
                       />
                     );
                   })}
@@ -222,7 +224,6 @@ export function WeightPanel({
                     <span>{formatVal(loaded.stats.min, dtype || "float32")}</span>
                     <span>{formatVal(loaded.stats.max, dtype || "float32")}</span>
                   </div>
-                  <div className={css.heatLegendCaption}>low ─── high</div>
                 </div>
               </>
             );

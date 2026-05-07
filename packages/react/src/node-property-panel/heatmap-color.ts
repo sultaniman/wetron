@@ -5,20 +5,35 @@ export function pickColormap(min: number, max: number): ColormapKind {
   return "sequential";
 }
 
-const STOPS: readonly string[] = [
-  "#1e3a8a",
-  "#3b82f6",
-  "#fde68a",
-  "#f97316",
-  "#7f1d1d",
+const STOPS_LIGHT: readonly string[] = [
+  "#f5f3ff",
+  "#ddd6fe",
+  "#a78bfa",
+  "#7c3aed",
+  "#4c1d95",
 ];
 
-export function colorForCell(value: number, min: number, max: number, kind: ColormapKind): string {
+const STOPS_DARK: readonly string[] = [
+  "#312e81",
+  "#5b21b6",
+  "#7e22ce",
+  "#a855f7",
+  "#d8b4fe",
+];
+
+export function colorForCell(
+  value: number,
+  min: number,
+  max: number,
+  kind: ColormapKind,
+  isDark = false,
+): string {
   if (kind === "constant") return "#cbd5e1";
   const range = max - min;
-  if (range === 0) return STOPS[0];
+  const stops = isDark ? STOPS_DARK : STOPS_LIGHT;
+  if (range === 0) return stops[0];
   const t = Math.max(0, Math.min(1, (value - min) / range));
-  return interpolateStops(t, STOPS);
+  return interpolateStops(t, stops);
 }
 
 function interpolateStops(t: number, stops: readonly string[]): string {

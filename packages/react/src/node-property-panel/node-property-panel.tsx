@@ -77,7 +77,7 @@ export function NodePropertyPanel({
                 <EdgePanel edge={target.edge} tensorShapes={tensorShapes} onBack={onBack} />
               ) : isTensorTarget(target) ? (
                 graph?.initializers.has(target.tensor.name) ? (
-                  <WeightPanel target={target.tensor} graph={graph} onBack={onBack} />
+                  <WeightPanel target={target.tensor} graph={graph} onBack={onBack} isDark={isDark} />
                 ) : (
                   <TensorPanel tensor={target.tensor} onBack={onBack} />
                 )
