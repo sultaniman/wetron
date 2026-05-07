@@ -19,8 +19,15 @@ const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = await parseModel(bytes, file.name);
 
 <ModelGraphView graph={graph} onTargetClick={setTarget} />
-<NodePropertyPanel target={target} tensorShapes={graph.tensorShapes} onClose={() => setTarget(null)} />
+<NodePropertyPanel
+  target={target}
+  graph={graph}                       // enables weight inspection on initializers
+  tensorShapes={graph.tensorShapes}
+  onClose={() => setTarget(null)}
+/>
 ```
+
+Pass `graph` to `NodePropertyPanel` if you want clicks on initializer tensors to open the built-in `WeightPanel` (stats, distribution histogram, heatmap, virtualized values grid). For models larger than 20 MiB the panel starts in a deferred state; the user opts in per tensor with a `Show weights` switch and the bytes are only decoded once.
 
 ## API
 
@@ -45,6 +52,7 @@ type ModelGraphViewHandle = {
 
 function NodePropertyPanel(props: {
   target: PanelTarget | null;
+  graph?: ModelGraph; // pass to route initializer tensors to WeightPanel
   colorMode?: "light" | "dark" | "system";
   opsets?: ReadonlyMap<string, number>;
   inputSources?: ReadonlyMap<string, string>;
@@ -52,6 +60,13 @@ function NodePropertyPanel(props: {
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
   onClose?: () => void;
+}): JSX.Element;
+
+function WeightPanel(props: {
+  target: { name: string; shape: readonly number[] | null; dtype: string | null };
+  graph: ModelGraph;
+  onBack?: () => void;
+  isDark?: boolean;
 }): JSX.Element;
 
 type PanelTarget =
@@ -95,3 +110,4 @@ import "@wetron/react/styles.css";
 - `@xyflow/react` ≥ 12
 - `@phosphor-icons/react` ≥ 2
 - `@base-ui/react` ≥ 1
+- `@tanstack/react-virtual` ≥ 3 (used by `WeightPanel`'s values grid)
