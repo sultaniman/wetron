@@ -1,4 +1,3 @@
-import React from "react";
 import type { WeightStats } from "@wetron/core";
 import { formatVal } from "../format-val.ts";
 import { pickColormap, colorForCell } from "../heatmap-color.ts";

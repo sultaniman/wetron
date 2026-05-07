@@ -1,4 +1,3 @@
-import React from "react";
 import { CubeIcon } from "@phosphor-icons/react";
 import { Row, BackButton } from "../panel-ui.tsx";
 import { Tooltip } from "../../tooltip.tsx";

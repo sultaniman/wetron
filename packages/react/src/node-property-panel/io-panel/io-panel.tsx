@@ -1,4 +1,3 @@
-import React from "react";
 import { ArrowFatDownIcon, ArrowFatUpIcon } from "@phosphor-icons/react";
 import type { GraphValue } from "@wetron/core/ir";
 import { Row, BackButton } from "../panel-ui.tsx";

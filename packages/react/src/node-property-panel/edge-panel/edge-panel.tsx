@@ -1,4 +1,3 @@
-import React from "react";
 import { ArrowsLeftRightIcon } from "@phosphor-icons/react";
 import { Row, SectionLabel, BackButton } from "../panel-ui.tsx";
 import { Tooltip } from "../../tooltip.tsx";

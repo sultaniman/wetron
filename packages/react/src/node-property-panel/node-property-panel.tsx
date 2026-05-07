@@ -1,4 +1,3 @@
-import React from "react";
 import { ScrollArea } from "@base-ui/react/scroll-area";
 import type { GraphNode, ModelGraph, PanelTarget } from "@wetron/core/ir";
 import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";

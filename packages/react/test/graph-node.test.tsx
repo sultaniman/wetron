@@ -1,5 +1,5 @@
 // @happy-dom
-import { test, expect, describe, afterEach } from "bun:test";
+import { test, expect, afterEach } from "bun:test";
 import { render, screen, cleanup } from "@testing-library/react";
 import React from "react";
 import { ReactFlowProvider } from "@xyflow/react";

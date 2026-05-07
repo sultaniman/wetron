@@ -1,4 +1,3 @@
-import React from "react";
 import type { Node, NodeProps } from "@xyflow/react";
 import type { GraphNodeData } from "@wetron/core/transform";
 import { CATEGORY_ICON } from "../theme.ts";

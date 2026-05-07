@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { ScrollArea } from "@base-ui/react/scroll-area";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import propertyPanelCss from "../node-property-panel.module.css";
