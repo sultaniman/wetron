@@ -355,6 +355,7 @@ export default function App() {
             <div style={{ position: "absolute", top: 16, right: 16, width: 280, zIndex: 10 }}>
               <NodePropertyPanel
                 target={selected}
+                graph={state.status === "ready" ? state.graph : undefined}
                 onTensorClick={handleTensorClick}
                 onBack={history.length > 0 ? handleBack : undefined}
                 onClose={handleClose}
