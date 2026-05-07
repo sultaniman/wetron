@@ -1,24 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   ArrowCircleDownIcon,
   ArrowCircleUpIcon,
   SlidersHorizontalIcon,
 } from "@phosphor-icons/react";
-import type { GraphNode, AttributeValue } from "@wetron/core/ir";
+import type { GraphNode } from "@wetron/core/ir";
 import { opCategory } from "@wetron/core";
-import { formatAttrBrief } from "@wetron/core/panel-utils";
-import { CATEGORY_THEME, CATEGORY_ICON, OP_ICON } from "../theme.ts";
-import {
-  attrChipLabel,
-  formatAttr,
-  renderIconEntry,
-  Row,
-  SectionLabel,
-  BackButton,
-  Chip,
-} from "./panel-ui.tsx";
-import { Tooltip } from "../tooltip.tsx";
-import css from "./node-property-panel.module.css";
+import { CATEGORY_THEME, CATEGORY_ICON, OP_ICON } from "../../theme.ts";
+import { renderIconEntry, Row, SectionLabel, BackButton } from "../panel-ui.tsx";
+import { AttrRow } from "../attr-row/attr-row.tsx";
+import { Tooltip } from "../../tooltip.tsx";
+import propertyPanelCss from "../node-property-panel.module.css";
 
 function formatModule(
   domain: string | undefined,
@@ -29,43 +21,6 @@ function formatModule(
   const version = opsets.get(key);
   const displayDomain = key === "" ? "ai.onnx" : key;
   return version != null ? `${displayDomain} v${version}` : displayDomain;
-}
-
-function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
-  const [expanded, setExpanded] = useState(false);
-  const full = formatAttr(value);
-  const brief = formatAttrBrief(value);
-  const needsExpand = brief !== full;
-
-  return (
-    <div>
-      <div className={css.row}>
-        <span className={css.rowLabel}>{name}</span>
-        <span className={css.rowValue}>{brief}</span>
-        {needsExpand && (
-          <button
-            className={css.expandBtn}
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              setExpanded((v) => !v);
-            }}
-          >
-            {expanded ? "▴" : "···"}
-          </button>
-        )}
-        <Chip label={attrChipLabel(value)} />
-      </div>
-      {expanded && (
-        <>
-          <pre className={css.valueExpanded}>{full}</pre>
-          <div className={css.row}>
-            <span className={css.rowLabel}>type</span>
-            <span className={css.rowValue}>{attrChipLabel(value)}</span>
-          </div>
-        </>
-      )}
-    </div>
-  );
 }
 
 export function OpPanel({
@@ -96,34 +51,37 @@ export function OpPanel({
   const module = formatModule(node.domain, opsets);
   return (
     <>
-      <div className={css.header}>
+      <div className={propertyPanelCss.header}>
         {onBack && <BackButton onBack={onBack} />}
         <div
-          className={css.iconBox}
+          className={propertyPanelCss.iconBox}
           style={
             { "--icon-box-bg": color + "20", "--icon-box-color": color } as React.CSSProperties
           }
         >
           {renderIconEntry(iconEntry)}
         </div>
-        <div className={css.headerText}>
+        <div className={propertyPanelCss.headerText}>
           <Tooltip text={node.opType} onlyIfOverflow>
-            <div className={css.nodeTitle}>{node.opType}</div>
+            <div className={propertyPanelCss.nodeTitle}>{node.opType}</div>
           </Tooltip>
           {module && (
             <Tooltip text={module} onlyIfOverflow>
-              <div className={css.nodeSubtitle}>{module}</div>
+              <div className={propertyPanelCss.nodeSubtitle}>{module}</div>
             </Tooltip>
           )}
           {node.name && (
             <Tooltip text={node.name} onlyIfOverflow>
-              <div className={css.nodeSubtitle}>{node.name}</div>
+              <div className={propertyPanelCss.nodeSubtitle}>{node.name}</div>
             </Tooltip>
           )}
         </div>
       </div>
       {visibleInputs.length > 0 && (
-        <div className={css.section}>
+        <div
+          className={`${propertyPanelCss.section} ${propertyPanelCss.scrollSection} ${propertyPanelCss.inputsScroll}`}
+          data-scroll="true"
+        >
           <SectionLabel icon={<ArrowCircleDownIcon size={12} />} title="Inputs" />
           {visibleInputs.map(({ name, slot }) => {
             const sourceOp = inputSources?.get(name);
@@ -146,7 +104,7 @@ export function OpPanel({
         </div>
       )}
       {node.outputs.length > 0 && (
-        <div className={css.section}>
+        <div className={`${propertyPanelCss.section} ${propertyPanelCss.scrollSection}`} data-scroll="true">
           <SectionLabel icon={<ArrowCircleUpIcon size={12} />} title="Outputs" />
           {node.outputs.map((name, i) => (
             <Row
@@ -160,7 +118,7 @@ export function OpPanel({
         </div>
       )}
       {attrEntries.length > 0 && (
-        <div className={css.sectionLast}>
+        <div className={propertyPanelCss.sectionLast}>
           <SectionLabel icon={<SlidersHorizontalIcon size={12} />} title="Attributes" />
           {attrEntries.map(([key, val]) => (
             <AttrRow key={key} name={key} value={val} />

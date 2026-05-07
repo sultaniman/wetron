@@ -41,6 +41,8 @@ export interface ModelGraph {
   readonly fileSizeBytes: number;
   /** Lazy accessor for initializer bytes. Absent for parsers that do not surface weights. */
   readonly weights?: WeightSource;
+  /** True when weights live in external files the host app must load (TF2 SavedModel checkpoint). */
+  readonly hasExternalWeights?: boolean;
   /** Non-fatal parse warnings (skipped/degraded nodes). Absent when empty. */
   readonly warnings?: readonly ParseWarning[];
 }

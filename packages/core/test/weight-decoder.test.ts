@@ -54,6 +54,25 @@ describe("decodeWeight", () => {
     expect(decodeWeight(bytesOf(1, 2, 3), "string", [1])).toBeNull();
     expect(decodeWeight(bytesOf(1, 2, 3), "complex64", [1])).toBeNull();
   });
+
+  test("treats scalar shape [] as a single value", () => {
+    // shape = [] means rank-0 tensor; reduce with init 1 yields 1 element.
+    const bytes = bytesOf(0x00, 0x00, 0x80, 0x3f);
+    const out = decodeWeight(bytes, "float32", []) as Float64Array;
+    expect(out.length).toBe(1);
+    expect(out[0]).toBeCloseTo(1.0, 6);
+  });
+
+  test("returns null when shape product overflows to Infinity", () => {
+    // 1e9 * 1e9 * 1e9 = 1e27 → loses precision but is finite; use larger to actually overflow.
+    // Number.MAX_SAFE_INTEGER ≈ 9e15; product of large shape elements goes to Infinity past Number.MAX_VALUE.
+    const huge = [1e200, 1e200];
+    expect(decodeWeight(bytesOf(0x00, 0x00, 0x80, 0x3f), "float32", huge)).toBeNull();
+  });
+
+  test("returns null for negative shape product", () => {
+    expect(decodeWeight(bytesOf(0x01), "uint8", [-1])).toBeNull();
+  });
 });
 
 describe("decodeFirstN", () => {

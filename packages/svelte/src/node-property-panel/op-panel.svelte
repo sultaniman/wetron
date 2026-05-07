@@ -38,7 +38,7 @@
   {#snippet icon()}<CategoryIcon {cat} op={node.opType} size={15} />{/snippet}
 </PanelHeader>
 {#if visibleInputs.length > 0}
-  <div class="section">
+  <div class="section scrollSection inputsScroll">
     <SectionLabel title="Inputs">
       {#snippet icon()}<ArrowCircleDownIcon size={12} />{/snippet}
     </SectionLabel>
@@ -51,7 +51,7 @@
   </div>
 {/if}
 {#if node.outputs.length > 0}
-  <div class="section">
+  <div class="section scrollSection">
     <SectionLabel title="Outputs">
       {#snippet icon()}<ArrowCircleUpIcon size={12} />{/snippet}
     </SectionLabel>
@@ -77,4 +77,9 @@
     border-bottom: 1px solid var(--panel-section-border);
   }
   .sectionLast { padding: 7px 11px; }
+  .scrollSection {
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .inputsScroll { max-height: 312px; }
 </style>
