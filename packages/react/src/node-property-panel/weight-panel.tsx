@@ -3,25 +3,17 @@ import type { ModelGraph } from "@wetron/core/ir";
 import { decodeWeight, computeStats } from "@wetron/core";
 import type { WeightStats } from "@wetron/core";
 import { BackButton } from "./panel-ui.tsx";
+import { formatVal } from "./format-val.ts";
+import { VirtualValues } from "./virtual-values.tsx";
 import css from "./node-property-panel.module.css";
 
 const SIZE_THRESHOLD = 20 * 1024 * 1024;
-const VALUES_PREVIEW = 32;
-const VALUES_MAX = 4096;
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n.toFixed(2)} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(2)} KB`;
   if (n < 1024 * 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(2)} MB`;
   return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-}
-
-function formatVal(v: number): string {
-  if (Number.isNaN(v)) return "NaN";
-  if (!Number.isFinite(v)) return v > 0 ? "+Inf" : "-Inf";
-  const s = v.toFixed(3);
-  // strip leading zero: "0.045" -> ".045", "-0.184" -> "-.184"
-  return s.replace(/^(-?)0\./, "$1.");
 }
 
 function elementSize(dtype: string): number {
@@ -75,8 +67,7 @@ function heatColor(value: number, min: number, max: number): string {
 
 interface Loaded {
   stats: WeightStats;
-  preview: number[];
-  total: number;
+  values: Float64Array | Int32Array | BigInt64Array;
 }
 
 export function WeightPanel({
@@ -92,34 +83,32 @@ export function WeightPanel({
     graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined,
   );
   const [viz, setViz] = useState<"dist" | "heat">("dist");
-  const [showAll, setShowAll] = useState(false);
+
+  const dtype = target.dtype ?? "";
 
   const loaded = useMemo((): Loaded | null => {
     if (!showWeights) return null;
     const bytes = graph.weights?.get(target.name);
     if (!bytes) return null;
-    const dtype = target.dtype ?? "float32";
-    const shape = target.shape ?? [bytes.byteLength / (elementSize(dtype) || 1)];
-    const decoded = decodeWeight(bytes, dtype, shape);
+    const d = target.dtype ?? "float32";
+    const shape = target.shape ?? [bytes.byteLength / (elementSize(d) || 1)];
+    const decoded = decodeWeight(bytes, d, shape);
     if (!decoded) return null;
 
-    let numeric: Float64Array | Int32Array;
+    // Stats need a numeric typed array; coerce BigInt to f64 once.
+    let numericForStats: Float64Array | Int32Array;
     if (decoded instanceof BigInt64Array) {
       const f = new Float64Array(decoded.length);
       for (let i = 0; i < decoded.length; i++) f[i] = Number(decoded[i]);
-      numeric = f;
+      numericForStats = f;
     } else {
-      numeric = decoded;
+      numericForStats = decoded;
     }
 
-    const stats = computeStats(numeric);
-    const previewLen = Math.min(showAll ? Math.min(numeric.length, VALUES_MAX) : VALUES_PREVIEW, numeric.length);
-    const preview = Array.from(numeric.slice(0, previewLen)).map(Number);
-    return { stats, preview, total: numeric.length };
-  }, [target.name, showWeights, showAll, graph.weights, target.dtype, target.shape]);
+    return { stats: computeStats(numericForStats), values: decoded };
+  }, [target.name, showWeights, graph.weights, target.dtype, target.shape]);
 
   const isLarge = graph.fileSizeBytes > SIZE_THRESHOLD;
-  const dtype = target.dtype ?? "";
   const shape = target.shape;
   const shapeLabel = shape ? `[${shape.join(" × ")}]` : "unknown";
   const totalElements = shape ? shape.reduce((a, b) => a * b, 1) : 0;
@@ -183,16 +172,17 @@ export function WeightPanel({
 
           <div className={css.row}>
             <span className={css.rowLabel}>min</span>
-            <span className={css.rowValue}>{formatVal(loaded.stats.min)}</span>
+            <span className={css.rowValue}>{formatVal(loaded.stats.min, dtype || "float32")}</span>
           </div>
           <div className={css.row}>
             <span className={css.rowLabel}>max</span>
-            <span className={css.rowValue}>{formatVal(loaded.stats.max)}</span>
+            <span className={css.rowValue}>{formatVal(loaded.stats.max, dtype || "float32")}</span>
           </div>
           <div className={css.row}>
             <span className={css.rowLabel}>{"μ ± σ"}</span>
             <span className={css.rowValue}>
-              {formatVal(loaded.stats.mean)} ± {formatVal(loaded.stats.std)}
+              {formatVal(loaded.stats.mean, dtype || "float32")} ±{" "}
+              {formatVal(loaded.stats.std, dtype || "float32")}
             </span>
           </div>
           <div className={css.row}>
@@ -221,9 +211,9 @@ export function WeightPanel({
                 ))}
               </div>
               <div className={css.heatLegend}>
-                <span>{formatVal(loaded.stats.min)}</span>
+                <span>{formatVal(loaded.stats.min, dtype || "float32")}</span>
                 <span className={css.scale} />
-                <span>+{formatVal(loaded.stats.max)}</span>
+                <span>+{formatVal(loaded.stats.max, dtype || "float32")}</span>
               </div>
             </>
           )}
@@ -242,9 +232,7 @@ export function WeightPanel({
             Show weights
           </span>
           {loaded && (
-            <span className={css.valuesMeta}>
-              {loaded.total} · first {loaded.preview.length}
-            </span>
+            <span className={css.valuesMeta}>{loaded.values.length.toLocaleString()} values</span>
           )}
         </div>
 
@@ -257,18 +245,11 @@ export function WeightPanel({
         )}
 
         {loaded && showWeights && (
-          <>
-            <div data-testid="values-grid" className={css.gridVals}>
-              {loaded.preview.map((v, i) => (
-                <span key={i}>{formatVal(v)}</span>
-              ))}
-            </div>
-            {loaded.total > VALUES_PREVIEW && !showAll && (
-              <button className={css.more} onClick={() => setShowAll(true)}>
-                Load all ({loaded.total.toLocaleString()})
-              </button>
-            )}
-          </>
+          <VirtualValues
+            data-testid="values-grid"
+            values={loaded.values}
+            format={(v) => formatVal(v, dtype || "float32")}
+          />
         )}
       </div>
     </>

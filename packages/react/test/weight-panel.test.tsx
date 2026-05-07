@@ -48,6 +48,10 @@ describe("WeightPanel small model", () => {
     // stat labels
     expect(screen.getByText("min")).toBeDefined();
     expect(screen.getByText("max")).toBeDefined();
+    // After the changes in Task 3, the values meta is "<count> values".
+    expect(screen.getByText("4 values")).toBeDefined();
+    // Load all is gone — values are virtualized.
+    expect(screen.queryByText(/Load all/)).toBeNull();
   });
 
   test("toggling Show weights hides values grid", async () => {
