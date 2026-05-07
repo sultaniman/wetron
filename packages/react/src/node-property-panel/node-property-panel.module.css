@@ -542,7 +542,7 @@
 .gridVals span {
   background: var(--wetron-panel-bg);
   padding: 2px 4px;
-  text-align: right;
+  text-align: center;
   color: var(--wetron-panel-value);
   min-width: 0;
   overflow: hidden;
@@ -576,7 +576,7 @@
 .gridRow > span {
   background: var(--wetron-panel-bg);
   padding: 2px 4px;
-  text-align: right;
+  text-align: center;
   color: var(--wetron-panel-value);
   font-family: ui-monospace, Menlo, monospace;
   font-size: 9px;
