@@ -12,8 +12,8 @@ describe("pickColormap", () => {
 });
 
 describe("colorForCell", () => {
-  test("constant kind returns a fixed neutral color", () => {
-    expect(colorForCell(1, 1, 1, "constant")).toBe("#cbd5e1");
+  test("constant kind returns a translucent neutral color", () => {
+    expect(colorForCell(1, 1, 1, "constant")).toBe("rgba(148,163,184,0.15)");
   });
 
   test("light theme ramps pale to deep low->high", () => {

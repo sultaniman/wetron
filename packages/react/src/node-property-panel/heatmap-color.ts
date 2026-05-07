@@ -28,7 +28,7 @@ export function colorForCell(
   kind: ColormapKind,
   isDark = false,
 ): string {
-  if (kind === "constant") return "#cbd5e1";
+  if (kind === "constant") return "rgba(148,163,184,0.15)";
   const range = max - min;
   const stops = isDark ? STOPS_DARK : STOPS_LIGHT;
   if (range === 0) return stops[0];
