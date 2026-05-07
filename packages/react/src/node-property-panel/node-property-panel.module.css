@@ -554,3 +554,30 @@
   padding: 6px 0 0 0;
   cursor: pointer;
 }
+
+.valuesScroll {
+  max-height: 320px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.gridRow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--wetron-panel-section-border);
+}
+.gridRow > span {
+  background: var(--wetron-panel-bg);
+  padding: 2px 4px;
+  text-align: right;
+  color: var(--wetron-panel-value);
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 9px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

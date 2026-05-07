@@ -40,11 +40,13 @@
     "@wetron/tokens": "workspace:*"
   },
   "devDependencies": {
+    "@tanstack/react-virtual": "^3.13.6",
     "@wetron/onnx": "workspace:*"
   },
   "peerDependencies": {
     "@base-ui/react": ">=1",
     "@phosphor-icons/react": ">=2",
+    "@tanstack/react-virtual": ">=3",
     "@xyflow/react": ">=12",
     "react": ">=18",
     "react-dom": ">=18"
