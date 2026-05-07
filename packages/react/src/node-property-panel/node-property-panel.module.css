@@ -13,7 +13,7 @@
   --wetron-panel-close-hover: #f0f0f0;
 
   position: relative;
-  width: 260px;
+  width: 320px;
   background: var(--wetron-panel-bg);
   border-radius: 8px;
   overflow: hidden;
@@ -544,6 +544,9 @@
   padding: 2px 4px;
   text-align: right;
   color: var(--wetron-panel-value);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .more {
