@@ -13,7 +13,42 @@
     },
     "GraphDef": {
       "fields": {
-        "node": { "rule": "repeated", "type": "NodeDef", "id": 1 }
+        "node": { "rule": "repeated", "type": "NodeDef", "id": 1 },
+        "library": { "type": "FunctionDefLibrary", "id": 2 }
+      }
+    },
+    "FunctionDefLibrary": {
+      "fields": {
+        "function": { "rule": "repeated", "type": "FunctionDef", "id": 1 }
+      }
+    },
+    "FunctionDef": {
+      "fields": {
+        "signature": { "type": "OpDef", "id": 1 },
+        "attr": { "keyType": "string", "type": "AttrValue", "id": 5 },
+        "nodeDef": { "rule": "repeated", "type": "NodeDef", "id": 3 },
+        "ret": { "keyType": "string", "type": "string", "id": 4 },
+        "controlRet": { "keyType": "string", "type": "string", "id": 6 }
+      }
+    },
+    "OpDef": {
+      "fields": {
+        "name": { "type": "string", "id": 1 },
+        "inputArg": { "rule": "repeated", "type": "ArgDef", "id": 2 },
+        "outputArg": { "rule": "repeated", "type": "ArgDef", "id": 3 },
+        "controlOutput": { "rule": "repeated", "type": "string", "id": 20 }
+      }
+    },
+    "ArgDef": {
+      "fields": {
+        "name": { "type": "string", "id": 1 },
+        "type": { "type": "int32", "id": 3 }
+      }
+    },
+    "NameAttrList": {
+      "fields": {
+        "name": { "type": "string", "id": 1 },
+        "attr": { "keyType": "string", "type": "AttrValue", "id": 2 }
       }
     },
     "NodeDef": {
@@ -26,7 +61,7 @@
     },
     "AttrValue": {
       "oneofs": {
-        "value": { "oneof": ["list", "s", "i", "f", "b", "type", "shape"] }
+        "value": { "oneof": ["list", "s", "i", "f", "b", "type", "shape", "func"] }
       },
       "fields": {
         "list": { "type": "ListValue", "id": 1 },
@@ -35,7 +70,8 @@
         "f": { "type": "float", "id": 4 },
         "b": { "type": "bool", "id": 5 },
         "type": { "type": "int32", "id": 6 },
-        "shape": { "type": "TensorShapeProto", "id": 7 }
+        "shape": { "type": "TensorShapeProto", "id": 7 },
+        "func": { "type": "NameAttrList", "id": 10 }
       }
     },
     "ListValue": {
