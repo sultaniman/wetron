@@ -37,6 +37,33 @@ function opCategory(opType: string): OpCategory;
 
 // Named input slot labels for known ops (e.g. Conv -> ["X","W","B"])
 function opInputLabels(opType: string): readonly string[];
+
+// Weight inspection helpers (consumed by @wetron/react WeightPanel)
+function decodeWeight(
+  bytes: Uint8Array,
+  dtype: string,
+  shape: readonly number[],
+): Float64Array | Int32Array | BigInt64Array | null;
+
+function decodeFirstN(
+  bytes: Uint8Array,
+  dtype: string,
+  n: number,
+): Float64Array | Int32Array | BigInt64Array | null;
+
+function computeStats(values: Float64Array | Int32Array): WeightStats;
+
+interface WeightStats {
+  readonly count: number;
+  readonly min: number;
+  readonly max: number;
+  readonly mean: number;
+  readonly std: number; // population standard deviation
+  readonly zeros: number;
+  readonly histogram: readonly number[]; // 12 fixed-width bins between min and max
+  readonly heatmap: readonly number[]; // 16 cols x 8 rows of mean-of-chunk values, length 128
+  readonly chunkSize: number; // number of consecutive values aggregated per heatmap cell
+}
 ```
 
 ## Sub-path exports
@@ -79,7 +106,14 @@ interface ModelGraph {
     { shape: readonly number[] | null; dtype: string | null }
   >;
   readonly opsets?: ReadonlyMap<string, number>; // domain -> version (ONNX only; "" = ai.onnx)
+  readonly fileSizeBytes: number; // size of the source file; drives the >20 MB lazy-load gate in the WeightPanel
+  readonly weights?: WeightSource; // lazy accessor for initializer bytes; undefined for parsers that don't surface weights
   readonly warnings?: readonly ParseWarning[];
+}
+
+interface WeightSource {
+  readonly totalBytes: number; // sum of all initializer byte lengths
+  get(name: string): Uint8Array | undefined; // returns bytes for one initializer, or undefined for unknown / unsupported
 }
 
 interface ParseWarning {
@@ -148,8 +182,19 @@ type FlowEdge = {
 
 ## Constraints
 
-- No weight deserialization - graph structure only.
+- Parsers never copy weight bytes eagerly. ONNX and TFLite expose them through `WeightSource.get(name)` (zero-copy slices into the input `Uint8Array` for TFLite; protobufjs-decoded `raw_data` / typed-arrays for ONNX). Other parsers leave `weights` undefined.
 - `detectFormat` always returns `Format`, never throws.
 - Do not patch `DataView.prototype` or `BigInt.prototype`.
 - Use `bigIntToNumber(v: bigint): number` from `@wetron/core/dtypes` for BigInt -> number (throws `RangeError` if outside safe integer range).
 - All exotic dtype readers live in `@wetron/core/dtypes` - parsers import from there, never inline shims.
+
+## Weight inspection pipeline
+
+Used by `@wetron/react`'s `WeightPanel` to render an initializer's stats, distribution histogram, heatmap, and a virtualized values grid:
+
+1. Caller decides whether to load: gate on `graph.fileSizeBytes <= 20 MiB` (small models auto-on) or wait for explicit user action (large models).
+2. `bytes = graph.weights.get(name)` - O(1) lookup; returns the raw bytes or `undefined`.
+3. `decoded = decodeWeight(bytes, dtype, shape)` - typed-array view in C-order. `decodeFirstN` is available for cases that only need a preview without materializing the rest.
+4. `stats = computeStats(decoded)` - single pass for `min/max/sum/sumSq/zeros`, second linear pass for the 12-bin histogram, third linear pass for the 128-cell heatmap (16 x 8). `chunkSize = floor(n / 128)` consecutive values are averaged per heatmap cell; the last cell may be a partial chunk.
+
+`computeStats` accepts `Float64Array | Int32Array`. For `BigInt64Array` (int64 weights), the caller must coerce to a `Float64Array` first (one-time `Number(v)` per element); precision degrades above 2^53 but int64 weights are rare in practice.
