@@ -18,22 +18,22 @@ describe("colorForCell", () => {
     expect(colorForCell(1, 1, 1, "constant")).toBe("#cbd5e1");
   });
   test("sequential min returns first stop", () => {
-    // first stop (green-50): #f0fdf4 -> rgb(240,253,244)
-    expect(colorForCell(0, 0, 255, "sequential")).toBe("rgb(240,253,244)");
+    // first stop (cool-warm): #1e3a8a -> rgb(30,58,138)
+    expect(colorForCell(0, 0, 255, "sequential")).toBe("rgb(30,58,138)");
   });
   test("sequential max returns last stop", () => {
-    // last stop (green-900): #14532d -> rgb(20,83,45)
-    expect(colorForCell(255, 0, 255, "sequential")).toBe("rgb(20,83,45)");
+    // last stop (cool-warm): #7f1d1d -> rgb(127,29,29)
+    expect(colorForCell(255, 0, 255, "sequential")).toBe("rgb(127,29,29)");
   });
   test("sequential midpoint hits the middle stop", () => {
     // 4 segments; midpoint t=0.5 lands at segIdx=2 with localT=0, returns stops[2]
-    // stops[2] (green-400): #4ade80 -> rgb(74,222,128)
-    expect(colorForCell(127.5, 0, 255, "sequential")).toBe("rgb(74,222,128)");
+    // stops[2] (cool-warm): #fde68a -> rgb(253,230,138)
+    expect(colorForCell(127.5, 0, 255, "sequential")).toBe("rgb(253,230,138)");
   });
   test("sequential clamps below min", () => {
-    expect(colorForCell(-100, 0, 255, "sequential")).toBe("rgb(240,253,244)");
+    expect(colorForCell(-100, 0, 255, "sequential")).toBe("rgb(30,58,138)");
   });
   test("sequential clamps above max", () => {
-    expect(colorForCell(500, 0, 255, "sequential")).toBe("rgb(20,83,45)");
+    expect(colorForCell(500, 0, 255, "sequential")).toBe("rgb(127,29,29)");
   });
 });
