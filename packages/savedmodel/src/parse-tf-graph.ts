@@ -101,6 +101,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   const inputs: GraphValue[] = [];
   const consumedTensors = new Set<string>();
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>();
+  let hasVarHandleOp = false;
 
   for (let i = 0; i < rawNodes.length; i++) {
     const raw = rawNodes[i];
@@ -120,6 +121,8 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       const inputNames = (raw.input ?? []).filter((inp) => !isControlDep(inp)).map(stripPort);
 
       inputNames.forEach((t) => consumedTensors.add(t));
+
+      if (op === "VarHandleOp") hasVarHandleOp = true;
 
       // Parse _output_shapes for tensorShapes
       const outputShapesAttr = raw.attr?.["_output_shapes"];
@@ -185,6 +188,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
     initializers: new Map(),
     tensorShapes,
     fileSizeBytes,
+    ...(hasVarHandleOp ? { hasExternalWeights: true } : {}),
     ...(warnings.length ? { warnings } : {}),
   };
 }
