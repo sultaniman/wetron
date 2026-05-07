@@ -71,8 +71,9 @@ function attrTypeNumber(raw: unknown): number {
   return 0;
 }
 
-function mapAttribute(a: Record<string, unknown>): AttributeValue {
+function mapAttribute(a: Record<string, unknown>, onWarn?: (ctx: string) => void): AttributeValue {
   const type = attrTypeNumber(a["type"]);
+  const attrName = String(a["name"] ?? "");
   switch (type) {
     case 1:
       return Number(a["f"] ?? 0);
@@ -86,6 +87,7 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
         try {
           return _decoder.decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)));
         } catch {
+          onWarn?.(`attribute "${attrName}": invalid base64 string`);
           return s;
         }
       }
@@ -102,6 +104,7 @@ function mapAttribute(a: Record<string, unknown>): AttributeValue {
           try {
             return _decoder.decode(Uint8Array.from(atob(b), (c) => c.charCodeAt(0)));
           } catch {
+            onWarn?.(`attribute "${attrName}": invalid base64 in strings list`);
             return b;
           }
         }
@@ -203,7 +206,13 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
         attributes: Object.fromEntries(
           ((n["attribute"] as Array<Record<string, unknown>> | null) ?? []).map((a) => [
             String(a["name"] ?? ""),
-            mapAttribute(a),
+            mapAttribute(a, (ctx) =>
+              warnings.push({
+                code: "attribute_decode_error",
+                context: `Node ${i} (${String(n["opType"] ?? "?")}) ${ctx}`,
+                nodeIndex: i,
+              }),
+            ),
           ]),
         ),
       } satisfies GraphNode);
@@ -226,21 +235,33 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
 
   // Decode raw weight bytes for each initializer (lazy contract — but cheap to
   // build the index once at parse time since protobufjs already decoded them).
-  const TYPED_FIELDS: ReadonlyArray<{ field: string; bytesPer: number; kind: "f32" | "f64" | "i32" | "i64" | "u32" | "u64" }> = [
+  const TYPED_FIELDS: ReadonlyArray<{
+    field: string;
+    bytesPer: number;
+    kind: "f32" | "f64" | "i32" | "i64" | "u32" | "u64";
+  }> = [
     { field: "floatData", bytesPer: 4, kind: "f32" },
     { field: "doubleData", bytesPer: 8, kind: "f64" },
     { field: "int32Data", bytesPer: 4, kind: "i32" },
     { field: "int64Data", bytesPer: 8, kind: "i64" },
+    { field: "uint32Data", bytesPer: 4, kind: "u32" },
     { field: "uint64Data", bytesPer: 8, kind: "u64" },
   ];
 
-  function bytesForInitializer(init: Record<string, unknown>): Uint8Array | undefined {
+  function bytesForInitializer(
+    init: Record<string, unknown>,
+    name: string,
+  ): Uint8Array | undefined {
     const raw = init["rawData"];
     if (raw instanceof Uint8Array) return raw;
     if (typeof raw === "string" && raw.length > 0) {
       try {
         return Uint8Array.from(atob(raw), (c) => c.charCodeAt(0));
       } catch {
+        warnings.push({
+          code: "initializer_decode_error",
+          context: `Initializer "${name}" rawData is not valid base64`,
+        });
         return undefined;
       }
     }
@@ -253,12 +274,24 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
         const v = arr[i];
         const off = i * f.bytesPer;
         switch (f.kind) {
-          case "f32": view.setFloat32(off, Number(v), true); break;
-          case "f64": view.setFloat64(off, Number(v), true); break;
-          case "i32": view.setInt32(off, Number(v), true); break;
-          case "i64": view.setBigInt64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true); break;
-          case "u32": view.setUint32(off, Number(v), true); break;
-          case "u64": view.setBigUint64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true); break;
+          case "f32":
+            view.setFloat32(off, Number(v), true);
+            break;
+          case "f64":
+            view.setFloat64(off, Number(v), true);
+            break;
+          case "i32":
+            view.setInt32(off, Number(v), true);
+            break;
+          case "i64":
+            view.setBigInt64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true);
+            break;
+          case "u32":
+            view.setUint32(off, Number(v), true);
+            break;
+          case "u64":
+            view.setBigUint64(off, typeof v === "bigint" ? v : BigInt(longToNumber(v)), true);
+            break;
         }
       }
       return new Uint8Array(buf);
@@ -271,7 +304,7 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
   for (const init of rawInitializers) {
     const name = String(init["name"] ?? "");
     if (!name) continue;
-    const buf = bytesForInitializer(init);
+    const buf = bytesForInitializer(init, name);
     if (buf) {
       weightBytes.set(name, buf);
       totalWeightBytes += buf.byteLength;

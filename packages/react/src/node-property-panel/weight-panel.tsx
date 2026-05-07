@@ -148,10 +148,7 @@ export function WeightPanel({
         <div className={css.section}>
           <div className={css.sectionLabelRow}>
             <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
-            <Tabs.Root
-              value={viz}
-              onValueChange={(v) => setViz(v as "dist" | "heat")}
-            >
+            <Tabs.Root value={viz} onValueChange={(v) => setViz(v as "dist" | "heat")}>
               <Tabs.List className={css.seg}>
                 <Tabs.Tab
                   value="dist"
@@ -206,51 +203,55 @@ export function WeightPanel({
             </div>
           )}
 
-          {viz === "heat" && (() => {
-            // Auto-scale tile colors by the cell-mean range so subtle variation
-            // between chunks is visible even when the tensor's overall min/max is wide.
-            const cells = loaded.stats.heatmap;
-            let cellMin = Infinity;
-            let cellMax = -Infinity;
-            for (const v of cells) {
-              if (v < cellMin) cellMin = v;
-              if (v > cellMax) cellMax = v;
-            }
-            const colormap = pickColormap(cellMin, cellMax);
-            return (
-              <>
-                <div
-                  className={css.heatCaption}
-                  title={`Each tile is the arithmetic mean of ${loaded.stats.chunkSize.toLocaleString()} consecutive values from the flattened tensor (row-major order). The 16×8 grid divides the tensor into ${cells.length} chunks; the final chunk may be smaller if the tensor count is not divisible by ${cells.length}. Colors are auto-scaled to the chunk-mean range so small differences are visible.`}
-                >
-                  Tile = mean of {loaded.stats.chunkSize.toLocaleString()} consecutive value{loaded.stats.chunkSize === 1 ? "" : "s"}
-                </div>
-                <div data-testid="heatmap" className={css.heat}>
-                  {cells.map((val, i) => {
-                    const start = i * loaded.stats.chunkSize;
-                    const tip = `mean ${formatVal(val, dtype || "float32")} · indices [${start}…${start + loaded.stats.chunkSize - 1}]`;
-                    return (
-                      <span
-                        key={i}
-                        title={tip}
-                        style={{ background: colorForCell(val, cellMin, cellMax, colormap, isDark) }}
-                      />
-                    );
-                  })}
-                </div>
-                <div className={css.heatLegend}>
-                  <div className={`${css.heatLegendBar} ${css.heatLegendBarSequential}`} />
+          {viz === "heat" &&
+            (() => {
+              // Auto-scale tile colors by the cell-mean range so subtle variation
+              // between chunks is visible even when the tensor's overall min/max is wide.
+              const cells = loaded.stats.heatmap;
+              let cellMin = Infinity;
+              let cellMax = -Infinity;
+              for (const v of cells) {
+                if (v < cellMin) cellMin = v;
+                if (v > cellMax) cellMax = v;
+              }
+              const colormap = pickColormap(cellMin, cellMax);
+              return (
+                <>
                   <div
-                    className={css.heatLegendTicks}
-                    title="Range of chunk means (auto-scaled). May be narrower than the tensor's full min/max."
+                    className={css.heatCaption}
+                    title={`Each tile is the arithmetic mean of ${loaded.stats.chunkSize.toLocaleString()} consecutive values from the flattened tensor (row-major order). The 16×8 grid divides the tensor into ${cells.length} chunks; the final chunk may be smaller if the tensor count is not divisible by ${cells.length}. Colors are auto-scaled to the chunk-mean range so small differences are visible.`}
                   >
-                    <span>{formatVal(cellMin, dtype || "float32")}</span>
-                    <span>{formatVal(cellMax, dtype || "float32")}</span>
+                    Tile = mean of {loaded.stats.chunkSize.toLocaleString()} consecutive value
+                    {loaded.stats.chunkSize === 1 ? "" : "s"}
                   </div>
-                </div>
-              </>
-            );
-          })()}
+                  <div data-testid="heatmap" className={css.heat}>
+                    {cells.map((val, i) => {
+                      const start = i * loaded.stats.chunkSize;
+                      const tip = `mean ${formatVal(val, dtype || "float32")} · indices [${start}…${start + loaded.stats.chunkSize - 1}]`;
+                      return (
+                        <span
+                          key={i}
+                          title={tip}
+                          style={{
+                            background: colorForCell(val, cellMin, cellMax, colormap, isDark),
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className={css.heatLegend}>
+                    <div className={`${css.heatLegendBar} ${css.heatLegendBarSequential}`} />
+                    <div
+                      className={css.heatLegendTicks}
+                      title="Range of chunk means (auto-scaled). May be narrower than the tensor's full min/max."
+                    >
+                      <span>{formatVal(cellMin, dtype || "float32")}</span>
+                      <span>{formatVal(cellMax, dtype || "float32")}</span>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
         </div>
       )}
 

@@ -149,7 +149,9 @@ describe("onClose and onTensorClick", () => {
       outputs: ["out"],
       attributes: {},
     };
-    const { container } = render(React.createElement(NodePropertyPanel, { target: opWithManyInputs }));
+    const { container } = render(
+      React.createElement(NodePropertyPanel, { target: opWithManyInputs }),
+    );
     await act(async () => {});
     const scrollers = container.querySelectorAll('[data-scroll="true"]');
     // One for inputs, one for outputs.

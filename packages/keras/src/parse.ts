@@ -55,7 +55,11 @@ function layerName(layer: KerasLayerEntry): string | null {
   return name;
 }
 
-function buildSequential(model: KerasModelConfig, warnings: ParseWarning[], fileSizeBytes: number): ModelGraph {
+function buildSequential(
+  model: KerasModelConfig,
+  warnings: ParseWarning[],
+  fileSizeBytes: number,
+): ModelGraph {
   const { layers } = model.config;
   const nodes: GraphNode[] = [];
   const inputs: GraphValue[] = [];
@@ -102,15 +106,11 @@ function buildSequential(model: KerasModelConfig, warnings: ParseWarning[], file
     }
   }
 
-  const lastNonInput = [...layers].reverse().find((l) => l.class_name !== "InputLayer");
-  const outputs: GraphValue[] = lastNonInput
-    ? [
-        {
-          name: layerName(lastNonInput) ?? "",
-          shape: null,
-          dtype: null,
-        },
-      ]
+  // Use the last successfully built node, not raw layers — layers without names
+  // are skipped during the loop and would point at a name not in the graph.
+  const lastNode = nodes[nodes.length - 1];
+  const outputs: GraphValue[] = lastNode
+    ? [{ name: lastNode.outputs[0], shape: null, dtype: null }]
     : [];
 
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>(
@@ -168,7 +168,11 @@ function resolveInbounds(
   return tensor ? [tensor] : [];
 }
 
-function buildFunctional(model: KerasModelConfig, warnings: ParseWarning[], fileSizeBytes: number): ModelGraph {
+function buildFunctional(
+  model: KerasModelConfig,
+  warnings: ParseWarning[],
+  fileSizeBytes: number,
+): ModelGraph {
   const { layers } = model.config;
   const nodes: GraphNode[] = [];
   const inputs: GraphValue[] = [];

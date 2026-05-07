@@ -9,11 +9,15 @@ import { VirtualValues } from "../src/node-property-panel/virtual-values.tsx";
 beforeEach(() => {
   Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
     configurable: true,
-    get() { return 320; },
+    get() {
+      return 320;
+    },
   });
   Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
     configurable: true,
-    get() { return 260; },
+    get() {
+      return 260;
+    },
   });
 });
 

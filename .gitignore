@@ -18,3 +18,4 @@ docs/.hugo_build.lock
 *draft*
 npm-debug.log*
 data/
+tmp

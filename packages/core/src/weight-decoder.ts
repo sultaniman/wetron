@@ -51,13 +51,10 @@ export function decodeWeight(
   shape: readonly number[],
 ): DecodedArray | null {
   const total = shape.reduce((a, b) => a * b, 1);
+  if (!Number.isFinite(total) || total < 0) return null;
   return decode(bytes, dtype, total);
 }
 
-export function decodeFirstN(
-  bytes: Uint8Array,
-  dtype: string,
-  n: number,
-): DecodedArray | null {
+export function decodeFirstN(bytes: Uint8Array, dtype: string, n: number): DecodedArray | null {
   return decode(bytes, dtype, n);
 }

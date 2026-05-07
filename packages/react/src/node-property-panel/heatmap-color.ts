@@ -5,21 +5,9 @@ export function pickColormap(min: number, max: number): ColormapKind {
   return "sequential";
 }
 
-const STOPS_LIGHT: readonly string[] = [
-  "#eff6ff",
-  "#bfdbfe",
-  "#60a5fa",
-  "#2563eb",
-  "#1e3a8a",
-];
+const STOPS_LIGHT: readonly string[] = ["#eff6ff", "#bfdbfe", "#60a5fa", "#2563eb", "#1e3a8a"];
 
-const STOPS_DARK: readonly string[] = [
-  "#bfdbfe",
-  "#93c5fd",
-  "#3b82f6",
-  "#1d4ed8",
-  "#1e3a8a",
-];
+const STOPS_DARK: readonly string[] = ["#bfdbfe", "#93c5fd", "#3b82f6", "#1d4ed8", "#1e3a8a"];
 
 export function colorForCell(
   value: number,

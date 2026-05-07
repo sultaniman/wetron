@@ -20,7 +20,12 @@ test("ONNX parse exposes weight bytes for initializers", async () => {
 
   // Byte length should match shape × dtype size for typical Tier 1 dtypes.
   const elementSize: Record<string, number> = {
-    float32: 4, float16: 2, int64: 8, int32: 4, int8: 1, uint8: 1,
+    float32: 4,
+    float16: 2,
+    int64: 8,
+    int32: 4,
+    int8: 1,
+    uint8: 1,
   };
   const elements = init.shape.reduce((a, b) => a * b, 1);
   const expected = elements * (elementSize[init.dtype] ?? 0);

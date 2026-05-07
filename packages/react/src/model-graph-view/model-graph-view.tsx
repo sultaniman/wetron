@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useImperativeHandle, forwardRef } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -36,6 +36,13 @@ const nodeTypes: NodeTypes = {
 
 const edgeTypes = { modelEdge: ModelEdge } as const;
 
+const EDGE_DEFAULTS = {
+  markerEnd: { type: MarkerType.ArrowClosed, width: 10, height: 10 },
+  style: { stroke: "var(--wetron-edge-default)", opacity: "var(--wetron-edge-default-opacity)" },
+} as const;
+
+const EMPTY_NAMES: ReadonlySet<string> = new Set();
+
 export type ModelGraphViewHandle = {
   /** Fit all nodes into view and wait for DOM to update (ensures all nodes are rendered). */
   fitAll: () => Promise<void>;
@@ -63,10 +70,7 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
   const isDark = useColorMode() === "dark";
   const rf = useReactFlow();
   const { nodes: rawNodes, onNodesChange, layoutNodes, layoutEdges } = useModelNodes(graph);
-  const matchedNames = useMemo(
-    () => (searchQuery ? filterGraph(graph, searchQuery) : new Set<string>()),
-    [graph, searchQuery],
-  );
+  const matchedNames = searchQuery ? filterGraph(graph, searchQuery) : EMPTY_NAMES;
   const nodes = useNodeDim(rawNodes, matchedNames);
   const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark, matchedNames);
   const handleNodeClick = useNodeClickHandler(onTargetClick);
@@ -75,10 +79,6 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
   useEffect(() => {
     onWarnings?.(graph.warnings ?? []);
   }, [graph, onWarnings]);
-  const edgeDefaults = useMemo(
-    () => (isDark ? { stroke: "#7a7a9a", opacity: 0.55 } : { stroke: "rgba(60,60,100,0.55)" }),
-    [isDark],
-  );
 
   useImperativeHandle(
     ref,
@@ -122,10 +122,7 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
         edgeTypes={edgeTypes}
         onNodeClick={handleNodeClick}
         onEdgeClick={handleEdgeClick}
-        defaultEdgeOptions={{
-          markerEnd: { type: MarkerType.ArrowClosed, width: 10, height: 10 },
-          style: edgeDefaults,
-        }}
+        defaultEdgeOptions={EDGE_DEFAULTS}
         nodesConnectable={false}
         nodesDraggable={false}
         panOnScroll
@@ -151,7 +148,7 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
           onClick={(_, pos) => rf.setCenter(pos.x, pos.y, { zoom: rf.getViewport().zoom })}
         />
         <Controls />
-        <Background color={isDark ? "#2a2a3a" : "#d0d0d8"} />
+        <Background color="var(--wetron-bg-pattern)" />
       </ReactFlow>
     </div>
   );

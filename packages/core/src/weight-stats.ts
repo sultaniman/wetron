@@ -22,7 +22,12 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
   const n = values.length;
   if (n === 0) {
     return {
-      count: 0, min: 0, max: 0, mean: 0, std: 0, zeros: 0,
+      count: 0,
+      min: 0,
+      max: 0,
+      mean: 0,
+      std: 0,
+      zeros: 0,
       histogram: new Array(HIST_BINS).fill(0),
       heatmap: new Array(HEAT_CELLS).fill(0),
       chunkSize: 1,
