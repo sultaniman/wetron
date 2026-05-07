@@ -1,26 +1,34 @@
-export type ColormapKind = "sequential" | "diverging" | "constant";
+export type ColormapKind = "sequential" | "constant";
 
 export function pickColormap(min: number, max: number): ColormapKind {
   if (min === max) return "constant";
-  if (min < 0 && max > 0) return "diverging";
   return "sequential";
 }
 
+const STOPS: readonly string[] = [
+  "#ccfbf1",
+  "#5eead4",
+  "#14b8a6",
+  "#0d9488",
+  "#0f766e",
+];
+
 export function colorForCell(value: number, min: number, max: number, kind: ColormapKind): string {
   if (kind === "constant") return "#cbd5e1";
-  if (kind === "diverging") {
-    const maxAbs = Math.max(Math.abs(min), Math.abs(max));
-    const t = Math.max(-1, Math.min(1, value / maxAbs));
-    // -1 -> deep purple, 0 -> pale white, +1 -> deep orange.
-    if (t < 0) return mix("#f8fafc", "#7e22ce", -t);
-    return mix("#f8fafc", "#ea580c", t);
-  }
-  // sequential: pale green -> deep green, t in [0,1].
-  const t = (value - min) / (max - min);
-  return mix("#dcfce7", "#15803d", Math.max(0, Math.min(1, t)));
+  const range = max - min;
+  if (range === 0) return STOPS[0];
+  const t = Math.max(0, Math.min(1, (value - min) / range));
+  return interpolateStops(t, STOPS);
 }
 
-/** linear interpolation between two #rrggbb colors. amount in [0,1]. */
+function interpolateStops(t: number, stops: readonly string[]): string {
+  const segments = stops.length - 1;
+  const segmentLen = 1 / segments;
+  const segIdx = Math.min(Math.floor(t / segmentLen), segments - 1);
+  const localT = Math.max(0, Math.min(1, (t - segIdx * segmentLen) / segmentLen));
+  return mix(stops[segIdx], stops[segIdx + 1], localT);
+}
+
 function mix(a: string, b: string, amount: number): string {
   const [ar, ag, ab] = parseHex(a);
   const [br, bg, bb] = parseHex(b);

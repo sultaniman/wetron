@@ -510,10 +510,14 @@
   border-radius: 3px;
 }
 .heatLegendBarSequential {
-  background: linear-gradient(to right, #dcfce7, #15803d);
-}
-.heatLegendBarDiverging {
-  background: linear-gradient(to right, #7e22ce 0%, #f8fafc 50%, #ea580c 100%);
+  background: linear-gradient(
+    to right,
+    #ccfbf1,
+    #5eead4,
+    #14b8a6,
+    #0d9488,
+    #0f766e
+  );
 }
 .heatLegendTicks {
   display: flex;

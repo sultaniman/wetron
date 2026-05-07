@@ -5,14 +5,10 @@ describe("pickColormap", () => {
   test("constant when min == max", () => {
     expect(pickColormap(0.5, 0.5)).toBe("constant");
   });
-  test("diverging when straddling zero", () => {
-    expect(pickColormap(-0.5, 0.4)).toBe("diverging");
-  });
-  test("sequential for non-negative", () => {
+  test("sequential when range is non-zero", () => {
     expect(pickColormap(0, 255)).toBe("sequential");
+    expect(pickColormap(-0.5, 0.4)).toBe("sequential");
     expect(pickColormap(50, 200)).toBe("sequential");
-  });
-  test("sequential for non-positive", () => {
     expect(pickColormap(-1, -0.1)).toBe("sequential");
   });
 });
@@ -21,29 +17,24 @@ describe("colorForCell", () => {
   test("constant returns a fixed neutral color", () => {
     expect(colorForCell(1, 1, 1, "constant")).toBe("#cbd5e1");
   });
-  test("diverging puts 0 at pale midpoint", () => {
-    const c = colorForCell(0, -1, 1, "diverging");
-    // pale white #f8fafc -> rgb(248,250,252)
-    expect(c).toBe("rgb(248,250,252)");
+  test("sequential min returns first stop", () => {
+    // first stop: #ccfbf1 -> rgb(204,251,241)
+    expect(colorForCell(0, 0, 255, "sequential")).toBe("rgb(204,251,241)");
   });
-  test("diverging extreme negative -> deep purple", () => {
-    const c = colorForCell(-1, -1, 1, "diverging");
-    // deep purple #7e22ce -> rgb(126,34,206)
-    expect(c).toBe("rgb(126,34,206)");
+  test("sequential max returns last stop", () => {
+    // last stop: #0f766e -> rgb(15,118,110)
+    expect(colorForCell(255, 0, 255, "sequential")).toBe("rgb(15,118,110)");
   });
-  test("diverging extreme positive -> deep orange", () => {
-    const c = colorForCell(1, -1, 1, "diverging");
-    // deep orange #ea580c -> rgb(234,88,12)
-    expect(c).toBe("rgb(234,88,12)");
+  test("sequential midpoint hits the middle stop", () => {
+    // 4 segments; midpoint t=0.5 falls inside segment 2 (between stops[1] and stops[2])
+    // Actually 0.5 / 0.25 = 2, so segIdx = 2, localT = 0; returns stops[2] exactly
+    // stops[2] = #14b8a6 -> rgb(20,184,166)
+    expect(colorForCell(127.5, 0, 255, "sequential")).toBe("rgb(20,184,166)");
   });
-  test("sequential min -> pale green", () => {
-    const c = colorForCell(0, 0, 255, "sequential");
-    // pale green #dcfce7 -> rgb(220,252,231)
-    expect(c).toBe("rgb(220,252,231)");
+  test("sequential clamps below min", () => {
+    expect(colorForCell(-100, 0, 255, "sequential")).toBe("rgb(204,251,241)");
   });
-  test("sequential max -> deep green", () => {
-    const c = colorForCell(255, 0, 255, "sequential");
-    // deep green #15803d -> rgb(21,128,61)
-    expect(c).toBe("rgb(21,128,61)");
+  test("sequential clamps above max", () => {
+    expect(colorForCell(500, 0, 255, "sequential")).toBe("rgb(15,118,110)");
   });
 });

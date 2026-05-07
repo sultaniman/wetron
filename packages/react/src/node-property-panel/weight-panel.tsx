@@ -216,30 +216,14 @@ export function WeightPanel({
                     );
                   })}
                 </div>
-                {colormap === "sequential" && (
-                  <div className={css.heatLegend}>
-                    <div className={`${css.heatLegendBar} ${css.heatLegendBarSequential}`} />
-                    <div className={css.heatLegendTicks}>
-                      <span>{formatVal(loaded.stats.min, dtype || "float32")}</span>
-                      <span>{formatVal(loaded.stats.max, dtype || "float32")}</span>
-                    </div>
-                    <div className={css.heatLegendCaption}>low ─── high</div>
+                <div className={css.heatLegend}>
+                  <div className={`${css.heatLegendBar} ${css.heatLegendBarSequential}`} />
+                  <div className={css.heatLegendTicks}>
+                    <span>{formatVal(loaded.stats.min, dtype || "float32")}</span>
+                    <span>{formatVal(loaded.stats.max, dtype || "float32")}</span>
                   </div>
-                )}
-                {colormap === "diverging" && (() => {
-                  const maxAbs = Math.max(Math.abs(loaded.stats.min), Math.abs(loaded.stats.max));
-                  return (
-                    <div className={css.heatLegend}>
-                      <div className={`${css.heatLegendBar} ${css.heatLegendBarDiverging}`} />
-                      <div className={css.heatLegendTicks}>
-                        <span>−{formatVal(maxAbs, dtype || "float32")}</span>
-                        <span>0</span>
-                        <span>+{formatVal(maxAbs, dtype || "float32")}</span>
-                      </div>
-                      <div className={css.heatLegendCaption}>negative ─── positive</div>
-                    </div>
-                  );
-                })()}
+                  <div className={css.heatLegendCaption}>low ─── high</div>
+                </div>
               </>
             );
           })()}
