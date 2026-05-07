@@ -11,9 +11,9 @@ export function colorForCell(value: number, min: number, max: number, kind: Colo
   if (kind === "diverging") {
     const maxAbs = Math.max(Math.abs(min), Math.abs(max));
     const t = Math.max(-1, Math.min(1, value / maxAbs));
-    // -1 -> deep blue, 0 -> pale white, +1 -> deep red.
-    if (t < 0) return mix("#f8fafc", "#1d4ed8", -t);
-    return mix("#f8fafc", "#dc2626", t);
+    // -1 -> deep purple, 0 -> pale white, +1 -> deep orange.
+    if (t < 0) return mix("#f8fafc", "#7e22ce", -t);
+    return mix("#f8fafc", "#ea580c", t);
   }
   // sequential: pale green -> deep green, t in [0,1].
   const t = (value - min) / (max - min);

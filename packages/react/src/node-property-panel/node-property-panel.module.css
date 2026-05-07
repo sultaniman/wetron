@@ -14,6 +14,7 @@
 
   position: relative;
   width: 320px;
+  box-sizing: border-box;
   background: var(--wetron-panel-bg);
   border-radius: 8px;
   overflow: hidden;
@@ -307,7 +308,7 @@
   border-radius: 8px;
 }
 .scrollContent {
-  width: 320px;
+  width: 318px;
   overflow-x: clip;
 }
 .scrollViewport {
@@ -512,7 +513,7 @@
   background: linear-gradient(to right, #dcfce7, #15803d);
 }
 .heatLegendBarDiverging {
-  background: linear-gradient(to right, #1d4ed8 0%, #f8fafc 50%, #dc2626 100%);
+  background: linear-gradient(to right, #7e22ce 0%, #f8fafc 50%, #ea580c 100%);
 }
 .heatLegendTicks {
   display: flex;

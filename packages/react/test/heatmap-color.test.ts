@@ -26,13 +26,15 @@ describe("colorForCell", () => {
     // pale white #f8fafc -> rgb(248,250,252)
     expect(c).toBe("rgb(248,250,252)");
   });
-  test("diverging extreme negative -> deep blue", () => {
+  test("diverging extreme negative -> deep purple", () => {
     const c = colorForCell(-1, -1, 1, "diverging");
-    expect(c).toBe("rgb(29,78,216)");
+    // deep purple #7e22ce -> rgb(126,34,206)
+    expect(c).toBe("rgb(126,34,206)");
   });
-  test("diverging extreme positive -> deep red", () => {
+  test("diverging extreme positive -> deep orange", () => {
     const c = colorForCell(1, -1, 1, "diverging");
-    expect(c).toBe("rgb(220,38,38)");
+    // deep orange #ea580c -> rgb(234,88,12)
+    expect(c).toBe("rgb(234,88,12)");
   });
   test("sequential min -> pale green", () => {
     const c = colorForCell(0, 0, 255, "sequential");
