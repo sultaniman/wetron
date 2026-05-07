@@ -118,6 +118,7 @@ export function WeightPanel({
     return { stats, preview, total: numeric.length };
   }, [target.name, showWeights, showAll, graph.weights, target.dtype, target.shape]);
 
+  const isLarge = graph.fileSizeBytes > SIZE_THRESHOLD;
   const dtype = target.dtype ?? "";
   const shape = target.shape;
   const shapeLabel = shape ? `[${shape.join(" × ")}]` : "unknown";
@@ -246,6 +247,14 @@ export function WeightPanel({
             </span>
           )}
         </div>
+
+        {isLarge && !showWeights && (
+          <div className={css.sizeNote}>
+            <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong>
+            <br />
+            Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
+          </div>
+        )}
 
         {loaded && showWeights && (
           <>
