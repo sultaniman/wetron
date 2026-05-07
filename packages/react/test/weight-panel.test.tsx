@@ -69,6 +69,22 @@ describe("WeightPanel small model", () => {
     expect(screen.queryByTestId("values-grid")).toBeNull();
   });
 
+  test("toggling Show weights hides histogram and grid (master gate)", async () => {
+    const g = smallGraph();
+    render(
+      React.createElement(WeightPanel, {
+        target: { name: "w", shape: [4], dtype: "float32" },
+        graph: g,
+      }),
+    );
+    await act(async () => {});
+    expect(screen.queryByTestId("histogram")).not.toBeNull();
+    expect(screen.queryByTestId("values-grid")).not.toBeNull();
+    await act(async () => fireEvent.click(screen.getByTestId("show-weights-switch")));
+    expect(screen.queryByTestId("histogram")).toBeNull();
+    expect(screen.queryByTestId("values-grid")).toBeNull();
+  });
+
   test("viz toggle swaps dist and heat", async () => {
     const g = smallGraph();
     render(

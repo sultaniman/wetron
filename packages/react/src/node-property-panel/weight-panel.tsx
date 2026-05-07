@@ -220,22 +220,16 @@ export function WeightPanel({
         </div>
       )}
 
-      <div className={css.sectionLast}>
-        <div className={css.valuesHeader}>
-          <span className={css.valuesLabel}>
-            <button
-              data-testid="show-weights-switch"
-              className={`${css.switch}${showWeights ? "" : ` ${css.switchOff}`}`}
-              onClick={() => setShowWeights((v) => !v)}
-              aria-label="Show weights"
-            />
-            Show weights
-          </span>
-          {loaded && (
-            <span className={css.valuesMeta}>{loaded.values.length.toLocaleString()} values</span>
-          )}
+      <div className={css.section}>
+        <div className={css.toggleRow}>
+          <span>Show weights</span>
+          <button
+            data-testid="show-weights-switch"
+            className={`${css.switch}${showWeights ? "" : ` ${css.switchOff}`}`}
+            onClick={() => setShowWeights((v) => !v)}
+            aria-label="Show weights"
+          />
         </div>
-
         {isLarge && !showWeights && (
           <div className={css.sizeNote}>
             <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong>
@@ -243,15 +237,21 @@ export function WeightPanel({
             Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
           </div>
         )}
+      </div>
 
-        {loaded && showWeights && (
+      {loaded && showWeights && (
+        <div className={css.sectionLast}>
+          <div className={css.sectionLabelRow}>
+            <span>Values</span>
+            <span className={css.valuesMeta}>{loaded.values.length.toLocaleString()} values</span>
+          </div>
           <VirtualValues
             data-testid="values-grid"
             values={loaded.values}
             format={(v) => formatVal(v, dtype || "float32")}
           />
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }
