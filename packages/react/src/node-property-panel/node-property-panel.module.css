@@ -51,7 +51,7 @@
   --wetron-seg-bg: rgba(255, 255, 255, 0.06);
   --wetron-seg-color: #94a3b8;
   --wetron-seg-on-bg: rgba(255, 255, 255, 0.12);
-  --wetron-seg-on-color: #93c5fd;
+  --wetron-seg-on-color: #f1f5f9;
 }
 
 .header {
@@ -448,8 +448,13 @@
   background: #fff;
   border-radius: 50%;
 }
-.switchOff { background: #cbd5e1; }
-.switchOff::after { left: 2px; right: auto; }
+.switchOff {
+  background: #cbd5e1;
+}
+.switchOff::after {
+  left: 2px;
+  right: auto;
+}
 
 .sizeNote {
   font-size: 10px;
@@ -520,7 +525,9 @@
   gap: 1px;
   margin-top: 6px;
 }
-.heat span { aspect-ratio: 1 / 1; }
+.heat span {
+  aspect-ratio: 1 / 1;
+}
 
 .heatLegend {
   margin-top: 6px;
@@ -618,10 +625,16 @@
   overflow-y: scroll;
   scrollbar-width: none;
 }
-.valuesScrollViewport::-webkit-scrollbar { display: none; }
+.valuesScrollViewport::-webkit-scrollbar {
+  display: none;
+}
 
-.gridAlignCenter > span { text-align: center; }
-.gridAlignRight > span { text-align: right; }
+.gridAlignCenter > span {
+  text-align: center;
+}
+.gridAlignRight > span {
+  text-align: right;
+}
 
 .gridRow {
   position: absolute;
