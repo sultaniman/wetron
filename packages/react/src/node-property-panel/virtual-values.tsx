@@ -3,7 +3,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import css from "./node-property-panel.module.css";
 
 const ROW_HEIGHT = 16;
-const COLS = 4;
+const COLS = 5;
 
 type Values = Float64Array | Int32Array | BigInt64Array;
 
