@@ -12,7 +12,7 @@ folds, filters, or punts.
 | TFLite                 | Clean — weights live in `buffers[]` indexed by tensor   | None needed                                                                                                 | only `subgraphs[0]` parsed                |
 | Keras (`.keras`)       | Clean — layer level; weights in a separate file         | n/a                                                                                                         | n/a                                       |
 | Keras metadata (`.pb`) | Clean — wraps the same Keras config                     | n/a                                                                                                         | n/a                                       |
-| TF SavedModel (`.pb`)  | **Wide by default** — every layer expands into many ops | `VarHandleOp` folded into `initializers`; `ReadVariableOp`/`AssignVariableOp`/`VarIsInitializedOp` filtered | `StatefulPartitionedCall` body **hidden** |
+| TF SavedModel (`.pb`)  | **Wide by default** — every layer expands into many ops | `VarHandleOp` folded into `initializers`; `ReadVariableOp`/`AssignVariableOp`/`VarIsInitializedOp` filtered | `StatefulPartitionedCall` body **inlined recursively** with arg binding |
 | ExecuTorch (`.pte`)    | Linear chain                                            | n/a                                                                                                         | only `execution_plans[0]` parsed          |
 | TorchScript Mobile     | Linear chain (forced)                                   | n/a                                                                                                         | methods **concatenated**                  |
 
@@ -61,10 +61,15 @@ matching IR channel and the layout's initializer-skip rule handles the rest.
 and exactly one consumer, its `value` tensor becomes an initializer and the op
 is removed. Removes 5–15% of nodes from typical CNNs and matches Netron.
 
-**Subgraphs are not inlined.** ONNX `If` / `Loop` / `Scan` carry their bodies
-in attributes of type `GRAPH` (5) or `GRAPHS` (10). `mapAttribute` currently
-returns `""` for both types (`parse.ts:113`), so the body's nodes are
-invisible. Models with control flow render as opaque ops.
+**Subgraph inlining**: `If` / `Loop` / `Scan` carry their bodies in attributes
+of type `GRAPH` (5) or `GRAPHS` (10). The parser flattens each body into the
+main `nodes` list with names prefixed by `<wrapper>/<attr>/`; references
+internal to a subgraph (its formal inputs, locally-scoped initializers,
+sibling node outputs) are also prefixed, while outer-scope captures stay
+unprefixed so edges still wire to the existing producer. Recurses up to depth
+4 for nested control flow. Verified on `fcos_resnet50_fpn_Opset17.onnx` —
+the `If_2401` op's previously hidden 30-node else branch is now visible as
+`If_2401/else_branch/<original>`.
 
 **Other quirks**:
 
@@ -164,12 +169,18 @@ consumers are already excluded. Without this filter the renderer ends up with
 a duplicate-looking saver branch whose weight chips don't resolve to anything
 useful.
 
-**What's still wide**: after the fold, a 16-layer model reduces from ~170
-nodes to a handful of layout-visible nodes — and those few are mostly
-`StatefulPartitionedCall`. The actual `Conv2D` / `Relu` / `MatMul` ops live
-inside the function body referenced by `StatefulPartitionedCall`, in
-`MetaGraphDef.graphDef.library.function[]`. **Function-body inlining is not
-implemented yet** and is the biggest remaining SavedModel quality gap.
+**Function-body inlining**: tf.saved_model.save() wraps the actual
+forward pass inside `StatefulPartitionedCall` ops whose body lives in
+`MetaGraphDef.graphDef.library.function[]`. The parser now decodes the
+function library (`tf-descriptor.json` was extended with `FunctionDefLibrary`,
+`FunctionDef`, `OpDef`, `ArgDef`, `NameAttrList`) and inlines each body at
+the call site. Body NodeDefs get a `<call_name>/<original>` prefix; function
+input args bind positionally to the caller's outer-scope inputs; body-internal
+`ReadVariableOp` consumers are rewritten to point at the underlying
+`VarHandleOp` (same fold rule as at the top level); chained signature wrappers
+expand recursively up to depth 6. On the `vertical_tf2` fixture this turns 5
+layout-visible nodes (mostly opaque calls) into 120 — the 16-Conv2D /
+20-ReLU / 5-MatMul chain becomes visible.
 
 **Checkpoint resolution**: variables in modern TF checkpoints use SSTable keys
 like `_operations/1/_kernel/.ATTRIBUTES/VARIABLE_VALUE`, not the friendly name
@@ -223,22 +234,24 @@ Operators come from a separate operator table, named like `aten::conv2d.default`
 
 Three formats hide their actual computation inside a "function call" wrapper:
 
-| Format        | Wrapper                      | Body location                                        |
-| ------------- | ---------------------------- | ---------------------------------------------------- |
-| ONNX          | `If` / `Loop` / `Scan` op    | Attribute of type `GRAPH` (5) / `GRAPHS` (10)        |
-| TFLite        | `IF` / `WHILE` op            | `subgraphs[1+]`                                      |
-| TF SavedModel | `StatefulPartitionedCall` op | `MetaGraphDef.graphDef.library.function[].nodeDef[]` |
+| Format        | Wrapper                      | Body location                                        | Status      |
+| ------------- | ---------------------------- | ---------------------------------------------------- | ----------- |
+| ONNX          | `If` / `Loop` / `Scan` op    | Attribute of type `GRAPH` (5) / `GRAPHS` (10)        | **inlined** |
+| TF SavedModel | `StatefulPartitionedCall` op | `MetaGraphDef.graphDef.library.function[].nodeDef[]` | **inlined** |
+| TFLite        | `IF` / `WHILE` op            | `subgraphs[1+]`                                      | not yet     |
 
-None of these are inlined today. Renderable bodies require:
+Each inliner does the same three things, just against a format-specific container:
 
-1. Parse the nested graph (each format encodes it differently).
+1. Parse the nested graph.
 2. Prefix every internal node name to avoid collisions with the outer graph.
-3. Wire outer-scope inputs to the formal subgraph parameters, and route
-   subgraph outputs back to the wrapper op's outputs.
+3. Resolve cross-scope references — bind formal subgraph parameters to the
+   caller's actual inputs (TF function arg binding), or leave outer-scope
+   captures unprefixed so they wire to existing producers (ONNX subgraphs).
 
-A generic "inline subgraph" pass in `@wetron/core` could amortize step 2/3 if
-each parser produces a `{ nodes, inputBinding, outputBinding }` triple from
-its format-specific extractor.
+For TFLite the wrapper-to-body mapping lives in `BuiltinOptions`
+(`IfOptions.then_subgraph_index`, `WhileOptions.body_subgraph_index`), which
+the parser doesn't decode yet (every op currently gets `attributes: {}`). That's
+the prerequisite for TFLite inlining.
 
 Note that this is distinct from `subgraph-collapse-design.md`, which is about
 _user-controlled_ grouping (folding many real nodes into one summary node).
@@ -249,13 +262,13 @@ concern.
 
 These come out of `transform.ts` and apply uniformly:
 
-- **`rankdir: "TB"`** is hard-coded (`transform.ts:62`). Models that read
-  better left-to-right (transformer pipelines, audio chains) can't currently
-  switch direction.
+- **`rankdir`** is configurable per render via the `ModelGraphView` `rankdir`
+  prop (defaults to `"TB"`). Pipelines that read better left-to-right can pass
+  `"LR"`. The transform threads it through dagre's `setGraph({ rankdir })`.
 - **Multi-edge handling**: when N edges share the same source/target pair
-  (e.g., two slots both reading the same tensor — `Add(x, x)`,
-  `MatMul(x, x.T)`), they reuse one set of dagre waypoints. Visually they
-  overlap. A perturbation per slot index would fan them out.
+  (e.g., two slots reading the same tensor — `Add(x, x)`, `MatMul(x, x.T)`),
+  they're now fanned out by `(slot − (total − 1) / 2) × FAN_STEP` px so they
+  don't overlap into a single stroke.
 - **Orphan nodes**: nodes with no edges still get unique x-positions from
   dagre — they don't stack at `(0, 0)`. They do sit on the same row as graph
   inputs (rank 0), which can look odd but isn't wrong.
@@ -281,18 +294,24 @@ These come out of `transform.ts` and apply uniformly:
 
 ## Open work (in priority order)
 
-1. **TF SavedModel function-body inlining** — read
-   `MetaGraphDef.graphDef.library.function[]`, inline into the main graph at
-   the corresponding `StatefulPartitionedCall` site. Biggest unlock for
-   real-model rendering.
-2. **ONNX subgraph inlining** — `If` / `Loop` / `Scan` body extraction with
-   prefixed names.
-3. **TFLite multi-subgraph** — same shape as ONNX subgraphs, indexed by
-   subgraph id.
-4. **TFLite `BuiltinOptions`** — surface at least `Conv2DOptions`,
-   `PoolingOptions`, `FullyConnectedOptions`, `FusedActivation`.
-5. **TorchScript multi-method** — emit per-method graphs (or one disconnected
+1. **TFLite `BuiltinOptions`** — surface at least `Conv2DOptions`,
+   `PoolingOptions`, `FullyConnectedOptions`, `FusedActivation`. Prerequisite
+   for the next item.
+2. **TFLite multi-subgraph** — once `IfOptions.then_subgraph_index` and
+   `WhileOptions.body_subgraph_index` are visible, inline the referenced
+   `subgraphs[i]` at each control-flow op site (same shape as the ONNX
+   inliner).
+3. **TorchScript multi-method** — emit per-method graphs (or one disconnected
    union with method boundaries explicit).
-6. **rankdir as a `ModelGraphView` prop** — let consumers pick TB vs LR.
-7. **Multi-edge fan-out** — perturb dagre waypoints per slot to avoid overlap.
-8. **ExecuTorch multi-plan** — selector or aggregated view.
+4. **ExecuTorch multi-plan** — selector or aggregated view.
+
+Already done (kept here so the doc reads as a changelog of how we got from
+"every SavedModel renders as 5 opaque ops" to the current state):
+
+- ✅ TF SavedModel function-body inlining (`StatefulPartitionedCall`).
+- ✅ ONNX subgraph inlining (`If` / `Loop` / `Scan`).
+- ✅ rankdir as a `ModelGraphView` prop (TB / LR).
+- ✅ Multi-edge fan-out (duplicate edges between same src/target offset by
+  ±FAN_STEP per slot).
+- ✅ Pre-checkpoint weight-panel UX for SavedModel (toggle disabled with
+  explanation when `hasExternalWeights && !weights`).
