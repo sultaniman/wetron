@@ -103,3 +103,7 @@ cd docs && bun install && bun run dev   # Hugo site at localhost:1313
 - No weight deserialization anywhere in the stack.
 - No patching of `DataView.prototype` or `BigInt.prototype`.
 - `detectFormat` always returns a `Format` string, never throws.
+
+## Related work
+
+[Netron](https://github.com/lutzroeder/netron) by Lutz Roeder is used as a reference for schema field layouts and node-count parity across supported formats. The parsers and rendering layers in wetron are independent implementations.
