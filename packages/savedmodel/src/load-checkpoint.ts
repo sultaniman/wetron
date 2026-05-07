@@ -2,6 +2,9 @@ import type { WeightSource } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 import { parseCheckpointIndex } from "./parse-checkpoint-index.ts";
 import type { CheckpointMeta } from "./parse-checkpoint-index.ts";
+import { parseCheckpointableObjectGraph } from "./parse-object-graph.ts";
+
+const OBJECT_GRAPH_KEY = "_CHECKPOINTABLE_OBJECT_GRAPH";
 
 export type CheckpointVariableMeta = {
   readonly dtype: string;
@@ -11,12 +14,18 @@ export type CheckpointVariableMeta = {
 export type LoadedCheckpoint = {
   readonly weights: WeightSource;
   readonly metas: ReadonlyMap<string, CheckpointVariableMeta>;
+  /**
+   * Map from semantic variable name (e.g. "conv1/kernel") to the SSTable
+   * checkpoint key (e.g. "_operations/1/_kernel/.ATTRIBUTES/VARIABLE_VALUE").
+   * Built from `_CHECKPOINTABLE_OBJECT_GRAPH` when present, empty otherwise.
+   */
+  readonly fullNameToKey: ReadonlyMap<string, string>;
 };
 
 /**
  * Load a TF2 SavedModel checkpoint pair (variables.index + variables.data-00000-of-00001).
- * Returns a WeightSource keyed by checkpoint variable name (e.g.
- * "layer_with_weights-0/kernel/.ATTRIBUTES/VARIABLE_VALUE") plus dtype/shape metas.
+ * Returns a WeightSource keyed by checkpoint SSTable key plus dtype/shape metas
+ * and a friendly-name → key mapping derived from the object graph blob.
  */
 export async function loadSavedModelWeights(
   indexFile: File,
@@ -32,8 +41,16 @@ export async function loadSavedModelWeights(
   const metas = new Map<string, CheckpointVariableMeta>();
   let totalBytes = 0;
   for (const [name, m] of index) {
+    if (name === OBJECT_GRAPH_KEY) continue;
     metas.set(name, { dtype: m.dtype, shape: m.shape });
     totalBytes += m.size;
+  }
+
+  let fullNameToKey: Map<string, string> = new Map();
+  const ogMeta = index.get(OBJECT_GRAPH_KEY);
+  if (ogMeta && ogMeta.offset + ogMeta.size <= dataBuffer.byteLength) {
+    const blob = new Uint8Array(dataBuffer, ogMeta.offset, ogMeta.size);
+    fullNameToKey = parseCheckpointableObjectGraph(blob);
   }
 
   const weights: WeightSource = {
@@ -51,5 +68,5 @@ export async function loadSavedModelWeights(
     },
   };
 
-  return { weights, metas };
+  return { weights, metas, fullNameToKey };
 }

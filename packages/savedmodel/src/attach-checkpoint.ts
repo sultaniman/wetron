@@ -5,12 +5,16 @@ const SUFFIX = "/.ATTRIBUTES/VARIABLE_VALUE";
 
 /**
  * Re-key a checkpoint's WeightSource by the graph node names that consume those
- * variables. Each VarHandleOp node carries a `shared_name` attribute; the checkpoint
- * key is `<shared_name>/.ATTRIBUTES/VARIABLE_VALUE`.
+ * variables.
+ *
+ * Resolution order for each `VarHandleOp` node's `shared_name`:
+ *   1. Direct lookup in `loaded.fullNameToKey` (Keras 3 layout — names like
+ *      "conv1/kernel" map to "_operations/N/_kernel/.ATTRIBUTES/VARIABLE_VALUE").
+ *   2. Direct match against `<shared_name>/.ATTRIBUTES/VARIABLE_VALUE` in the
+ *      checkpoint metas (legacy / TF1-style layout).
  *
  * Returns a new ModelGraph with `weights` populated and `tensorShapes` extended
- * with dtype/shape for each mapped variable. `hasExternalWeights` stays set so
- * the host can tell that weights came from a checkpoint pair.
+ * with dtype/shape for each mapped variable.
  */
 export function attachCheckpointToGraph(
   graph: ModelGraph,
@@ -22,16 +26,24 @@ export function attachCheckpointToGraph(
     if (node.opType !== "VarHandleOp") continue;
     const shared = node.attributes["shared_name"];
     if (typeof shared !== "string" || shared.length === 0) continue;
-    const key = `${shared}${SUFFIX}`;
-    if (loaded.metas.has(key)) {
-      nameToKey.set(node.name, key);
+
+    const viaObjectGraph = loaded.fullNameToKey.get(shared);
+    if (viaObjectGraph !== undefined && loaded.metas.has(viaObjectGraph)) {
+      nameToKey.set(node.name, viaObjectGraph);
+      continue;
+    }
+    const direct = `${shared}${SUFFIX}`;
+    if (loaded.metas.has(direct)) {
+      nameToKey.set(node.name, direct);
     }
   }
 
   const tensorShapes = new Map(graph.tensorShapes);
+  const initializers = new Map(graph.initializers);
   for (const [nodeName, key] of nameToKey) {
     const meta = loaded.metas.get(key)!;
     tensorShapes.set(nodeName, { shape: meta.shape, dtype: meta.dtype });
+    initializers.set(nodeName, { shape: meta.shape, dtype: meta.dtype });
   }
 
   let totalBytes = 0;
@@ -45,10 +57,9 @@ export function attachCheckpointToGraph(
     get(name: string): Uint8Array | undefined {
       const key = nameToKey.get(name);
       if (key !== undefined) return loaded.weights.get(key);
-      // Fall through to raw checkpoint key — useful if caller queries directly.
       return loaded.weights.get(name);
     },
   };
 
-  return { ...graph, weights, tensorShapes };
+  return { ...graph, weights, tensorShapes, initializers };
 }

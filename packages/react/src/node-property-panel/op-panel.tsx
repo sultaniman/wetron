@@ -38,15 +38,17 @@ function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
   const needsExpand = brief !== full;
 
   return (
-    <div>
+    <div className={css.attrRow}>
       <div className={css.row}>
         <span className={css.rowLabel}>{name}</span>
-        <span className={css.rowValue}>{brief}</span>
+        {!expanded && <span className={css.rowValue}>{brief}</span>}
         {needsExpand && (
           <button
+            type="button"
             className={css.expandBtn}
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
+              e.currentTarget.blur();
               setExpanded((v) => !v);
             }}
           >
@@ -55,15 +57,7 @@ function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
         )}
         <Chip label={attrChipLabel(value)} />
       </div>
-      {expanded && (
-        <>
-          <pre className={css.valueExpanded}>{full}</pre>
-          <div className={css.row}>
-            <span className={css.rowLabel}>type</span>
-            <span className={css.rowValue}>{attrChipLabel(value)}</span>
-          </div>
-        </>
-      )}
+      {expanded && <pre className={css.valueExpanded}>{full}</pre>}
     </div>
   );
 }

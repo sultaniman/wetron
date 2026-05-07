@@ -76,6 +76,24 @@ function shapeFromTf(tfShape: TfShape): readonly number[] | null {
   return tfShape.dim.map((d) => longToNumber(d.size ?? -1));
 }
 
+// TF DataType enum (subset wetron actually surfaces — see tensorflow/core/framework/types.proto)
+const TF_DTYPE: Record<number, string> = {
+  1: "float32",
+  2: "float64",
+  3: "int32",
+  4: "uint8",
+  5: "int16",
+  6: "int8",
+  7: "string",
+  9: "int64",
+  10: "bool",
+  14: "bfloat16",
+  17: "uint16",
+  19: "float16",
+  22: "uint32",
+  23: "uint64",
+};
+
 export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGraph {
   const root = getRoot();
   const SavedModelType = root.lookupType("SavedModel");
@@ -101,7 +119,33 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   const inputs: GraphValue[] = [];
   const consumedTensors = new Set<string>();
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>();
+  // VarHandleOp declares a variable; ReadVariableOp dereferences it. Both are pure plumbing
+  // — we fold them into `initializers` and rewrite consumer inputs so the rendered graph
+  // shows only the forward-pass trunk (Conv2D → ReLU → …) instead of a wide cloud of reads.
+  const initializers = new Map<string, { shape: readonly number[]; dtype: string }>();
+  const readToVar = new Map<string, string>();
   let hasVarHandleOp = false;
+
+  // Pass 1: identify VarHandleOp and ReadVariableOp so we can fold + rewrite in pass 2.
+  for (const raw of rawNodes) {
+    const name = raw.name;
+    const op = raw.op;
+    if (!name || !op) continue;
+
+    if (op === "VarHandleOp") {
+      hasVarHandleOp = true;
+      const dtypeNum = raw.attr?.["dtype"]?.type;
+      const shapeAttr = raw.attr?.["shape"]?.shape;
+      const shape = shapeAttr ? shapeFromTf(shapeAttr) : null;
+      // Initializers require concrete shape + dtype; if either is missing skip the fold.
+      if (shape && Array.isArray(shape) && typeof dtypeNum === "number" && TF_DTYPE[dtypeNum]) {
+        initializers.set(name, { shape, dtype: TF_DTYPE[dtypeNum] });
+      }
+    } else if (op === "ReadVariableOp") {
+      const src = (raw.input ?? []).find((inp) => !isControlDep(inp));
+      if (src) readToVar.set(name, stripPort(src));
+    }
+  }
 
   for (let i = 0; i < rawNodes.length; i++) {
     const raw = rawNodes[i];
@@ -117,12 +161,25 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
         continue;
       }
 
-      // Filter control deps, strip port suffixes from inputs
-      const inputNames = (raw.input ?? []).filter((inp) => !isControlDep(inp)).map(stripPort);
+      // Variable plumbing — these ops have no inference role and just clutter the layout.
+      // ReadVariableOp consumers are rewritten below to point at the underlying VarHandleOp.
+      // VarIsInitializedOp / AssignVariableOp run only at session init / checkpoint restore.
+      // VarHandleOps stay in `nodes` so attachCheckpointToGraph can walk them for `shared_name`,
+      // but they're also added to `initializers` so the renderer folds them into consumers.
+      if (op === "ReadVariableOp" || op === "VarIsInitializedOp" || op === "AssignVariableOp") {
+        continue;
+      }
+
+      // Filter control deps, strip ports, and rewrite ReadVariableOp inputs to the underlying
+      // VarHandleOp so consumers reference the variable directly (matches ONNX initializer model).
+      const inputNames = (raw.input ?? [])
+        .filter((inp) => !isControlDep(inp))
+        .map((inp) => {
+          const stripped = stripPort(inp);
+          return readToVar.get(stripped) ?? stripped;
+        });
 
       inputNames.forEach((t) => consumedTensors.add(t));
-
-      if (op === "VarHandleOp") hasVarHandleOp = true;
 
       // Parse _output_shapes for tensorShapes
       const outputShapesAttr = raw.attr?.["_output_shapes"];
@@ -175,6 +232,11 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
     }
   }
 
+  // Surface variable shape/dtype in tensorShapes so the panel can render them.
+  for (const [varName, info] of initializers) {
+    tensorShapes.set(varName, { shape: info.shape, dtype: info.dtype });
+  }
+
   // Graph outputs: nodes whose output tensors are never consumed as another node's input
   const outputs: GraphValue[] = nodes
     .filter((n) => !consumedTensors.has(n.outputs[0]))
@@ -185,7 +247,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
     inputs,
     outputs,
     nodes,
-    initializers: new Map(),
+    initializers,
     tensorShapes,
     fileSizeBytes,
     ...(hasVarHandleOp ? { hasExternalWeights: true } : {}),

@@ -109,6 +109,11 @@ export function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges:
 
   for (let i = 0; i < graph.nodes.length; i++) {
     const node = graph.nodes[i];
+    // Nodes that are also initializers (e.g. SavedModel VarHandleOp) act as variable
+    // declarations — they're surfaced as weight metadata inside their consumers, not as
+    // standalone graph nodes. Keep them in `graph.nodes` for callers like
+    // attachCheckpointToGraph but skip them from layout/edges here.
+    if (graph.initializers.has(node.name)) continue;
     const id = `node::${i}::${node.name || node.opType}`;
     const labels = opInputLabels(node.opType);
     const weightInputsRaw = node.inputs

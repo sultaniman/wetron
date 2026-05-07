@@ -10,7 +10,7 @@ Output layout:
       variables.data-00000-of-00001
 
 Usage:
-  python scripts/export_savedmodel_with_variables.py            # default: 'small_tf2'
+  python scripts/export_savedmodel_with_variables.py            # default: deep vertical chain
   python scripts/export_savedmodel_with_variables.py --name foo --size large
 """
 
@@ -85,15 +85,20 @@ def build_large() -> tf.keras.Model:
 
 
 def build_vertical() -> tf.keras.Model:
-    """Deep, narrow sequential chain — many layers, no branching."""
+    """Deep, strictly linear chain — Conv→ReLU only, no BatchNorm.
+
+    BatchNorm expands into ~4 parallel VarHandleOp branches per layer at the
+    SavedModel level (gamma, beta, moving_mean, moving_variance), which makes
+    the rendered graph look wide. Stripping BN keeps the TF graph tall and
+    narrow so dagre lays it out as a single column.
+    """
     inputs = tf.keras.Input(shape=(28, 28, 1), name="input")
     x = inputs
-    for i in range(1, 9):
+    for i in range(1, 17):
         x = tf.keras.layers.Conv2D(16, 3, padding="same", name=f"conv{i}")(x)
-        x = tf.keras.layers.BatchNormalization(name=f"bn{i}")(x)
         x = tf.keras.layers.ReLU(name=f"relu{i}")(x)
     x = tf.keras.layers.GlobalAveragePooling2D(name="gap")(x)
-    for i in range(1, 4):
+    for i in range(1, 5):
         x = tf.keras.layers.Dense(64, name=f"fc{i}")(x)
         x = tf.keras.layers.ReLU(name=f"fc{i}_relu")(x)
     x = tf.keras.layers.Dense(10, activation="softmax", name="output")(x)
@@ -131,9 +136,9 @@ def export(model: tf.keras.Model, dest: Path) -> None:
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument(
-        "--name", default="small_tf2", help="output directory name under test-models/"
+        "--name", default="vertical_tf2", help="output directory name under test-models/"
     )
-    p.add_argument("--size", choices=BUILDERS.keys(), default="small")
+    p.add_argument("--size", choices=BUILDERS.keys(), default="vertical")
     args = p.parse_args()
 
     OUT.mkdir(exist_ok=True)
