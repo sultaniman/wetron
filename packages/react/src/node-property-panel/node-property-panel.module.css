@@ -494,31 +494,35 @@
 .heat span { aspect-ratio: 1 / 1; }
 
 .heatLegend {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  margin-top: 6px;
   font-size: 9px;
   color: var(--wetron-panel-subtitle);
   font-family: ui-monospace, Menlo, monospace;
-  margin-top: 6px;
 }
-.scaleSequential {
-  flex: 1;
+.heatLegendBar {
   height: 6px;
-  background: linear-gradient(to right, #e0f2fe, #1e40af);
   border-radius: 3px;
 }
-.scaleDivergingLeft {
-  flex: 1;
-  height: 6px;
-  background: linear-gradient(to right, #1d4ed8, #f8fafc);
-  border-radius: 3px 0 0 3px;
+.heatLegendBarSequential {
+  background: linear-gradient(to right, #e0f2fe, #1e40af);
 }
-.scaleDivergingRight {
-  flex: 1;
-  height: 6px;
-  background: linear-gradient(to right, #f8fafc, #dc2626);
-  border-radius: 0 3px 3px 0;
+.heatLegendBarDiverging {
+  background: linear-gradient(to right, #1d4ed8 0%, #f8fafc 50%, #dc2626 100%);
+}
+.heatLegendTicks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+}
+.heatLegendTicks span {
+  flex: 0 0 auto;
+}
+.heatLegendCaption {
+  margin-top: 4px;
+  text-align: center;
+  font-size: 9px;
+  color: var(--wetron-panel-subtitle);
+  letter-spacing: 0.04em;
 }
 
 .heatCaption {

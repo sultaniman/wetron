@@ -119,6 +119,25 @@ export function WeightPanel({
         )}
       </div>
 
+      <div className={css.section}>
+        <div className={css.toggleRow}>
+          <span>Show weights</span>
+          <button
+            data-testid="show-weights-switch"
+            className={`${css.switch}${showWeights ? "" : ` ${css.switchOff}`}`}
+            onClick={() => setShowWeights((v) => !v)}
+            aria-label="Show weights"
+          />
+        </div>
+        {isLarge && !showWeights && (
+          <div className={css.sizeNote}>
+            <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong>
+            <br />
+            Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
+          </div>
+        )}
+      </div>
+
       {loaded && (
         <div className={css.section}>
           <div className={css.sectionLabelRow}>
@@ -179,29 +198,39 @@ export function WeightPanel({
                   Tile = mean of {loaded.stats.chunkSize.toLocaleString()} consecutive value{loaded.stats.chunkSize === 1 ? "" : "s"}
                 </div>
                 <div data-testid="heatmap" className={css.heat}>
-                  {loaded.stats.heatmap.map((val, i) => (
-                    <span
-                      key={i}
-                      style={{ background: colorForCell(val, loaded.stats.min, loaded.stats.max, colormap) }}
-                    />
-                  ))}
+                  {loaded.stats.heatmap.map((val, i) => {
+                    const start = i * loaded.stats.chunkSize;
+                    const tip = `mean ${formatVal(val, dtype || "float32")} · indices [${start}…${start + loaded.stats.chunkSize - 1}]`;
+                    return (
+                      <span
+                        key={i}
+                        title={tip}
+                        style={{ background: colorForCell(val, loaded.stats.min, loaded.stats.max, colormap) }}
+                      />
+                    );
+                  })}
                 </div>
                 {colormap === "sequential" && (
                   <div className={css.heatLegend}>
-                    <span>{formatVal(loaded.stats.min, dtype || "float32")}</span>
-                    <span className={css.scaleSequential} />
-                    <span>{formatVal(loaded.stats.max, dtype || "float32")}</span>
+                    <div className={`${css.heatLegendBar} ${css.heatLegendBarSequential}`} />
+                    <div className={css.heatLegendTicks}>
+                      <span>{formatVal(loaded.stats.min, dtype || "float32")}</span>
+                      <span>{formatVal(loaded.stats.max, dtype || "float32")}</span>
+                    </div>
+                    <div className={css.heatLegendCaption}>low ─── high</div>
                   </div>
                 )}
                 {colormap === "diverging" && (() => {
                   const maxAbs = Math.max(Math.abs(loaded.stats.min), Math.abs(loaded.stats.max));
                   return (
                     <div className={css.heatLegend}>
-                      <span>{formatVal(-maxAbs, dtype || "float32")}</span>
-                      <span className={css.scaleDivergingLeft} />
-                      <span>0</span>
-                      <span className={css.scaleDivergingRight} />
-                      <span>+{formatVal(maxAbs, dtype || "float32")}</span>
+                      <div className={`${css.heatLegendBar} ${css.heatLegendBarDiverging}`} />
+                      <div className={css.heatLegendTicks}>
+                        <span>−{formatVal(maxAbs, dtype || "float32")}</span>
+                        <span>0</span>
+                        <span>+{formatVal(maxAbs, dtype || "float32")}</span>
+                      </div>
+                      <div className={css.heatLegendCaption}>negative ─── positive</div>
                     </div>
                   );
                 })()}
@@ -210,25 +239,6 @@ export function WeightPanel({
           })()}
         </div>
       )}
-
-      <div className={css.section}>
-        <div className={css.toggleRow}>
-          <span>Show weights</span>
-          <button
-            data-testid="show-weights-switch"
-            className={`${css.switch}${showWeights ? "" : ` ${css.switchOff}`}`}
-            onClick={() => setShowWeights((v) => !v)}
-            aria-label="Show weights"
-          />
-        </div>
-        {isLarge && !showWeights && (
-          <div className={css.sizeNote}>
-            <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong>
-            <br />
-            Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
-          </div>
-        )}
-      </div>
 
       {loaded && showWeights && (
         <div className={css.sectionLast}>
