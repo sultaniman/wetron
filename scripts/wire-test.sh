@@ -7,6 +7,9 @@ TEST_DIR="$WETRON_ROOT/../wetron-test"
 
 PACKAGES=(core onnx tflite keras react executorch torchscript tokens savedmodel)
 
+echo "Building wetron packages..."
+(cd "$WETRON_ROOT" && bun run build)
+
 echo "Packing wetron packages..."
 for pkg in "${PACKAGES[@]}"; do
   echo "  → $pkg"
