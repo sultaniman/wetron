@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { ScrollArea } from "@base-ui/react/scroll-area";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import css from "./node-property-panel.module.css";
 
@@ -10,10 +11,12 @@ type Values = Float64Array | Int32Array | BigInt64Array;
 export function VirtualValues({
   values,
   format,
+  align = "center",
   "data-testid": testId,
 }: {
   values: Values;
   format: (v: number) => string;
+  align?: "center" | "right";
   "data-testid"?: string;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -26,25 +29,34 @@ export function VirtualValues({
     overscan: 6,
   });
 
+  const alignClass = align === "right" ? css.gridAlignRight : css.gridAlignCenter;
+
   return (
-    <div ref={parentRef} className={css.valuesScroll} data-testid={testId}>
-      <div className={css.gridVals} style={{ height: v.getTotalSize() }}>
-        {v.getVirtualItems().map((row) => (
-          <div
-            key={row.index}
-            className={css.gridRow}
-            style={{ top: row.start, height: ROW_HEIGHT }}
-          >
-            {Array.from({ length: COLS }, (_, c) => {
-              const idx = row.index * COLS + c;
-              if (idx >= values.length) return <span key={c} />;
-              const raw = values[idx];
-              const num = typeof raw === "bigint" ? Number(raw) : raw;
-              return <span key={c}>{format(num)}</span>;
-            })}
+    <ScrollArea.Root className={css.valuesScrollRoot} data-testid={testId}>
+      <ScrollArea.Viewport ref={parentRef} className={css.valuesScrollViewport}>
+        <ScrollArea.Content>
+          <div className={css.gridVals} style={{ height: v.getTotalSize(), position: "relative" }}>
+            {v.getVirtualItems().map((row) => (
+              <div
+                key={row.index}
+                className={`${css.gridRow} ${alignClass}`}
+                style={{ top: row.start, height: ROW_HEIGHT }}
+              >
+                {Array.from({ length: COLS }, (_, c) => {
+                  const idx = row.index * COLS + c;
+                  if (idx >= values.length) return <span key={c} />;
+                  const raw = values[idx];
+                  const num = typeof raw === "bigint" ? Number(raw) : raw;
+                  return <span key={c}>{format(num)}</span>;
+                })}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
+        </ScrollArea.Content>
+      </ScrollArea.Viewport>
+      <ScrollArea.Scrollbar orientation="vertical" className={css.scrollbar}>
+        <ScrollArea.Thumb className={css.scrollThumb} />
+      </ScrollArea.Scrollbar>
+    </ScrollArea.Root>
   );
 }

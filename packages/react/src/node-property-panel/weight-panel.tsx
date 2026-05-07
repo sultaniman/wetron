@@ -3,8 +3,9 @@ import type { ModelGraph } from "@wetron/core/ir";
 import { decodeWeight, computeStats } from "@wetron/core";
 import type { WeightStats } from "@wetron/core";
 import { BackButton } from "./panel-ui.tsx";
-import { formatVal } from "./format-val.ts";
+import { formatVal, isIntegerDtype } from "./format-val.ts";
 import { VirtualValues } from "./virtual-values.tsx";
+import { pickColormap, colorForCell } from "./heatmap-color.ts";
 import css from "./node-property-panel.module.css";
 
 const SIZE_THRESHOLD = 20 * 1024 * 1024;
@@ -33,36 +34,6 @@ function elementSize(dtype: string): number {
     bool: 1,
   };
   return sizes[dtype] ?? 0;
-}
-
-function heatColor(value: number, min: number, max: number): string {
-  const range = max - min;
-  if (range === 0) return "#3b82f6";
-  const t = (value - min) / range;
-  // blue -> cyan -> yellow -> orange -> red
-  const stops = [
-    [0.1, 0x1e, 0x3a, 0x8a],
-    [0.4, 0x3b, 0x82, 0xf6],
-    [0.6, 0xfd, 0xe6, 0x8a],
-    [0.8, 0xf9, 0x73, 0x16],
-    [1.0, 0x7f, 0x1d, 0x1d],
-  ] as const;
-  let r = 0x3b,
-    g = 0x82,
-    b = 0xf6;
-  for (let i = 0; i < stops.length; i++) {
-    const [pos, sr, sg, sb] = stops[i];
-    if (t <= pos) {
-      const prev = i === 0 ? [0, 0x1e, 0x3a, 0x8a] : stops[i - 1];
-      const prevPos = (prev as readonly number[])[0];
-      const frac = pos === prevPos ? 0 : (t - prevPos) / (pos - prevPos);
-      r = Math.round((prev as readonly number[])[1] + frac * (sr - (prev as readonly number[])[1]));
-      g = Math.round((prev as readonly number[])[2] + frac * (sg - (prev as readonly number[])[2]));
-      b = Math.round((prev as readonly number[])[3] + frac * (sb - (prev as readonly number[])[3]));
-      break;
-    }
-  }
-  return `rgb(${r},${g},${b})`;
 }
 
 interface Loaded {
@@ -200,23 +171,43 @@ export function WeightPanel({
             </div>
           )}
 
-          {viz === "heat" && (
-            <>
-              <div data-testid="heatmap" className={css.heat}>
-                {loaded.stats.heatmap.map((val, i) => (
-                  <span
-                    key={i}
-                    style={{ background: heatColor(val, loaded.stats.min, loaded.stats.max) }}
-                  />
-                ))}
-              </div>
-              <div className={css.heatLegend}>
-                <span>{formatVal(loaded.stats.min, dtype || "float32")}</span>
-                <span className={css.scale} />
-                <span>+{formatVal(loaded.stats.max, dtype || "float32")}</span>
-              </div>
-            </>
-          )}
+          {viz === "heat" && (() => {
+            const colormap = pickColormap(loaded.stats.min, loaded.stats.max);
+            return (
+              <>
+                <div className={css.heatCaption}>
+                  Tile = mean of {loaded.stats.chunkSize.toLocaleString()} consecutive value{loaded.stats.chunkSize === 1 ? "" : "s"}
+                </div>
+                <div data-testid="heatmap" className={css.heat}>
+                  {loaded.stats.heatmap.map((val, i) => (
+                    <span
+                      key={i}
+                      style={{ background: colorForCell(val, loaded.stats.min, loaded.stats.max, colormap) }}
+                    />
+                  ))}
+                </div>
+                {colormap === "sequential" && (
+                  <div className={css.heatLegend}>
+                    <span>{formatVal(loaded.stats.min, dtype || "float32")}</span>
+                    <span className={css.scaleSequential} />
+                    <span>{formatVal(loaded.stats.max, dtype || "float32")}</span>
+                  </div>
+                )}
+                {colormap === "diverging" && (() => {
+                  const maxAbs = Math.max(Math.abs(loaded.stats.min), Math.abs(loaded.stats.max));
+                  return (
+                    <div className={css.heatLegend}>
+                      <span>{formatVal(-maxAbs, dtype || "float32")}</span>
+                      <span className={css.scaleDivergingLeft} />
+                      <span>0</span>
+                      <span className={css.scaleDivergingRight} />
+                      <span>+{formatVal(maxAbs, dtype || "float32")}</span>
+                    </div>
+                  );
+                })()}
+              </>
+            );
+          })()}
         </div>
       )}
 
@@ -249,6 +240,7 @@ export function WeightPanel({
             data-testid="values-grid"
             values={loaded.values}
             format={(v) => formatVal(v, dtype || "float32")}
+            align={isIntegerDtype(dtype || "float32") ? "center" : "right"}
           />
         </div>
       )}

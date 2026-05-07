@@ -9,6 +9,8 @@ export interface WeightStats {
   readonly histogram: readonly number[];
   /** 16 cols x 8 rows of mean-of-chunk values, length 128. */
   readonly heatmap: readonly number[];
+  /** number of consecutive values averaged per heatmap cell. */
+  readonly chunkSize: number;
 }
 
 const HIST_BINS = 12;
@@ -23,6 +25,7 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
       count: 0, min: 0, max: 0, mean: 0, std: 0, zeros: 0,
       histogram: new Array(HIST_BINS).fill(0),
       heatmap: new Array(HEAT_CELLS).fill(0),
+      chunkSize: 1,
     };
   }
 
@@ -58,15 +61,15 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
   }
 
   const heatmap = new Array(HEAT_CELLS).fill(0);
-  const chunk = Math.max(1, Math.floor(n / HEAT_CELLS));
+  const chunkSize = Math.max(1, Math.floor(n / HEAT_CELLS));
   for (let c = 0; c < HEAT_CELLS; c++) {
-    const start = c * chunk;
-    const end = c === HEAT_CELLS - 1 ? n : Math.min(n, start + chunk);
+    const start = c * chunkSize;
+    const end = c === HEAT_CELLS - 1 ? n : Math.min(n, start + chunkSize);
     if (start >= n) break;
     let s = 0;
     for (let i = start; i < end; i++) s += values[i];
     heatmap[c] = s / (end - start);
   }
 
-  return { count: n, min, max, mean, std, zeros, histogram, heatmap };
+  return { count: n, min, max, mean, std, zeros, histogram, heatmap, chunkSize };
 }

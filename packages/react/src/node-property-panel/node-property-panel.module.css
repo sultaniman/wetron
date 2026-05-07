@@ -502,11 +502,30 @@
   font-family: ui-monospace, Menlo, monospace;
   margin-top: 6px;
 }
-.heatLegend .scale {
+.scaleSequential {
   flex: 1;
   height: 6px;
-  background: linear-gradient(to right, #1e3a8a, #3b82f6, #fde68a, #f97316, #7f1d1d);
+  background: linear-gradient(to right, #e0f2fe, #1e40af);
   border-radius: 3px;
+}
+.scaleDivergingLeft {
+  flex: 1;
+  height: 6px;
+  background: linear-gradient(to right, #1d4ed8, #f8fafc);
+  border-radius: 3px 0 0 3px;
+}
+.scaleDivergingRight {
+  flex: 1;
+  height: 6px;
+  background: linear-gradient(to right, #f8fafc, #dc2626);
+  border-radius: 0 3px 3px 0;
+}
+
+.heatCaption {
+  font-size: 9px;
+  color: var(--wetron-panel-subtitle);
+  margin: 6px 0 4px;
+  font-family: ui-monospace, Menlo, monospace;
 }
 
 .valuesHeader {
@@ -558,11 +577,21 @@
   cursor: pointer;
 }
 
-.valuesScroll {
-  max-height: 320px;
-  overflow-y: auto;
+.valuesScrollRoot {
   position: relative;
+  overflow: hidden;
 }
+.valuesScrollViewport {
+  max-height: 320px;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+.valuesScrollViewport::-webkit-scrollbar { display: none; }
+
+.gridAlignCenter > span { text-align: center; }
+.gridAlignRight > span { text-align: right; }
 
 .gridRow {
   position: absolute;
@@ -576,7 +605,6 @@
 .gridRow > span {
   background: var(--wetron-panel-bg);
   padding: 2px 4px;
-  text-align: center;
   color: var(--wetron-panel-value);
   font-family: ui-monospace, Menlo, monospace;
   font-size: 9px;

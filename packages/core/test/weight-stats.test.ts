@@ -45,4 +45,17 @@ describe("computeStats", () => {
     expect(s.max).toBe(2);
     expect(s.zeros).toBe(2);
   });
+
+  test("chunkSize matches heatmap chunk size", () => {
+    const v = new Float64Array(2048);
+    for (let i = 0; i < 2048; i++) v[i] = i;
+    const s = computeStats(v);
+    expect(s.chunkSize).toBe(Math.floor(2048 / 128));
+  });
+
+  test("chunkSize is at least 1 for tiny tensors", () => {
+    const v = new Float64Array([1, 2]);
+    const s = computeStats(v);
+    expect(s.chunkSize).toBe(1);
+  });
 });
