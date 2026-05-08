@@ -58,10 +58,12 @@
   .iconBox[data-kind="tensor"] { background: #e6f4ea; color: #34a853; }
   .iconBox[data-kind="input"]  { background: #e6f4ea; color: #2e7d32; }
   .iconBox[data-kind="output"] { background: #e8f0fe; color: #1565c0; }
+  .iconBox[data-kind="weight"] { background: #e8f0fe; color: #2563eb; }
   :global([data-theme="dark"]) .iconBox[data-kind="edge"]   { background: color-mix(in oklch, #ce93d8 12%, #1e1e2e); color: #ce93d8; }
   :global([data-theme="dark"]) .iconBox[data-kind="tensor"] { background: color-mix(in oklch, #4caf50 12%, #1e1e2e); color: #4caf50; }
   :global([data-theme="dark"]) .iconBox[data-kind="input"]  { background: color-mix(in oklch, #4caf50 12%, #1e1e2e); color: #4caf50; }
   :global([data-theme="dark"]) .iconBox[data-kind="output"] { background: color-mix(in oklch, #42a5f5 12%, #1e1e2e); color: #42a5f5; }
+  :global([data-theme="dark"]) .iconBox[data-kind="weight"] { background: color-mix(in oklch, #60a5fa 12%, #1e1e2e); color: #60a5fa; }
   .titleWrap { min-width: 0; flex: 1; overflow: hidden; }
   .nodeTitle {
     font-weight: 700;

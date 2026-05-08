@@ -5,7 +5,7 @@ import type { WeightStats } from "@wetron/core";
 import { Tabs } from "@base-ui/react/tabs";
 import { BackButton } from "../panel-ui.tsx";
 import { Tooltip } from "../../tooltip.tsx";
-import { formatVal, isIntegerDtype } from "../format-val.ts";
+import { formatVal, isIntegerDtype } from "@wetron/core/format-val";
 import { VirtualValues } from "../virtual-values/virtual-values.tsx";
 import { WeightHistogram, WeightHeatmap } from "../weight-viz/weight-viz.tsx";
 import propertyPanelCss from "../node-property-panel.module.css";

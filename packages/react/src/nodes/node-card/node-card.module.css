@@ -117,3 +117,22 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.weightMore {
+  font-size: 10px;
+  color: var(--node-color);
+  margin-top: 3px;
+  padding: 2px 3px;
+  border-radius: 2px;
+  font-weight: 600;
+  opacity: 0.75;
+  cursor: pointer;
+  transition:
+    background 0.1s,
+    opacity 0.1s;
+}
+
+.weightMore:hover {
+  background: color-mix(in oklch, var(--node-color) 12%, transparent);
+  opacity: 1;
+}

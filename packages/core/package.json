@@ -65,6 +65,16 @@
       "source": "./src/flatbuffers.ts",
       "types": "./dist/flatbuffers.d.ts",
       "import": "./dist/flatbuffers.js"
+    },
+    "./format-val": {
+      "source": "./src/format-val.ts",
+      "types": "./dist/format-val.d.ts",
+      "import": "./dist/format-val.js"
+    },
+    "./heatmap-color": {
+      "source": "./src/heatmap-color.ts",
+      "types": "./dist/heatmap-color.d.ts",
+      "import": "./dist/heatmap-color.js"
     }
   },
   "dependencies": {

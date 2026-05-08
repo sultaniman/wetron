@@ -1,18 +1,20 @@
 <script lang="ts">
   import { resolveColorMode, type ColorMode } from '../color-mode-context.ts';
-  import type { PanelTarget, GraphNode, GraphValue } from '@wetron/core/ir';
+  import type { PanelTarget, GraphNode, GraphValue, ModelGraph } from '@wetron/core/ir';
   import { PANEL_VARS } from '@wetron/tokens';
   import { categoryVars } from '../category-vars.ts';
   import OpPanel from './op-panel.svelte';
   import IoPanel from './io-panel.svelte';
   import EdgePanel from './edge-panel.svelte';
   import TensorPanel from './tensor-panel.svelte';
+  import WeightPanel from './weight-panel.svelte';
   import CloseButton from './close-button.svelte';
 
   type TensorInfo = { readonly shape: readonly number[] | null; readonly dtype: string | null };
 
-  let { target, onTensorClick, onBack, onClose, colorMode, inputSources, tensorShapes, opsets }: {
+  let { target, graph, onTensorClick, onBack, onClose, colorMode, inputSources, tensorShapes, opsets }: {
     target: PanelTarget | null;
+    graph?: ModelGraph;
     onTensorClick?: (name: string) => void;
     onBack?: () => void;
     onClose?: () => void;
@@ -70,7 +72,11 @@
     {:else if isEdgeTarget(target)}
       <EdgePanel edge={target.edge} {tensorShapes} {onBack} />
     {:else if isTensorTarget(target)}
-      <TensorPanel tensor={target.tensor} {onBack} />
+      {#if graph?.initializers.has(target.tensor.name)}
+        <WeightPanel target={target.tensor} {graph} {onBack} {isDark} />
+      {:else}
+        <TensorPanel tensor={target.tensor} {onBack} />
+      {/if}
     {:else if isIoTarget(target)}
       <IoPanel graphValue={target.graphValue} direction={target.direction} {onBack} />
     {/if}

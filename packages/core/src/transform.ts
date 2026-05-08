@@ -56,6 +56,12 @@ const META_MARGIN = 5;
 const ROW_H = 19;
 const ION_H = CARD_BASE + META_MARGIN + 12; // 49
 
+// Max weight rows rendered on a node card. Beyond this we render a single
+// "+N more" footer row instead — the full list is reachable via the side panel.
+// Keeps StatefulPartitionedCall and similar high-arity nodes from blowing up
+// vertical space and starving dagre's rank assignment.
+export const WEIGHT_ROW_LIMIT = 8;
+
 export type LayoutDirection = "TB" | "LR";
 
 export function modelGraphToFlow(
@@ -132,10 +138,12 @@ export function modelGraphToFlow(
     const weightInputs = weightInputsRaw.length > 0 ? weightInputsRaw : undefined;
     const hasSubtitle = !!(node.name && !/^op_\d+$/.test(node.name));
     const nWeights = weightInputs?.length ?? 0;
+    const visibleRows =
+      nWeights <= WEIGHT_ROW_LIMIT ? nWeights : WEIGHT_ROW_LIMIT + 1; // +1 for "more" row
     const nodeH =
       CARD_BASE +
       (hasSubtitle ? SUBTITLE_H : 0) +
-      (nWeights > 0 ? META_MARGIN + nWeights * ROW_H : 0);
+      (visibleRows > 0 ? META_MARGIN + visibleRows * ROW_H : 0);
 
     flowNodes.push({
       id,

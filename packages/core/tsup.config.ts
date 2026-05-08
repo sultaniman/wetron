@@ -10,6 +10,8 @@ export default defineConfig({
     "edge-path": "src/edge-path.ts",
     "panel-utils": "src/panel-utils.ts",
     flatbuffers: "src/flatbuffers.ts",
+    "format-val": "src/format-val.ts",
+    "heatmap-color": "src/heatmap-color.ts",
   },
   format: ["esm"],
   dts: true,

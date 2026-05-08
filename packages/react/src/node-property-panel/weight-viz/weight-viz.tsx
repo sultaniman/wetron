@@ -1,6 +1,6 @@
 import type { WeightStats } from "@wetron/core";
-import { formatVal } from "../format-val.ts";
-import { pickColormap, colorForCell } from "../heatmap-color.ts";
+import { formatVal } from "@wetron/core/format-val";
+import { pickColormap, colorForCell } from "@wetron/core/heatmap-color";
 import weightVizCss from "./weight-viz.module.css";
 import { JSX } from "react";
 

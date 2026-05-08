@@ -1,5 +1,6 @@
 import type { Node, NodeProps } from "@xyflow/react";
 import type { GraphNodeData } from "@wetron/core/transform";
+import { WEIGHT_ROW_LIMIT } from "@wetron/core/transform";
 import { opCategory } from "@wetron/core";
 import { opIcon } from "../theme.ts";
 import { NodeCard } from "./node-card/node-card.tsx";
@@ -10,6 +11,9 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
   const color = `var(--wetron-category-${cat})`;
   const hasWeights = data.weightInputs != null && data.weightInputs.length > 0;
   const displayName = data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined;
+  const total = data.weightInputs?.length ?? 0;
+  const visible = total > WEIGHT_ROW_LIMIT ? data.weightInputs!.slice(0, WEIGHT_ROW_LIMIT) : data.weightInputs;
+  const hiddenCount = total > WEIGHT_ROW_LIMIT ? total - WEIGHT_ROW_LIMIT : 0;
   return (
     <NodeCard
       nodeType="graphNode"
@@ -24,8 +28,8 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
       selected={selected}
       colors={{ color }}
     >
-      {data.weightInputs && data.weightInputs.length > 0
-        ? data.weightInputs.map((w) => (
+      {visible && visible.length > 0
+        ? visible.map((w) => (
             <div
               key={w.slot}
               className={css.weightRow}
@@ -39,6 +43,15 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
             </div>
           ))
         : null}
+      {hiddenCount > 0 ? (
+        <div
+          className={css.weightMore}
+          aria-label={`${hiddenCount} more inputs, click to view all`}
+          data-weight-more={hiddenCount}
+        >
+          + {hiddenCount} more
+        </div>
+      ) : null}
     </NodeCard>
   );
 }

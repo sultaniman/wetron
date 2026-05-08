@@ -59,3 +59,32 @@ test("color prop uses CSS category var not hex", () => {
   const card = container.querySelector('[data-nodetype="graphNode"]')!;
   expect(card.style.getPropertyValue("--node-color")).toBe("var(--wetron-category-conv)");
 });
+
+test("weight rows beyond limit collapse to '+ N more' indicator", () => {
+  const many = Array.from({ length: 20 }, (_, i) => ({
+    slot: i + 1,
+    label: `in_${i + 1}`,
+    name: `var_${i}`,
+    shape: [64] as readonly number[],
+    dtype: "float32",
+  }));
+  const { container } = renderNode("StatefulPartitionedCall", { weightInputs: many });
+  const rows = container.querySelectorAll("[data-weight-name]");
+  expect(rows.length).toBe(8);
+  const more = container.querySelector("[data-weight-more]")!;
+  expect(more).not.toBeNull();
+  expect(more.textContent).toBe("+ 12 more");
+});
+
+test("weight rows at or below limit render fully without 'more' indicator", () => {
+  const eight = Array.from({ length: 8 }, (_, i) => ({
+    slot: i + 1,
+    label: `in_${i + 1}`,
+    name: `var_${i}`,
+    shape: [64] as readonly number[],
+    dtype: "float32",
+  }));
+  const { container } = renderNode("Conv", { weightInputs: eight });
+  expect(container.querySelectorAll("[data-weight-name]").length).toBe(8);
+  expect(container.querySelector("[data-weight-more]")).toBeNull();
+});

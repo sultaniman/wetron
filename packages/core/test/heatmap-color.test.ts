@@ -1,5 +1,5 @@
 import { test, expect, describe } from "bun:test";
-import { pickColormap, colorForCell } from "../src/node-property-panel/heatmap-color.ts";
+import { pickColormap, colorForCell } from "../src/heatmap-color.ts";
 
 describe("pickColormap", () => {
   test("constant when min == max", () => {

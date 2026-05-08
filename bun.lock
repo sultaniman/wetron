@@ -14,6 +14,7 @@
         "@happy-dom/global-registrator": "^20.9.0",
         "@phosphor-icons/react": "^2.1.10",
         "@playwright/test": "^1.59.1",
+        "@tanstack/svelte-virtual": "^3.13.24",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.2",
         "@types/bun": "^1.3.13",
@@ -70,7 +71,7 @@
     },
     "packages/core": {
       "name": "@wetron/core",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/executorch": "workspace:*",
         "@wetron/keras": "workspace:*",
@@ -86,28 +87,28 @@
     },
     "packages/executorch": {
       "name": "@wetron/executorch",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/keras": {
       "name": "@wetron/keras",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/onnx": {
       "name": "@wetron/onnx",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/react": {
       "name": "@wetron/react",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/core": "workspace:*",
         "@wetron/tokens": "workspace:*",
@@ -127,7 +128,7 @@
     },
     "packages/savedmodel": {
       "name": "@wetron/savedmodel",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/core": "workspace:*",
         "@wetron/keras": "workspace:*",
@@ -135,12 +136,13 @@
     },
     "packages/svelte": {
       "name": "@wetron/svelte",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/core": "workspace:*",
         "@wetron/tokens": "workspace:*",
       },
       "peerDependencies": {
+        "@tanstack/svelte-virtual": ">=3",
         "@xyflow/svelte": "^1.5.2",
         "phosphor-svelte": ">=3",
         "svelte": "^5.55.5",
@@ -148,18 +150,18 @@
     },
     "packages/tflite": {
       "name": "@wetron/tflite",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
     },
     "packages/tokens": {
       "name": "@wetron/tokens",
-      "version": "0.0.8",
+      "version": "0.0.10",
     },
     "packages/torchscript": {
       "name": "@wetron/torchscript",
-      "version": "0.0.8",
+      "version": "0.0.10",
       "dependencies": {
         "@wetron/core": "workspace:*",
       },
@@ -363,6 +365,8 @@
     "@sveltejs/vite-plugin-svelte": ["@sveltejs/vite-plugin-svelte@7.0.0", "", { "dependencies": { "deepmerge": "^4.3.1", "magic-string": "^0.30.21", "obug": "^2.1.0", "vitefu": "^1.1.2" }, "peerDependencies": { "svelte": "^5.46.4", "vite": "^8.0.0-beta.7 || ^8.0.0" } }, "sha512-ILXmxC7HAsnkK2eslgPetrqqW1BKSL7LktsFgqzNj83MaivMGZzluWq32m25j2mDOjmSKX7GGWahePhuEs7P/g=="],
 
     "@tanstack/react-virtual": ["@tanstack/react-virtual@3.13.24", "", { "dependencies": { "@tanstack/virtual-core": "3.14.0" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-aIJvz5OSkhNIhZIpYivrxrPTKYsjW9Uzy+sP/mx0S3sev2HyvPb7xmjbYvokzEpfgYHy/HjzJ2zFAETuUfgCpg=="],
+
+    "@tanstack/svelte-virtual": ["@tanstack/svelte-virtual@3.13.24", "", { "dependencies": { "@tanstack/virtual-core": "3.14.0" }, "peerDependencies": { "svelte": "^3.48.0 || ^4.0.0 || ^5.0.0" } }, "sha512-Up3LOD5Cj+oJ3GuKfM1Li06jzzZMIZnRPmu3aik9rJQgk7jq7LgPo4yumfUw4+I4edjYfyPKSZnXGwZ9Vjlebw=="],
 
     "@tanstack/virtual-core": ["@tanstack/virtual-core@3.14.0", "", {}, "sha512-JLANqGy/D6k4Ujmh8Tr25lGimuOXNiaVyXaCAZS0W+1390sADdGnyUdSWNIfd49gebtIxGMij4IktRVzrdr12Q=="],
 

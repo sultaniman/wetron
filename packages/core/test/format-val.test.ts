@@ -1,5 +1,5 @@
 import { test, expect, describe } from "bun:test";
-import { formatVal, isIntegerDtype } from "../src/node-property-panel/format-val.ts";
+import { formatVal, isIntegerDtype } from "../src/format-val.ts";
 
 describe("isIntegerDtype", () => {
   test("recognizes int and uint families", () => {
