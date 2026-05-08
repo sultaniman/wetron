@@ -8,10 +8,10 @@ follow the no-date filename convention (e.g. `<topic>-design.md`).
 - [docs-sweep-design.md](docs-sweep-design.md) — Capability sweep across published docs and `docs/specs` / `docs/plans` reorg into a single tree with this index. Status: in-progress.
 - [model-diff-design.md](model-diff-design.md) — Visual diff between two model checkpoints (added/removed/changed nodes). Status: proposed.
 - [subgraph-collapse-design.md](subgraph-collapse-design.md) — Fold repetitive node groups (transformer blocks, residual units) into summary nodes that expand on click. Status: proposed.
+- [svelte-weight-panel-port-design.md](svelte-weight-panel-port-design.md) — Bring `@wetron/svelte` to weight-inspection parity with `@wetron/react`; hoist shared format/colormap helpers into `@wetron/core`. Status: proposed.
 
 ## Reference
 
-- [wetron-design.md](wetron-design.md) — Top-level architecture: monorepo layout, package responsibilities, IR contract.
 - [format-graph-structures.md](format-graph-structures.md) — How each format encodes its graph and what wetron folds, filters, or punts.
 - [funding-positioning.md](funding-positioning.md) — Comparison of NGI Zero / NLnet vs Prototype Fund applications: layers, asks, eligibility.
 

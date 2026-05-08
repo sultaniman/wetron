@@ -325,8 +325,12 @@
   display: none;
 }
 
-.panel [role="presentation"]:focus:not(:focus-visible),
-.panel [tabindex]:focus:not(:focus-visible) {
+.panel [role="presentation"]:focus,
+.panel [role="presentation"]:focus-visible,
+.panel [tabindex]:focus:not(:focus-visible),
+.scrollViewport:focus-visible,
+.scrollViewport > [role="presentation"]:focus-visible,
+.scrollViewport > [role="presentation"] > :first-child:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }

@@ -16,17 +16,23 @@
 
   const totalRows = $derived(Math.ceil(values.length / COLS));
 
-  const virtualizer = $derived(
-    createVirtualizer<HTMLDivElement, HTMLDivElement>({
+  // Recreate the virtualizer when the scroll element binds (null -> div) or
+  // when the row count changes. virtual-core sets up its size observer during
+  // _didMount; if getScrollElement() returns null at that moment, no items are
+  // ever measured, so we must instantiate after parentRef is live.
+  const virtualizer = $derived.by(() => {
+    const el = parentRef;
+    if (!el) return null;
+    return createVirtualizer<HTMLDivElement, HTMLDivElement>({
       count: totalRows,
-      getScrollElement: () => parentRef,
+      getScrollElement: () => el,
       estimateSize: () => ROW_HEIGHT,
       overscan: 6,
-    }),
-  );
+    });
+  });
 
-  const items = $derived($virtualizer.getVirtualItems());
-  const totalSize = $derived($virtualizer.getTotalSize());
+  const items = $derived(virtualizer ? $virtualizer.getVirtualItems() : []);
+  const totalSize = $derived(virtualizer ? $virtualizer.getTotalSize() : 0);
 </script>
 
 <div bind:this={parentRef} class="scroll" data-testid="values-grid">
@@ -53,11 +59,16 @@
 
 <style>
   .scroll {
-    max-height: 300px;
+    max-height: 270px;
     overflow-y: auto;
     font-variant-numeric: tabular-nums;
     font-size: 11px;
     line-height: 16px;
+    animation: valuesFadeIn 220ms ease-out;
+  }
+  @keyframes valuesFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
   .grid {
     width: 100%;

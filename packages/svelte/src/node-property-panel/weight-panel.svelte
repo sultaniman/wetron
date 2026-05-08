@@ -194,7 +194,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
+    padding: 6px 0;
+    font-size: 11px;
+    color: var(--panel-label);
   }
   .switch {
     width: 28px;
@@ -236,28 +238,40 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 11px;
-    opacity: 0.7;
-    margin-bottom: 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--panel-label);
+    margin-bottom: 6px;
   }
   .seg {
     display: inline-flex;
-    border: 1px solid var(--panel-section-border);
-    border-radius: 4px;
-    overflow: hidden;
+    background: var(--panel-seg-bg, #f1f5f9);
+    border-radius: 6px;
+    padding: 2px;
   }
   .seg button {
-    border: 0;
-    background: transparent;
-    padding: 2px 8px;
+    background: none;
+    border: none;
+    font: inherit;
     font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
     cursor: pointer;
+    color: var(--panel-seg-color, #64748b);
+    text-transform: none;
+    letter-spacing: 0;
   }
   .seg .segOn {
-    background: color-mix(in oklch, currentColor 10%, transparent);
+    background: var(--panel-seg-on-bg, #fff);
+    color: var(--panel-seg-on-color, #2563eb);
+    font-weight: 600;
   }
   .valuesMeta {
-    font-size: 10px;
-    opacity: 0.6;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9px;
+    color: var(--panel-subtitle);
+    text-transform: none;
+    letter-spacing: 0;
   }
 </style>

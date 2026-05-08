@@ -167,10 +167,10 @@ export function WeightPanel({
       </div>
 
       {loaded && (
-        <div className={propertyPanelCss.section}>
-          <div className={weightPanelCss.sectionLabelRow}>
-            <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
-            <Tabs.Root value={viz} onValueChange={(v) => setViz(v as "dist" | "heat")}>
+        <Tabs.Root value={viz} onValueChange={(v) => setViz(v as "dist" | "heat")}>
+          <div className={propertyPanelCss.section}>
+            <div className={weightPanelCss.sectionLabelRow}>
+              <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
               <Tabs.List className={weightPanelCss.seg}>
                 <Tabs.Tab
                   value="dist"
@@ -187,36 +187,40 @@ export function WeightPanel({
                   heat
                 </Tabs.Tab>
               </Tabs.List>
-            </Tabs.Root>
-          </div>
+            </div>
 
-          <div className={propertyPanelCss.row}>
-            <span className={propertyPanelCss.rowLabel}>min</span>
-            <span className={propertyPanelCss.rowValue}>
-              {formatVal(loaded.stats.min, dtype || "float32")}
-            </span>
-          </div>
-          <div className={propertyPanelCss.row}>
-            <span className={propertyPanelCss.rowLabel}>max</span>
-            <span className={propertyPanelCss.rowValue}>
-              {formatVal(loaded.stats.max, dtype || "float32")}
-            </span>
-          </div>
-          <div className={propertyPanelCss.row}>
-            <span className={propertyPanelCss.rowLabel}>{"μ ± σ"}</span>
-            <span className={propertyPanelCss.rowValue}>
-              {formatVal(loaded.stats.mean, dtype || "float32")} ±{" "}
-              {formatVal(loaded.stats.std, dtype || "float32")}
-            </span>
-          </div>
-          <div className={propertyPanelCss.row}>
-            <span className={propertyPanelCss.rowLabel}>zeros</span>
-            <span className={propertyPanelCss.rowValue}>{loaded.stats.zeros}</span>
-          </div>
+            <div className={propertyPanelCss.row}>
+              <span className={propertyPanelCss.rowLabel}>min</span>
+              <span className={propertyPanelCss.rowValue}>
+                {formatVal(loaded.stats.min, dtype || "float32")}
+              </span>
+            </div>
+            <div className={propertyPanelCss.row}>
+              <span className={propertyPanelCss.rowLabel}>max</span>
+              <span className={propertyPanelCss.rowValue}>
+                {formatVal(loaded.stats.max, dtype || "float32")}
+              </span>
+            </div>
+            <div className={propertyPanelCss.row}>
+              <span className={propertyPanelCss.rowLabel}>{"μ ± σ"}</span>
+              <span className={propertyPanelCss.rowValue}>
+                {formatVal(loaded.stats.mean, dtype || "float32")} ±{" "}
+                {formatVal(loaded.stats.std, dtype || "float32")}
+              </span>
+            </div>
+            <div className={propertyPanelCss.row}>
+              <span className={propertyPanelCss.rowLabel}>zeros</span>
+              <span className={propertyPanelCss.rowValue}>{loaded.stats.zeros}</span>
+            </div>
 
-          {viz === "dist" && <WeightHistogram stats={loaded.stats} dtype={dtype} />}
-          {viz === "heat" && <WeightHeatmap stats={loaded.stats} dtype={dtype} isDark={isDark} />}
-        </div>
+            <Tabs.Panel value="dist">
+              <WeightHistogram stats={loaded.stats} dtype={dtype} />
+            </Tabs.Panel>
+            <Tabs.Panel value="heat">
+              <WeightHeatmap stats={loaded.stats} dtype={dtype} isDark={isDark} />
+            </Tabs.Panel>
+          </div>
+        </Tabs.Root>
       )}
 
       {loaded && showWeights && (

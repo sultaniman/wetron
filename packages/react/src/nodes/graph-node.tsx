@@ -12,7 +12,8 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
   const hasWeights = data.weightInputs != null && data.weightInputs.length > 0;
   const displayName = data.name && !/^op_\d+$/.test(data.name) ? data.name : undefined;
   const total = data.weightInputs?.length ?? 0;
-  const visible = total > WEIGHT_ROW_LIMIT ? data.weightInputs!.slice(0, WEIGHT_ROW_LIMIT) : data.weightInputs;
+  const visible =
+    total > WEIGHT_ROW_LIMIT ? data.weightInputs!.slice(0, WEIGHT_ROW_LIMIT) : data.weightInputs;
   const hiddenCount = total > WEIGHT_ROW_LIMIT ? total - WEIGHT_ROW_LIMIT : 0;
   return (
     <NodeCard

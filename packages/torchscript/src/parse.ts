@@ -52,10 +52,8 @@ function readFunction(bb: ByteBuffer, funcTable: number): { qn: string; ops: str
   return { qn, ops: opCalls };
 }
 
-// ---------------------------------------------------------------------------
-// ZIP-based TorchScript (torch.jit.save / newer _save_for_lite_interpreter)
-// ---------------------------------------------------------------------------
-
+// ZIP-based TorchScript (torch.jit.save / newer _save_for_lite_interpreter).
+//
 // Minimal Python binary serialization decoder (protocol 2/4) - handles only
 // tuples, lists, strings, ints, floats, and None. Callables and objects are
 // dropped as null so we can still walk the operator metadata.
@@ -302,8 +300,6 @@ function parseZipTorchscript(bytes: Uint8Array): ModelGraph {
     fileSizeBytes: bytes.byteLength,
   };
 }
-
-// ---------------------------------------------------------------------------
 
 export function parseTorchscript(bytes: Uint8Array): ModelGraph {
   // ZIP-based format (torch.jit.save / newer lite interpreter)

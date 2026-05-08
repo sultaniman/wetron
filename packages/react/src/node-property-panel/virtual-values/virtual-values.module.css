@@ -19,9 +19,19 @@
 .valuesScrollRoot {
   position: relative;
   overflow: hidden;
+  animation: valuesFadeIn 220ms ease-out;
+}
+
+@keyframes valuesFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .valuesScrollViewport {
-  max-height: 320px;
+  max-height: 288px;
   width: 100%;
   overflow-x: hidden;
   overflow-y: scroll;

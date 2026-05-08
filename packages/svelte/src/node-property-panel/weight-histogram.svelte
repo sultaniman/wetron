@@ -25,14 +25,14 @@
     display: flex;
     align-items: flex-end;
     gap: 1px;
-    height: 48px;
-    padding: 4px 0;
+    height: 46px;
+    margin-top: 6px;
   }
   .spark span {
     flex: 1;
-    background: var(--node-color, currentColor);
-    opacity: 0.65;
+    background: #3b82f6;
+    opacity: 0.85;
     min-width: 2px;
-    border-radius: 1px;
+    border-radius: 1px 1px 0 0;
   }
 </style>

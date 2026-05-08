@@ -48,28 +48,29 @@
 
 <style>
   .heatCaption {
-    font-size: 10px;
-    opacity: 0.7;
-    margin-top: 6px;
-    margin-bottom: 4px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9px;
+    color: var(--panel-subtitle);
+    margin: 6px 0 4px;
   }
   .heat {
     display: grid;
     grid-template-columns: repeat(16, 1fr);
-    grid-auto-rows: 8px;
     gap: 1px;
+    margin-top: 6px;
   }
   .heat span {
-    width: 100%;
-    height: 100%;
-    border-radius: 1px;
+    aspect-ratio: 1 / 1;
   }
   .heatLegend {
-    margin-top: 4px;
+    margin-top: 6px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9px;
+    color: var(--panel-subtitle);
   }
   .heatLegendBar {
-    height: 4px;
-    border-radius: 2px;
+    height: 6px;
+    border-radius: 3px;
   }
   .heatLegendBarSequential {
     background: linear-gradient(to right, #eff6ff, #bfdbfe, #60a5fa, #2563eb, #1e3a8a);
@@ -77,8 +78,6 @@
   .heatLegendTicks {
     display: flex;
     justify-content: space-between;
-    font-size: 9px;
-    opacity: 0.6;
-    margin-top: 2px;
+    margin-top: 3px;
   }
 </style>

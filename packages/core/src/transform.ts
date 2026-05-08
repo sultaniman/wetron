@@ -138,8 +138,7 @@ export function modelGraphToFlow(
     const weightInputs = weightInputsRaw.length > 0 ? weightInputsRaw : undefined;
     const hasSubtitle = !!(node.name && !/^op_\d+$/.test(node.name));
     const nWeights = weightInputs?.length ?? 0;
-    const visibleRows =
-      nWeights <= WEIGHT_ROW_LIMIT ? nWeights : WEIGHT_ROW_LIMIT + 1; // +1 for "more" row
+    const visibleRows = nWeights <= WEIGHT_ROW_LIMIT ? nWeights : WEIGHT_ROW_LIMIT + 1; // +1 for "more" row
     const nodeH =
       CARD_BASE +
       (hasSubtitle ? SUBTITLE_H : 0) +

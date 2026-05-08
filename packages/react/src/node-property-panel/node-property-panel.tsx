@@ -69,7 +69,6 @@ export function NodePropertyPanel({
               {isGraphNode(target) ? (
                 <OpPanel
                   node={target}
-                  isDark={isDark}
                   inputSources={inputSources}
                   onTensorClick={onTensorClick}
                   onBack={onBack}

@@ -6,7 +6,7 @@ import {
 } from "@phosphor-icons/react";
 import type { GraphNode } from "@wetron/core/ir";
 import { opCategory } from "@wetron/core";
-import { CATEGORY_THEME, CATEGORY_ICON, OP_ICON } from "../../theme.ts";
+import { CATEGORY_ICON, OP_ICON } from "../../theme.ts";
 import { renderIconEntry, Row, SectionLabel, BackButton } from "../panel-ui.tsx";
 import { AttrRow } from "../attr-row/attr-row.tsx";
 import { Tooltip } from "../../tooltip.tsx";
@@ -25,22 +25,20 @@ function formatModule(
 
 export function OpPanel({
   node,
-  isDark,
   inputSources,
   onTensorClick,
   onBack,
   opsets,
 }: {
   node: GraphNode;
-  isDark: boolean;
   inputSources?: ReadonlyMap<string, string>;
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
   opsets?: ReadonlyMap<string, number>;
 }) {
   const cat = opCategory(node.opType);
-  const theme = CATEGORY_THEME[cat];
-  const color = isDark ? theme.dark : theme.light;
+  const color = `var(--wetron-category-${cat})`;
+  const iconBg = `color-mix(in oklch, var(--wetron-category-${cat}) 12%, transparent)`;
   const iconEntry = OP_ICON[node.opType] ?? CATEGORY_ICON[cat];
   // Preserve the original slot index so the React key is unique even when a
   // node consumes the same tensor twice (e.g. Add(x, x)).
@@ -55,9 +53,7 @@ export function OpPanel({
         {onBack && <BackButton onBack={onBack} />}
         <div
           className={propertyPanelCss.iconBox}
-          style={
-            { "--icon-box-bg": color + "20", "--icon-box-color": color } as React.CSSProperties
-          }
+          style={{ "--icon-box-bg": iconBg, "--icon-box-color": color } as React.CSSProperties}
         >
           {renderIconEntry(iconEntry)}
         </div>
@@ -86,11 +82,7 @@ export function OpPanel({
           {visibleInputs.map(({ name, slot }) => {
             const sourceOp = inputSources?.get(name);
             const sourceCat = sourceOp ? opCategory(sourceOp) : null;
-            const sourceColor = sourceCat
-              ? isDark
-                ? CATEGORY_THEME[sourceCat].dark
-                : CATEGORY_THEME[sourceCat].light
-              : undefined;
+            const sourceColor = sourceCat ? `var(--wetron-category-${sourceCat})` : undefined;
             return (
               <Row
                 key={`${slot}::${name}`}
