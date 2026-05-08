@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { ArrowUpIcon } from "@phosphor-icons/react";
+import { SunIcon, MoonIcon, DesktopIcon } from "@phosphor-icons/react";
 import { toPng } from "html-to-image";
 import { getViewportForBounds } from "@xyflow/react";
 import { parseModel } from "@wetron/core";
@@ -25,6 +25,11 @@ function resolveMode(mode: ColorMode): "light" | "dark" {
 
 const MODE_CYCLE: ColorMode[] = ["system", "light", "dark"];
 const MODE_LABEL: Record<ColorMode, string> = { system: "System", light: "Light", dark: "Dark" };
+const MODE_ICON: Record<ColorMode, typeof SunIcon> = {
+  system: DesktopIcon,
+  light: SunIcon,
+  dark: MoonIcon,
+};
 
 type State =
   | { status: "idle" }
@@ -250,7 +255,19 @@ export default function App() {
           flexShrink: 0,
         }}
       >
-        <span style={{ fontWeight: 700, fontSize: 18, color: chrome.text }}>wetron</span>
+        <a
+          href="/"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            textDecoration: "none",
+            color: chrome.text,
+          }}
+        >
+          <BrandMark size={22} />
+          <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: "-0.01em" }}>wetron</span>
+        </a>
         {state.status !== "idle" && (
           <span style={{ color: chrome.muted, fontSize: 14 }}>{state.name}</span>
         )}
@@ -278,6 +295,23 @@ export default function App() {
               width: 180,
             }}
           />
+        )}
+        {state.status === "ready" && (
+          <button
+            onClick={exportPng}
+            style={{
+              padding: "5px 12px",
+              background: "transparent",
+              color: chrome.muted,
+              border: `1px solid ${chrome.border}`,
+              borderRadius: 6,
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 500,
+            }}
+          >
+            Export PNG
+          </button>
         )}
         {state.status === "ready" && state.graph.hasExternalWeights && !state.graph.weights && (
           <label
@@ -319,41 +353,9 @@ export default function App() {
             ✓ weights loaded
           </span>
         )}
-        {state.status === "ready" && (
-          <button
-            onClick={exportPng}
-            style={{
-              padding: "5px 12px",
-              background: "transparent",
-              color: chrome.muted,
-              border: `1px solid ${chrome.border}`,
-              borderRadius: 6,
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 500,
-            }}
-          >
-            Export PNG
-          </button>
-        )}
-        <button
-          onClick={cycleMode}
-          style={{
-            marginLeft: state.status === "ready" ? 0 : "auto",
-            padding: "5px 12px",
-            background: "transparent",
-            color: chrome.muted,
-            border: `1px solid ${chrome.border}`,
-            borderRadius: 6,
-            cursor: "pointer",
-            fontSize: 12,
-            fontWeight: 500,
-          }}
-        >
-          {MODE_LABEL[colorMode]}
-        </button>
         <label
           style={{
+            marginLeft: state.status === "ready" ? 0 : "auto",
             padding: "6px 14px",
             background: "#1a73e8",
             color: "#fff",
@@ -371,6 +373,31 @@ export default function App() {
             onChange={onFileChange}
           />
         </label>
+        {(() => {
+          const Icon = MODE_ICON[colorMode];
+          return (
+            <button
+              onClick={cycleMode}
+              title={`Theme: ${MODE_LABEL[colorMode]}`}
+              aria-label={`Theme: ${MODE_LABEL[colorMode]}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 26,
+                height: 26,
+                padding: 0,
+                background: "transparent",
+                color: chrome.muted,
+                border: "none",
+                borderRadius: 6,
+                cursor: "pointer",
+              }}
+            >
+              <Icon size={16} weight="regular" />
+            </button>
+          );
+        })()}
       </header>
 
       <main style={{ flex: 1, position: "relative", overflow: "hidden" }}>
@@ -383,6 +410,7 @@ export default function App() {
               setDragging(true);
             }}
             onDragLeave={() => setDragging(false)}
+            onFileChange={onFileChange}
             isDark={isDark}
           />
         )}
@@ -454,47 +482,103 @@ export default function App() {
   );
 }
 
+function BrandMark({ size = 22 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <rect width="64" height="64" rx="14" fill="#1a73e8" />
+      <path
+        d="M14 18 L24 48 L32 30 L40 48 L50 18"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function DropZone({
   dragging,
   onDrop,
   onDragOver,
   onDragLeave,
+  onFileChange,
   isDark,
 }: {
   dragging: boolean;
   onDrop: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
+  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isDark: boolean;
 }) {
+  const headline = isDark ? "#ececf1" : "#1a1a1f";
+  const sub = isDark ? "#9ea0aa" : "#5b6270";
+  const faint = isDark ? "#6b6e78" : "#9aa0ac";
+  const dragBg = isDark ? "rgba(26,115,232,0.12)" : "rgba(26,115,232,0.06)";
+  const dragOutline = "rgba(26,115,232,0.55)";
   return (
     <div
       onDrop={onDrop}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       style={{
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "100%",
-        gap: 12,
-        border: `2px dashed ${dragging ? "#1a73e8" : isDark ? "#333" : "#ccc"}`,
-        margin: 24,
-        borderRadius: 12,
-        background: dragging ? (isDark ? "#1a2a4a" : "#e8f0fe") : isDark ? "#1a1a2a" : "#fafafa",
-        transition: "all 0.15s",
+        gap: 14,
+        background: dragging ? dragBg : "transparent",
+        boxShadow: dragging ? `inset 0 0 0 2px ${dragOutline}` : "none",
+        transition: "background 0.15s, box-shadow 0.15s",
       }}
     >
-      <div style={{ color: isDark ? "#e0e0e0" : "#333" }}>
-        <ArrowUpIcon size={48} />
+      <BrandMark size={64} />
+      <div
+        style={{
+          fontWeight: 600,
+          fontSize: 22,
+          letterSpacing: "-0.01em",
+          color: headline,
+          marginTop: 4,
+        }}
+      >
+        Open a neural network model
       </div>
-      <div style={{ fontWeight: 600, color: isDark ? "#e0e0e0" : "#333" }}>
-        Drop a model file here
-      </div>
-      <div style={{ color: isDark ? "#888" : "#888", fontSize: 13 }}>
+      <div style={{ color: sub, fontSize: 13 }}>
         Supports .onnx, .tflite, .keras, .pt, .pte and .pb
       </div>
+      <label
+        style={{
+          marginTop: 8,
+          padding: "9px 20px",
+          background: "#1a73e8",
+          color: "#fff",
+          borderRadius: 8,
+          cursor: "pointer",
+          fontSize: 14,
+          fontWeight: 500,
+          boxShadow: "0 1px 2px rgba(26,115,232,0.25)",
+        }}
+      >
+        Open model
+        <input
+          type="file"
+          accept=".onnx,.tflite,.keras,.pte,.pt,.pb"
+          style={{ display: "none" }}
+          onChange={onFileChange}
+        />
+      </label>
+      <div style={{ color: faint, fontSize: 12 }}>or drop a file here</div>
     </div>
   );
 }

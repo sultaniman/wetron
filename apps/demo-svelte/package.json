@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@wetron/savedmodel": "workspace:*",
     "@wetron/svelte": "workspace:*",
     "@xyflow/svelte": "latest",
     "html-to-image": "latest",

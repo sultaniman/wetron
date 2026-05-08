@@ -1,11 +1,17 @@
 <script lang="ts">
-  import { ArrowUpIcon } from 'phosphor-svelte';
+  import { SunIcon, MoonIcon, DesktopIcon } from 'phosphor-svelte';
   import { toPng } from 'html-to-image';
   import { getViewportForBounds } from '@xyflow/svelte';
   import { parseModel } from '@wetron/core';
   import type { ModelGraph } from '@wetron/core';
+  import { loadSavedModelWeights, attachCheckpointToGraph } from '@wetron/savedmodel';
   import { ModelGraphView, NodePropertyPanel } from '@wetron/svelte';
   import type { PanelTarget, ColorMode, ExportHelpers } from '@wetron/svelte';
+
+  type WeightsLoad =
+    | { status: 'idle' }
+    | { status: 'loading' }
+    | { status: 'error'; message: string };
 
   type AppState =
     | { status: 'idle' }
@@ -15,6 +21,11 @@
 
   const MODE_CYCLE: ColorMode[] = ['system', 'light', 'dark'];
   const MODE_LABEL: Record<ColorMode, string> = { system: 'System', light: 'Light', dark: 'Dark' };
+  const MODE_ICON: Record<ColorMode, typeof SunIcon> = {
+    system: DesktopIcon,
+    light: SunIcon,
+    dark: MoonIcon,
+  };
 
   let appState = $state<AppState>({ status: 'idle' });
   let graphExport = $state<ExportHelpers | null>(null);
@@ -27,6 +38,7 @@
   let selectedEdgeTensorName = $state<string | null>(null);
   let colorMode = $state<ColorMode>('system');
   let searchQuery = $state('');
+  let weightsLoad = $state<WeightsLoad>({ status: 'idle' });
 
   let systemIsDark = $state(
     (() => { try { return window.matchMedia('(prefers-color-scheme: dark)').matches; } catch { return false; } })()
@@ -52,6 +64,9 @@
     muted: isDark ? '#888' : '#666',
     faint: isDark ? '#666' : '#888',
     pageBg: isDark ? '#0f0f17' : '#f5f5f5',
+    headline: isDark ? '#ececf1' : '#1a1a1f',
+    sub: isDark ? '#9ea0aa' : '#5b6270',
+    dragBg: isDark ? 'rgba(26,115,232,0.12)' : 'rgba(26,115,232,0.06)',
   });
 
   const tensorSources = $derived.by(() => {
@@ -70,6 +85,8 @@
 
   const tensorShapes = $derived(appState.status === 'ready' && graph ? graph.tensorShapes : undefined);
 
+  const ModeIcon = $derived(MODE_ICON[colorMode]);
+
   function cycleMode() {
     colorMode = MODE_CYCLE[(MODE_CYCLE.indexOf(colorMode) + 1) % MODE_CYCLE.length];
   }
@@ -81,6 +98,7 @@
     history = [];
     selectedEdgeTensorName = null;
     searchQuery = '';
+    weightsLoad = { status: 'idle' };
     try {
       const buf = await file.arrayBuffer();
       const parsed = await parseModel(new Uint8Array(buf), file.name);
@@ -89,6 +107,33 @@
     } catch (e) {
       appState = { status: 'error', message: e instanceof Error ? e.message : String(e), name: file.name };
     }
+  }
+
+  async function loadWeights(files: FileList) {
+    const list = Array.from(files);
+    const indexFile = list.find((f) => f.name.endsWith('.index'));
+    const dataFile = list.find((f) => /\.data-\d{5}-of-\d{5}$/.test(f.name));
+    if (!indexFile || !dataFile) {
+      weightsLoad = {
+        status: 'error',
+        message: 'Pick both files: variables.index and variables.data-00000-of-00001',
+      };
+      return;
+    }
+    weightsLoad = { status: 'loading' };
+    try {
+      const loaded = await loadSavedModelWeights(indexFile, dataFile);
+      if (graph) graph = attachCheckpointToGraph(graph, loaded);
+      weightsLoad = { status: 'idle' };
+    } catch (e) {
+      weightsLoad = { status: 'error', message: e instanceof Error ? e.message : String(e) };
+    }
+  }
+
+  function onWeightsChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+    if (target.files) loadWeights(target.files);
+    target.value = '';
   }
 
   function handleTargetClick(target: PanelTarget) {
@@ -163,9 +208,19 @@
   }
 </script>
 
+{#snippet brandMark(size: number)}
+  <svg width={size} height={size} viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="64" height="64" rx="14" fill="#1a73e8" />
+    <path d="M14 18 L24 48 L32 30 L40 48 L50 18" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+{/snippet}
+
 <div style="display:flex;flex-direction:column;height:100vh;background:{chrome.pageBg}">
   <header style="padding:12px 20px;background:{chrome.bg};border-bottom:1px solid {chrome.border};display:flex;align-items:center;gap:16px;flex-shrink:0">
-    <span style="font-weight:700;font-size:18px;color:{chrome.text}">wetron</span>
+    <a href="/" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:{chrome.text}">
+      {@render brandMark(22)}
+      <span style="font-weight:700;font-size:18px;letter-spacing:-0.01em">wetron</span>
+    </a>
     {#if appState.status !== 'idle'}
       <span style="color:{chrome.muted};font-size:14px">{appState.name}</span>
     {/if}
@@ -188,16 +243,45 @@
         Export PNG
       </button>
     {/if}
-    <button
-      onclick={cycleMode}
-      style="{appState.status !== 'ready' ? 'margin-left:auto;' : ''}padding:5px 12px;background:transparent;color:{chrome.muted};border:1px solid {chrome.border};border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;"
-    >
-      {MODE_LABEL[colorMode]}
-    </button>
-    <label style="padding:6px 14px;background:#1a73e8;color:#fff;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500">
+    {#if appState.status === 'ready' && graph && graph.hasExternalWeights && !graph.weights}
+      <label
+        title="Pick variables.index + variables.data-XXXXX-of-XXXXX from the SavedModel directory"
+        style="padding:5px 12px;background:{weightsLoad.status === 'loading' ? chrome.faint : 'transparent'};color:{weightsLoad.status === 'error' ? '#d93025' : chrome.muted};border:1px solid {weightsLoad.status === 'error' ? '#d93025' : chrome.border};border-radius:6px;cursor:{weightsLoad.status === 'loading' ? 'wait' : 'pointer'};font-size:12px;font-weight:500"
+      >
+        {weightsLoad.status === 'loading'
+          ? 'Loading…'
+          : weightsLoad.status === 'error'
+            ? `Weights: ${weightsLoad.message}`
+            : 'Load weights…'}
+        <input
+          type="file"
+          multiple
+          style="display:none"
+          onchange={onWeightsChange}
+          disabled={weightsLoad.status === 'loading'}
+        />
+      </label>
+    {/if}
+    {#if appState.status === 'ready' && graph && graph.weights}
+      <span
+        style="padding:5px 10px;color:{chrome.muted};font-size:12px"
+        title="{graph.weights.totalBytes.toLocaleString()} bytes loaded"
+      >
+        ✓ weights loaded
+      </span>
+    {/if}
+    <label style="{appState.status !== 'ready' ? 'margin-left:auto;' : ''}padding:6px 14px;background:#1a73e8;color:#fff;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500">
       Open model
       <input type="file" accept=".onnx,.tflite,.keras,.pb,.pte,.pt" style="display:none" onchange={onFileChange} />
     </label>
+    <button
+      onclick={cycleMode}
+      title="Theme: {MODE_LABEL[colorMode]}"
+      aria-label="Theme: {MODE_LABEL[colorMode]}"
+      style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;background:transparent;color:{chrome.muted};border:none;border-radius:6px;cursor:pointer"
+    >
+      <ModeIcon size={16} weight="regular" />
+    </button>
   </header>
 
   <main style="flex:1;position:relative;overflow:hidden">
@@ -208,17 +292,25 @@
         ondragover={(e) => { e.preventDefault(); dragging = true; }}
         ondragleave={() => dragging = false}
         style="
-          display:flex;flex-direction:column;align-items:center;justify-content:center;
-          height:100%;gap:12px;
-          border:2px dashed {dragging ? '#1a73e8' : isDark ? '#333' : '#ccc'};
-          margin:24px;border-radius:12px;
-          background:{dragging ? (isDark ? '#1a2a4a' : '#e8f0fe') : isDark ? '#1a1a2a' : '#fafafa'};
-          transition:all 0.15s
+          position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+          height:100%;gap:14px;
+          background:{dragging ? chrome.dragBg : 'transparent'};
+          box-shadow:{dragging ? 'inset 0 0 0 2px rgba(26,115,232,0.55)' : 'none'};
+          transition:background 0.15s, box-shadow 0.15s
         "
       >
-        <div style="color:{isDark ? '#e0e0e0' : '#333'}"><ArrowUpIcon size={48} /></div>
-        <div style="font-weight:600;color:{isDark ? '#e0e0e0' : '#333'}">Drop a model file here</div>
-        <div style="color:#888;font-size:13px">Supports .onnx, .tflite, .keras, .pt, .pte and .pb</div>
+        {@render brandMark(64)}
+        <div style="margin-top:4px;font-weight:600;font-size:22px;letter-spacing:-0.01em;color:{chrome.headline}">
+          Open a neural network model
+        </div>
+        <div style="color:{chrome.sub};font-size:13px">
+          Supports .onnx, .tflite, .keras, .pt, .pte and .pb
+        </div>
+        <label style="margin-top:8px;padding:9px 20px;background:#1a73e8;color:#fff;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;box-shadow:0 1px 2px rgba(26,115,232,0.25)">
+          Open model
+          <input type="file" accept=".onnx,.tflite,.keras,.pte,.pt,.pb" style="display:none" onchange={onFileChange} />
+        </label>
+        <div style="color:{chrome.faint};font-size:12px">or drop a file here</div>
       </div>
     {:else if appState.status === 'loading'}
       <div style="display:flex;align-items:center;justify-content:center;height:100%;color:{chrome.muted}">
@@ -247,9 +339,10 @@
         />
 
         {#if selected !== null}
-          <div style="position:absolute;top:16px;right:16px;width:280px;z-index:10;max-height:calc(100% - 32px);overflow-y:auto;border-radius:8px;">
+          <div style="position:absolute;top:16px;right:16px;width:320px;z-index:10;max-height:calc(100% - 32px);overflow-y:auto;border-radius:8px;">
             <NodePropertyPanel
               target={selected}
+              {graph}
               {colorMode}
               inputSources={tensorSources}
               {tensorShapes}
