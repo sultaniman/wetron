@@ -135,6 +135,18 @@ The panel has four sections, top to bottom:
 
 The panel replaces the property panel area while a verification result is on screen. Closing it returns to normal model browsing.
 
+### Graph annotation
+
+While a verification result is on screen, graph nodes that own tensors are annotated with their verification status. A small badge in the node's top-right corner uses the same glyph and colour palette as the table:
+
+- Green check `✓` — all of the node's tensors matched.
+- Red cross `✗` — at least one of the node's tensors mismatched, is missing, or is extra.
+- No badge — the node has no tensors covered by the report (activations, reshapes, etc.) or is outside a node-scoped verification.
+
+Clicking a badged node opens the property panel filtered to that node's verification status, so a reviewer can drill from "MISMATCH on Conv2D_42" straight to the offending tensor without scrolling the table.
+
+The badges disappear when the verification panel is closed.
+
 ### PDF export
 
 The `Export PDF` action triggers `window.print()` with a `@media print` stylesheet that:
