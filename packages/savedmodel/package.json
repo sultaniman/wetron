@@ -1,6 +1,6 @@
 {
   "name": "@wetron/savedmodel",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "description": "TF SavedModel parser — extracts graph structure from keras_metadata.pb and saved_model.pb files",
   "keywords": [
     "graph",
@@ -13,6 +13,7 @@
   ],
   "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
+  "author": "Sultan Iman",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",

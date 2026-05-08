@@ -1,6 +1,6 @@
 {
   "name": "@wetron/onnx",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "description": "ONNX model parser — extracts graph structure (nodes, edges, shapes) from .onnx files",
   "keywords": [
     "graph",
@@ -11,6 +11,7 @@
   ],
   "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
+  "author": "Sultan Iman",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",

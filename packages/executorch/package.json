@@ -1,6 +1,6 @@
 {
   "name": "@wetron/executorch",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "description": "ExecuTorch model parser — extracts graph structure from .pte flatbuffer files",
   "keywords": [
     "executorch",
@@ -12,6 +12,7 @@
   ],
   "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
+  "author": "Sultan Iman",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",

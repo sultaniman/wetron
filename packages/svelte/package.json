@@ -1,6 +1,6 @@
 {
   "name": "@wetron/svelte",
-  "version": "0.0.8",
+  "version": "0.0.11",
   "description": "Svelte components for neural network graph visualization, built on SvelteFlow",
   "keywords": [
     "graph",
@@ -12,6 +12,7 @@
   ],
   "homepage": "https://codeberg.org/askar/wetron",
   "license": "MIT",
+  "author": "Sultan Iman",
   "repository": {
     "type": "git",
     "url": "https://codeberg.org/askar/wetron.git",
