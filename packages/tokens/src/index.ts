@@ -92,6 +92,10 @@ export const PANEL_VARS = {
     "--panel-chip-bg": "#f0f0f0",
     "--panel-chip-color": "#888",
     "--panel-close-hover": "#f0f0f0",
+    "--panel-seg-bg": "#f1f5f9",
+    "--panel-seg-color": "#64748b",
+    "--panel-seg-on-bg": "#fff",
+    "--panel-seg-on-color": "#2563eb",
   },
   dark: {
     "--panel-bg": "#1e1e2e",
@@ -105,5 +109,9 @@ export const PANEL_VARS = {
     "--panel-chip-bg": "#262646",
     "--panel-chip-color": "#a0a0c0",
     "--panel-close-hover": "#2a2a3a",
+    "--panel-seg-bg": "rgba(255, 255, 255, 0.06)",
+    "--panel-seg-color": "#94a3b8",
+    "--panel-seg-on-bg": "rgba(255, 255, 255, 0.12)",
+    "--panel-seg-on-color": "#f1f5f9",
   },
 } as const;

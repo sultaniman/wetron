@@ -53,9 +53,9 @@ test("CANVAS_VARS light and dark have the same 7 keys", () => {
   for (const k of keys) expect(k.startsWith("--")).toBe(true);
 });
 
-test("PANEL_VARS light and dark have the same 11 keys", () => {
+test("PANEL_VARS light and dark have the same 15 keys", () => {
   const keys = Object.keys(PANEL_VARS.light);
-  expect(keys).toHaveLength(11);
+  expect(keys).toHaveLength(15);
   expect(Object.keys(PANEL_VARS.dark)).toEqual(keys);
   for (const k of keys) expect(k.startsWith("--")).toBe(true);
 });
