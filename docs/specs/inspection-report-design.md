@@ -122,21 +122,31 @@ Two reports are considered to match iff:
 
 A field outside the verification predicate (filename, timestamp, producer, wetron version) may differ without affecting the verdict.
 
-### Comparator UI
+### Verification panel
 
-Top-of-view banner with a verdict:
+The verification result is a structured panel — the same UI that the user sees in-app *is* the human-readable report, and that panel can be printed to PDF.
 
-- `MATCH ✓ — all <n> tensors verified` (green).
-- `MISMATCH ✗ — <k> of <n> tensors differ` (red), with a one-line "View details" affordance.
+The panel has four sections, top to bottom:
 
-Below the banner, a collapsible per-tensor table. Each row is one tensor with status `match` / `mismatch` / `missing` / `extra`, the offending field highlighted on mismatch.
+1. **Header** — verdict banner (`MATCH ✓` / `MISMATCH ✗`) plus an `Export PDF` action top-right. For node scope the banner reads `MATCH ✓ — node "<name>"`.
+2. **Identity bar** — a metadata row that surfaces the verifier (wetron version), the verification timestamp, the report's `createdAt`, and the format/version. These are non-hashed informational fields.
+3. **File block** — the file's name, byte length, and SHA-256, shown once. This is the verification anchor.
+4. **Per-tensor table** — collapsible, with one row per tensor (status, name, shape, dtype, sha256). Default-collapsed when the report has > 100 tensors; default-expanded otherwise. Mismatch rows show expected and observed hashes side-by-side.
 
-Defaults:
+The panel replaces the property panel area while a verification result is on screen. Closing it returns to normal model browsing.
 
-- Collapsed when the dropped report has > 100 tensors.
-- Expanded otherwise.
+### PDF export
 
-For node-scoped reports the banner reads `MATCH ✓ — node "<name>"`.
+The `Export PDF` action triggers `window.print()` with a `@media print` stylesheet that:
+
+- Hides everything except the verification panel.
+- Expands the per-tensor table regardless of the in-app collapsed state (the PDF is the audit trail; nothing is hidden).
+- Adds a printed header with the verdict, file SHA-256, and timestamp on every page.
+- Removes the close button and any interactive affordances.
+
+The user gets a native "Save as PDF" dialog from their browser. Suggested default filename: `verification-<filenameStem>-<YYYYMMDD-HHMMSS>.pdf`.
+
+This approach adds no new dependencies — just print CSS — and produces a PDF whose content is exactly what the user sees in the panel, eliminating any concern that the printed artefact diverges from the verified result.
 
 ## UI surfaces
 
@@ -147,7 +157,7 @@ For node-scoped reports the banner reads `MATCH ✓ — node "<name>"`.
 | Toolbar         | Export report ▾         | Visible when a model is loaded. Mode toggle inside the dropdown. |
 | Toolbar         | Verify against report…  | Visible when a model is loaded; opens a file picker for `.json`. |
 | Property panel  | Export node report      | Visible when the selected node has weight tensors.               |
-| Banner + table  | Comparator UI           | Replaces the property panel area while a report is loaded.       |
+| Verification panel | Comparator UI + Export PDF | Replaces the property panel area while a verification result is on screen. |
 
 Both export buttons offer a mode toggle (`identity` / `identity+stats`) before download.
 
