@@ -7,7 +7,7 @@ Wetron is a browser-native inspector for neural network models. The roadmap belo
 The single biggest gap in the current ML tooling landscape: there is no way for a regulator, journalist, or civic-tech reviewer to **inspect a third-party model and prove what they saw** without first handing the file to a SaaS or installing a desktop app. Wetron's browser-native architecture closes that gap; this track turns inspection into auditing.
 
 - **Model-vs-model diff.** Side-by-side graph + per-tensor weight-statistics comparison between two model files. Detects fine-tuning, layer surgery, and supply-chain tampering on shared weights.
-- **Provenance / attestation export.** Stable graph hash + per-tensor checksum summary that a reviewer can sign and publish ("I inspected this exact file at this date"). Reproducible across sessions and machines.
+- **Inspection report export.** Stable graph hash + per-tensor checksum summary, exportable as a small JSON/Markdown artefact that documents which file was inspected. Reproducible across sessions and machines, so two reviewers can confirm they looked at the same bytes.
 
 ## Track 2 — Format coverage for the LLM era
 
