@@ -98,20 +98,15 @@ The `file` block is identical to the global report's `file` block — a node rep
 
 ## Verification flow
 
-Verification requires a model to be loaded first — there is nothing to verify against otherwise. The empty drop-zone continues to accept model files only.
+Verification requires a model to be loaded first — there is nothing to verify against otherwise. The empty drop-zone continues to accept model files only and is unchanged by this feature.
 
-Once a model is loaded, two affordances trigger verification:
-
-1. A toolbar action `Verify against report…` opens a file picker for a `.json` report.
-2. Dragging a `.json` onto the loaded-model view shows a full-view "Drop report to verify" overlay; releasing it triggers the same flow.
-
-A dropped or picked report:
+Once a model is loaded, the toolbar exposes a `Verify against report…` action that opens a file picker for a `.json` report. The picked report:
 
 1. Is parsed and validated against `reportVersion`.
 2. Is matched against the currently-loaded model.
 3. Drives a comparator that checks the verification predicate field-by-field.
 
-Dropping a `.json` onto the empty drop-zone (no model loaded) shows a non-blocking notice — "Open a model first, then drop the report to verify" — and keeps the user in the empty state.
+There are no drag-and-drop targets on the loaded view — for either models or reports. The drop-zone exists only in the empty state. Once a model is loaded, all file input goes through explicit toolbar actions: `Open model` to load a new model, `Verify against report…` to verify against the current one. This keeps the surface unambiguous and avoids accidental drops over the graph.
 
 ### Verification predicate
 
@@ -147,11 +142,11 @@ For node-scoped reports the banner reads `MATCH ✓ — node "<name>"`.
 
 | Surface         | Action                  | Trigger                                                          |
 | --------------- | ----------------------- | ---------------------------------------------------------------- |
-| Toolbar         | Export global report    | Visible when a model is loaded.                                  |
+| Empty drop-zone | Open model              | Unchanged. Only entry point that accepts drag-and-drop.          |
+| Toolbar         | Open model              | Always visible. Opens a file picker, replaces the loaded model.  |
+| Toolbar         | Export report ▾         | Visible when a model is loaded. Mode toggle inside the dropdown. |
 | Toolbar         | Verify against report…  | Visible when a model is loaded; opens a file picker for `.json`. |
 | Property panel  | Export node report      | Visible when the selected node has weight tensors.               |
-| Loaded view     | Drop overlay for `.json`| Active when a model is loaded; full-view overlay on dragenter.   |
-| Empty drop-zone | Model files only        | Unchanged. A `.json` drop here shows an "open a model first" notice. |
 | Banner + table  | Comparator UI           | Replaces the property panel area while a report is loaded.       |
 
 Both export buttons offer a mode toggle (`identity` / `identity+stats`) before download.
