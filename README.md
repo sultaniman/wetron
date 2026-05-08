@@ -1,8 +1,19 @@
 # wetron
 
-A browser-based neural network model visualizer - open a model and explore its computation graph interactively.
+Browser-native inspector for neural network models. Open a model file and explore its computation graph, tensor shapes, and weight statistics — fully in the browser, no upload, no server, no telemetry.
 
-Graph structure only - no weight data is read or stored.
+## Why
+
+Existing model inspection tools either run as native desktop apps (Netron) or push files through hosted services. Neither is acceptable when the model itself is the sensitive artefact — proprietary weights, medical models, audited systems under the EU AI Act, or research code that can't leave a network.
+
+Wetron is the first model inspector that runs entirely client-side as an embeddable library. That makes it useful for:
+
+- **AI auditability** — regulators, journalists, and civic-tech reviewers can inspect third-party models without exposing them to a SaaS.
+- **Privacy-sensitive ML** — medical, defence, and on-device models can be inspected without leaving the host machine.
+- **Education & reproducibility** — courses and papers can ship a graph viewer alongside a model with a single `<script>` tag.
+- **FOSS infrastructure** — the `@wetron/*` packages are designed to be embedded by other open-source projects (model registries, dataset cards, scientific notebooks).
+
+Parsing runs on `ArrayBuffer` / `DataView` / `TextDecoder` / `DecompressionStream` — nothing else. Weight bytes are decoded lazily on demand for the property panel; they're never uploaded or persisted.
 
 ## Packages
 
@@ -100,7 +111,7 @@ cd docs && bun install && bun run dev   # Hugo site at localhost:1313
 ## Constraints
 
 - Browser-only. All I/O uses `file.arrayBuffer()`, `fetch`, `TextDecoder`, `DataView`.
-- No weight deserialization anywhere in the stack.
+- Weight bytes are exposed via `WeightSource` and decoded lazily on demand — never uploaded, never persisted.
 - No patching of `DataView.prototype` or `BigInt.prototype`.
 - `detectFormat` always returns a `Format` string, never throws.
 
