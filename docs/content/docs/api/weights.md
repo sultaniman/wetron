@@ -10,6 +10,8 @@ import { decodeWeight, decodeFirstN, computeStats } from "@wetron/core";
 import type { WeightSource, WeightStats } from "@wetron/core";
 ```
 
+{{< themed-img light="images/property-panel-heatmap-light.png" dark="images/property-panel-heatmap-dark.png" alt="Property panel rendering a weight heatmap from WeightStats" class="themed-img--narrow" >}}
+
 ## WeightSource
 
 Lives on `ModelGraph.weights`. Present when the parser surfaces initializer bytes.
@@ -85,6 +87,8 @@ interface WeightStats {
 ```
 
 The histogram has 12 bins between `min` and `max`. When `min === max`, the entire count lands in the middle bin. The heatmap is `16 × 8 = 128` cells; each cell averages `chunkSize = max(1, floor(count / 128))` consecutive values.
+
+{{< themed-img light="images/property-panel-bar-plot-light.png" dark="images/property-panel-bar-plot-dark.png" alt="Property panel rendering a 12-bin histogram from WeightStats" class="themed-img--narrow" >}}
 
 ## TF2 SavedModel checkpoint loader
 

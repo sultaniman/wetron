@@ -5,6 +5,8 @@ lead: "Wetron is a browser-native library for parsing and visualising ML model g
 weight: 10
 ---
 
+{{< themed-img light="images/graph-with-heatmap-light.png" dark="images/graph-with-heatmap-dark.png" alt="Loaded model graph with the property panel showing a weight heatmap" >}}
+
 ## What it does
 
 Wetron reads neural network model files and produces a structured graph of operators, inputs, and outputs. That graph can then be rendered as an interactive diagram using the React or Svelte renderer packages.
@@ -55,3 +57,9 @@ model file
 | TorchScript ZIP    | ZIP magic + `.pt`/`.ptl` extension               |
 | TorchScript Mobile | `PTMF` at offset 4                               |
 | ExecuTorch         | `ET12` at offset 4                               |
+
+## Demo app
+
+The repo ships a small demo app under [`apps/demo`](https://github.com/sultaniman/wetron/tree/main/apps/demo) (React) and [`apps/demo-svelte`](https://github.com/sultaniman/wetron/tree/main/apps/demo-svelte) (Svelte) that wire `parseModel` up to the renderer packages and let you drop any supported file in the browser. They're the easiest way to see the library end-to-end before integrating it into your own app.
+
+{{< themed-img light="images/demo-light-empty.png" dark="images/demo-dark-empty.png" alt="Wetron demo app — empty state with drop zone" >}}

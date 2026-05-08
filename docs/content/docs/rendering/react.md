@@ -28,6 +28,8 @@ import { ModelGraphView } from "@wetron/react";
 
 Renders the full interactive graph. Nodes are coloured by operator category. Click a node or edge to receive a `PanelTarget` you can pass to `NodePropertyPanel`.
 
+{{< themed-img light="images/graph-with-heatmap-light.png" dark="images/graph-with-heatmap-dark.png" alt="ModelGraphView with NodePropertyPanel open on a weight tensor" >}}
+
 ### Props
 
 | Prop                     | Type                                          | Description                                       |
@@ -75,6 +77,11 @@ import { NodePropertyPanel } from "@wetron/react";
 When `target` resolves to an initializer tensor (a name present in `graph.initializers`) and `graph` is supplied, the panel switches to the weight panel. It auto-enables decoding for models where `fileSizeBytes <= 20MB` and `graph.weights` is present, and offers an explicit "Show weights" toggle for larger files. The toggle is disabled when `graph.hasExternalWeights && !graph.weights` - the prompt to load checkpoint files is shown in that state.
 
 The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally; the histogram and heatmap visualisations come from the same `WeightStats.histogram` (12 bins) and `WeightStats.heatmap` (16 × 8 grid) documented in [Weights](../api/weights/).
+
+{{< themed-img-row >}}
+{{< themed-img light="images/property-panel-heatmap-light.png" dark="images/property-panel-heatmap-dark.png" alt="NodePropertyPanel weight panel — heatmap view" >}}
+{{< themed-img light="images/property-panel-bar-plot-light.png" dark="images/property-panel-bar-plot-dark.png" alt="NodePropertyPanel weight panel — histogram view" >}}
+{{< /themed-img-row >}}
 
 ## PanelTarget type
 

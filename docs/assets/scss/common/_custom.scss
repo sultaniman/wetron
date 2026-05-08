@@ -41,6 +41,52 @@ footer {
   background-color: rgba(239, 68, 68, 0.08);
 }
 
+// Themed image pair — swap on doks color-mode toggle (data-bs-theme).
+.themed-img {
+  display: block;
+  margin: 2.5rem 0;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    border-radius: 0.5rem;
+  }
+
+  .themed-img-dark {
+    display: none;
+  }
+}
+
+[data-bs-theme="dark"] .themed-img {
+  .themed-img-light {
+    display: none;
+  }
+  .themed-img-dark {
+    display: block;
+  }
+}
+
+.themed-img--narrow {
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.themed-img-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin: 2.5rem 0;
+
+  > .themed-img {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+  }
+}
+
 // search dialog — normalize content font sizes
 #searchResults {
   .content {

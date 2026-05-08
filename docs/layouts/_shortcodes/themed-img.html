@@ -1,0 +1,29 @@
+{{- /*
+Renders a pair of images that swap based on the doks color-mode toggle.
+Both images are processed by Hugo's image pipeline (resize + webp).
+
+@param {string} light  Path to the light-mode image (asset path).
+@param {string} dark   Path to the dark-mode image (asset path).
+@param {string} alt    Alt text for both images.
+@param {int}    [width=1600] Max display width in pixels.
+*/ -}}
+
+{{- $light := .Get "light" -}}
+{{- $dark  := .Get "dark"  -}}
+{{- $alt   := .Get "alt"   -}}
+{{- $width := default 1600 (.Get "width") | int -}}
+{{- $class := .Get "class" -}}
+
+{{- $lightRes := resources.Get $light -}}
+{{- $darkRes  := resources.Get $dark  -}}
+
+{{- if not $lightRes }}{{ errorf "themed-img: light image not found: %q" $light }}{{ end -}}
+{{- if not $darkRes  }}{{ errorf "themed-img: dark image not found: %q"  $dark  }}{{ end -}}
+
+{{- $lightSized := $lightRes.Resize (printf "%dx webp q85" $width) -}}
+{{- $darkSized  := $darkRes.Resize  (printf "%dx webp q85" $width) -}}
+
+<span class="themed-img{{ with $class }} {{ . }}{{ end }}">
+  <img class="themed-img-light" src="{{ $lightSized.RelPermalink }}" width="{{ $lightSized.Width }}" height="{{ $lightSized.Height }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+  <img class="themed-img-dark"  src="{{ $darkSized.RelPermalink  }}" width="{{ $darkSized.Width  }}" height="{{ $darkSized.Height  }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+</span>
