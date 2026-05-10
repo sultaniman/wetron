@@ -1,6 +1,6 @@
 # wetron
 
-**[wetron.app](https://wetron.app)** — Browser-native inspector for neural network models. Open a model file and explore its computation graph, tensor shapes, and weight statistics — fully in the browser, no upload, no server, no telemetry. See [wetron.app](https://wetron.app/).
+**[wetron.app](https://wetron.app)** — Browser-native inspector for neural network models. Open a model file and explore its computation graph, tensor shapes, and weight statistics — fully in the browser, no upload, no server, no telemetry.
 
 ## Why
 
