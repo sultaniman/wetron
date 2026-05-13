@@ -67,7 +67,7 @@ import { modelGraphToFlow } from "@wetron/core";
 function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] };
 ```
 
-Converts a `ModelGraph` to layout-positioned `FlowNode[]` and `FlowEdge[]` ready for ReactFlow or SvelteFlow. Dagre is applied top-to-bottom. Used internally by the renderer packages - call it directly only if you're building a custom renderer.
+Converts a `ModelGraph` to layout-positioned `FlowNode[]` and `FlowEdge[]` ready for ReactFlow or SvelteFlow. Dagre is applied top-to-bottom. Call directly only when building a custom renderer; the renderer packages call it automatically.
 
 ## opCategory
 

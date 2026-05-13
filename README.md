@@ -6,7 +6,7 @@
 
 Existing model inspection tools either run as native desktop apps (Netron) or push files through hosted services. Neither is acceptable when the model itself is the sensitive artefact — proprietary weights, medical models, audited systems under the EU AI Act, or research code that can't leave a network.
 
-Wetron is the first model inspector that runs entirely client-side as an embeddable library. That makes it useful for:
+Wetron is a model inspector that runs entirely client-side as an embeddable library. That makes it useful for:
 
 - **AI auditability** — regulators, journalists, and civic-tech reviewers can inspect third-party models without exposing them to a SaaS.
 - **Privacy-sensitive ML** — medical, defence, and on-device models can be inspected without leaving the host machine.
@@ -43,7 +43,7 @@ bun add @wetron/react
 bun add @wetron/core
 ```
 
-`@wetron/react` depends on `@wetron/core`, and `@wetron/core` depends on all parser packages - so a single install covers everything.
+`@wetron/react` depends on `@wetron/core`, and `@wetron/core` depends on all parser packages.
 
 Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@phosphor-icons/react >=2`, `@base-ui/react >=1`.
 

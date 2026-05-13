@@ -27,8 +27,6 @@ Sponsorship goes directly to the work that keeps this project alive:
 
 ## How to sponsor
 
-[**Open Collective**](https://opencollective.com/wetron) - recurring or one-time, transparent ledger. _(Page goes live once the collective is approved.)_
-
 [**GitHub Sponsors**](https://github.com/sponsors/sultaniman) - direct to the maintainer.
 
 For larger or custom arrangements (embedding wetron in a commercial product, priority on specific format support, integration help), get in touch directly via the [GitHub repository](https://github.com/sultaniman/wetron).
@@ -65,11 +63,7 @@ Items 1-2 are mostly self-funded already; items 3-7 are the realistic targets fo
 
 ## Public funding picture
 
-Sponsorship via Open Collective and GitHub Sponsors covers the recurring maintenance and the gaps between grant cycles. Both matter; neither alone is enough.
-
-## Current sponsors
-
-_The collective is being set up. Once live, sponsors will be listed here._
+GitHub Sponsors covers the recurring maintenance and the gaps between grant cycles.
 
 ## Maintainer
 

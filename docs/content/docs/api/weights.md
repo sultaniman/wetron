@@ -70,7 +70,7 @@ Same kind mapping as `decodeWeight`. Decodes the first `n` elements (or fewer if
 function computeStats(values: Float64Array | Int32Array): WeightStats;
 ```
 
-Single-pass scan over a decoded array. The `BigInt64Array` output of `decodeWeight` is not a valid input - convert int64 weights to a numeric form first if you need stats.
+The `BigInt64Array` output of `decodeWeight` is not a valid input - convert int64 weights to a numeric form first if you need stats.
 
 ```ts
 interface WeightStats {
