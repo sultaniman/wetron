@@ -70,3 +70,13 @@ export async function parseModel(bytes: Uint8Array, filename?: string): Promise<
 
   throw new ParseError("unknown", `Cannot detect format${filename ? ` for "${filename}"` : ""}`);
 }
+
+/** Fetches and parses a model from a URL. The server must allow CORS (`Access-Control-Allow-Origin`). */
+export async function parseModelFromUrl(url: string): Promise<ModelGraph> {
+  const res = await fetch(url);
+  if (!res.ok) throw new ParseError("unknown", `fetch ${url}: ${res.status}`);
+
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  const filename = new URL(url).pathname.split("/").at(-1);
+  return parseModel(bytes, filename);
+}

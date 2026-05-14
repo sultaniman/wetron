@@ -16,10 +16,7 @@ Add URL-based weight loading for TF2 SavedModel checkpoints and ONNX models with
 ### `@wetron/savedmodel` — `load-checkpoint.ts`
 
 ```ts
-export async function loadSavedModelWeightsFromUrls(
-  indexUrl: string,
-  ...dataUrls: string[]
-): Promise<LoadedCheckpoint>
+export async function loadSavedModelWeightsFromUrls(indexUrl: string, ...dataUrls: string[]): Promise<LoadedCheckpoint>;
 ```
 
 Fetches all URLs in parallel via `fetch().arrayBuffer()`, then runs the same checkpoint parsing logic as `loadSavedModelWeights`. `dataUrls` must be in shard order (shard 0, 1, …) — the caller is responsible for ordering. Returns the same `LoadedCheckpoint` shape; use `attachCheckpointToGraph` to wire it into a `ModelGraph` as usual.
@@ -27,10 +24,7 @@ Fetches all URLs in parallel via `fetch().arrayBuffer()`, then runs the same che
 ### `@wetron/onnx` — new `src/load-external.ts`
 
 ```ts
-export async function loadOnnxExternalWeightsFromUrl(
-  modelBytes: Uint8Array,
-  baseUrl: string,
-): Promise<WeightSource>
+export async function loadOnnxExternalWeightsFromUrl(modelBytes: Uint8Array, baseUrl: string): Promise<WeightSource>;
 ```
 
 Re-reads the protobuf to collect external data refs (file, offset, length per initializer). Fetches each unique shard file once in parallel from `${baseUrl}/${filename}`. Returns a `WeightSource` that slices from the fetched buffers by initializer name.
@@ -46,13 +40,13 @@ No changes to `@wetron/core`. No new IR types.
 
 ## Error handling
 
-| Scenario | Behavior |
-|---|---|
-| HTTP response not `ok` | `throw new ParseError(format, \`fetch ${url}: ${status}\`)` |
-| ONNX model has no external data entries | Return empty `WeightSource` |
-| TF2 `dataUrls` empty | Zero shards — `get()` always `undefined` |
-| Slice out of bounds | `ParseError` from existing checkpoint logic, unchanged |
-| CORS blocked | Browser throws a network error before `fetch` resolves — surfaces as an unhandled rejection, not a `ParseError` |
+| Scenario                                | Behavior                                                                                                        |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| HTTP response not `ok`                  | `throw new ParseError(format, \`fetch ${url}: ${status}\`)`                                                     |
+| ONNX model has no external data entries | Return empty `WeightSource`                                                                                     |
+| TF2 `dataUrls` empty                    | Zero shards — `get()` always `undefined`                                                                        |
+| Slice out of bounds                     | `ParseError` from existing checkpoint logic, unchanged                                                          |
+| CORS blocked                            | Browser throws a network error before `fetch` resolves — surfaces as an unhandled rejection, not a `ParseError` |
 
 ## Testing
 

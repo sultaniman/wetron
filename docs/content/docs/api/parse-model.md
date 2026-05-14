@@ -17,6 +17,26 @@ Inspects the buffer's magic bytes (with filename extension as a tiebreaker) to i
 
 Throws `ParseError` if the format cannot be detected or parsing fails.
 
+## parseModelFromUrl
+
+```ts
+import { parseModelFromUrl } from "@wetron/core";
+
+async function parseModelFromUrl(url: string): Promise<ModelGraph>;
+```
+
+Fetches the model at `url` via `fetch`, then calls `parseModel` on the response bytes. The filename is inferred from the URL path and passed to `detectFormat` as a tiebreaker.
+
+Throws `ParseError` if the HTTP response is not `ok`, or if the format cannot be detected.
+
+**CORS requirement** — because wetron runs in the browser, the server hosting the model must include the `Access-Control-Allow-Origin` header. Requests to same-origin URLs always work. For cross-origin models, the server must opt in:
+
+```
+Access-Control-Allow-Origin: *
+```
+
+Common hosts that already do this: Hugging Face model files (`hf.co/…/resolve/…`), public S3 buckets with a CORS policy, and GitHub raw content (`raw.githubusercontent.com`). If the server does not send the header, the browser blocks the request and `fetch` throws a network error before `parseModelFromUrl` can surface it.
+
 ## Direct parser imports
 
 Call parsers directly to avoid the auto-detection overhead, or if you want to exclude specific parsers from your bundle:
