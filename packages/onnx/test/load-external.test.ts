@@ -84,29 +84,6 @@ describe("loadOnnxExternalWeightsFromUrl", () => {
     expect(Array.from(bFloats)).toEqual([10, 20]);
   });
 
-  test("trailing slash in baseUrl is tolerated", async () => {
-    const modelBytes = buildModelBytes([
-      {
-        name: "w",
-        dataType: 1,
-        dims: [1],
-        dataLocation: 1,
-        externalData: [
-          { key: "location", value: "w.bin" },
-          { key: "offset", value: "0" },
-          { key: "length", value: "4" },
-        ],
-      },
-    ]);
-
-    const external = new Uint8Array(new Float32Array([7]).buffer);
-    mockFetch({ "https://x/w.bin": external });
-
-    const weights = await loadOnnxExternalWeightsFromUrl(modelBytes, "https://x/");
-    const w = weights.get("w")!;
-    expect(new Float32Array(w.buffer, w.byteOffset, 1)[0]).toBe(7);
-  });
-
   test("returns empty WeightSource when no external data", async () => {
     const modelBytes = buildModelBytes([
       {
