@@ -47,6 +47,7 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
     sumSq += x * x;
     if (x === 0) zeros++;
   }
+
   const mean = sum / n;
   const variance = sumSq / n - mean * mean;
   const std = Math.sqrt(Math.max(0, variance));
@@ -71,8 +72,10 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
     const start = c * chunkSize;
     const end = c === HEAT_CELLS - 1 ? n : Math.min(n, start + chunkSize);
     if (start >= n) break;
+
     let s = 0;
     for (let i = start; i < end; i++) s += values[i];
+
     heatmap[c] = s / (end - start);
   }
 

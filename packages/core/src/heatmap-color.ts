@@ -6,7 +6,6 @@ export function pickColormap(min: number, max: number): ColormapKind {
 }
 
 const STOPS_LIGHT: readonly string[] = ["#eff6ff", "#bfdbfe", "#60a5fa", "#2563eb", "#1e3a8a"];
-
 const STOPS_DARK: readonly string[] = ["#bfdbfe", "#93c5fd", "#3b82f6", "#1d4ed8", "#1e3a8a"];
 
 export function colorForCell(
@@ -17,9 +16,11 @@ export function colorForCell(
   isDark = false,
 ): string {
   if (kind === "constant") return "rgba(148,163,184,0.15)";
+
   const range = max - min;
   const stops = isDark ? STOPS_DARK : STOPS_LIGHT;
   if (range === 0) return stops[0];
+
   const t = Math.max(0, Math.min(1, (value - min) / range));
   return interpolateStops(t, stops);
 }

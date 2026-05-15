@@ -25,6 +25,7 @@ Parsing runs on `ArrayBuffer` / `DataView` / `TextDecoder` / `DecompressionStrea
 | `@wetron/keras`       | Keras `.keras` archive parser                             |
 | `@wetron/torchscript` | TorchScript Mobile and ZIP-based `.pt` parser             |
 | `@wetron/executorch`  | ExecuTorch `.pte` parser (flatbuffers)                    |
+| `@wetron/savedmodel`  | TF SavedModel `.pb` parser + TF2 checkpoint loader        |
 | `@wetron/react`       | React graph view and property panel                       |
 | `@wetron/svelte`      | Svelte graph view and property panel                      |
 | `@wetron/tokens`      | Theme constants (colors, CSS vars) - no dependencies      |

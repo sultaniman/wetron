@@ -26,6 +26,31 @@ const graph = parseSavedModel(bytes); // synchronous, returns ModelGraph
 
 Throws `ParseError` from `@wetron/core/ir` if the file is too short or has unrecognized `.pb` content.
 
+### Checkpoint loading
+
+Variable weights live outside the `.pb` file in the TF2 `variables/` checkpoint pair. Load and attach them with:
+
+```ts
+import {
+  loadSavedModelWeights,
+  loadSavedModelWeightsFromUrls,
+  attachCheckpointToGraph,
+} from "@wetron/savedmodel";
+
+// From local files
+const loaded = await loadSavedModelWeights(indexFile, dataFile);
+
+// From URLs (one URL per shard, in shard order)
+const loaded = await loadSavedModelWeightsFromUrls(
+  "https://.../variables.index",
+  "https://.../variables.data-00000-of-00001",
+);
+
+const graphWithWeights = attachCheckpointToGraph(graph, loaded);
+```
+
+`graph.hasExternalWeights` is `true` whenever at least one `VarHandleOp` is present, signalling the host app to prompt for the checkpoint files.
+
 ## Format detection
 
 The first byte determines which variant is parsed:

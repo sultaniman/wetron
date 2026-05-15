@@ -33,18 +33,27 @@ function decode(bytes: Uint8Array, dtype: string, count: number): DecodedArray |
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   if (info.outKind === "f64") {
     const out = new Float64Array(n);
-    for (let i = 0; i < n; i++) out[i] = info.read(view, i * info.bytesPerEl) as number;
+    for (let i = 0; i < n; i++) {
+      out[i] = info.read(view, i * info.bytesPerEl) as number
+    };
+
     return out;
   }
 
   if (info.outKind === "i32") {
     const out = new Int32Array(n);
-    for (let i = 0; i < n; i++) out[i] = info.read(view, i * info.bytesPerEl) as number;
+    for (let i = 0; i < n; i++) {
+      out[i] = info.read(view, i * info.bytesPerEl) as number
+    };
+
     return out;
   }
 
   const out = new BigInt64Array(n);
-  for (let i = 0; i < n; i++) out[i] = info.read(view, i * info.bytesPerEl) as bigint;
+  for (let i = 0; i < n; i++) {
+    out[i] = info.read(view, i * info.bytesPerEl) as bigint
+  };
+
   return out;
 }
 

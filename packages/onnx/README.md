@@ -1,6 +1,6 @@
 # @wetron/onnx
 
-ONNX model parser for wetron. Reads `.onnx` files and returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserialized.
+ONNX model parser for wetron. Reads `.onnx` files and returns a `ModelGraph` IR. Initializer bytes are surfaced lazily through `ModelGraph.weights`; initializers with `data_location = EXTERNAL` are not inlined and must be fetched separately (see below).
 
 ## Install
 
@@ -20,6 +20,19 @@ const graph = parseOnnx(bytes);
 ```
 
 Throws `ParseError` from `@wetron/core/ir` on malformed input.
+
+### External data loading
+
+For models where initializers use `data_location = EXTERNAL`, fetch the external files and build a `WeightSource`:
+
+```ts
+import { loadOnnxExternalWeightsFromUrl } from "@wetron/onnx";
+
+const weights = await loadOnnxExternalWeightsFromUrl(modelBytes, "https://.../model-dir");
+// weights.get("init_name") -> Uint8Array | undefined
+```
+
+Each unique `location` filename is fetched once from `${baseUrl}/${location}` and shared across initializers that slice it. Returns an empty `WeightSource` when the model has no `EXTERNAL` initializers. Throws `ParseError` on non-`ok` responses.
 
 ## What gets parsed
 

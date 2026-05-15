@@ -29,5 +29,5 @@ function parseOnnx(bytes: Uint8Array): ModelGraph;
 ## Notes
 
 - Initializer bytes are exposed lazily through `ModelGraph.weights` - the parser indexes them but does not decode until requested. See [Weights](../api/weights/) for `decodeWeight`, `decodeFirstN`, and `computeStats`.
-- External data references in large ONNX models are skipped.
+- Initializers with `data_location = EXTERNAL` are not surfaced by `parseOnnx` itself. Load them separately via `loadOnnxExternalWeightsFromUrl(modelBytes, baseUrl)` from `@wetron/onnx` — see [Weights](../api/weights/#onnx-external-data-loader).
 - The parser uses `protobufjs` - not a hand-rolled binary reader.

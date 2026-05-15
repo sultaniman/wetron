@@ -669,7 +669,9 @@ const ATEN_MAP: Record<string, OpCategory> = {
   __setitem__: "merge",
 };
 
-/** Extracts the base op name from an aten namespace op (e.g. "aten::add.int" -> "add"). Returns null for non-aten ops. */
+/** Extracts the base op name from an aten namespace op (e.g. "aten::add.int" -> "add").
+ * Returns null for non-aten ops.
+ */
 export function opBase(opType: string): string | null {
   const sep = opType.indexOf("::");
   if (sep === -1) return null;

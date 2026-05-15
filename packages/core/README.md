@@ -18,6 +18,9 @@ function detectFormat(bytes: Uint8Array, filename?: string): Format;
 // Parse a model file - dispatches to the right parser based on format detection
 async function parseModel(bytes: Uint8Array, filename?: string): Promise<ModelGraph>;
 
+// Fetch and parse a model from a URL. Server must allow CORS.
+async function parseModelFromUrl(url: string): Promise<ModelGraph>;
+
 // Convert IR to ReactFlow / SvelteFlow nodes and edges (Dagre layout, top-to-bottom)
 function modelGraphToFlow(graph: ModelGraph): { nodes: FlowNode[]; edges: FlowEdge[] };
 

@@ -9,7 +9,6 @@ export function formatVal(v: number, dtype: string): string {
   if (Number.isNaN(v)) return "NaN";
   if (!Number.isFinite(v)) return v > 0 ? "+Inf" : "-Inf";
   if (v === 0) return "0";
-
   if (isIntegerDtype(dtype)) return v.toFixed(0);
 
   const abs = Math.abs(v);

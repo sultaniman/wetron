@@ -93,10 +93,19 @@ The histogram has 12 bins between `min` and `max`. When `min === max`, the entir
 ## TF2 SavedModel checkpoint loader
 
 ```ts
-import { loadSavedModelWeights, attachCheckpointToGraph } from "@wetron/savedmodel";
+import {
+  loadSavedModelWeights,
+  loadSavedModelWeightsFromUrls,
+  attachCheckpointToGraph,
+} from "@wetron/savedmodel";
 import type { LoadedCheckpoint } from "@wetron/savedmodel";
 
 async function loadSavedModelWeights(indexFile: File, dataFile: File): Promise<LoadedCheckpoint>;
+
+async function loadSavedModelWeightsFromUrls(
+  indexUrl: string,
+  ...dataUrls: string[]
+): Promise<LoadedCheckpoint>;
 
 interface LoadedCheckpoint {
   readonly weights: WeightSource;
@@ -107,11 +116,28 @@ interface LoadedCheckpoint {
 function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpoint): ModelGraph;
 ```
 
-`loadSavedModelWeights` reads the SavedModel checkpoint pair (`variables.index` + `variables.data-00000-of-00001`) and returns a `WeightSource` keyed by the SSTable key plus dtype/shape metadata.
+`loadSavedModelWeights` reads the SavedModel checkpoint pair (`variables.index` + `variables.data-XXXXX-of-YYYYY`) and returns a `WeightSource` keyed by the SSTable key plus dtype/shape metadata.
+
+`loadSavedModelWeightsFromUrls` is the URL-based variant. Pass the index URL plus one data-shard URL per shard, in shard order (shard 0, 1, …). All URLs are fetched in parallel. Server must allow CORS (`Access-Control-Allow-Origin`). Throws `ParseError` if any response is not `ok`.
 
 `attachCheckpointToGraph` re-keys the loaded `WeightSource` by graph node name. It walks each `VarHandleOp` node, resolves its `shared_name` against the checkpoint's object graph (`_CHECKPOINTABLE_OBJECT_GRAPH`) or directly against `<shared_name>/.ATTRIBUTES/VARIABLE_VALUE`, and returns a new `ModelGraph` whose `weights.get(nodeName)` returns the matching tensor bytes.
 
 The flag `ModelGraph.hasExternalWeights` is set by `parseSavedModel` when at least one `VarHandleOp` is present, so a host app knows to prompt for the checkpoint files.
+
+## ONNX external data loader
+
+```ts
+import { loadOnnxExternalWeightsFromUrl } from "@wetron/onnx";
+
+async function loadOnnxExternalWeightsFromUrl(
+  modelBytes: Uint8Array,
+  baseUrl: string,
+): Promise<WeightSource>;
+```
+
+For ONNX models whose initializers use `data_location = EXTERNAL`, fetches each unique external file once from `${baseUrl}/${location}` (where `location` is the filename recorded in the initializer's `external_data` entries) and returns a `WeightSource` that slices the fetched buffers by initializer name. Files are fetched in parallel; initializers sharing a `location` share one buffer.
+
+Returns an empty `WeightSource` (`totalBytes: 0`, `get()` always `undefined`) if the model has no `EXTERNAL` initializers. Throws `ParseError` if any response is not `ok`. CORS rules from `parseModelFromUrl` apply.
 
 ## Example
 

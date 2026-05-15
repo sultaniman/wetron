@@ -61,7 +61,7 @@ Softmax (output)
 ## Notes
 
 - `parseModel` detects `.pb` by filename extension; the first-byte check then selects the variant.
-- `ModelGraph.weights` is not populated by `parseSavedModel` itself. For TF2 models, load the checkpoint pair (`variables.index` + `variables.data-00000-of-00001`) with `loadSavedModelWeights` and call `attachCheckpointToGraph` to produce a graph with `weights` re-keyed by node name. See [Weights](../api/weights/).
+- `ModelGraph.weights` is not populated by `parseSavedModel` itself. For TF2 models, load the checkpoint pair (`variables.index` + `variables.data-XXXXX-of-YYYYY`) with `loadSavedModelWeights` — or `loadSavedModelWeightsFromUrls(indexUrl, ...dataUrls)` for remote checkpoints — and call `attachCheckpointToGraph` to produce a graph with `weights` re-keyed by node name. See [Weights](../api/weights/).
 - Control dependencies (inputs prefixed with `^`) are ignored.
 - Port suffixes (`:0`, `:1`) are stripped from input tensor names. As a
   consequence, multi-output ops (`Split`, `TopK`, …) cannot be fully
