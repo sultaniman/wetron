@@ -2,17 +2,13 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from "react"
 import { SunIcon, MoonIcon, DesktopIcon } from "@phosphor-icons/react";
 import { toPng } from "html-to-image";
 import { getViewportForBounds } from "@xyflow/react";
-import { parseModel } from "@wetron/core";
-import { loadSavedModelWeights, attachCheckpointToGraph } from "@wetron/savedmodel";
+import { parseModel, parseModelFromUrl } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
 import type { ModelGraphViewHandle } from "@wetron/react";
 import type { ModelGraph } from "@wetron/core";
 import type { PanelTarget, ColorMode } from "@wetron/react";
-
-type WeightsLoad =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "error"; message: string };
+import { WeightsDialog } from "./WeightsDialog";
+import { OpenModelDialog } from "./OpenModelDialog";
 
 function resolveMode(mode: ColorMode): "light" | "dark" {
   if (mode !== "system") return mode;
@@ -45,7 +41,8 @@ export default function App() {
   const [selectedEdgeTensorName, setSelectedEdgeTensorName] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [colorMode, setColorMode] = useState<ColorMode>("system");
-  const [weightsLoad, setWeightsLoad] = useState<WeightsLoad>({ status: "idle" });
+  const [weightsDialogOpen, setWeightsDialogOpen] = useState(false);
+  const [openDialogOpen, setOpenDialogOpen] = useState(false);
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const graphViewRef = useRef<ModelGraphViewHandle>(null);
   const [resolvedMode, setResolvedMode] = useState<"light" | "dark">(() => resolveMode("system"));
@@ -72,7 +69,7 @@ export default function App() {
     setHistory([]);
     setSelectedEdgeTensorName(null);
     setSearchQuery("");
-    setWeightsLoad({ status: "idle" });
+    setWeightsDialogOpen(false);
     try {
       const buf = await file.arrayBuffer();
       const graph = await parseModel(new Uint8Array(buf), file.name);
@@ -86,40 +83,35 @@ export default function App() {
     }
   }, []);
 
-  const loadWeights = useCallback(async (files: FileList) => {
-    const list = Array.from(files);
-    const indexFile = list.find((f) => f.name.endsWith(".index"));
-    const dataFile = list.find((f) => /\.data-\d{5}-of-\d{5}$/.test(f.name));
-    if (!indexFile || !dataFile) {
-      setWeightsLoad({
-        status: "error",
-        message: "Pick both files: variables.index and variables.data-00000-of-00001",
-      });
-      return;
-    }
-    setWeightsLoad({ status: "loading" });
+  const loadUrl = useCallback(async (url: string) => {
+    const name = (() => {
+      try {
+        return new URL(url).pathname.split("/").at(-1) || url;
+      } catch {
+        return url;
+      }
+    })();
+    setState({ status: "loading", name });
+    setSelected(null);
+    setHistory([]);
+    setSelectedEdgeTensorName(null);
+    setSearchQuery("");
+    setWeightsDialogOpen(false);
     try {
-      const loaded = await loadSavedModelWeights(indexFile, dataFile);
-      setState((prev) => {
-        if (prev.status !== "ready") return prev;
-        return { ...prev, graph: attachCheckpointToGraph(prev.graph, loaded) };
-      });
-      setWeightsLoad({ status: "idle" });
+      const graph = await parseModelFromUrl(url);
+      setState({ status: "ready", graph, name });
     } catch (e) {
-      setWeightsLoad({
+      setState({
         status: "error",
         message: e instanceof Error ? e.message : String(e),
+        name,
       });
     }
   }, []);
 
-  const onWeightsChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) loadWeights(e.target.files);
-      e.target.value = "";
-    },
-    [loadWeights],
-  );
+  const onWeightsLoaded = useCallback((nextGraph: ModelGraph) => {
+    setState((prev) => (prev.status === "ready" ? { ...prev, graph: nextGraph } : prev));
+  }, []);
 
   const tensorSources = useMemo<ReadonlyMap<string, string>>(() => {
     if (state.status !== "ready") return new Map();
@@ -212,14 +204,6 @@ export default function App() {
       e.preventDefault();
       setDragging(false);
       const file = e.dataTransfer.files[0];
-      if (file) loadFile(file);
-    },
-    [loadFile],
-  );
-
-  const onFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
       if (file) loadFile(file);
     },
     [loadFile],
@@ -331,32 +315,21 @@ export default function App() {
           </button>
         )}
         {state.status === "ready" && state.graph.hasExternalWeights && !state.graph.weights && (
-          <label
-            title="Pick variables.index + variables.data-XXXXX-of-XXXXX from the SavedModel directory"
+          <button
+            onClick={() => setWeightsDialogOpen(true)}
             style={{
               padding: "5px 12px",
-              background: weightsLoad.status === "loading" ? chrome.faint : "transparent",
-              color: weightsLoad.status === "error" ? "#d93025" : chrome.muted,
-              border: `1px solid ${weightsLoad.status === "error" ? "#d93025" : chrome.border}`,
+              background: "transparent",
+              color: chrome.muted,
+              border: `1px solid ${chrome.border}`,
               borderRadius: 6,
-              cursor: weightsLoad.status === "loading" ? "wait" : "pointer",
+              cursor: "pointer",
               fontSize: 12,
               fontWeight: 500,
             }}
           >
-            {weightsLoad.status === "loading"
-              ? "Loading…"
-              : weightsLoad.status === "error"
-                ? `Weights: ${weightsLoad.message}`
-                : "Load weights…"}
-            <input
-              type="file"
-              multiple
-              style={{ display: "none" }}
-              onChange={onWeightsChange}
-              disabled={weightsLoad.status === "loading"}
-            />
-          </label>
+            Load weights…
+          </button>
         )}
         {state.status === "ready" && state.graph.weights && (
           <span
@@ -370,12 +343,14 @@ export default function App() {
             ✓ weights loaded
           </span>
         )}
-        <label
+        <button
+          onClick={() => setOpenDialogOpen(true)}
           style={{
             marginLeft: state.status === "ready" ? 0 : "auto",
             padding: "6px 14px",
             background: "#1a73e8",
             color: "#fff",
+            border: "none",
             borderRadius: 6,
             cursor: "pointer",
             fontSize: 13,
@@ -383,13 +358,7 @@ export default function App() {
           }}
         >
           Open model
-          <input
-            type="file"
-            accept=".onnx,.tflite,.keras,.pte,.pt,.pb"
-            style={{ display: "none" }}
-            onChange={onFileChange}
-          />
-        </label>
+        </button>
         {(() => {
           const Icon = MODE_ICON[colorMode];
           return (
@@ -427,7 +396,7 @@ export default function App() {
               setDragging(true);
             }}
             onDragLeave={() => setDragging(false)}
-            onFileChange={onFileChange}
+            onOpen={() => setOpenDialogOpen(true)}
             isDark={isDark}
           />
         )}
@@ -495,6 +464,24 @@ export default function App() {
           </div>
         )}
       </main>
+      {weightsDialogOpen && state.status === "ready" && (
+        <WeightsDialog
+          graph={state.graph}
+          chrome={chrome}
+          isDark={isDark}
+          onClose={() => setWeightsDialogOpen(false)}
+          onLoaded={onWeightsLoaded}
+        />
+      )}
+      {openDialogOpen && (
+        <OpenModelDialog
+          chrome={chrome}
+          isDark={isDark}
+          onClose={() => setOpenDialogOpen(false)}
+          onFile={loadFile}
+          onUrl={loadUrl}
+        />
+      )}
     </div>
   );
 }
@@ -541,14 +528,14 @@ function DropZone({
   onDrop,
   onDragOver,
   onDragLeave,
-  onFileChange,
+  onOpen,
   isDark,
 }: {
   dragging: boolean;
   onDrop: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onOpen: () => void;
   isDark: boolean;
 }) {
   const headline = isDark ? "#ececf1" : "#1a1a1f";
@@ -589,12 +576,14 @@ function DropZone({
       <div style={{ color: sub, fontSize: 13 }}>
         Supports .onnx, .tflite, .keras, .pt, .pte and .pb
       </div>
-      <label
+      <button
+        onClick={onOpen}
         style={{
           marginTop: 8,
           padding: "9px 20px",
           background: "#1a73e8",
           color: "#fff",
+          border: "none",
           borderRadius: 8,
           cursor: "pointer",
           fontSize: 14,
@@ -603,13 +592,7 @@ function DropZone({
         }}
       >
         Open model
-        <input
-          type="file"
-          accept=".onnx,.tflite,.keras,.pte,.pt,.pb"
-          style={{ display: "none" }}
-          onChange={onFileChange}
-        />
-      </label>
+      </button>
       <div style={{ color: faint, fontSize: 12 }}>or drop a file here</div>
     </div>
   );
