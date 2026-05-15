@@ -5,6 +5,7 @@ import { TF_DTYPE } from "./tf-dtype.ts";
 export interface CheckpointMeta {
   readonly dtype: string;
   readonly shape: readonly number[];
+  readonly shardId: number;
   readonly offset: number;
   readonly size: number;
 }
@@ -62,6 +63,7 @@ function parseBundleEntry(value: Uint8Array): Partial<CheckpointMeta> {
   const view = new DataView(value.buffer, value.byteOffset, value.byteLength);
   let pos = 0;
   let dtype = "float32";
+  let shardId = 0;
   let offset = 0;
   let size = 0;
   const shape: number[] = [];
@@ -76,6 +78,7 @@ function parseBundleEntry(value: Uint8Array): Partial<CheckpointMeta> {
       const [val, p2] = readVarint(view, pos);
       pos = p2;
       if (fieldNum === 1) dtype = TF_DTYPE[val] ?? `dtype_${val}`;
+      else if (fieldNum === 3) shardId = val;
       else if (fieldNum === 4) offset = val;
       else if (fieldNum === 5) size = val;
     } else if (wireType === 2) {
@@ -126,7 +129,7 @@ function parseBundleEntry(value: Uint8Array): Partial<CheckpointMeta> {
     }
   }
 
-  return { dtype, shape, offset, size };
+  return { dtype, shape, shardId, offset, size };
 }
 
 const _dec = new TextDecoder();
@@ -169,12 +172,14 @@ export function parseCheckpointIndex(bytes: Uint8Array): Map<string, CheckpointM
       if (
         partial.dtype !== undefined &&
         partial.shape !== undefined &&
+        partial.shardId !== undefined &&
         partial.offset !== undefined &&
         partial.size !== undefined
       ) {
         result.set(name, {
           dtype: partial.dtype,
           shape: partial.shape as readonly number[],
+          shardId: partial.shardId,
           offset: partial.offset,
           size: partial.size,
         });

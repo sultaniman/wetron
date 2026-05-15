@@ -22,6 +22,53 @@ export type LoadedCheckpoint = {
   readonly fullNameToKey: ReadonlyMap<string, string>;
 };
 
+function buildLoadedCheckpoint(
+  indexBytes: Uint8Array,
+  shards: readonly ArrayBuffer[],
+): LoadedCheckpoint {
+  const index = parseCheckpointIndex(indexBytes);
+
+  const metas = new Map<string, CheckpointVariableMeta>();
+  let totalBytes = 0;
+  for (const [name, m] of index) {
+    if (name === OBJECT_GRAPH_KEY) continue;
+    metas.set(name, { dtype: m.dtype, shape: m.shape });
+    totalBytes += m.size;
+  }
+
+  let fullNameToKey: Map<string, string> = new Map();
+  const ogMeta = index.get(OBJECT_GRAPH_KEY);
+  const ogShard = ogMeta ? shards[ogMeta.shardId] : undefined;
+  if (ogMeta && ogShard && ogMeta.offset + ogMeta.size <= ogShard.byteLength) {
+    const blob = new Uint8Array(ogShard, ogMeta.offset, ogMeta.size);
+    fullNameToKey = parseCheckpointableObjectGraph(blob);
+  }
+
+  const weights: WeightSource = {
+    totalBytes,
+    get(name: string): Uint8Array | undefined {
+      const m: CheckpointMeta | undefined = index.get(name);
+      if (!m) return undefined;
+      const shard = shards[m.shardId];
+      if (!shard) {
+        throw new ParseError(
+          "savedmodel",
+          `checkpoint variable "${name}" references shard ${m.shardId} but only ${shards.length} shard(s) provided`,
+        );
+      }
+      if (m.offset + m.size > shard.byteLength) {
+        throw new ParseError(
+          "savedmodel",
+          `checkpoint slice [${m.offset}, ${m.offset + m.size}) exceeds shard ${m.shardId} buffer (${shard.byteLength} bytes)`,
+        );
+      }
+      return new Uint8Array(shard, m.offset, m.size);
+    },
+  };
+
+  return { weights, metas, fullNameToKey };
+}
+
 /**
  * Load a TF2 SavedModel checkpoint pair (variables.index + variables.data-00000-of-00001).
  * Returns a WeightSource keyed by checkpoint SSTable key plus dtype/shape metas
@@ -35,38 +82,26 @@ export async function loadSavedModelWeights(
     indexFile.arrayBuffer().then((b) => new Uint8Array(b)),
     dataFile.arrayBuffer(),
   ]);
+  return buildLoadedCheckpoint(indexBytes, [dataBuffer]);
+}
 
-  const index = parseCheckpointIndex(indexBytes);
-
-  const metas = new Map<string, CheckpointVariableMeta>();
-  let totalBytes = 0;
-  for (const [name, m] of index) {
-    if (name === OBJECT_GRAPH_KEY) continue;
-    metas.set(name, { dtype: m.dtype, shape: m.shape });
-    totalBytes += m.size;
+/**
+ * Load a TF2 SavedModel checkpoint from URLs. `dataUrls` must be in shard order
+ * (shard 0, 1, …).
+ */
+export async function loadSavedModelWeightsFromUrls(
+  indexUrl: string,
+  ...dataUrls: string[]
+): Promise<LoadedCheckpoint> {
+  async function fetchBytes(url: string): Promise<ArrayBuffer> {
+    const res = await fetch(url);
+    if (!res.ok) throw new ParseError("savedmodel", `fetch ${url}: ${res.status}`);
+    return res.arrayBuffer();
   }
 
-  let fullNameToKey: Map<string, string> = new Map();
-  const ogMeta = index.get(OBJECT_GRAPH_KEY);
-  if (ogMeta && ogMeta.offset + ogMeta.size <= dataBuffer.byteLength) {
-    const blob = new Uint8Array(dataBuffer, ogMeta.offset, ogMeta.size);
-    fullNameToKey = parseCheckpointableObjectGraph(blob);
-  }
-
-  const weights: WeightSource = {
-    totalBytes,
-    get(name: string): Uint8Array | undefined {
-      const m: CheckpointMeta | undefined = index.get(name);
-      if (!m) return undefined;
-      if (m.offset + m.size > dataBuffer.byteLength) {
-        throw new ParseError(
-          "savedmodel",
-          `checkpoint slice [${m.offset}, ${m.offset + m.size}) exceeds data buffer (${dataBuffer.byteLength} bytes)`,
-        );
-      }
-      return new Uint8Array(dataBuffer, m.offset, m.size);
-    },
-  };
-
-  return { weights, metas, fullNameToKey };
+  const [indexBuf, ...shardBufs] = await Promise.all([
+    fetchBytes(indexUrl),
+    ...dataUrls.map(fetchBytes),
+  ]);
+  return buildLoadedCheckpoint(new Uint8Array(indexBuf), shardBufs);
 }
