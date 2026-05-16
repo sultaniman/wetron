@@ -17,7 +17,8 @@
     "dagre": "^0.8.5",
     "fflate": "^0.8.2",
     "flatbuffers": "^25.9.23",
-    "protobufjs": "^8.0.3"
+    "protobufjs": "^8.0.3",
+    "svelte": "^5.55.7"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.9.0",

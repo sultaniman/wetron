@@ -40,6 +40,6 @@
     "@tanstack/svelte-virtual": ">=3",
     "@xyflow/svelte": "^1.5.2",
     "phosphor-svelte": ">=3",
-    "svelte": "^5.55.5"
+    "svelte": ">=5"
   }
 }
