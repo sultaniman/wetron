@@ -7,6 +7,7 @@
     <div class="col-lg-9 col-xl-8 text-center">
       <p class="lead">{{ .Params.lead | safeHTML }}</p>
       <a class="btn btn-primary btn-cta rounded-pill btn-lg my-3" href="{{ "docs/guide/introduction/" | relURL }}" role="button">{{ i18n "get_started" }}</a>
+      <a class="btn btn-outline-primary rounded-pill btn-lg my-3 ms-2" href="https://wetron.app" target="_blank" rel="noopener noreferrer" role="button">{{ i18n "try_demo" }}</a>
       <a class="btn btn-outline-primary rounded-pill btn-lg my-3 ms-2" href="{{ "docs/api/core-types/" | relURL }}" role="button">{{ i18n "api_reference" }}</a>
       {{ .Content }}
     </div>

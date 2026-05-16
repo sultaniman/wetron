@@ -4,6 +4,9 @@ other = "Get Started"
 [api_reference]
 other = "API Reference"
 
+[try_demo]
+other = "Try Demo"
+
 [feature_formats_title]
 other = "Five model formats"
 
