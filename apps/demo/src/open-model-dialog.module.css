@@ -1,0 +1,146 @@
+.overlay {
+  --dlg-bg: #fff;
+  --dlg-border: #e0e0e0;
+  --dlg-text: #333;
+  --dlg-muted: #666;
+  --dlg-faint: #888;
+  --dlg-section-bg: #fafafa;
+  --dlg-input-bg: #fff;
+  --dlg-overlay-bg: rgba(15, 15, 23, 0.35);
+
+  position: fixed;
+  inset: 0;
+  background: var(--dlg-overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.overlay[data-theme="dark"] {
+  --dlg-bg: #16161e;
+  --dlg-border: #2a2a3a;
+  --dlg-text: #e0e0e0;
+  --dlg-muted: #888;
+  --dlg-faint: #666;
+  --dlg-section-bg: #1a1a24;
+  --dlg-input-bg: #1f1f2a;
+  --dlg-overlay-bg: rgba(0, 0, 0, 0.55);
+}
+
+.dialog {
+  width: 460px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: var(--dlg-bg);
+  color: var(--dlg-text);
+  border: 1px solid var(--dlg-border);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--dlg-border);
+}
+
+.title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.closeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background: transparent;
+  color: var(--dlg-muted);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section {
+  background: var(--dlg-section-bg);
+  border: 1px solid var(--dlg-border);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sectionHint {
+  font-size: 12px;
+  color: var(--dlg-muted);
+}
+
+.fileChooser {
+  display: inline-flex;
+}
+
+.fileChooserLabel {
+  padding: 6px 14px;
+  background: #1a73e8;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.urlInput {
+  padding: 6px 10px;
+  background: var(--dlg-input-bg);
+  color: var(--dlg-text);
+  border: 1px solid var(--dlg-border);
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.primaryButton {
+  padding: 6px 14px;
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.primaryButton:disabled {
+  background: #1a73e833;
+  cursor: not-allowed;
+}

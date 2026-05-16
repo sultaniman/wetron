@@ -1,31 +1,18 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { SunIcon, MoonIcon, DesktopIcon } from "@phosphor-icons/react";
-import { toPng } from "html-to-image";
 import { getViewportForBounds } from "@xyflow/react";
+import { toPng } from "html-to-image";
 import { parseModel, parseModelFromUrl } from "@wetron/core";
 import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
 import type { ModelGraphViewHandle } from "@wetron/react";
 import type { ModelGraph } from "@wetron/core";
-import type { PanelTarget, ColorMode } from "@wetron/react";
-import { WeightsDialog } from "./WeightsDialog";
-import { OpenModelDialog } from "./OpenModelDialog";
-
-function resolveMode(mode: ColorMode): "light" | "dark" {
-  if (mode !== "system") return mode;
-  try {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  } catch {
-    return "light";
-  }
-}
-
-const MODE_CYCLE: ColorMode[] = ["system", "light", "dark"];
-const MODE_LABEL: Record<ColorMode, string> = { system: "System", light: "Light", dark: "Dark" };
-const MODE_ICON: Record<ColorMode, typeof SunIcon> = {
-  system: DesktopIcon,
-  light: SunIcon,
-  dark: MoonIcon,
-};
+import type { PanelTarget } from "@wetron/react";
+import { BrandMark } from "./brand-mark.tsx";
+import { GitHubIcon } from "./github-icon.tsx";
+import { DropZone } from "./drop-zone.tsx";
+import { OpenModelDialog } from "./open-model-dialog.tsx";
+import { WeightsDialog } from "./weights-dialog.tsx";
+import { MODE_CYCLE, MODE_ICON, MODE_LABEL, resolveMode, type ColorMode } from "./theme.ts";
+import css from "./app.module.css";
 
 type State =
   | { status: "idle" }
@@ -168,7 +155,6 @@ export default function App() {
     await graphViewRef.current.fitAll();
     const el = graphViewRef.current.getViewportElement();
     if (!el) return;
-    // Compute output canvas at actual node-layout scale (1px per layout unit) + padding
     const bounds = graphViewRef.current.getNodesBounds();
     const PAD = 60;
     const imgW = Math.ceil(bounds.width + PAD * 2);
@@ -209,48 +195,16 @@ export default function App() {
     [loadFile],
   );
 
-  const isDark = resolvedMode === "dark";
-  const chrome = {
-    bg: isDark ? "#16161e" : "#fff",
-    border: isDark ? "#2a2a3a" : "#e0e0e0",
-    text: isDark ? "#e0e0e0" : "#333",
-    muted: isDark ? "#888" : "#666",
-    faint: isDark ? "#666" : "#888",
-    pageBg: isDark ? "#0f0f17" : "#f5f5f5",
-  };
+  const ModeIcon = MODE_ICON[colorMode];
+  const ready = state.status === "ready";
+  const showWeightsButton = ready && state.graph.hasExternalWeights && !state.graph.weights;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        background: chrome.pageBg,
-      }}
-    >
-      <header
-        style={{
-          padding: "12px 20px",
-          background: chrome.bg,
-          borderBottom: `1px solid ${chrome.border}`,
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-          flexShrink: 0,
-        }}
-      >
-        <a
-          href="/"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            textDecoration: "none",
-            color: chrome.text,
-          }}
-        >
+    <div className={css.root} data-theme={resolvedMode}>
+      <header className={css.header}>
+        <a href="/" className={css.brandLink}>
           <BrandMark size={22} />
-          <span style={{ fontWeight: 700, fontSize: 18, letterSpacing: "-0.01em" }}>wetron</span>
+          <span className={css.brandName}>wetron</span>
         </a>
         <a
           href="https://github.com/sultaniman/wetron"
@@ -258,86 +212,49 @@ export default function App() {
           rel="noopener noreferrer"
           title="View on GitHub"
           aria-label="View on GitHub"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            color: chrome.text,
-            textDecoration: "none",
-            lineHeight: 0,
-            marginTop: 2,
-          }}
+          className={`${css.iconLink} ${css.iconLinkAlign}`}
         >
           <GitHubIcon size={22} />
         </a>
-        {state.status !== "idle" && (
-          <span style={{ color: chrome.muted, fontSize: 14 }}>{state.name}</span>
-        )}
-        {state.status === "ready" && (
-          <span style={{ color: chrome.faint, fontSize: 13 }}>
+        <a
+          href="https://sultaniman.github.io/wetron/"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Documentation"
+          aria-label="Documentation"
+          className={`${css.iconLink} ${css.iconLinkAlignTight}`}
+        >
+          Docs
+        </a>
+        {state.status !== "idle" && <span className={css.fileName}>{state.name}</span>}
+        {ready && (
+          <span className={css.stats}>
             {state.graph.nodes.length} nodes · {state.graph.inputs.length} inputs ·{" "}
             {state.graph.outputs.length} outputs
           </span>
         )}
-        {state.status === "ready" && (
+        {ready && (
           <input
             type="search"
             placeholder="Search ops…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              marginLeft: "auto",
-              padding: "5px 10px",
-              background: "transparent",
-              color: chrome.text,
-              border: `1px solid ${chrome.border}`,
-              borderRadius: 6,
-              fontSize: 13,
-              outline: "none",
-              width: 180,
-            }}
+            className={css.search}
           />
         )}
-        {state.status === "ready" && (
-          <button
-            onClick={exportPng}
-            style={{
-              padding: "5px 12px",
-              background: "transparent",
-              color: chrome.muted,
-              border: `1px solid ${chrome.border}`,
-              borderRadius: 6,
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 500,
-            }}
-          >
+        {ready && (
+          <button onClick={exportPng} className={css.toolButton}>
             Export PNG
           </button>
         )}
-        {state.status === "ready" && state.graph.hasExternalWeights && !state.graph.weights && (
-          <button
-            onClick={() => setWeightsDialogOpen(true)}
-            style={{
-              padding: "5px 12px",
-              background: "transparent",
-              color: chrome.muted,
-              border: `1px solid ${chrome.border}`,
-              borderRadius: 6,
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 500,
-            }}
-          >
+        {showWeightsButton && (
+          <button onClick={() => setWeightsDialogOpen(true)} className={css.toolButton}>
             Load weights…
           </button>
         )}
-        {state.status === "ready" && state.graph.weights && (
+        {ready && state.graph.weights && (
           <span
-            style={{
-              padding: "5px 10px",
-              color: chrome.muted,
-              fontSize: 12,
-            }}
+            className={css.weightsStatus}
             title={`${state.graph.weights.totalBytes.toLocaleString()} bytes loaded`}
           >
             ✓ weights loaded
@@ -345,50 +262,24 @@ export default function App() {
         )}
         <button
           onClick={() => setOpenDialogOpen(true)}
-          style={{
-            marginLeft: state.status === "ready" ? 0 : "auto",
-            padding: "6px 14px",
-            background: "#1a73e8",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer",
-            fontSize: 13,
-            fontWeight: 500,
-          }}
+          className={`${css.openButton} ${ready ? "" : css.openButtonPushRight}`}
         >
           Open model
         </button>
-        {(() => {
-          const Icon = MODE_ICON[colorMode];
-          return (
-            <button
-              onClick={cycleMode}
-              title={`Theme: ${MODE_LABEL[colorMode]}`}
-              aria-label={`Theme: ${MODE_LABEL[colorMode]}`}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 26,
-                height: 26,
-                padding: 0,
-                background: "transparent",
-                color: chrome.muted,
-                border: "none",
-                borderRadius: 6,
-                cursor: "pointer",
-              }}
-            >
-              <Icon size={16} weight="regular" />
-            </button>
-          );
-        })()}
+        <button
+          onClick={cycleMode}
+          title={`Theme: ${MODE_LABEL[colorMode]}`}
+          aria-label={`Theme: ${MODE_LABEL[colorMode]}`}
+          className={css.themeButton}
+        >
+          <ModeIcon size={16} weight="regular" />
+        </button>
       </header>
 
-      <main style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+      <main className={css.main}>
         {state.status === "idle" && (
           <DropZone
+            theme={resolvedMode}
             dragging={dragging}
             onDrop={onDrop}
             onDragOver={(e) => {
@@ -397,43 +288,21 @@ export default function App() {
             }}
             onDragLeave={() => setDragging(false)}
             onOpen={() => setOpenDialogOpen(true)}
-            isDark={isDark}
           />
         )}
         {state.status === "loading" && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              color: chrome.muted,
-            }}
-          >
-            Parsing {state.name}...
-          </div>
+          <div className={css.placeholder}>Parsing {state.name}...</div>
         )}
         {state.status === "error" && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              gap: 8,
-            }}
-          >
-            <div style={{ color: "#d93025", fontWeight: 600 }}>Failed to parse {state.name}</div>
-            <div style={{ color: chrome.muted, fontSize: 13, maxWidth: 480, textAlign: "center" }}>
-              {state.message}
-            </div>
+          <div className={css.errorBox}>
+            <div className={css.errorTitle}>Failed to parse {state.name}</div>
+            <div className={css.errorMessage}>{state.message}</div>
           </div>
         )}
-        {state.status === "ready" && (
+        {ready && (
           <div
             ref={graphContainerRef}
-            style={{ position: "relative", width: "100%", height: "100%" }}
+            className={css.graphHost}
             onDrop={onDrop}
             onDragOver={(e) => {
               e.preventDefault();
@@ -449,151 +318,37 @@ export default function App() {
               searchQuery={searchQuery}
               colorMode={colorMode}
             />
-            <div style={{ position: "absolute", top: 16, right: 16, width: 320, zIndex: 10 }}>
+            <div className={css.panelHost}>
               <NodePropertyPanel
                 target={selected}
-                graph={state.status === "ready" ? state.graph : undefined}
+                graph={state.graph}
                 onTensorClick={handleTensorClick}
                 onBack={history.length > 0 ? handleBack : undefined}
                 onClose={handleClose}
                 colorMode={colorMode}
                 inputSources={tensorSources}
-                tensorShapes={state.status === "ready" ? state.graph.tensorShapes : undefined}
+                tensorShapes={state.graph.tensorShapes}
               />
             </div>
           </div>
         )}
       </main>
-      {weightsDialogOpen && state.status === "ready" && (
+      {weightsDialogOpen && ready && (
         <WeightsDialog
+          theme={resolvedMode}
           graph={state.graph}
-          chrome={chrome}
-          isDark={isDark}
           onClose={() => setWeightsDialogOpen(false)}
           onLoaded={onWeightsLoaded}
         />
       )}
       {openDialogOpen && (
         <OpenModelDialog
-          chrome={chrome}
-          isDark={isDark}
+          theme={resolvedMode}
           onClose={() => setOpenDialogOpen(false)}
           onFile={loadFile}
           onUrl={loadUrl}
         />
       )}
-    </div>
-  );
-}
-
-function GitHubIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.461-1.11-1.461-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
-    </svg>
-  );
-}
-
-function BrandMark({ size = 22 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 64 64"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <rect width="64" height="64" rx="14" fill="#1a73e8" />
-      <path
-        d="M14 18 L24 48 L32 30 L40 48 L50 18"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function DropZone({
-  dragging,
-  onDrop,
-  onDragOver,
-  onDragLeave,
-  onOpen,
-  isDark,
-}: {
-  dragging: boolean;
-  onDrop: (e: React.DragEvent) => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDragLeave: () => void;
-  onOpen: () => void;
-  isDark: boolean;
-}) {
-  const headline = isDark ? "#ececf1" : "#1a1a1f";
-  const sub = isDark ? "#9ea0aa" : "#5b6270";
-  const faint = isDark ? "#6b6e78" : "#9aa0ac";
-  const dragBg = isDark ? "rgba(26,115,232,0.12)" : "rgba(26,115,232,0.06)";
-  const dragOutline = "rgba(26,115,232,0.55)";
-  return (
-    <div
-      onDrop={onDrop}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-        gap: 14,
-        background: dragging ? dragBg : "transparent",
-        boxShadow: dragging ? `inset 0 0 0 2px ${dragOutline}` : "none",
-        transition: "background 0.15s, box-shadow 0.15s",
-      }}
-    >
-      <BrandMark size={64} />
-      <div
-        style={{
-          fontWeight: 600,
-          fontSize: 22,
-          letterSpacing: "-0.01em",
-          color: headline,
-          marginTop: 4,
-        }}
-      >
-        Open a neural network model
-      </div>
-      <div style={{ color: sub, fontSize: 13 }}>
-        Supports .onnx, .tflite, .keras, .pt, .pte and .pb
-      </div>
-      <button
-        onClick={onOpen}
-        style={{
-          marginTop: 8,
-          padding: "9px 20px",
-          background: "#1a73e8",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          cursor: "pointer",
-          fontSize: 14,
-          fontWeight: 500,
-          boxShadow: "0 1px 2px rgba(26,115,232,0.25)",
-        }}
-      >
-        Open model
-      </button>
-      <div style={{ color: faint, fontSize: 12 }}>or drop a file here</div>
     </div>
   );
 }
