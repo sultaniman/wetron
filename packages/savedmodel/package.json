@@ -1,6 +1,6 @@
 {
   "name": "@wetron/savedmodel",
-  "version": "0.0.11",
+  "version": "0.0.15",
   "description": "TF SavedModel parser — extracts graph structure from keras_metadata.pb and saved_model.pb files",
   "keywords": [
     "graph",
