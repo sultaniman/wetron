@@ -43,6 +43,7 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
     const x = values[i];
     if (x < min) min = x;
     if (x > max) max = x;
+
     sum += x;
     sumSq += x * x;
     if (x === 0) zeros++;

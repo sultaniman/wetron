@@ -73,7 +73,7 @@ export function NodeCard({
           <span className={css.subtitle}>{subtitle}</span>
         </Tooltip>
       )}
-      {children != null && (
+      {React.Children.toArray(children).some(Boolean) && (
         <div data-nodename className={css.meta}>
           {children}
         </div>
