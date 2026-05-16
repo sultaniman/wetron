@@ -181,11 +181,6 @@ The Svelte `ModelGraphView` already builds a `ModelGraph` internally. Thread it 
 - `packages/core/package.json` — add two subpath exports.
 - `packages/svelte/package.json` — add `@tanstack/svelte-virtual` peer + dev dep.
 
-## Open questions
-
-1. Should `WeightHistogram` and `WeightHeatmap` be exported from `@wetron/svelte`? React doesn't export them individually — they're internal to `WeightPanel`. Default: keep them internal (Svelte mirrors React).
-2. Should the React side also split `weight-viz.tsx` into two files for symmetry? Default: no — leave React unchanged, this port only adds parity, it doesn't refactor React.
-
 ## Risks
 
 - `@tanstack/svelte-virtual`'s API differs from `@tanstack/react-virtual` in small ways (store vs hook, `getVirtualItems()` vs subscribed value). Worst case: a thin `$derived` wrapper, no architectural impact.

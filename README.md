@@ -10,7 +10,6 @@ Wetron is a model inspector that runs entirely client-side as an embeddable libr
 
 - **AI auditability** — regulators, journalists, and civic-tech reviewers can inspect third-party models without exposing them to a SaaS.
 - **Privacy-sensitive ML** — medical, defence, and on-device models can be inspected without leaving the host machine.
-- **Education & reproducibility** — courses and papers can ship a graph viewer alongside a model with a single `<script>` tag.
 - **FOSS infrastructure** — the `@wetron/*` packages are designed to be embedded by other open-source projects (model registries, dataset cards, scientific notebooks).
 
 Parsing runs on `ArrayBuffer` / `DataView` / `TextDecoder` / `DecompressionStream` — nothing else. Weight bytes are decoded lazily on demand for the property panel; they're never uploaded or persisted.

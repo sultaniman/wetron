@@ -96,14 +96,6 @@ Run dagre twice:
 
 The two-pass approach avoids positions jumping wildly when a group is collapsed/expanded.
 
-## Open questions (decide before implementing)
-
-1. **Auto-grouping heuristic** - should the library offer `inferGroups(graph): SubgraphGroup[]`
-   based on name-prefix clustering? Useful default for transformer models.
-2. **Nested collapse** - can a group contain other groups? Start with flat-only for v1.
-3. **Panel content for a collapsed group** - list of op types inside, or full node list?
-4. **Keyboard shortcut** - `Space` to expand/collapse focused group node?
-
 ## Effort
 
 ~3-4 days. Transform layer changes are the bulk; renderer changes are straightforward

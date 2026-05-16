@@ -105,16 +105,6 @@ has `kind !== "unchanged"`. Shows:
 New `PanelTarget` union member is not needed - the existing `GraphNode` target works;
 the panel reads diff data from the `diff` prop.
 
-## Open questions (decide before implementing)
-
-1. **Fuzzy match threshold** - how many hops in topological order before we give up and
-   call it added+removed? Start with ±5 nodes.
-2. **Edge diff** - should added/removed edges be highlighted? Requires edge identity
-   (tensorName is not stable across models). Defer to v2.
-3. **Split mode** - high value for quantisation comparison; schedule for v2.
-4. **GraphDiff in IR** - should `diffGraphs` live in `@wetron/core/src/diff.ts` as a
-   new named export, or inline in `index.ts`? Separate file is cleaner.
-
 ## Effort
 
 ~3-4 days. Algorithm + data model are the bulk; renderer changes are a styling layer on
