@@ -58,7 +58,7 @@ export function WeightPanel({
   const [showWeights, setShowWeights] = useState(
     graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined,
   );
-  const [viz, setViz] = useState<"dist" | "heat">("dist");
+  const [viz, setViz] = useState<"dist" | "heat">("heat");
 
   // Auto-enable on the transition from no-weights to weights-loaded so a user
   // who opens this panel before loading external weights (TF2 SavedModel) sees
@@ -173,18 +173,18 @@ export function WeightPanel({
               <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
               <Tabs.List className={weightPanelCss.seg}>
                 <Tabs.Tab
-                  value="dist"
-                  data-testid="viz-dist"
-                  className={viz === "dist" ? weightPanelCss.segOn : ""}
-                >
-                  dist
-                </Tabs.Tab>
-                <Tabs.Tab
                   value="heat"
                   data-testid="viz-heat"
                   className={viz === "heat" ? weightPanelCss.segOn : ""}
                 >
                   heat
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="dist"
+                  data-testid="viz-dist"
+                  className={viz === "dist" ? weightPanelCss.segOn : ""}
+                >
+                  dist
                 </Tabs.Tab>
               </Tabs.List>
             </div>
