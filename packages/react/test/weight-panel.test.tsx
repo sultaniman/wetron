@@ -69,7 +69,7 @@ describe("WeightPanel small model", () => {
     expect(screen.queryByTestId("values-grid")).toBeNull();
   });
 
-  test("toggling Show weights hides histogram and grid (master gate)", async () => {
+  test("toggling Show weights hides heatmap and grid (master gate)", async () => {
     const g = smallGraph();
     render(
       React.createElement(WeightPanel, {
@@ -78,14 +78,14 @@ describe("WeightPanel small model", () => {
       }),
     );
     await act(async () => {});
-    expect(screen.queryByTestId("histogram")).not.toBeNull();
+    expect(screen.queryByTestId("heatmap")).not.toBeNull();
     expect(screen.queryByTestId("values-grid")).not.toBeNull();
     await act(async () => fireEvent.click(screen.getByTestId("show-weights-switch")));
-    expect(screen.queryByTestId("histogram")).toBeNull();
+    expect(screen.queryByTestId("heatmap")).toBeNull();
     expect(screen.queryByTestId("values-grid")).toBeNull();
   });
 
-  test("viz toggle swaps dist and heat", async () => {
+  test("viz toggle swaps heat and dist", async () => {
     const g = smallGraph();
     render(
       React.createElement(WeightPanel, {
@@ -94,11 +94,11 @@ describe("WeightPanel small model", () => {
       }),
     );
     await act(async () => {});
-    expect(screen.queryByTestId("histogram")).not.toBeNull();
-    expect(screen.queryByTestId("heatmap")).toBeNull();
-    await act(async () => fireEvent.click(screen.getByTestId("viz-heat")));
     expect(screen.queryByTestId("heatmap")).not.toBeNull();
     expect(screen.queryByTestId("histogram")).toBeNull();
+    await act(async () => fireEvent.click(screen.getByTestId("viz-dist")));
+    expect(screen.queryByTestId("histogram")).not.toBeNull();
+    expect(screen.queryByTestId("heatmap")).toBeNull();
   });
 });
 
@@ -148,6 +148,6 @@ describe("WeightPanel large model", () => {
     await act(async () => {});
     await act(async () => fireEvent.click(screen.getByTestId("show-weights-switch")));
     expect(screen.queryByTestId("values-grid")).not.toBeNull();
-    expect(screen.queryByTestId("histogram")).not.toBeNull();
+    expect(screen.queryByTestId("heatmap")).not.toBeNull();
   });
 });
