@@ -48,6 +48,7 @@
           data-weight-shape={w.shape.join(',')}
         >
           <span class="weight-label">{w.label}</span>
+          <span class="weight-name" title={w.name}>{w.name}</span>
           <span class="weight-shape">〈{w.shape.join('×')}〉</span>
         </div>
       {/each}
@@ -86,6 +87,15 @@
     font-weight: 600;
     color: var(--node-color);
     min-width: 14px;
+  }
+  .weight-name {
+    flex: 1;
+    min-width: 0;
+    opacity: 0.65;
+    font-family: ui-monospace, Menlo, monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .weight-shape {
     opacity: 0.85;

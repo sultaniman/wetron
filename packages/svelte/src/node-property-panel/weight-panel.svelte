@@ -33,7 +33,7 @@
   }
 
   let showWeights = $state(graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined);
-  let viz = $state<'dist' | 'heat'>('dist');
+  let viz = $state<'dist' | 'heat'>('heat');
 
   // Auto-enable on the no-weights -> weights-loaded transition (e.g. checkpoint
   // file dropped after the panel was opened). Don't override a manual toggle.
@@ -126,15 +126,15 @@
       <span>{viz === 'dist' ? 'Distribution' : 'Heatmap'}</span>
       <div class="seg">
         <button
-          data-testid="viz-dist"
-          class={viz === 'dist' ? 'segOn' : ''}
-          onclick={() => (viz = 'dist')}
-        >dist</button>
-        <button
           data-testid="viz-heat"
           class={viz === 'heat' ? 'segOn' : ''}
           onclick={() => (viz = 'heat')}
         >heat</button>
+        <button
+          data-testid="viz-dist"
+          class={viz === 'dist' ? 'segOn' : ''}
+          onclick={() => (viz = 'dist')}
+        >dist</button>
       </div>
     </div>
 
