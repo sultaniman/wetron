@@ -40,6 +40,9 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
               data-weight-shape={w.shape.join(",")}
             >
               <span className={css.weightLabel}>{w.label}</span>
+              <span className={css.weightName} title={w.name}>
+                {w.name}
+              </span>
               <span className={css.weightShape}>〈{w.shape.join("×")}〉</span>
             </div>
           ))
