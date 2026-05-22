@@ -115,11 +115,16 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   const inputs: GraphValue[] = [];
   const consumedTensors = new Set<string>();
   const tensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>();
-  // VarHandleOp declares a variable; ReadVariableOp dereferences it. Both are pure plumbing
-  // — we fold them into `initializers` and rewrite consumer inputs so the rendered graph
-  // shows only the forward-pass trunk (Conv2D → ReLU → …) instead of a wide cloud of reads.
+  // VarHandleOp declares a variable; ReadVariableOp dereferences it. We collect them all
+  // in `varHandleInfo`, then after the rewrite + inline passes promote only the ones that
+  // end up with exactly one consumer into `initializers` (fold into the consumer card).
+  // Multi-consumer variables stay as standalone nodes with fanout edges; orphans get dropped.
   const initializers = new Map<string, { shape: readonly number[]; dtype: string }>();
+  const varHandleInfo = new Map<string, { shape: readonly number[]; dtype: string }>();
   const readToVar = new Map<string, string>();
+  // Call ops whose function body has been inlined — their captured-variable inputs are
+  // redundant with the inlined body's references, so we strip them post-inline.
+  const inlinedCallNames = new Set<string>();
   let hasVarHandleOp = false;
 
   // tf.saved_model.save() always emits __saver_save / __saver_restore signatures alongside
@@ -171,9 +176,9 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       const dtypeNum = raw.attr?.["dtype"]?.type;
       const shapeAttr = raw.attr?.["shape"]?.shape;
       const shape = shapeAttr ? shapeFromTf(shapeAttr) : null;
-      // Initializers require concrete shape + dtype; if either is missing skip the fold.
+      // Variables require concrete shape + dtype; if either is missing skip the fold.
       if (shape && Array.isArray(shape) && typeof dtypeNum === "number" && TF_DTYPE[dtypeNum]) {
-        initializers.set(name, { shape, dtype: TF_DTYPE[dtypeNum] });
+        varHandleInfo.set(name, { shape, dtype: TF_DTYPE[dtypeNum] });
       }
     } else if (op === "ReadVariableOp") {
       const src = (raw.input ?? []).find((inp) => !isControlDep(inp));
@@ -389,6 +394,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
         const fnName = bn.attr?.f?.func?.name;
         if (fnName && functionByName.has(fnName)) {
           inlineCall(fullName, resolved, functionByName.get(fnName)!, depth + 1);
+          inlinedCallNames.add(fullName);
         }
       }
     }
@@ -404,25 +410,70 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
     const fnName = raw?.attr?.f?.func?.name;
     if (fnName && functionByName.has(fnName)) {
       inlineCall(node.name, node.inputs as string[], functionByName.get(fnName)!, 0);
+      inlinedCallNames.add(node.name);
     }
   }
 
-  // Surface variable shape/dtype in tensorShapes so the panel can render them.
-  for (const [varName, info] of initializers) {
+  // Strip captured-variable inputs from inlined call ops. The body now references those
+  // variables directly, so listing them on the call op too just duplicates the weight rows.
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i];
+    if (!inlinedCallNames.has(n.name)) continue;
+
+    const filtered = n.inputs.filter((inp) => !varHandleInfo.has(inp));
+    if (filtered.length !== n.inputs.length) {
+      nodes[i] = { ...n, inputs: filtered };
+    }
+  }
+
+  // Classify each VarHandleOp by post-rewrite consumer count:
+  //   0 consumers  -> orphan (drop from nodes; never reach the renderer)
+  //   1 consumer   -> fold into the consumer as a weight row (add to `initializers`)
+  //   2+ consumers -> keep as standalone graph node with fanout edges (Netron-style)
+  const varConsumerCount = new Map<string, number>();
+  for (const n of nodes) {
+    const seen = new Set<string>();
+    for (const inp of n.inputs) {
+      if (!varHandleInfo.has(inp) || seen.has(inp)) continue;
+
+      seen.add(inp);
+      varConsumerCount.set(inp, (varConsumerCount.get(inp) ?? 0) + 1);
+    }
+  }
+  const orphans = new Set<string>();
+  for (const [name, info] of varHandleInfo) {
+    const count = varConsumerCount.get(name) ?? 0;
+    if (count === 0) {
+      orphans.add(name);
+    } else if (count === 1) {
+      initializers.set(name, info);
+    }
+  }
+  const finalNodes = nodes.filter((n) => !orphans.has(n.name));
+
+  // Surface shape/dtype for every variable we kept (folded OR standalone).
+  for (const [varName, info] of varHandleInfo) {
+    if (orphans.has(varName)) continue;
     tensorShapes.set(varName, { shape: info.shape, dtype: info.dtype });
   }
 
   // Graph outputs: nodes whose output tensors are never consumed as another node's input.
-  // Skip initializers (VarHandleOps) — they're declarations, never real outputs.
-  const outputs: GraphValue[] = nodes
-    .filter((n) => !consumedTensors.has(n.outputs[0]) && !initializers.has(n.name))
+  // Skip initializers (folded variables) — they're declarations, never real outputs.
+  // Skip standalone VarHandleOps too — they're variable sources, not model outputs.
+  const outputs: GraphValue[] = finalNodes
+    .filter(
+      (n) =>
+        !consumedTensors.has(n.outputs[0]) &&
+        !initializers.has(n.name) &&
+        n.opType !== "VarHandleOp",
+    )
     .map((n) => ({ name: n.name, shape: null, dtype: null }));
 
   return {
     name: "saved_model",
     inputs,
     outputs,
-    nodes,
+    nodes: finalNodes,
     initializers,
     tensorShapes,
     fileSizeBytes,

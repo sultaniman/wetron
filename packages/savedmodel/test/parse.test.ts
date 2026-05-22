@@ -52,6 +52,28 @@ test("vertical_saved_model.pb: sequential TF op graph", () => {
   expect(graph.nodes.some((n) => n.opType === "MatMul")).toBe(true);
 });
 
+test("vertical_tf2: every initializer has exactly one consumer (no orphans, no duplication)", () => {
+  const graph = parseSavedModel(fixture("vertical_tf2/saved_model.pb"));
+
+  const consumerCount = new Map<string, number>();
+  for (const n of graph.nodes) {
+    const seen = new Set<string>();
+    for (const inp of n.inputs) {
+      if (!graph.initializers.has(inp)) continue;
+      if (seen.has(inp)) continue; // count once per consumer node
+
+      seen.add(inp);
+      consumerCount.set(inp, (consumerCount.get(inp) ?? 0) + 1);
+    }
+  }
+
+  const orphans = [...graph.initializers.keys()].filter((k) => !consumerCount.has(k));
+  const shared = [...consumerCount.entries()].filter(([, c]) => c > 1).map(([k]) => k);
+
+  expect(orphans).toEqual([]);
+  expect(shared).toEqual([]);
+});
+
 test("unknown .pb content throws ParseError with savedmodel format", () => {
   let err: unknown;
   try {
