@@ -22,32 +22,17 @@
 
   const subGraph = $derived(data.graphNode?.subGraph);
   const nav = consumeSubGraphNav();
-  function handleOpenSubGraph(e: Event) {
-    e.stopPropagation();
+  function handleOpenSubGraph() {
     if (subGraph) nav.navigateInto(subGraph);
   }
 </script>
-
-{#snippet openTab()}
-  {#if subGraph}
-    <button
-      type="button"
-      class="open-tab"
-      aria-label={`Open ${data.opType} sub-graph`}
-      onclick={handleOpenSubGraph}
-      style:background={color}
-    >
-      ▸
-    </button>
-  {/if}
-{/snippet}
 
 <NodeCard
   nodeType="graphNode"
   topHandle
   bottomHandle
   pill={data.opType}
-  subtitle={displayName}
+  subtitle={subGraph ? undefined : displayName}
   {ariaLabel}
   {cat}
   op={data.opType}
@@ -58,7 +43,8 @@
   tintBase={isDark ? '#1e1e2e' : 'white'}
   tinted={!hasWeights}
   {selected}
-  affordance={subGraph ? openTab : undefined}
+  scopeName={subGraph ? displayName : undefined}
+  onOpenScope={subGraph ? handleOpenSubGraph : undefined}
 >
   {#if hasWeights && visibleWeights}
     <div class="meta">
@@ -144,40 +130,6 @@
     transition:
       background 0.1s,
       opacity 0.1s;
-  }
-
-  .open-tab {
-    position: absolute;
-    right: -14px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 26px;
-    border: none;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
-    padding: 0 0 0 2px;
-    line-height: 1;
-    box-shadow: 1px 0 2px rgba(0, 0, 0, 0.12);
-    transition: width 0.12s, right 0.12s, box-shadow 0.12s;
-  }
-
-  .open-tab:hover {
-    width: 22px;
-    right: -18px;
-    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.18);
-  }
-
-  .open-tab:focus-visible {
-    outline: 2px solid var(--node-color);
-    outline-offset: 2px;
   }
 
   .weight-more:hover {

@@ -18,20 +18,6 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
   const hiddenCount = total > WEIGHT_ROW_LIMIT ? total - WEIGHT_ROW_LIMIT : 0;
   const subGraph = data.graphNode?.subGraph;
   const { navigateInto } = useSubGraphNav();
-  const openTab = subGraph ? (
-    <button
-      type="button"
-      className={css.openTab}
-      aria-label={`Open ${data.opType} sub-graph`}
-      onClick={(e) => {
-        e.stopPropagation();
-        navigateInto(subGraph);
-      }}
-      style={{ background: color }}
-    >
-      ▸
-    </button>
-  ) : null;
 
   return (
     <NodeCard
@@ -39,14 +25,15 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
       topHandle
       bottomHandle
       pill={data.opType}
-      subtitle={displayName}
+      subtitle={subGraph ? undefined : displayName}
       ariaLabel={displayName ? `${data.opType}, ${displayName}` : data.opType}
       cat={cat}
       iconEntry={opIcon(data.opType, cat)}
       tinted={!hasWeights}
       selected={selected}
       colors={{ color }}
-      affordance={openTab}
+      scopeName={subGraph ? displayName : undefined}
+      onOpenScope={subGraph ? () => navigateInto(subGraph) : undefined}
     >
       {visible && visible.length > 0
         ? visible.map((w) => (

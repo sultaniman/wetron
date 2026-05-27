@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { Handle, Position } from '@xyflow/svelte';
+  import { CaretRightIcon } from 'phosphor-svelte';
   import type { OpCategory } from '@wetron/core';
   import CategoryIcon from './category-icon.svelte';
   import Tooltip from '../tooltip.svelte';
@@ -22,7 +23,8 @@
     tinted?: boolean;
     selected?: boolean;
     children?: Snippet;
-    affordance?: Snippet;
+    scopeName?: string;
+    onOpenScope?: (e: MouseEvent) => void;
   }
 
   let {
@@ -42,7 +44,8 @@
     tinted = false,
     selected = false,
     children,
-    affordance,
+    scopeName,
+    onOpenScope,
   }: Props = $props();
 
   const cardBg = $derived(
@@ -77,7 +80,6 @@
   {#if topHandle}
     <Handle type="target" position={Position.Top} />
   {/if}
-  {@render affordance?.()}
   <div class="header-row">
     <Tooltip text={pill} onlyIfOverflow>
       <span class="pill">{pill}</span>
@@ -86,7 +88,14 @@
       <CategoryIcon {cat} {op} size={16} />
     </span>
   </div>
-  {#if subtitle}
+  {#if scopeName}
+    <div class="scope-row">
+      <Tooltip text={scopeName} onlyIfOverflow>
+        <span class="scope-name">{scopeName}</span>
+      </Tooltip>
+      <CaretRightIcon size={12} weight="bold" />
+    </div>
+  {:else if subtitle}
     <Tooltip text={subtitle} onlyIfOverflow>
       <div class="subtitle">{subtitle}</div>
     </Tooltip>
@@ -158,5 +167,41 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-family: monospace;
+  }
+
+  .scope-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 5px -8px -7px;
+    padding: 6px 10px;
+    background: color-mix(in oklch, var(--node-color) 18%, transparent);
+    color: var(--node-color);
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 11px;
+    border: none;
+    border-radius: 0 0 3px 3px;
+    cursor: pointer;
+    width: calc(100% + 16px);
+    text-align: left;
+    transition: background 0.12s;
+  }
+
+  .scope-row:hover {
+    background: color-mix(in oklch, var(--node-color) 28%, transparent);
+  }
+
+  .scope-row:focus-visible {
+    outline: 2px solid var(--node-color);
+    outline-offset: -2px;
+  }
+
+  .scope-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.85;
   }
 </style>

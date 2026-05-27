@@ -1,5 +1,6 @@
 import React from "react";
 import { Handle, Position } from "@xyflow/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import type { OpCategory } from "@wetron/core";
 import type { IconEntry } from "../../theme.ts";
 import { Tooltip } from "../../tooltip.tsx";
@@ -22,7 +23,8 @@ export function NodeCard({
   selected = false,
   ariaLabel,
   children,
-  affordance,
+  scopeName,
+  onOpenScope,
 }: {
   nodeType: "graphNode" | "ioNode";
   topHandle?: boolean;
@@ -36,7 +38,8 @@ export function NodeCard({
   selected?: boolean;
   ariaLabel?: string;
   children?: React.ReactNode;
-  affordance?: React.ReactNode;
+  scopeName?: string;
+  onOpenScope?: (e: React.MouseEvent) => void;
 }) {
   return (
     <div
@@ -58,7 +61,6 @@ export function NodeCard({
       }
     >
       {topHandle && <Handle type="target" position={Position.Top} />}
-      {affordance}
       <div className={css.headerRow}>
         <Tooltip text={pill} onlyIfOverflow>
           <span className={css.pill}>{pill}</span>
@@ -71,10 +73,33 @@ export function NodeCard({
           )}
         </span>
       </div>
-      {subtitle && (
-        <Tooltip text={subtitle} onlyIfOverflow>
-          <span className={css.subtitle}>{subtitle}</span>
-        </Tooltip>
+      {scopeName ? (
+        onOpenScope ? (
+          <button
+            type="button"
+            className={css.scopeRow}
+            onClick={onOpenScope}
+            aria-label={`Open ${scopeName} sub-graph`}
+          >
+            <Tooltip text={scopeName} onlyIfOverflow>
+              <span className={css.scopeName}>{scopeName}</span>
+            </Tooltip>
+            <CaretRightIcon className={css.scopeChev} size={12} weight="bold" aria-hidden="true" />
+          </button>
+        ) : (
+          <div className={css.scopeRow}>
+            <Tooltip text={scopeName} onlyIfOverflow>
+              <span className={css.scopeName}>{scopeName}</span>
+            </Tooltip>
+            <CaretRightIcon className={css.scopeChev} size={12} weight="bold" aria-hidden="true" />
+          </div>
+        )
+      ) : (
+        subtitle && (
+          <Tooltip text={subtitle} onlyIfOverflow>
+            <span className={css.subtitle}>{subtitle}</span>
+          </Tooltip>
+        )
       )}
       {React.Children.toArray(children).some(Boolean) && (
         <div data-nodename className={css.meta}>

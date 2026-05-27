@@ -148,39 +148,44 @@
   opacity: 1;
 }
 
-.openTab {
-  position: absolute;
-  right: -14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 18px;
-  height: 26px;
-  border: none;
-  border-radius: 0 4px 4px 0;
-  cursor: pointer;
+.scopeRow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  color: #fff;
-  padding: 0 0 0 2px;
-  line-height: 1;
-  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.12);
-  transition:
-    width 0.12s,
-    right 0.12s,
-    box-shadow 0.12s;
+  gap: 6px;
+  margin: 5px -8px -7px;
+  padding: 4px 10px;
+  background: color-mix(in oklch, var(--node-color) 18%, transparent);
+  color: var(--node-color);
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  border: none;
+  border-radius: 0 0 3px 3px;
+  cursor: pointer;
+  width: calc(100% + 16px);
+  text-align: left;
+  transition: background 0.12s;
 }
 
-.openTab:hover {
-  width: 22px;
-  right: -18px;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.18);
+.scopeRow:hover {
+  background: color-mix(in oklch, var(--node-color) 28%, transparent);
 }
 
-.openTab:focus-visible {
+.scopeRow:focus-visible {
   outline: 2px solid var(--node-color);
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+
+.scopeName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.scopeChev {
+  font-size: 12px;
+  opacity: 0.85;
+  flex-shrink: 0;
 }
