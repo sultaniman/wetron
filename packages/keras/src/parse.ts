@@ -8,10 +8,11 @@ import type {
 } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
 
-type KerasInboundNode = {
-  args: unknown[];
-  kwargs: Record<string, unknown>;
-};
+// Keras serializes inbound_nodes in three formats depending on version:
+//   - Keras 3:  [{ args: [tensorRef, ...], kwargs: {...} }]
+//   - Keras 2:  [{ argName: [layerName, nodeIdx, tensorIdx, {}], ... }]
+//   - Legacy:   [[[ layerName, nodeIdx, tensorIdx, {} ], ...]]
+type KerasInboundNode = unknown;
 
 type KerasLayerEntry = {
   class_name: string;
@@ -148,24 +149,49 @@ function resolveInbounds(
   outputMap: Map<string, string>,
 ): string[] {
   if (!inboundNodes.length) return [];
-  const firstArg = inboundNodes[0].args[0];
-  if (firstArg == null) return [];
+  const first = inboundNodes[0];
+  if (first == null) return [];
 
-  // Merge layer: args[0] is an array of tensor references
-  if (Array.isArray(firstArg)) {
-    return (firstArg as unknown[]).flatMap((item) => {
-      const name = kerasHistoryLayerName(item);
+  // Legacy list format: [[["layerName", nodeIdx, tensorIdx, {}], ...]]
+  if (Array.isArray(first)) {
+    return (first as unknown[]).flatMap((tuple) => {
+      if (!Array.isArray(tuple) || tuple.length === 0) return [];
+      const name = typeof tuple[0] === "string" ? tuple[0] : null;
       if (!name) return [];
       const tensor = outputMap.get(name);
       return tensor ? [tensor] : [];
     });
   }
 
-  // Single input
-  const name = kerasHistoryLayerName(firstArg);
-  if (!name) return [];
-  const tensor = outputMap.get(name);
-  return tensor ? [tensor] : [];
+  const obj = first as Record<string, unknown>;
+
+  // Keras 3 format: { args: [tensorRef, ...], kwargs: {...} }
+  if (Array.isArray(obj["args"])) {
+    const firstArg = (obj["args"] as unknown[])[0];
+    if (firstArg == null) return [];
+    if (Array.isArray(firstArg)) {
+      return (firstArg as unknown[]).flatMap((item) => {
+        const name = kerasHistoryLayerName(item);
+        if (!name) return [];
+        const tensor = outputMap.get(name);
+        return tensor ? [tensor] : [];
+      });
+    }
+    const name = kerasHistoryLayerName(firstArg);
+    if (!name) return [];
+    const tensor = outputMap.get(name);
+    return tensor ? [tensor] : [];
+  }
+
+  // Keras 2 dict format: { argName: [layerName, nodeIdx, tensorIdx, {}], ... }
+  const result: string[] = [];
+  for (const val of Object.values(obj)) {
+    if (Array.isArray(val) && val.length > 0 && typeof val[0] === "string") {
+      const tensor = outputMap.get(val[0]);
+      if (tensor) result.push(tensor);
+    }
+  }
+  return result;
 }
 
 function buildFunctional(
