@@ -31,4 +31,18 @@ describe("colorForCell", () => {
   test("isDark defaults to false", () => {
     expect(colorForCell(0, 0, 255, "sequential")).toBe("rgb(239,246,255)");
   });
+
+  test("NaN value maps to first stop without crashing", () => {
+    // NaN in a heatmap cell must not throw
+    const result = colorForCell(NaN, -1, 1, "sequential", false);
+    expect(result).toBe("rgb(239,246,255)");
+  });
+});
+
+describe("pickColormap", () => {
+  test("returns constant for non-finite min or max", () => {
+    expect(pickColormap(Infinity, -Infinity)).toBe("constant");
+    expect(pickColormap(NaN, 1)).toBe("constant");
+    expect(pickColormap(0, Infinity)).toBe("constant");
+  });
 });

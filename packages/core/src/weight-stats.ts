@@ -11,6 +11,12 @@ export interface WeightStats {
   readonly heatmap: readonly number[];
   /** number of consecutive values averaged per heatmap cell. */
   readonly chunkSize: number;
+  /**
+   * Number of heatmap cells that contain real data.
+   * Cells beyond this index are zero-padded and should be treated as empty.
+   * Always <= 128. Equal to 128 when the tensor has >= 128 elements.
+   */
+  readonly filledCells: number;
 }
 
 const HIST_BINS = 12;
@@ -31,6 +37,7 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
       histogram: Array.from({ length: HIST_BINS }, () => 0),
       heatmap: Array.from({ length: HEAT_CELLS }, () => 0),
       chunkSize: 1,
+      filledCells: 0,
     };
   }
 
@@ -39,18 +46,23 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
   let sum = 0;
   let sumSq = 0;
   let zeros = 0;
+  // finiteCount excludes NaN / ±Infinity so mean and std are always finite.
+  let finiteCount = 0;
   for (let i = 0; i < n; i++) {
     const x = values[i];
+    // NaN comparisons are always false, so min/max correctly track non-NaN values.
     if (x < min) min = x;
     if (x > max) max = x;
-
-    sum += x;
-    sumSq += x * x;
+    if (Number.isFinite(x)) {
+      sum += x;
+      sumSq += x * x;
+      finiteCount++;
+    }
     if (x === 0) zeros++;
   }
 
-  const mean = sum / n;
-  const variance = sumSq / n - mean * mean;
+  const mean = finiteCount > 0 ? sum / finiteCount : 0;
+  const variance = finiteCount > 0 ? sumSq / finiteCount - mean * mean : 0;
   const std = Math.sqrt(Math.max(0, variance));
 
   const histogram = Array.from({ length: HIST_BINS }, () => 0);
@@ -75,10 +87,20 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
     if (start >= n) break;
 
     let s = 0;
-    for (let i = start; i < end; i++) s += values[i];
-
-    heatmap[c] = s / (end - start);
+    let fc = 0;
+    for (let i = start; i < end; i++) {
+      const x = values[i];
+      if (Number.isFinite(x)) { s += x; fc++; }
+    }
+    // If all values in the chunk are non-finite, represent the cell as 0.
+    heatmap[c] = fc > 0 ? s / fc : 0;
   }
 
-  return { count: n, min, max, mean, std, zeros, histogram, heatmap, chunkSize };
+  let filledCells = 0;
+  for (let c = 0; c < HEAT_CELLS; c++) {
+    if (c * chunkSize >= n) break;
+    filledCells++;
+  }
+
+  return { count: n, min, max, mean, std, zeros, histogram, heatmap, chunkSize, filledCells };
 }

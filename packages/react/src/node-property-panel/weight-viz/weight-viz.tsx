@@ -39,11 +39,14 @@ export function WeightHeatmap({
 }): JSX.Element {
   const fmtDtype = dtype || "float32";
   const cells = stats.heatmap;
-  // Auto-scale tile colors by the cell-mean range so subtle variation between
-  // chunks is visible even when the tensor's overall min/max is wide.
+  const filled = stats.filledCells;
+  // Auto-scale tile colors only over real cells; zero-padding beyond `filled`
+  // must not influence the range (a bias of 24 elements only fills 24 of 128
+  // cells — the rest are 0 and would falsely anchor the minimum to 0).
   let cellMin = Infinity;
   let cellMax = -Infinity;
-  for (const v of cells) {
+  for (let i = 0; i < filled; i++) {
+    const v = cells[i];
     if (v < cellMin) cellMin = v;
     if (v > cellMax) cellMax = v;
   }
@@ -53,13 +56,16 @@ export function WeightHeatmap({
     <>
       <div
         className={weightVizCss.heatCaption}
-        title={`Each tile is the arithmetic mean of ${stats.chunkSize.toLocaleString()} consecutive values from the flattened tensor (row-major order). The 16×8 grid divides the tensor into ${cells.length} chunks; the final chunk may be smaller if the tensor count is not divisible by ${cells.length}. Colors are auto-scaled to the chunk-mean range so small differences are visible.`}
+        title={`Each tile is the arithmetic mean of ${stats.chunkSize.toLocaleString()} consecutive values from the flattened tensor (row-major order). The 16×8 grid divides the tensor into ${filled} chunks; the final chunk may be smaller if the tensor count is not divisible by ${filled}. Colors are auto-scaled to the chunk-mean range so small differences are visible.`}
       >
         Tile = mean of {stats.chunkSize.toLocaleString()} consecutive value
         {stats.chunkSize === 1 ? "" : "s"}
       </div>
       <div data-testid="heatmap" className={weightVizCss.heat}>
         {cells.map((val, i) => {
+          if (i >= filled) {
+            return <span key={i} title="empty" style={{ background: "rgba(148,163,184,0.08)" }} />;
+          }
           const start = i * stats.chunkSize;
           const tip = `mean ${formatVal(val, fmtDtype)} · indices [${start}…${start + stats.chunkSize - 1}]`;
           return (
@@ -72,7 +78,11 @@ export function WeightHeatmap({
         })}
       </div>
       <div className={weightVizCss.heatLegend}>
-        <div className={`${weightVizCss.heatLegendBar} ${weightVizCss.heatLegendBarSequential}`} />
+        {colormap === "sequential" ? (
+          <div className={`${weightVizCss.heatLegendBar} ${weightVizCss.heatLegendBarSequential}`} />
+        ) : (
+          <div className={`${weightVizCss.heatLegendBar} ${weightVizCss.heatLegendBarConstant}`} />
+        )}
         <div
           className={weightVizCss.heatLegendTicks}
           title="Range of chunk means (auto-scaled). May be narrower than the tensor's full min/max."

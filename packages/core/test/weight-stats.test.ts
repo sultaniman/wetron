@@ -58,4 +58,66 @@ describe("computeStats", () => {
     const s = computeStats(v);
     expect(s.chunkSize).toBe(1);
   });
+
+  test("NaN values are skipped in mean, std, and heatmap cells", () => {
+    // 3 finite values mixed with NaN (as can occur from float16 decoding)
+    const v = new Float64Array([1, NaN, 3, NaN, 5]);
+    const s = computeStats(v);
+    expect(s.min).toBe(1);
+    expect(s.max).toBe(5);
+    expect(s.mean).toBeCloseTo(3, 6);
+    expect(Number.isFinite(s.std)).toBe(true);
+    // Heatmap cells must never be NaN
+    for (const cell of s.heatmap) {
+      expect(Number.isFinite(cell)).toBe(true);
+    }
+  });
+
+  test("Infinity values are skipped in mean, std, and heatmap cells", () => {
+    const v = new Float64Array([1, Infinity, 2, -Infinity, 3]);
+    const s = computeStats(v);
+    // min/max from comparisons: -Infinity < Infinity check etc.
+    // Only finite values drive mean and std
+    expect(s.mean).toBeCloseTo(2, 6);
+    expect(Number.isFinite(s.std)).toBe(true);
+    for (const cell of s.heatmap) {
+      expect(Number.isFinite(cell)).toBe(true);
+    }
+  });
+
+  test("filledCells equals 128 for large tensors", () => {
+    const v = new Float64Array(2048);
+    for (let i = 0; i < 2048; i++) v[i] = i;
+    const s = computeStats(v);
+    expect(s.filledCells).toBe(128);
+  });
+
+  test("filledCells equals count for small tensors", () => {
+    // 24-element bias: chunkSize=1, so exactly 24 cells filled
+    const v = new Int32Array(24);
+    for (let i = 0; i < 24; i++) v[i] = i * 100;
+    const s = computeStats(v);
+    expect(s.chunkSize).toBe(1);
+    expect(s.filledCells).toBe(24);
+    // Padding cells (24-127) must remain 0
+    for (let i = 24; i < 128; i++) {
+      expect(s.heatmap[i]).toBe(0);
+    }
+  });
+
+  test("filledCells is 0 for empty tensor", () => {
+    const v = new Float64Array(0);
+    const s = computeStats(v);
+    expect(s.filledCells).toBe(0);
+  });
+
+  test("all-NaN tensor produces finite zeroed stats", () => {
+    const v = new Float64Array([NaN, NaN, NaN]);
+    const s = computeStats(v);
+    expect(s.mean).toBe(0);
+    expect(s.std).toBe(0);
+    for (const cell of s.heatmap) {
+      expect(Number.isFinite(cell)).toBe(true);
+    }
+  });
 });

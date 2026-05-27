@@ -42,6 +42,9 @@
     var(--wetron-heat-stop-4)
   );
 }
+.heatLegendBarConstant {
+  background: rgba(148, 163, 184, 0.25);
+}
 .heatLegendTicks {
   display: flex;
   justify-content: space-between;

@@ -1,6 +1,7 @@
 export type ColormapKind = "sequential" | "constant";
 
 export function pickColormap(min: number, max: number): ColormapKind {
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return "constant";
   if (min === max) return "constant";
   return "sequential";
 }
@@ -21,7 +22,9 @@ export function colorForCell(
   const stops = isDark ? STOPS_DARK : STOPS_LIGHT;
   if (range === 0) return stops[0];
 
-  const t = Math.max(0, Math.min(1, (value - min) / range));
+  const t = Number.isFinite(value)
+    ? Math.max(0, Math.min(1, (value - min) / range))
+    : 0;
   return interpolateStops(t, stops);
 }
 
