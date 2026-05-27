@@ -35,26 +35,26 @@ bump version:
 publish:
     bun install
     cd packages/tokens      && bun publish --access public
+    cd packages/core        && bun publish --access public
     cd packages/onnx        && bun publish --access public
     cd packages/tflite      && bun publish --access public
     cd packages/keras       && bun publish --access public
     cd packages/executorch  && bun publish --access public
     cd packages/torchscript && bun publish --access public
     cd packages/savedmodel  && bun publish --access public
-    cd packages/core        && bun publish --access public
     cd packages/react       && bun publish --access public
     cd packages/svelte      && bun publish --access public
 
 # Dry-run all packages — shows resolved versions and files before publishing
 preview:
     cd packages/tokens      && bun publish --dry-run --access public
+    cd packages/core        && bun publish --dry-run --access public
     cd packages/onnx        && bun publish --dry-run --access public
     cd packages/tflite      && bun publish --dry-run --access public
     cd packages/keras       && bun publish --dry-run --access public
     cd packages/executorch  && bun publish --dry-run --access public
     cd packages/torchscript && bun publish --dry-run --access public
     cd packages/savedmodel  && bun publish --dry-run --access public
-    cd packages/core        && bun publish --dry-run --access public
     cd packages/react       && bun publish --dry-run --access public
     cd packages/svelte      && bun publish --dry-run --access public
 
