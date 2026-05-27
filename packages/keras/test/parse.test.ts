@@ -169,3 +169,23 @@ test("MobileNetV2: 155 nodes, correct input, single output", () => {
   expect(graph.inputs[0].shape).toEqual([-1, 224, 224, 3]);
   expect(graph.nodes[0].inputs[0]).toBe("input_layer");
 });
+
+test("Keras 2 dict-format inbound_nodes: 99 nodes, merge edges resolve", () => {
+  const bytes = new Uint8Array(
+    readFileSync(resolve(import.meta.dir, "../../../test-models/keras2_synthetic.keras")),
+  );
+  const graph = parseKeras(bytes);
+  expect(graph.name).toBe("keras2_synthetic");
+  expect(graph.nodes.length).toBe(99);
+  expect(graph.inputs.length).toBe(1);
+  expect(graph.inputs[0].name).toBe("input_1");
+  expect(graph.outputs.map((o) => o.name)).toEqual(["predictions"]);
+  expect(graph.warnings ?? []).toEqual([]);
+  expect(graph.nodes[0].inputs[0]).toBe("input_1");
+
+  const merges = graph.nodes.filter((n) => n.opType === "Add");
+  expect(merges.length).toBe(3);
+  for (const m of merges) {
+    expect(m.inputs.length).toBe(2);
+  }
+});
