@@ -341,7 +341,7 @@ export function parseOnnx(bytes: Uint8Array): ModelGraph {
   const initializerNames = new Set(rawInitializers.map((i) => String(i["name"] ?? "")));
   const filteredInputs = rawInputs.filter((vi) => !initializerNames.has(String(vi["name"] ?? "")));
 
-  // Decode raw weight bytes for each initializer (lazy contract — but cheap to
+  // Decode raw weight bytes for each initializer (lazy contract - but cheap to
   // build the index once at parse time since protobufjs already decoded them).
   const TYPED_FIELDS: ReadonlyArray<{
     field: string;

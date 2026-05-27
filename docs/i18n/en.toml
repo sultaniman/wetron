@@ -11,7 +11,7 @@ other = "Try Demo"
 other = "Five model formats"
 
 [feature_formats_desc]
-other = "ONNX, TFLite, Keras, TorchScript, and ExecuTorch — parsed entirely in the browser with no server required."
+other = "ONNX, TFLite, Keras, TorchScript, and ExecuTorch - parsed entirely in the browser with no server required."
 
 [feature_browser_title]
 other = "Zero server, zero upload"

@@ -30,7 +30,7 @@ OUT = ROOT / "test-models"
 
 
 def build_small() -> tf.keras.Model:
-    """Tiny Keras model with conv + dense layers — produces a handful of variables."""
+    """Tiny Keras model with conv + dense layers - produces a handful of variables."""
     inputs = tf.keras.Input(shape=(28, 28, 1), name="input")
     x = tf.keras.layers.Conv2D(8, 3, padding="same", name="conv1")(inputs)
     x = tf.keras.layers.BatchNormalization(name="bn1")(x)
@@ -44,7 +44,7 @@ def build_small() -> tf.keras.Model:
 
 
 def build_large() -> tf.keras.Model:
-    """ResNet-style model — many more variables, useful for stress-testing the index parser."""
+    """ResNet-style model - many more variables, useful for stress-testing the index parser."""
 
     def block(x, filters, strides, tag):
         needs_proj = strides > 1 or int(x.shape[-1]) != filters
@@ -85,7 +85,7 @@ def build_large() -> tf.keras.Model:
 
 
 def build_vertical() -> tf.keras.Model:
-    """Deep, strictly linear chain — Conv→ReLU only, no BatchNorm.
+    """Deep, strictly linear chain - Conv->ReLU only, no BatchNorm.
 
     BatchNorm expands into ~4 parallel VarHandleOp branches per layer at the
     SavedModel level (gamma, beta, moving_mean, moving_variance), which makes

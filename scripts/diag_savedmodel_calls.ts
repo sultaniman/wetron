@@ -61,7 +61,7 @@ if (aShadow) {
       found++;
     }
   }
-  if (found === 0) console.log(`    (none — explains the orphan)`);
+  if (found === 0) console.log(`    (none - explains the orphan)`);
 }
 
 // 6. For one leaf VH, show its consumers

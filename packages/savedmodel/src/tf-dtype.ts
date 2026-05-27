@@ -1,4 +1,4 @@
-// TF DataType enum (subset wetron surfaces — see tensorflow/core/framework/types.proto).
+// TF DataType enum (subset wetron surfaces - see tensorflow/core/framework/types.proto).
 // DT_HALF (19) is "float16"; DT_UINT16/UINT32/UINT64 are 17/22/23.
 // Codes 8 (complex64), 11-13/15-16 (quantized), 18 (complex128), 20 (resource),
 // 21 (variant), 24-30 (fp8/int4/uint4) are intentionally omitted.

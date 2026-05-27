@@ -29,7 +29,7 @@ Fetches the model at `url` via `fetch`, then calls `parseModel` on the response 
 
 Throws `ParseError` if the HTTP response is not `ok`, or if the format cannot be detected.
 
-**CORS requirement** — because wetron runs in the browser, the server hosting the model must include the `Access-Control-Allow-Origin` header. Requests to same-origin URLs always work. For cross-origin models, the server must opt in:
+**CORS requirement** - because wetron runs in the browser, the server hosting the model must include the `Access-Control-Allow-Origin` header. Requests to same-origin URLs always work. For cross-origin models, the server must opt in:
 
 ```
 Access-Control-Allow-Origin: *

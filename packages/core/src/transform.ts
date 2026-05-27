@@ -57,7 +57,7 @@ const ROW_H = 19;
 const ION_H = CARD_BASE + META_MARGIN + 12; // 49
 
 // Max weight rows rendered on a node card. Beyond this we render a single
-// "+N more" footer row instead — the full list is reachable via the side panel.
+// "+N more" footer row instead - the full list is reachable via the side panel.
 // Keeps StatefulPartitionedCall and similar high-arity nodes from blowing up
 // vertical space and starving dagre's rank assignment.
 export const WEIGHT_ROW_LIMIT = 8;
@@ -122,7 +122,7 @@ export function modelGraphToFlow(
   for (let i = 0; i < graph.nodes.length; i++) {
     const node = graph.nodes[i];
     // Nodes that are also initializers (e.g. SavedModel VarHandleOp) act as variable
-    // declarations — they're surfaced as weight metadata inside their consumers, not as
+    // declarations - they're surfaced as weight metadata inside their consumers, not as
     // standalone graph nodes. Keep them in `graph.nodes` for callers like
     // attachCheckpointToGraph but skip them from layout/edges here.
     if (graph.initializers.has(node.name)) continue;

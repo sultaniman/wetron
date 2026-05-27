@@ -8,7 +8,7 @@ const SUFFIX = "/.ATTRIBUTES/VARIABLE_VALUE";
  * variables.
  *
  * Resolution order for each `VarHandleOp` node's `shared_name`:
- *   1. Direct lookup in `loaded.fullNameToKey` (Keras 3 layout — names like
+ *   1. Direct lookup in `loaded.fullNameToKey` (Keras 3 layout - names like
  *      "conv1/kernel" map to "_operations/N/_kernel/.ATTRIBUTES/VARIABLE_VALUE").
  *   2. Direct match against `<shared_name>/.ATTRIBUTES/VARIABLE_VALUE` in the
  *      checkpoint metas (legacy / TF1-style layout).

@@ -125,4 +125,4 @@ const out = zipSync({
 
 const dest = resolve(import.meta.dir, "..", "test-models", "keras2_synthetic.keras");
 writeFileSync(dest, out);
-console.log(`wrote ${dest} — ${layers.length} layers`);
+console.log(`wrote ${dest} - ${layers.length} layers`);

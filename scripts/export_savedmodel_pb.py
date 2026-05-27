@@ -69,17 +69,17 @@ def extract_pb_files(model, tag: str) -> None:
 
 def build_small() -> tf.keras.Model:
     """
-    ~22 Keras layer nodes — functional model with 2 residual blocks.
+    ~22 Keras layer nodes - functional model with 2 residual blocks.
 
     Input (1)
-    Block 1 — no projection (16→16, stride 1): conv, bn, relu, conv, bn, proj_conv, add, relu = 8
-    Block 2 — with projection (16→32, stride 2): proj_conv, proj_bn, conv, bn, relu, conv, bn, add, relu = 9
+    Block 1 - no projection (16->16, stride 1): conv, bn, relu, conv, bn, proj_conv, add, relu = 8
+    Block 2 - with projection (16->32, stride 2): proj_conv, proj_bn, conv, bn, relu, conv, bn, add, relu = 9
     Classifier: gap, dense_64, relu, dense_10 = 4
     Total: 1 + 8 + 9 + 4 = 22
     """
     inputs = tf.keras.Input(shape=(28, 28, 1), name="input")
 
-    # --- block 1 (stride 1, 16 filters, shortcut projection 1→16) ---
+    # --- block 1 (stride 1, 16 filters, shortcut projection 1->16) ---
     shortcut = tf.keras.layers.Conv2D(16, 1, name="b1_proj")(inputs)
     x = tf.keras.layers.Conv2D(16, 3, padding="same", name="b1_conv1")(inputs)
     x = tf.keras.layers.BatchNormalization(name="b1_bn1")(x)
@@ -89,7 +89,7 @@ def build_small() -> tf.keras.Model:
     x = tf.keras.layers.Add(name="b1_add")([x, shortcut])
     x = tf.keras.layers.ReLU(name="b1_relu2")(x)
 
-    # --- block 2 (stride 2, 32 filters, shortcut projection 16→32) ---
+    # --- block 2 (stride 2, 32 filters, shortcut projection 16->32) ---
     shortcut = tf.keras.layers.Conv2D(32, 1, strides=2, name="b2_proj")(x)
     shortcut = tf.keras.layers.BatchNormalization(name="b2_proj_bn")(shortcut)
     x = tf.keras.layers.Conv2D(32, 3, strides=2, padding="same", name="b2_conv1")(x)
@@ -111,7 +111,7 @@ def build_small() -> tf.keras.Model:
 
 def build_large() -> tf.keras.Model:
     """
-    ~153 Keras layer nodes — ResNet-like with 4 stages.
+    ~153 Keras layer nodes - ResNet-like with 4 stages.
 
     Stem:    Input + Conv + BN + ReLU + MaxPool              =   5
     Stage 1: 4 blocks × 7 layers (no projection)             =  28
@@ -143,21 +143,21 @@ def build_large() -> tf.keras.Model:
     x = tf.keras.layers.ReLU(name="stem_relu")(x)
     x = tf.keras.layers.MaxPooling2D(3, strides=2, padding="same", name="stem_pool")(x)
 
-    # Stage 1 — 4 blocks, no projection (64→64, stride 1)
+    # Stage 1 - 4 blocks, no projection (64->64, stride 1)
     for i in range(1, 5):
         x = block(x, 64, 1, f"s1b{i}")
 
-    # Stage 2 — 4 blocks (first doubles channels + strides)
+    # Stage 2 - 4 blocks (first doubles channels + strides)
     x = block(x, 128, 2, "s2b1")
     for i in range(2, 5):
         x = block(x, 128, 1, f"s2b{i}")
 
-    # Stage 3 — 6 blocks
+    # Stage 3 - 6 blocks
     x = block(x, 256, 2, "s3b1")
     for i in range(2, 7):
         x = block(x, 256, 1, f"s3b{i}")
 
-    # Stage 4 — 6 blocks
+    # Stage 4 - 6 blocks
     x = block(x, 512, 2, "s4b1")
     for i in range(2, 7):
         x = block(x, 512, 1, f"s4b{i}")

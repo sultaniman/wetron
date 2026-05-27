@@ -2,15 +2,15 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship the inspection-report feature defined in `docs/specs/inspection-report-design.md` — a JSON report format with file + per-tensor SHA-256, a verification panel that compares a dropped report against a loaded model, an `Export PDF` print flow, and graph-node status badges. Two-level scope (global + node) and two modes (`identity`, `identity+stats`).
+**Goal:** Ship the inspection-report feature defined in `docs/specs/inspection-report-design.md` - a JSON report format with file + per-tensor SHA-256, a verification panel that compares a dropped report against a loaded model, an `Export PDF` print flow, and graph-node status badges. Two-level scope (global + node) and two modes (`identity`, `identity+stats`).
 
-**Architecture:** Five phases. Phase 1 builds a pure-TypeScript `report` module in `@wetron/core` covering hashing, canonical serialisation, build, parse, and verify — no DOM, no React. Phase 2 wires React components: toolbar export dropdown, node-scoped export, verify file picker, verification panel, print stylesheet, graph-node badges. Phase 3 mirrors the React work in Svelte. Phase 4 wires the two demo apps. Phase 5 ships docs (Hugo pages + `llms.md`).
+**Architecture:** Five phases. Phase 1 builds a pure-TypeScript `report` module in `@wetron/core` covering hashing, canonical serialisation, build, parse, and verify - no DOM, no React. Phase 2 wires React components: toolbar export dropdown, node-scoped export, verify file picker, verification panel, print stylesheet, graph-node badges. Phase 3 mirrors the React work in Svelte. Phase 4 wires the two demo apps. Phase 5 ships docs (Hugo pages + `llms.md`).
 
-**Tech stack:** Bun workspaces, TypeScript, WebCrypto (`crypto.subtle.digest`) for SHA-256, native `String.prototype.normalize('NFD')` for tensor-name canonicalisation, React 19, Svelte 5 (runes), `bun test` for tests, `@testing-library/react` and `@testing-library/svelte` for components, browser print stylesheet for the PDF export. All package operations go through `bun` / `bunx` — never `npm`/`npx`/`pnpm`/`node`. Commits go straight to `main`. Commit messages: lowercase verb + short description. Stage files individually — never `git add -A`.
+**Tech stack:** Bun workspaces, TypeScript, WebCrypto (`crypto.subtle.digest`) for SHA-256, native `String.prototype.normalize('NFD')` for tensor-name canonicalisation, React 19, Svelte 5 (runes), `bun test` for tests, `@testing-library/react` and `@testing-library/svelte` for components, browser print stylesheet for the PDF export. All package operations go through `bun` / `bunx` - never `npm`/`npx`/`pnpm`/`node`. Commits go straight to `main`. Commit messages: lowercase verb + short description. Stage files individually - never `git add -A`.
 
 ---
 
-## Phase 1 — `@wetron/core/report` module
+## Phase 1 - `@wetron/core/report` module
 
 The core module is the load-bearing piece. UI surfaces in later phases call into it.
 
@@ -46,7 +46,7 @@ test("sha256Hex returns lowercase hex only", async () => {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `bun test packages/core/test/report/hash.test.ts`
-Expected: FAIL — `sha256Hex` is not defined.
+Expected: FAIL - `sha256Hex` is not defined.
 
 - [ ] **Step 3: Implement the hash utility**
 
@@ -66,7 +66,7 @@ export async function sha256Hex(bytes: Uint8Array): Promise<string> {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/core/test/report/hash.test.ts`
-Expected: PASS — 3 tests.
+Expected: PASS - 3 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -195,7 +195,7 @@ test("two strings that are visually equivalent normalise to the same value", () 
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `bun test packages/core/test/report/normalize.test.ts`
-Expected: FAIL — `normalizeName` is not defined.
+Expected: FAIL - `normalizeName` is not defined.
 
 - [ ] **Step 3: Implement**
 
@@ -209,7 +209,7 @@ export function normalizeName(name: string): string {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/core/test/report/normalize.test.ts`
-Expected: PASS — 4 tests.
+Expected: PASS - 4 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -259,7 +259,7 @@ test("null is preserved", () => {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `bun test packages/core/test/report/serialize.test.ts`
-Expected: FAIL — `canonicalStringify` is not defined.
+Expected: FAIL - `canonicalStringify` is not defined.
 
 - [ ] **Step 3: Implement**
 
@@ -288,7 +288,7 @@ function stringify(value: unknown): string {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/core/test/report/serialize.test.ts`
-Expected: PASS — 4 tests.
+Expected: PASS - 4 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -414,7 +414,7 @@ test("tensors are sorted by NFD-normalised name", async () => {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `bun test packages/core/test/report/build-global.test.ts`
-Expected: FAIL — `buildGlobalReport` is not defined.
+Expected: FAIL - `buildGlobalReport` is not defined.
 
 - [ ] **Step 3: Implement**
 
@@ -508,7 +508,7 @@ export async function buildGlobalReport(opts: BuildOptions): Promise<Report> {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/core/test/report/build-global.test.ts`
-Expected: PASS — 3 tests.
+Expected: PASS - 3 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -610,7 +610,7 @@ test("buildNodeReport throws when the node has no weight inputs", async () => {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `bun test packages/core/test/report/build-node.test.ts`
-Expected: FAIL — `buildNodeReport` is not exported.
+Expected: FAIL - `buildNodeReport` is not exported.
 
 - [ ] **Step 3: Implement**
 
@@ -663,7 +663,7 @@ export async function buildNodeReport(opts: BuildNodeOptions): Promise<Report> {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/core/test/report/build-node.test.ts`
-Expected: PASS — 3 tests.
+Expected: PASS - 3 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -736,7 +736,7 @@ test("parseReport accepts node scope", () => {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `bun test packages/core/test/report/parse.test.ts`
-Expected: FAIL — `parseReport` is not defined.
+Expected: FAIL - `parseReport` is not defined.
 
 - [ ] **Step 3: Implement**
 
@@ -771,7 +771,7 @@ export function parseReport(json: string): ParseResult {
   if (typeof r.file !== "object" || r.file === null) {
     return { kind: "error", message: "file block missing" };
   }
-  // Trust the rest — runtime validation is defensive against a malicious JSON,
+  // Trust the rest - runtime validation is defensive against a malicious JSON,
   // but the verifier compares fields directly so type-narrowing here is enough.
   return { kind: "ok", report: parsed as Report };
 }
@@ -780,7 +780,7 @@ export function parseReport(json: string): ParseResult {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/core/test/report/parse.test.ts`
-Expected: PASS — 4 tests.
+Expected: PASS - 4 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -886,7 +886,7 @@ test("cross-mode verification compares only identity fields", () => {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `bun test packages/core/test/report/verify.test.ts`
-Expected: FAIL — `verifyReports` is not defined.
+Expected: FAIL - `verifyReports` is not defined.
 
 - [ ] **Step 3: Implement**
 
@@ -972,7 +972,7 @@ export function verifyReports(expected: Report, observed: Report): Verdict {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/core/test/report/verify.test.ts`
-Expected: PASS — 7 tests.
+Expected: PASS - 7 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -1041,7 +1041,7 @@ export type {
 
 - [ ] **Step 3: Add subpath export**
 
-In `packages/core/package.json`, inside the `exports` object, add (alphabetised — sits between `./op-inputs` and `./transform` if those exist, or at a sensible position):
+In `packages/core/package.json`, inside the `exports` object, add (alphabetised - sits between `./op-inputs` and `./transform` if those exist, or at a sensible position):
 
 ```jsonc
 "./report": {
@@ -1054,7 +1054,7 @@ In `packages/core/package.json`, inside the `exports` object, add (alphabetised 
 - [ ] **Step 4: Run all core tests to verify nothing regressed**
 
 Run: `bun test packages/core`
-Expected: PASS — all existing tests plus the new `report/*` tests.
+Expected: PASS - all existing tests plus the new `report/*` tests.
 
 - [ ] **Step 5: Commit**
 
@@ -1065,7 +1065,7 @@ git commit -m "export inspection report module from @wetron/core"
 
 ---
 
-## Phase 2 — React UI
+## Phase 2 - React UI
 
 ### Task 2.1: VerificationPanel component shell
 
@@ -1117,7 +1117,7 @@ test("VerificationPanel renders a MISMATCH banner", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `bun test packages/react/test/verification-panel.test.tsx`
-Expected: FAIL — `VerificationPanel` does not exist.
+Expected: FAIL - `VerificationPanel` does not exist.
 
 - [ ] **Step 3: Implement**
 
@@ -1135,10 +1135,10 @@ export interface VerificationPanelProps {
 export function VerificationPanel({ report, verdict, onClose }: VerificationPanelProps) {
   const verdictText =
     verdict.kind === "match"
-      ? `MATCH ✓ — all ${verdict.tensors.length} tensors verified`
+      ? `MATCH ✓ - all ${verdict.tensors.length} tensors verified`
       : verdict.kind === "mismatch"
-        ? `MISMATCH ✗ — ${verdict.tensors.filter((t) => t.status !== "match").length} of ${verdict.tensors.length} tensors differ`
-        : `INCOMPATIBLE — ${verdict.reasons.join(", ")}`;
+        ? `MISMATCH ✗ - ${verdict.tensors.filter((t) => t.status !== "match").length} of ${verdict.tensors.length} tensors differ`
+        : `INCOMPATIBLE - ${verdict.reasons.join(", ")}`;
   const tone = verdict.kind === "match" ? "success" : "danger";
   const scopeText = report.scope === "global" ? "global scope" : `node "${report.scope.node}"`;
 
@@ -1195,7 +1195,7 @@ export type { VerificationPanelProps } from "./verification-panel.tsx";
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `bun test packages/react/test/verification-panel.test.tsx`
-Expected: PASS — 2 tests.
+Expected: PASS - 2 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -1236,7 +1236,7 @@ test("table renders one row per tensor verdict", () => {
 - [ ] **Step 2: Run to verify the new test fails**
 
 Run: `bun test packages/react/test/verification-panel.test.tsx`
-Expected: FAIL — no rows rendered.
+Expected: FAIL - no rows rendered.
 
 - [ ] **Step 3: Add the table to the component**
 
@@ -1268,7 +1268,7 @@ Append a `<table>` block inside the `<section>` in `verification-panel.tsx`, aft
                 ? `expected ${t.expected.sha256.slice(0, 6)}…${t.expected.sha256.slice(-4)}`
                 : t.status === "extra"
                   ? `observed ${t.observed.sha256.slice(0, 6)}…${t.observed.sha256.slice(-4)}`
-                  : `${t.expected.sha256.slice(0, 6)}… → ${t.observed.sha256.slice(0, 6)}…`}
+                  : `${t.expected.sha256.slice(0, 6)}… -> ${t.observed.sha256.slice(0, 6)}…`}
           </td>
         </tr>
       ))}
@@ -1290,7 +1290,7 @@ Add CSS:
 - [ ] **Step 4: Run tests to verify all pass**
 
 Run: `bun test packages/react/test/verification-panel.test.tsx`
-Expected: PASS — 3 tests.
+Expected: PASS - 3 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -1370,7 +1370,7 @@ test("the button is disabled when no model is loaded", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `bun test packages/react/test/export-report-button.test.tsx`
-Expected: FAIL — `ExportReportButton` not exported.
+Expected: FAIL - `ExportReportButton` not exported.
 
 - [ ] **Step 3: Implement**
 
@@ -1418,7 +1418,7 @@ export type { ExportReportButtonProps } from "./export-report-button.tsx";
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/react/test/export-report-button.test.tsx`
-Expected: PASS — 2 tests.
+Expected: PASS - 2 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -1455,7 +1455,7 @@ test("export-node fires onExport with the node name and selected mode", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `bun test packages/react/test/export-node-button.test.tsx`
-Expected: FAIL — component missing.
+Expected: FAIL - component missing.
 
 - [ ] **Step 3: Implement**
 
@@ -1489,7 +1489,7 @@ export type { ExportNodeReportButtonProps } from "./export-node-button.tsx";
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `bun test packages/react/test/export-node-button.test.tsx`
-Expected: PASS — 1 test.
+Expected: PASS - 1 test.
 
 - [ ] **Step 5: Commit**
 
@@ -1537,7 +1537,7 @@ test("VerifyButton is disabled with no model loaded", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `bun test packages/react/test/verify-button.test.tsx`
-Expected: FAIL — component missing.
+Expected: FAIL - component missing.
 
 - [ ] **Step 3: Implement**
 
@@ -1583,7 +1583,7 @@ export type { VerifyButtonProps } from "./verify-button.tsx";
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/react/test/verify-button.test.tsx`
-Expected: PASS — 2 tests.
+Expected: PASS - 2 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -1639,7 +1639,7 @@ test("nodes with no weight tensors get no status", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `bun test packages/react/test/node-status.test.ts`
-Expected: FAIL — helper missing.
+Expected: FAIL - helper missing.
 
 - [ ] **Step 3: Implement the helper**
 
@@ -1703,7 +1703,7 @@ Update the node-data TypeScript type to include `verificationStatus`. The plumbi
 - [ ] **Step 5: Run tests**
 
 Run: `bun test packages/react`
-Expected: PASS — all existing + new node-status test.
+Expected: PASS - all existing + new node-status test.
 
 - [ ] **Step 6: Commit**
 
@@ -1714,7 +1714,7 @@ git commit -m "add per-node verification badge to react renderer"
 
 ---
 
-## Phase 3 — Svelte parity
+## Phase 3 - Svelte parity
 
 Phase 3 mirrors Phase 2 in `@wetron/svelte`. Same boundaries, same type names, same tests under `packages/svelte/test/` using `@testing-library/svelte` and `happy-dom` (already configured per `svelte-weight-panel-port.md`).
 
@@ -1755,7 +1755,7 @@ test("renders MATCH banner", () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `bun test packages/svelte/test/verification-panel.test.ts`
-Expected: FAIL — component missing.
+Expected: FAIL - component missing.
 
 - [ ] **Step 3: Implement**
 
@@ -1768,10 +1768,10 @@ Expected: FAIL — component missing.
 
   let verdictText = $derived(
     verdict.kind === "match"
-      ? `MATCH ✓ — all ${verdict.tensors.length} tensors verified`
+      ? `MATCH ✓ - all ${verdict.tensors.length} tensors verified`
       : verdict.kind === "mismatch"
-        ? `MISMATCH ✗ — ${verdict.tensors.filter((t) => t.status !== "match").length} of ${verdict.tensors.length} tensors differ`
-        : `INCOMPATIBLE — ${verdict.reasons.join(", ")}`,
+        ? `MISMATCH ✗ - ${verdict.tensors.filter((t) => t.status !== "match").length} of ${verdict.tensors.length} tensors differ`
+        : `INCOMPATIBLE - ${verdict.reasons.join(", ")}`,
   );
   let tone = $derived(verdict.kind === "match" ? "ok" : "bad");
   let scopeText = $derived(report.scope === "global" ? "global scope" : `node "${report.scope.node}"`);
@@ -1805,7 +1805,7 @@ Expected: FAIL — component missing.
             <td class="tensor-name">{t.name}</td>
             <td>{t.status === "extra" ? t.observed.shape.join(" × ") : t.status === "match" ? "" : t.expected.shape.join(" × ")}</td>
             <td>{t.status === "extra" ? t.observed.dtype : t.status === "match" ? "" : t.expected.dtype}</td>
-            <td class="hash">{t.status === "match" ? "" : t.status === "missing" ? `expected ${t.expected.sha256.slice(0, 6)}…${t.expected.sha256.slice(-4)}` : t.status === "extra" ? `observed ${t.observed.sha256.slice(0, 6)}…${t.observed.sha256.slice(-4)}` : `${t.expected.sha256.slice(0, 6)}… → ${t.observed.sha256.slice(0, 6)}…`}</td>
+            <td class="hash">{t.status === "match" ? "" : t.status === "missing" ? `expected ${t.expected.sha256.slice(0, 6)}…${t.expected.sha256.slice(-4)}` : t.status === "extra" ? `observed ${t.observed.sha256.slice(0, 6)}…${t.observed.sha256.slice(-4)}` : `${t.expected.sha256.slice(0, 6)}… -> ${t.observed.sha256.slice(0, 6)}…`}</td>
           </tr>
         {/each}
       </tbody>
@@ -1855,7 +1855,7 @@ export { default as VerificationPanel } from "./verification-panel.svelte";
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `bun test packages/svelte/test/verification-panel.test.ts`
-Expected: PASS — 1 test.
+Expected: PASS - 1 test.
 
 - [ ] **Step 5: Commit**
 
@@ -1893,7 +1893,7 @@ test("clicking opens the mode picker", async () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `bun test packages/svelte/test/export-report-button.test.ts`
-Expected: FAIL — component missing.
+Expected: FAIL - component missing.
 
 - [ ] **Step 3: Implement the three Svelte components**
 
@@ -1954,7 +1954,7 @@ export { default as VerifyButton } from "./verify-button.svelte";
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `bun test packages/svelte`
-Expected: PASS — all existing + new tests.
+Expected: PASS - all existing + new tests.
 
 - [ ] **Step 5: Commit**
 
@@ -1968,7 +1968,7 @@ git commit -m "add svelte report toolbar and verify components"
 ### Task 3.3: Svelte node-status helper + badge
 
 **Files:**
-- Create: `packages/svelte/src/verification-panel/node-status.ts` (re-export from React's helper if it's pure TS — preferred — otherwise duplicate)
+- Create: `packages/svelte/src/verification-panel/node-status.ts` (re-export from React's helper if it's pure TS - preferred - otherwise duplicate)
 - Modify: `packages/svelte/src/nodes/graph-node.svelte`
 
 - [ ] **Step 1: Hoist the helper to `@wetron/core/report` or duplicate**
@@ -1998,7 +1998,7 @@ Move the React test under `packages/core/test/report/node-status.test.ts`. Delet
 - [ ] **Step 2: Run all tests**
 
 Run: `bun test`
-Expected: PASS — node-status tests now run from `@wetron/core`.
+Expected: PASS - node-status tests now run from `@wetron/core`.
 
 - [ ] **Step 3: Render the Svelte badge in `packages/svelte/src/nodes/graph-node.svelte`**
 
@@ -2026,7 +2026,7 @@ git commit -m "share node-status helper from core; add svelte badge"
 
 ---
 
-## Phase 4 — Demo apps wiring
+## Phase 4 - Demo apps wiring
 
 ### Task 4.1: Wire React demo (`apps/demo`)
 
@@ -2110,7 +2110,7 @@ Render the panel when set, replacing the property panel area:
 
 Pass the verdict down to the graph view so node badges render. Compute `nodeInputs` from the graph and pass `computeNodeStatuses(verdict, nodeInputs)` into `ModelGraphView`'s data attachment path.
 
-Add the property-panel `ExportNodeReportButton` inside `NodePropertyPanel` when the selected node has weight tensors — wire to `buildNodeReport` then `downloadJson`.
+Add the property-panel `ExportNodeReportButton` inside `NodePropertyPanel` when the selected node has weight tensors - wire to `buildNodeReport` then `downloadJson`.
 
 - [ ] **Step 2: Verify the demo runs**
 
@@ -2118,7 +2118,7 @@ Run: `cd apps/demo && bun dev`
 Open the URL, load a model, click "Export report ▾", choose `identity`, click "Download report.json". Verify the JSON downloads and parses with `jq`.
 Click "Verify against report…", pick the just-downloaded JSON. Verify the `MATCH` banner appears.
 Re-pick a different model file's report. Verify `INCOMPATIBLE` due to file SHA mismatch.
-Click "Export PDF" — verify the print dialog opens and the panel is the only visible content.
+Click "Export PDF" - verify the print dialog opens and the panel is the only visible content.
 
 - [ ] **Step 3: Commit**
 
@@ -2154,7 +2154,7 @@ git commit -m "wire svelte demo to inspection report flow"
 
 ---
 
-## Phase 5 — Documentation
+## Phase 5 - Documentation
 
 ### Task 5.1: API reference page in Hugo
 
@@ -2172,7 +2172,7 @@ lead: "Reproducible chain-of-custody reports for model files."
 weight: 40
 ---
 
-`@wetron/core` exports a small set of pure functions for producing and verifying inspection reports. UI surfaces in `@wetron/react` and `@wetron/svelte` consume the same module — there is no rendering logic in core.
+`@wetron/core` exports a small set of pure functions for producing and verifying inspection reports. UI surfaces in `@wetron/react` and `@wetron/svelte` consume the same module - there is no rendering logic in core.
 
 ## buildGlobalReport
 
@@ -2216,8 +2216,8 @@ Sorted-keys, no-whitespace JSON serialiser. Two reports for the same file produc
 
 ## See also
 
-- [docs/specs/inspection-report-design.md](https://codeberg.org/askar/wetron/src/branch/main/docs/specs/inspection-report-design.md) — the design spec.
-- [Weights](./weights/) — `WeightStats` shape used in `identity+stats` mode.
+- [docs/specs/inspection-report-design.md](https://codeberg.org/askar/wetron/src/branch/main/docs/specs/inspection-report-design.md) - the design spec.
+- [Weights](./weights/) - `WeightStats` shape used in `identity+stats` mode.
 ```
 
 - [ ] **Step 2: Build the docs site**
@@ -2275,20 +2275,20 @@ git commit -m "link verification panel from rendering docs"
 
 Run this against the spec at `docs/specs/inspection-report-design.md`:
 
-- [ ] Bytewise-identical equivalence — covered by Phase 1 hash + verify
-- [ ] Two modes (`identity`, `identity+stats`) — Task 1.5 (build) + 2.4/3.2 (UI)
-- [ ] Two scopes (`global`, `{node}`) — Tasks 1.5, 1.6
-- [ ] Canonical serialisation (sorted keys, no whitespace, NFD names) — Tasks 1.3, 1.4, 1.5
-- [ ] Verification predicate — Task 1.8
-- [ ] Verification panel (banner, identity bar, file block, table) — Tasks 2.1, 2.2 (React), 3.1 (Svelte)
-- [ ] Export PDF via print stylesheet — Task 2.3 (React), 3.1 inline (Svelte)
-- [ ] Toolbar export + verify actions — Tasks 2.4, 2.6 (React), 3.2 (Svelte)
-- [ ] Property-panel node export — Task 2.5 (React), 3.2 (Svelte)
-- [ ] Graph node verification badges — Task 2.7 (React), 3.3 (Svelte, helper hoisted to core)
-- [ ] Drop-zone unchanged in empty state, no drop targets in loaded state — implicit in Phase 4 (no drop wiring added)
-- [ ] Reading from `ModelGraph.weights` only — Tasks 1.5, 1.6 use existing `WeightSource`
-- [ ] Documentation — Phase 5
-- [ ] No new dependencies — confirmed; only WebCrypto (built-in), `String.prototype.normalize` (built-in)
+- [ ] Bytewise-identical equivalence - covered by Phase 1 hash + verify
+- [ ] Two modes (`identity`, `identity+stats`) - Task 1.5 (build) + 2.4/3.2 (UI)
+- [ ] Two scopes (`global`, `{node}`) - Tasks 1.5, 1.6
+- [ ] Canonical serialisation (sorted keys, no whitespace, NFD names) - Tasks 1.3, 1.4, 1.5
+- [ ] Verification predicate - Task 1.8
+- [ ] Verification panel (banner, identity bar, file block, table) - Tasks 2.1, 2.2 (React), 3.1 (Svelte)
+- [ ] Export PDF via print stylesheet - Task 2.3 (React), 3.1 inline (Svelte)
+- [ ] Toolbar export + verify actions - Tasks 2.4, 2.6 (React), 3.2 (Svelte)
+- [ ] Property-panel node export - Task 2.5 (React), 3.2 (Svelte)
+- [ ] Graph node verification badges - Task 2.7 (React), 3.3 (Svelte, helper hoisted to core)
+- [ ] Drop-zone unchanged in empty state, no drop targets in loaded state - implicit in Phase 4 (no drop wiring added)
+- [ ] Reading from `ModelGraph.weights` only - Tasks 1.5, 1.6 use existing `WeightSource`
+- [ ] Documentation - Phase 5
+- [ ] No new dependencies - confirmed; only WebCrypto (built-in), `String.prototype.normalize` (built-in)
 
 ---
 
@@ -2296,7 +2296,7 @@ Run this against the spec at `docs/specs/inspection-report-design.md`:
 
 Plan complete and saved to `docs/plans/inspection-report.md`. Two execution options:
 
-1. **Subagent-Driven (recommended)** — fresh subagent per task with review between tasks
-2. **Inline Execution** — execute tasks in this session with checkpoints
+1. **Subagent-Driven (recommended)** - fresh subagent per task with review between tasks
+2. **Inline Execution** - execute tasks in this session with checkpoints
 
 Pick one when ready.

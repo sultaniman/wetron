@@ -12,7 +12,7 @@ echo "Building wetron packages..."
 
 echo "Packing wetron packages..."
 for pkg in "${PACKAGES[@]}"; do
-  echo "  → $pkg"
+  echo "  -> $pkg"
   pkg_dir="$WETRON_ROOT/packages/$pkg"
   output=$(cd "$pkg_dir" && bun pm pack --quiet | tr -d '[:space:]')
   mv "$pkg_dir/$output" "$pkg_dir/wetron-${pkg}.tgz"

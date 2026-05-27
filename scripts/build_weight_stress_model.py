@@ -1,11 +1,11 @@
 """Build an ONNX model that stresses per-node weight surfacing.
 
 Edge cases exercised:
-  1. Two Conv layers with DISTINCT weights — each node must see only its own W/B.
-  2. Two MatMul ops sharing a TIED weight — same initializer name on both nodes.
+  1. Two Conv layers with DISTINCT weights - each node must see only its own W/B.
+  2. Two MatMul ops sharing a TIED weight - same initializer name on both nodes.
   3. A node consuming the SAME initializer twice in two different input slots.
-  4. An UNUSED initializer that no node references — should not appear anywhere.
-  5. An initializer also listed in graph.input (old-style ONNX) — should not appear twice.
+  4. An UNUSED initializer that no node references - should not appear anywhere.
+  5. An initializer also listed in graph.input (old-style ONNX) - should not appear twice.
 """
 
 import numpy as np
@@ -26,7 +26,7 @@ B_conv_b = numpy_helper.from_array(np.ones((8,), dtype=np.float32), name="B_conv
 
 # Tied weight: a single matrix used as both an embedding table and an output
 # projection (the LM-head tying pattern). It should appear on BOTH consumer
-# nodes — that is correct, not a bug.
+# nodes - that is correct, not a bug.
 W_tied = numpy_helper.from_array(
     np.eye(16, dtype=np.float32).reshape(16, 16), name="W_tied"
 )
@@ -36,7 +36,7 @@ W_square = numpy_helper.from_array(
     np.eye(16, dtype=np.float32).reshape(16, 16), name="W_square"
 )
 
-# Unused initializer — no node references it; must not surface anywhere.
+# Unused initializer - no node references it; must not surface anywhere.
 unused_init = numpy_helper.from_array(
     np.full((4,), 7.0, dtype=np.float32), name="W_unused"
 )
@@ -77,7 +77,7 @@ conv_b = helper.make_node(
     pads=[1, 1, 1, 1],
 )
 
-# Global average pool, flatten to (N, 8) — we don't care about correctness,
+# Global average pool, flatten to (N, 8) - we don't care about correctness,
 # only graph structure.
 gap = helper.make_node(
     "GlobalAveragePool", inputs=["conv_b_out"], outputs=["gap_out"], name="GAP"
@@ -86,7 +86,7 @@ flatten = helper.make_node(
     "Flatten", inputs=["gap_out"], outputs=["flat"], name="Flatten"
 )
 
-# Pad/truncate to size 16 with a Gemm (no learnable weight for brevity — use
+# Pad/truncate to size 16 with a Gemm (no learnable weight for brevity - use
 # a small constant matrix).
 proj = numpy_helper.from_array(np.zeros((8, 16), dtype=np.float32), name="W_proj")
 gemm = helper.make_node(
@@ -113,7 +113,7 @@ tied_b = helper.make_node(
 )
 
 # Same-initializer-twice test:
-#   MatMul(W_square, W_square) — same input name in two slots.
+#   MatMul(W_square, W_square) - same input name in two slots.
 self_product = helper.make_node(
     "MatMul",
     inputs=["W_square", "W_square"],

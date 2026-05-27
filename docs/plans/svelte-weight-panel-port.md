@@ -4,13 +4,13 @@
 
 **Goal:** Bring `@wetron/svelte` to weight-inspection parity with `@wetron/react` by porting `WeightPanel`, `WeightHistogram`, `WeightHeatmap`, and `VirtualValues`. Hoist shared `format-val` / `heatmap-color` helpers into `@wetron/core` so React and Svelte share one implementation.
 
-**Architecture:** Two phases. Phase A relocates two pure-TypeScript helpers from `packages/react/src/node-property-panel/` to `@wetron/core` and rewires React imports — no behaviour change, existing React tests stay green. Phase B builds four new Svelte components mirroring the React weight-inspection UI, wires them into `NodePropertyPanel`, and adds the absolute minimum test coverage (`@testing-library/svelte` + one smoke test).
+**Architecture:** Two phases. Phase A relocates two pure-TypeScript helpers from `packages/react/src/node-property-panel/` to `@wetron/core` and rewires React imports - no behaviour change, existing React tests stay green. Phase B builds four new Svelte components mirroring the React weight-inspection UI, wires them into `NodePropertyPanel`, and adds the absolute minimum test coverage (`@testing-library/svelte` + one smoke test).
 
-**Tech stack:** Bun workspaces, TypeScript, Svelte 5 (runes API), `@tanstack/svelte-virtual`, `@testing-library/svelte`, `happy-dom`. All package operations use `bun` / `bunx` — never `npm`/`npx`/`pnpm`/`node`. Commits go straight to `main`, no feature branches. Commit messages: lowercase verb + short description, no conventional-commit prefixes. Stage files individually — never `git add -A`.
+**Tech stack:** Bun workspaces, TypeScript, Svelte 5 (runes API), `@tanstack/svelte-virtual`, `@testing-library/svelte`, `happy-dom`. All package operations use `bun` / `bunx` - never `npm`/`npx`/`pnpm`/`node`. Commits go straight to `main`, no feature branches. Commit messages: lowercase verb + short description, no conventional-commit prefixes. Stage files individually - never `git add -A`.
 
 ---
 
-## Phase A — hoist shared helpers into `@wetron/core`
+## Phase A - hoist shared helpers into `@wetron/core`
 
 ### Task A1: Move `format-val.ts` into `@wetron/core`
 
@@ -29,7 +29,7 @@
 cp packages/react/src/node-property-panel/format-val.ts packages/core/src/format-val.ts
 ```
 
-The file is pure TypeScript with no React imports — no edits required.
+The file is pure TypeScript with no React imports - no edits required.
 
 - [ ] **Step 2: Move the test file verbatim**
 
@@ -132,7 +132,7 @@ Update its import to:
 import { pickColormap, colorForCell } from "../src/heatmap-color.ts";
 ```
 
-(Adjust whatever the original imported — the symbol set is `pickColormap`, `colorForCell`, and possibly the `ColormapKind` type.)
+(Adjust whatever the original imported - the symbol set is `pickColormap`, `colorForCell`, and possibly the `ColormapKind` type.)
 
 - [ ] **Step 3: Add subpath export**
 
@@ -191,7 +191,7 @@ git commit -m "hoist heatmap-color into @wetron/core"
 
 ---
 
-## Phase B — Svelte WeightPanel port
+## Phase B - Svelte WeightPanel port
 
 ### Task B1: Add `@tanstack/svelte-virtual` to `@wetron/svelte`
 
@@ -225,7 +225,7 @@ In root `package.json`, add to `devDependencies`:
 "@tanstack/svelte-virtual": "^3.13.6"
 ```
 
-(Match the version range used by `@tanstack/react-virtual` in the same file — pick the latest 3.x at install time.)
+(Match the version range used by `@tanstack/react-virtual` in the same file - pick the latest 3.x at install time.)
 
 - [ ] **Step 3: Install**
 
@@ -552,7 +552,7 @@ git commit -m "add svelte weight-heatmap component"
   let showWeights = $state(graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined);
   let viz = $state<'dist' | 'heat'>('dist');
 
-  // Auto-enable on the no-weights → weights-loaded transition (e.g. checkpoint
+  // Auto-enable on the no-weights -> weights-loaded transition (e.g. checkpoint
   // file dropped after the panel was opened). Don't override a manual toggle.
   let prevHadWeights = graph.weights !== undefined;
   $effect(() => {
@@ -636,7 +636,7 @@ git commit -m "add svelte weight-heatmap component"
     </div>
   {:else if isLarge && !showWeights}
     <div class="sizeNote">
-      <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong><br />
+      <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong><br />
       Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
     </div>
   {/if}
@@ -860,7 +860,7 @@ let { target, graph, onTensorClick, onBack, onClose, colorMode, inputSources, te
 } = $props();
 ```
 
-(Match the existing `onTensorClick` signature already in the file — do not change it.)
+(Match the existing `onTensorClick` signature already in the file - do not change it.)
 
 - [ ] **Step 2: Replace the tensor-target branch**
 
@@ -918,9 +918,9 @@ bun test packages/svelte
 just check
 ```
 
-Expected: clean. If TypeScript/Svelte type-checks fail in `weight-panel.svelte`, fix them before continuing — typical issues:
-- Missing `ModelGraph` import (added in Task B6 — verify)
-- `decodeWeight` / `computeStats` not re-exported from `@wetron/core` root (they are — `weight-decoder.ts` and `weight-stats.ts` are listed in `core/src/index.ts`).
+Expected: clean. If TypeScript/Svelte type-checks fail in `weight-panel.svelte`, fix them before continuing - typical issues:
+- Missing `ModelGraph` import (added in Task B6 - verify)
+- `decodeWeight` / `computeStats` not re-exported from `@wetron/core` root (they are - `weight-decoder.ts` and `weight-stats.ts` are listed in `core/src/index.ts`).
 
 - [ ] **Step 4: Commit**
 
@@ -964,7 +964,7 @@ GlobalRegistrator.register();
 
 Check whether `packages/svelte/` already has a `bunfig.toml` or how the React package picks up its setup file. The React package uses a `bunfig.toml` referencing `test/setup.ts` (typical pattern). Mirror that.
 
-If `packages/react/bunfig.toml` exists, copy its structure into `packages/svelte/bunfig.toml`. If not, the convention may be at the workspace root — check root `bunfig.toml`. Whichever location is authoritative, add the svelte setup the same way.
+If `packages/react/bunfig.toml` exists, copy its structure into `packages/svelte/bunfig.toml`. If not, the convention may be at the workspace root - check root `bunfig.toml`. Whichever location is authoritative, add the svelte setup the same way.
 
 If the existing pattern is per-package `bunfig.toml`, create `packages/svelte/bunfig.toml`:
 
@@ -979,7 +979,7 @@ preload = "./test/setup.ts"
 bun test packages/svelte 2>&1 | head -10
 ```
 
-Expected: bun reports "0 pass / 0 fail" — no setup errors. If it logs `GlobalRegistrator` errors, fix the preload wiring before proceeding.
+Expected: bun reports "0 pass / 0 fail" - no setup errors. If it logs `GlobalRegistrator` errors, fix the preload wiring before proceeding.
 
 - [ ] **Step 6: Commit**
 
@@ -1032,7 +1032,7 @@ test("WeightPanel renders shape, dtype, size for a small initialised tensor", ()
 });
 ```
 
-If the `ModelGraph` shape in `@wetron/core/ir` has additional required fields not constructed above (the spec mentions `warnings`, `metadata`, etc.), add them as empty defaults — read `packages/core/src/ir.ts` to confirm. The test compiles or it doesn't; this is the verification.
+If the `ModelGraph` shape in `@wetron/core/ir` has additional required fields not constructed above (the spec mentions `warnings`, `metadata`, etc.), add them as empty defaults - read `packages/core/src/ir.ts` to confirm. The test compiles or it doesn't; this is the verification.
 
 - [ ] **Step 2: Run the test**
 
@@ -1067,7 +1067,7 @@ Expected: clean build, all tests pass across every package.
 
 - [ ] **Step 2: Confirm Svelte renderer loads in the test app**
 
-If a test app exists at `apps/*` with a Svelte entry point, run it and open a model with weights to confirm `WeightPanel` renders end-to-end. If no Svelte test-app entry is wired, skip — type-check + smoke test cover correctness, and visual verification can be done at consumer-integration time.
+If a test app exists at `apps/*` with a Svelte entry point, run it and open a model with weights to confirm `WeightPanel` renders end-to-end. If no Svelte test-app entry is wired, skip - type-check + smoke test cover correctness, and visual verification can be done at consumer-integration time.
 
 - [ ] **Step 3: Tag-ready check (no commit)**
 
@@ -1082,6 +1082,6 @@ Expected: working tree clean, recent commits cover hoist + each Svelte component
 
 ## Self-review notes
 
-- Spec coverage: every section of the design (helper hoist, four new Svelte components, wiring, test setup, package.json changes, removal of `model-graph-view.svelte` mention since it doesn't render `NodePropertyPanel`) maps to a task. The spec said "Wiring into `model-graph-view.svelte`" but the audit found `NodePropertyPanel` is consumer-composed, not rendered by `ModelGraphView` — that wiring task was removed; consumers thread `graph` themselves.
+- Spec coverage: every section of the design (helper hoist, four new Svelte components, wiring, test setup, package.json changes, removal of `model-graph-view.svelte` mention since it doesn't render `NodePropertyPanel`) maps to a task. The spec said "Wiring into `model-graph-view.svelte`" but the audit found `NodePropertyPanel` is consumer-composed, not rendered by `ModelGraphView` - that wiring task was removed; consumers thread `graph` themselves.
 - Type names: `Loaded`, `WeightStats`, `ModelGraph`, `PanelTarget` are used consistently across tasks. `decodeWeight` / `computeStats` are pulled from `@wetron/core` root export.
 - Tests minimised per user instruction: one smoke test, no `virtual-values.test.ts`, no per-condition coverage. The shared core helpers retain their existing test coverage post-hoist.

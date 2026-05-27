@@ -159,7 +159,7 @@ export function WeightPanel({
         )}
         {isLarge && !showWeights && !(graph.hasExternalWeights && graph.weights === undefined) && (
           <div className={weightPanelCss.sizeNote}>
-            <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong>
+            <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong>
             <br />
             Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
           </div>

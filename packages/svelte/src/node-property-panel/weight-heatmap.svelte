@@ -14,7 +14,7 @@
     let cellMax = -Infinity;
     // Only scale over real cells; zero-padding beyond `filled` must not
     // anchor the range to 0 for small tensors (e.g. bias with 24 elements
-    // only fills 24 of 128 cells — the rest are 0 and would distort colors).
+    // only fills 24 of 128 cells - the rest are 0 and would distort colors).
     for (let i = 0; i < filled; i++) {
       const v = cells[i];
       if (v < cellMin) cellMin = v;

@@ -45,8 +45,8 @@ async function getH5Wasm(): Promise<H5Wasm> {
 
 /**
  * snake_case for Keras class names matching the H5 group key convention.
- *   FooBarConv2D → foo_bar_conv2d  (NOT conv2_d — the second regex is [a-z], not [a-z0-9])
- *   DSPFooSTFT128 → dsp_foo_stft128
+ *   FooBarConv2D -> foo_bar_conv2d  (NOT conv2_d - the second regex is [a-z], not [a-z0-9])
+ *   DSPFooSTFT128 -> dsp_foo_stft128
  */
 export function kerasSnakeCase(name: string): string {
   let s = name.replace(/(.)([A-Z][a-z]+)/g, "$1_$2");
@@ -105,7 +105,7 @@ function normaliseDtype(meta: H5Meta): string {
 }
 
 /**
- * Parse model.weights.h5 bytes and return a WeightIndex (path → meta)
+ * Parse model.weights.h5 bytes and return a WeightIndex (path -> meta)
  * and a WeightSource for lazy byte access.
  */
 export async function parseH5Weights(

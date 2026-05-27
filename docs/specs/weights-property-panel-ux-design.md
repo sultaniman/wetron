@@ -1,4 +1,4 @@
-# Weights Property Panel — UX Polish Design
+# Weights Property Panel - UX Polish Design
 
 ## Goal
 
@@ -9,14 +9,14 @@ Fix the UX of the just-shipped `WeightPanel` so that an initializer view stays v
 1. Panel widens beyond its 280 px design when long values like `140.000` push 4-column cells outward.
 2. Integer dtypes render with redundant decimals (`140.000` for a `uint8`).
 3. The values grid has no `max-height`; clicking *Load all* on a 512-element tensor produces a 100+ row table that consumes the viewport.
-4. The `Load all <N> →` link and the `<count> · first <N>` meta line are redundant once virtualization makes the full tensor accessible.
+4. The `Load all <N> ->` link and the `<count> · first <N>` meta line are redundant once virtualization makes the full tensor accessible.
 5. `OpPanel` inputs/outputs sections grow tall on nodes with many inputs (e.g., `Concat` with 64 inputs), reproducing the same panel-stretching problem.
 
 ## Out of scope
 
 - The `Show weights` switch styling and visual weight (not currently bothering the user).
 - Row-index labels in the values grid.
-- Scroll-to-index, value selection, copy-to-clipboard — all deferred.
+- Scroll-to-index, value selection, copy-to-clipboard - all deferred.
 
 ## Number formatting
 
@@ -39,7 +39,7 @@ Replace the current `{loaded.total} · first {loaded.preview.length}` with a sin
 <span className={css.valuesMeta}>{count.toLocaleString()} values</span>
 ```
 
-Drop the `Load all <N> →` button and the `showAll` state from `WeightPanel`. With virtualization, the full tensor is always reachable through scroll.
+Drop the `Load all <N> ->` button and the `showAll` state from `WeightPanel`. With virtualization, the full tensor is always reachable through scroll.
 
 ## Layout containment
 
@@ -133,7 +133,7 @@ Component contract:
 
 `WeightPanel` integrates it:
 
-- `loaded.preview: number[]` becomes `loaded.values: Float64Array | Int32Array | BigInt64Array` (the full decoded tensor — no slicing).
+- `loaded.preview: number[]` becomes `loaded.values: Float64Array | Int32Array | BigInt64Array` (the full decoded tensor - no slicing).
 - The `<div data-testid="values-grid" ...>` wrapper goes away. Replace with `<VirtualValues values={loaded.values} format={(v) => formatVal(v, dtype)} data-testid="values-grid" />`. The `data-testid` is forwarded to `VirtualValues`'s outer div so the existing tests still pass.
 - The `<button className={css.more}>Load all</button>` and `showAll` state both deleted.
 
@@ -150,19 +150,19 @@ CSS:
 }
 ```
 
-The label stays at the top; rows below scroll inside the bounded area. No virtualization needed — input lists rarely exceed dozens of rows, and existing tooltip / click behavior on `Row` is preserved.
+The label stays at the top; rows below scroll inside the bounded area. No virtualization needed - input lists rarely exceed dozens of rows, and existing tooltip / click behavior on `Row` is preserved.
 
 ## Testing
 
 Existing tests stay green:
 
-- `packages/react/test/weight-panel.test.tsx` — three small-model tests (`renders header, info section, and stats`, `toggling Show weights hides values grid`, `viz toggle swaps dist and heat`) and two large-model tests (`starts off, shows size note, no values grid`, `toggling on loads stats and values`). After this change, `values-grid` is the outer wrapper of `VirtualValues` (still has the `data-testid`), so the assertions still pass.
+- `packages/react/test/weight-panel.test.tsx` - three small-model tests (`renders header, info section, and stats`, `toggling Show weights hides values grid`, `viz toggle swaps dist and heat`) and two large-model tests (`starts off, shows size note, no values grid`, `toggling on loads stats and values`). After this change, `values-grid` is the outer wrapper of `VirtualValues` (still has the `data-testid`), so the assertions still pass.
 
 New tests:
 
 - `formatVal` returns plain integers for integer dtypes (`formatVal(140, "uint8") === "140"`), 3-decimal stripped for normal floats (`formatVal(-0.184, "float32") === "-.184"`), scientific for tiny floats (`formatVal(1.5e-4, "float32") === "1.5e-4"`), `0` for exact zero. Lives in `weight-panel.test.tsx` or in a sibling helper `format-val.test.ts` if extracted.
-- `VirtualValues` renders the first row of values when scrolled to top (small tensor: 8 values → 2 rows visible). `packages/react/test/virtual-values.test.tsx`.
-- `OpPanel` renders inputs inside a scrollable container. Add an assertion in the existing `op panel` describe block: when there are 30 inputs, the inputs section's `scrollHeight` exceeds `clientHeight` (i.e., it scrolls). Skip if happy-dom doesn't support scrollHeight — fall back to checking the `.scrollSection` class is present.
+- `VirtualValues` renders the first row of values when scrolled to top (small tensor: 8 values -> 2 rows visible). `packages/react/test/virtual-values.test.tsx`.
+- `OpPanel` renders inputs inside a scrollable container. Add an assertion in the existing `op panel` describe block: when there are 30 inputs, the inputs section's `scrollHeight` exceeds `clientHeight` (i.e., it scrolls). Skip if happy-dom doesn't support scrollHeight - fall back to checking the `.scrollSection` class is present.
 
 ## Files
 
@@ -173,10 +173,10 @@ New tests:
 
 **Modified**
 
-- `packages/react/package.json` — add `@tanstack/react-virtual`
+- `packages/react/package.json` - add `@tanstack/react-virtual`
 - `packages/react/src/node-property-panel/weight-panel.tsx`
 - `packages/react/src/node-property-panel/op-panel.tsx`
 - `packages/react/src/node-property-panel/node-property-panel.module.css`
-- `packages/react/test/weight-panel.test.tsx` — add `formatVal` cases, possibly adjust `values-grid` lookups
-- `packages/react/test/node-property-panel.test.tsx` — add OpPanel scroll-section assertion
-- `apps/demo/src/App.tsx` — wrapper width 280 → 320
+- `packages/react/test/weight-panel.test.tsx` - add `formatVal` cases, possibly adjust `values-grid` lookups
+- `packages/react/test/node-property-panel.test.tsx` - add OpPanel scroll-section assertion
+- `apps/demo/src/App.tsx` - wrapper width 280 -> 320

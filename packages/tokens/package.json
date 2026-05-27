@@ -1,7 +1,7 @@
 {
   "name": "@wetron/tokens",
   "version": "0.0.15",
-  "description": "Design tokens — theme colors and CSS variables for wetron graph visualization components",
+  "description": "Design tokens - theme colors and CSS variables for wetron graph visualization components",
   "keywords": [
     "css-variables",
     "design-tokens",

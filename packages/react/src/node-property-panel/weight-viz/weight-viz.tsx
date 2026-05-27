@@ -42,7 +42,7 @@ export function WeightHeatmap({
   const filled = stats.filledCells;
   // Auto-scale tile colors only over real cells; zero-padding beyond `filled`
   // must not influence the range (a bias of 24 elements only fills 24 of 128
-  // cells — the rest are 0 and would falsely anchor the minimum to 0).
+  // cells - the rest are 0 and would falsely anchor the minimum to 0).
   let cellMin = Infinity;
   let cellMax = -Infinity;
   for (let i = 0; i < filled; i++) {

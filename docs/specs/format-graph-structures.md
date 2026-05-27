@@ -8,11 +8,11 @@ folds, filters, or punts.
 
 | Format                 | Graph density                                           | Wetron's plumbing handling                                                                                  | Function-body / subgraphs                 |
 | ---------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| ONNX                   | Clean — initializers formally separated from nodes      | `Constant` folded into `initializers`                                                                       | `If`/`Loop`/`Scan` body **hidden**        |
-| TFLite                 | Clean — weights live in `buffers[]` indexed by tensor   | None needed                                                                                                 | only `subgraphs[0]` parsed                |
-| Keras (`.keras`)       | Clean — layer level; weights in a separate file         | n/a                                                                                                         | n/a                                       |
-| Keras metadata (`.pb`) | Clean — wraps the same Keras config                     | n/a                                                                                                         | n/a                                       |
-| TF SavedModel (`.pb`)  | **Wide by default** — every layer expands into many ops | `VarHandleOp` folded into `initializers`; `ReadVariableOp`/`AssignVariableOp`/`VarIsInitializedOp` filtered | `StatefulPartitionedCall` body **inlined recursively** with arg binding |
+| ONNX                   | Clean - initializers formally separated from nodes      | `Constant` folded into `initializers`                                                                       | `If`/`Loop`/`Scan` body **hidden**        |
+| TFLite                 | Clean - weights live in `buffers[]` indexed by tensor   | None needed                                                                                                 | only `subgraphs[0]` parsed                |
+| Keras (`.keras`)       | Clean - layer level; weights in a separate file         | n/a                                                                                                         | n/a                                       |
+| Keras metadata (`.pb`) | Clean - wraps the same Keras config                     | n/a                                                                                                         | n/a                                       |
+| TF SavedModel (`.pb`)  | **Wide by default** - every layer expands into many ops | `VarHandleOp` folded into `initializers`; `ReadVariableOp`/`AssignVariableOp`/`VarIsInitializedOp` filtered | `StatefulPartitionedCall` body **inlined recursively** with arg binding |
 | ExecuTorch (`.pte`)    | Linear chain                                            | n/a                                                                                                         | only `execution_plans[0]` parsed          |
 | TorchScript Mobile     | Linear chain (forced)                                   | n/a                                                                                                         | methods **concatenated**                  |
 
@@ -39,10 +39,10 @@ Instead, the renderer surfaces it as a "weight pill" inside its consumer's card
 
 That single rule handles four different "what counts as a weight" representations:
 
-- ONNX `initializer[]` — already a separate field on the proto.
-- TFLite tensors with non-empty `buffers[]` — added to `initializers` at parse time.
-- TF SavedModel `VarHandleOp` — added to `initializers`, kept in `nodes` so checkpoint code can still read `shared_name`.
-- Folded ONNX `Constant` ops — moved from `nodes` to `initializers` at parse time.
+- ONNX `initializer[]` - already a separate field on the proto.
+- TFLite tensors with non-empty `buffers[]` - added to `initializers` at parse time.
+- TF SavedModel `VarHandleOp` - added to `initializers`, kept in `nodes` so checkpoint code can still read `shared_name`.
+- Folded ONNX `Constant` ops - moved from `nodes` to `initializers` at parse time.
 
 Adding a new format? Make its weights flow through `initializers`; don't invent a parallel channel.
 
@@ -50,7 +50,7 @@ Adding a new format? Make its weights flow through `initializers`; don't invent 
 
 ### ONNX (`packages/onnx/src/parse.ts`)
 
-**Wire format**: protobuf. `onnx.ModelProto` → `GraphProto` with `node[]`,
+**Wire format**: protobuf. `onnx.ModelProto` -> `GraphProto` with `node[]`,
 `initializer[]`, `input[]`, `output[]`.
 
 **Why it renders cleanly**: ONNX explicitly separates trainable weights
@@ -67,7 +67,7 @@ main `nodes` list with names prefixed by `<wrapper>/<attr>/`; references
 internal to a subgraph (its formal inputs, locally-scoped initializers,
 sibling node outputs) are also prefixed, while outer-scope captures stay
 unprefixed so edges still wire to the existing producer. Recurses up to depth
-4 for nested control flow. Verified on `fcos_resnet50_fpn_Opset17.onnx` —
+4 for nested control flow. Verified on `fcos_resnet50_fpn_Opset17.onnx` -
 the `If_2401` op's previously hidden 30-node else branch is now visible as
 `If_2401/else_branch/<original>`.
 
@@ -78,7 +78,7 @@ the `If_2401` op's previously hidden 30-node else branch is now visible as
   `.toJSON()`); decode failures now emit `ParseWarning` instead of silently
   dropping the bytes.
 - `uint32` initializer values stored in `uint32Data` (rather than `rawData`)
-  are now decoded — they were previously missed.
+  are now decoded - they were previously missed.
 
 ### TFLite (`packages/tflite/src/parse.ts`)
 
@@ -89,17 +89,17 @@ the `If_2401` op's previously hidden 30-node else branch is now visible as
 intermediates and inputs/outputs stay as graph values.
 
 **Only `subgraphs[0]` is parsed** (`parse.ts:135`). A `.tflite` model can have
-multiple subgraphs — typically one is the inference graph and others are the
+multiple subgraphs - typically one is the inference graph and others are the
 bodies of `IF`/`WHILE` ops. Bodies are invisible; the control-flow op shows up
 as a single node with hidden internals.
 
-**Op attributes are dropped** (`parse.ts:230` — every op gets
+**Op attributes are dropped** (`parse.ts:230` - every op gets
 `attributes: {}`). The TFLite `BuiltinOptions` union (`Conv2DOptions`,
 `PoolingOptions`, `FusedActivation`, padding mode, axes, …) carries the
 inference-relevant params and isn't surfaced. The panel can show op type and
 shape but not stride/padding/activation. Known gap.
 
-**Quantize / Dequantize stay visible** — they're real ops, not plumbing, and
+**Quantize / Dequantize stay visible** - they're real ops, not plumbing, and
 quantized models often want to see where dynamic-range conversion happens.
 
 ### Keras `.keras` (`packages/keras/src/parse.ts`)
@@ -108,20 +108,20 @@ quantized models often want to see where dynamic-range conversion happens.
 graph; `model_weights.h5` carries weights but is not parsed for graph display.
 
 **Why it renders cleanly**: the JSON is layer-level. Each Keras layer maps to
-one `GraphNode` — there's no "many TF ops per Keras layer" expansion at this
+one `GraphNode` - there's no "many TF ops per Keras layer" expansion at this
 layer of abstraction.
 
 **Two graph styles**:
 
-- `Sequential` — linear chain. Output derives from the last successfully
+- `Sequential` - linear chain. Output derives from the last successfully
   built node (skipping layers without names that get a `layer_name_missing`
   warning).
-- `Functional` — DAG via each layer's `inbound_nodes`. Outputs are inferred
+- `Functional` - DAG via each layer's `inbound_nodes`. Outputs are inferred
   as the layers whose outputs are never consumed by another layer.
 
 **Decompression**: currently uses `fflate.unzipSync`. Native
 `DecompressionStream` is the documented preference but would flip the parse
-function from sync to async — deferred.
+function from sync to async - deferred.
 
 ### Keras metadata (`packages/savedmodel/src/parse-keras-meta.ts`)
 
@@ -140,11 +140,11 @@ This is where things get noisy. Every Keras layer expands into many TF ops:
   `Conv2D` op.
 - A `BatchNormalization` Keras layer becomes ~10 forward-pass ops plus 4
   `VarHandleOp`/`ReadVariableOp` pairs (gamma, beta, moving_mean,
-  moving_variance) — the main culprit for "linear Keras chain renders wide".
+  moving_variance) - the main culprit for "linear Keras chain renders wide".
 - Each variable also gets an `AssignVariableOp` (writes the initial value at
   session init) and a `VarIsInitializedOp` (init-time check).
 
-A 16-layer `Conv → ReLU` model produces ~170 raw TF nodes, mostly plumbing.
+A 16-layer `Conv -> ReLU` model produces ~170 raw TF nodes, mostly plumbing.
 
 **The fold (current behavior)**:
 
@@ -152,8 +152,8 @@ A 16-layer `Conv → ReLU` model produces ~170 raw TF nodes, mostly plumbing.
 | -------------------- | ----------------------------------------------------------------------------------- |
 | `VarHandleOp`        | Added to `initializers` _and_ kept in `graph.nodes`. Layout skips it.               |
 | `ReadVariableOp`     | Dropped. Consumers' input names rewritten to point at the underlying `VarHandleOp`. |
-| `AssignVariableOp`   | Dropped — init-time only.                                                           |
-| `VarIsInitializedOp` | Dropped — init-time only.                                                           |
+| `AssignVariableOp`   | Dropped - init-time only.                                                           |
+| `VarIsInitializedOp` | Dropped - init-time only.                                                           |
 
 Why keep `VarHandleOp` in `nodes` if it's invisible? Because
 `attachCheckpointToGraph` walks `graph.nodes` for `VarHandleOp` to read each
@@ -179,7 +179,7 @@ input args bind positionally to the caller's outer-scope inputs; body-internal
 `ReadVariableOp` consumers are rewritten to point at the underlying
 `VarHandleOp` (same fold rule as at the top level); chained signature wrappers
 expand recursively up to depth 6. On the `vertical_tf2` fixture this turns 5
-layout-visible nodes (mostly opaque calls) into 120 — the 16-Conv2D /
+layout-visible nodes (mostly opaque calls) into 120 - the 16-Conv2D /
 20-ReLU / 5-MatMul chain becomes visible.
 
 **Checkpoint resolution**: variables in modern TF checkpoints use SSTable keys
@@ -202,10 +202,10 @@ to `<shared_name>/.ATTRIBUTES/VARIABLE_VALUE` for older / TF1 layouts.
 
 - Only `execution_plans[0]` is parsed. Multi-plan models (per-backend variants,
   quantization variants) lose their other plans.
-- Input/output detection uses "value not yet produced → output" walking, which
+- Input/output detection uses "value not yet produced -> output" walking, which
   can misclassify if the model has dynamic shapes or control flow.
 
-**Attributes**: `attributes: {}` for every op — operator parameters from the
+**Attributes**: `attributes: {}` for every op - operator parameters from the
 ExecuTorch schema are not surfaced.
 
 ### TorchScript Mobile (`packages/torchscript/src/parse.ts`)
@@ -222,12 +222,12 @@ Operators come from a separate operator table, named like `aten::conv2d.default`
 - When a scripted module exposes multiple methods (`forward`, `encode`,
   custom methods), the parser concatenates all their CALL instructions into a
   single linear chain. The resulting graph is topologically wrong for any
-  multi-method module — methods should be separate graphs (or at least
+  multi-method module - methods should be separate graphs (or at least
   separate disconnected subgraphs).
 - The hand-rolled bytecode decoder supports the opcodes seen in real-world
-  files. `REDUCE` (0x52) and `BUILD` (0x62) are silently skipped — if either
+  files. `REDUCE` (0x52) and `BUILD` (0x62) are silently skipped - if either
   appears in metadata, downstream graph data is wrong.
-- No tensor shape information is available in PTMF — `GraphValue.shape` is
+- No tensor shape information is available in PTMF - `GraphValue.shape` is
   always `null`.
 
 ## The recurring pattern: function-body inlining
@@ -244,7 +244,7 @@ Each inliner does the same three things, just against a format-specific containe
 
 1. Parse the nested graph.
 2. Prefix every internal node name to avoid collisions with the outer graph.
-3. Resolve cross-scope references — bind formal subgraph parameters to the
+3. Resolve cross-scope references - bind formal subgraph parameters to the
    caller's actual inputs (TF function arg binding), or leave outer-scope
    captures unprefixed so they wire to existing producers (ONNX subgraphs).
 
@@ -266,11 +266,11 @@ These come out of `transform.ts` and apply uniformly:
   prop (defaults to `"TB"`). Pipelines that read better left-to-right can pass
   `"LR"`. The transform threads it through dagre's `setGraph({ rankdir })`.
 - **Multi-edge handling**: when N edges share the same source/target pair
-  (e.g., two slots reading the same tensor — `Add(x, x)`, `MatMul(x, x.T)`),
+  (e.g., two slots reading the same tensor - `Add(x, x)`, `MatMul(x, x.T)`),
   they're now fanned out by `(slot − (total − 1) / 2) × FAN_STEP` px so they
   don't overlap into a single stroke.
 - **Orphan nodes**: nodes with no edges still get unique x-positions from
-  dagre — they don't stack at `(0, 0)`. They do sit on the same row as graph
+  dagre - they don't stack at `(0, 0)`. They do sit on the same row as graph
   inputs (rank 0), which can look odd but isn't wrong.
 - **`onlyRenderVisibleElements`** is enabled on the React renderer. Edge
   highlighting and search tinting still operate over the full graph; only the
@@ -294,16 +294,16 @@ These come out of `transform.ts` and apply uniformly:
 
 ## Open work (in priority order)
 
-1. **TFLite `BuiltinOptions`** — surface at least `Conv2DOptions`,
+1. **TFLite `BuiltinOptions`** - surface at least `Conv2DOptions`,
    `PoolingOptions`, `FullyConnectedOptions`, `FusedActivation`. Prerequisite
    for the next item.
-2. **TFLite multi-subgraph** — once `IfOptions.then_subgraph_index` and
+2. **TFLite multi-subgraph** - once `IfOptions.then_subgraph_index` and
    `WhileOptions.body_subgraph_index` are visible, inline the referenced
    `subgraphs[i]` at each control-flow op site (same shape as the ONNX
    inliner).
-3. **TorchScript multi-method** — emit per-method graphs (or one disconnected
+3. **TorchScript multi-method** - emit per-method graphs (or one disconnected
    union with method boundaries explicit).
-4. **ExecuTorch multi-plan** — selector or aggregated view.
+4. **ExecuTorch multi-plan** - selector or aggregated view.
 
 Already done (kept here so the doc reads as a changelog of how we got from
 "every SavedModel renders as 5 opaque ops" to the current state):

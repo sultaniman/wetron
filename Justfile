@@ -18,7 +18,7 @@ build:
     cd packages/core        && bunx tsup --config tsup.index.config.ts
     cd packages/tokens      && bunx tsup
     cd packages/react       && bunx vite build
-    # @wetron/svelte ships source directly — no build step
+    # @wetron/svelte ships source directly - no build step
 
 # Run the test suite
 test:
@@ -45,7 +45,7 @@ publish:
     cd packages/react       && bun publish --access public
     cd packages/svelte      && bun publish --access public
 
-# Dry-run all packages — shows resolved versions and files before publishing
+# Dry-run all packages - shows resolved versions and files before publishing
 preview:
     cd packages/tokens      && bun publish --dry-run --access public
     cd packages/core        && bun publish --dry-run --access public

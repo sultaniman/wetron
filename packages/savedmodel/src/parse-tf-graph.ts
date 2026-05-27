@@ -122,13 +122,13 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   const initializers = new Map<string, { shape: readonly number[]; dtype: string }>();
   const varHandleInfo = new Map<string, { shape: readonly number[]; dtype: string }>();
   const readToVar = new Map<string, string>();
-  // Call ops whose function body has been inlined — their captured-variable inputs are
+  // Call ops whose function body has been inlined - their captured-variable inputs are
   // redundant with the inlined body's references, so we strip them post-inline.
   const inlinedCallNames = new Set<string>();
   let hasVarHandleOp = false;
 
   // tf.saved_model.save() always emits __saver_save / __saver_restore signatures alongside
-  // the inference signature. They're checkpoint plumbing, not the model — drop them so the
+  // the inference signature. They're checkpoint plumbing, not the model - drop them so the
   // rendered graph doesn't show duplicate-looking branches whose weight chips don't resolve.
   // Mark nodes consuming `saver_filename` (the saver Placeholder), then transitively mark
   // upstream nodes whose only remaining consumers are in the excluded set.
@@ -200,7 +200,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
         continue;
       }
 
-      // Variable plumbing — these ops have no inference role and just clutter the layout.
+      // Variable plumbing - these ops have no inference role and just clutter the layout.
       // ReadVariableOp consumers are rewritten below to point at the underlying VarHandleOp.
       // VarIsInitializedOp / AssignVariableOp run only at session init / checkpoint restore.
       // VarHandleOps stay in `nodes` so attachCheckpointToGraph can walk them for `shared_name`,
@@ -285,7 +285,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
     if (fn.signature?.name) functionByName.set(fn.signature.name, fn);
   }
 
-  // Local readToVar map for a function body — populated per call so that body-internal
+  // Local readToVar map for a function body - populated per call so that body-internal
   // ReadVariableOp consumers get rewritten to the underlying variable (an arg) just
   // like at the top level.
   function inlineCall(
@@ -305,7 +305,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
     const bodyNodes = fn.nodeDef ?? [];
     const sigInputs = fn.signature?.inputArg ?? [];
 
-    // Bind: arg name (used inside body) → caller's actual input from outer scope.
+    // Bind: arg name (used inside body) -> caller's actual input from outer scope.
     const argMap = new Map<string, string>();
     for (let k = 0; k < sigInputs.length && k < callInputs.length; k++) {
       const argName = sigInputs[k].name;
@@ -327,7 +327,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
 
     const resolveBodyRef = (ref: string): string => {
       const stripped = stripPort(ref);
-      // Body-local ReadVariableOp — drop it; resolve to its underlying source. The
+      // Body-local ReadVariableOp - drop it; resolve to its underlying source. The
       // source is typically a function arg (bound to an outer VarHandleOp), so that
       // path resolves through argMap below.
       if (localReadToVar.has(stripped)) {
@@ -336,11 +336,11 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
         if (localNames.has(src)) return prefix + src;
         return readToVar.get(src) ?? src;
       }
-      // Function arg — replace with caller's outer-scope ref.
+      // Function arg - replace with caller's outer-scope ref.
       if (argMap.has(stripped)) return argMap.get(stripped)!;
-      // Internal name — prefix it.
+      // Internal name - prefix it.
       if (localNames.has(stripped)) return prefix + stripped;
-      // Closure / outer-scope capture — leave as-is (with read-var rewrite if applicable).
+      // Closure / outer-scope capture - leave as-is (with read-var rewrite if applicable).
       return readToVar.get(stripped) ?? stripped;
     };
 
@@ -348,7 +348,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       const bnName = bn.name;
       const op = bn.op;
       if (!bnName || !op) continue;
-      // Plumbing — same rules as the top-level pass.
+      // Plumbing - same rules as the top-level pass.
       if (op === "ReadVariableOp" || op === "VarIsInitializedOp" || op === "AssignVariableOp") {
         continue;
       }
@@ -388,7 +388,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
         attributes,
       });
 
-      // Nested call — recurse with the resolved inputs so its body's args bind to
+      // Nested call - recurse with the resolved inputs so its body's args bind to
       // outer-most scope references rather than this body's locals.
       if (op === "StatefulPartitionedCall" || op === "PartitionedCall") {
         const fnName = bn.attr?.f?.func?.name;
@@ -458,8 +458,8 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   }
 
   // Graph outputs: nodes whose output tensors are never consumed as another node's input.
-  // Skip initializers (folded variables) — they're declarations, never real outputs.
-  // Skip standalone VarHandleOps too — they're variable sources, not model outputs.
+  // Skip initializers (folded variables) - they're declarations, never real outputs.
+  // Skip standalone VarHandleOps too - they're variable sources, not model outputs.
   const outputs: GraphValue[] = finalNodes
     .filter(
       (n) =>

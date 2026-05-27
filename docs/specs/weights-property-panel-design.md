@@ -1,4 +1,4 @@
-# Weights in Property Panel — Design
+# Weights in Property Panel - Design
 
 ## Goal
 
@@ -9,8 +9,8 @@ For models larger than 20 MB the switch starts off, no stats or plots are comput
 ## Non-goals
 
 - Weight rendering for `keras`, `savedmodel`, `torchscript`, `executorch` parsers in v1. They will set `fileSizeBytes` but leave `weights` undefined; the panel falls back to today's behavior (shape + dtype only).
-- A global "show all weights" toolbar toggle. Per-tensor only — fits the lazy load model and keeps surface area small.
-- Pagination of the values grid beyond a one-shot "Load all N →" link.
+- A global "show all weights" toolbar toggle. Per-tensor only - fits the lazy load model and keeps surface area small.
+- Pagination of the values grid beyond a one-shot "Load all N ->" link.
 - Cross-model weight comparison (covered by the existing `model-diff-design.md`).
 
 ## IR change
@@ -46,7 +46,7 @@ export interface ModelGraph {
 | `@wetron/torchscript` | Same. |
 | `@wetron/executorch` | Same. |
 
-`fileSizeBytes` is `bytes.byteLength` at parse entry — passed in or read at the top of each `parse*` function.
+`fileSizeBytes` is `bytes.byteLength` at parse entry - passed in or read at the top of each `parse*` function.
 
 ## New core modules
 
@@ -66,17 +66,17 @@ export function decodeFirstN(
 ): Float64Array | Int32Array | BigInt64Array | null;
 ```
 
-- Uses `DataView` directly via the existing `dtypes.ts` helpers — no patches, no allocations beyond the result typed array.
+- Uses `DataView` directly via the existing `dtypes.ts` helpers - no patches, no allocations beyond the result typed array.
 - Returns `null` for dtypes we do not render: `string`, `complex64`, `complex128`, sparse encodings.
-- `decodeFirstN` walks at most `n` elements — used for the values grid so a 9 MB tensor's first 32 values do not require materializing the rest.
+- `decodeFirstN` walks at most `n` elements - used for the values grid so a 9 MB tensor's first 32 values do not require materializing the rest.
 
 ### `packages/core/src/weight-stats.ts`
 
 Single-pass over the decoded values. One walk computes:
 
 - `min`, `max`, `sum`, `sumSq`, `zeroCount`, `count`
-- `histogram` — fixed 12 bins, edges defined by `[min, max]` after the first pass (or computed in a streaming-quantile-free two-pass for large tensors; v1 does two passes — one for range, one for bins, both linear)
-- `heatmap` — downsample the flat sequence into a 16×8 grid by taking the mean of each contiguous chunk
+- `histogram` - fixed 12 bins, edges defined by `[min, max]` after the first pass (or computed in a streaming-quantile-free two-pass for large tensors; v1 does two passes - one for range, one for bins, both linear)
+- `heatmap` - downsample the flat sequence into a 16×8 grid by taking the mean of each contiguous chunk
 
 ```ts
 export interface WeightStats {
@@ -101,16 +101,16 @@ Both modules are exported from `@wetron/core` for any IR consumer to use, not ju
 
 ### Layout
 
-1. **Header** — `W` icon (square chip in panel-blue, matching `Cpu`/`Cube`), "Weight" title, tensor name as monospace 9 px subtitle.
-2. **Info section** — `shape`, `dtype`, `size` (humanized: `6.75 KB`, `9.0 MB`).
-3. **Distribution / Heatmap section** — section label `Distribution` or `Heatmap` on the left, segmented `dist | heat` toggle on the right. Below: numeric stats rows (`min`, `max`, `μ ± σ`, `zeros`). Below those: 12-bar histogram with min / 0 / max axis when `dist`, or 16×8 diverging heatmap with `-max … +max` legend when `heat`.
-4. **Values section** — section header is the `Show weights` switch on the left and `<count> · first 32` meta on the right. When on: 4-column × 8-row dense numeric grid (32 cells), each cell right-aligned and shown to 3 decimals (e.g. `-.184`); below the grid `Load all <count> →` if the tensor has more than 32 elements. Clicking "Load all" expands the grid to the full count, capped at 4096 cells in v1 to keep DOM size bounded — values beyond that are reachable in a future iteration. When off: only the header line.
+1. **Header** - `W` icon (square chip in panel-blue, matching `Cpu`/`Cube`), "Weight" title, tensor name as monospace 9 px subtitle.
+2. **Info section** - `shape`, `dtype`, `size` (humanized: `6.75 KB`, `9.0 MB`).
+3. **Distribution / Heatmap section** - section label `Distribution` or `Heatmap` on the left, segmented `dist | heat` toggle on the right. Below: numeric stats rows (`min`, `max`, `μ ± σ`, `zeros`). Below those: 12-bar histogram with min / 0 / max axis when `dist`, or 16×8 diverging heatmap with `-max … +max` legend when `heat`.
+4. **Values section** - section header is the `Show weights` switch on the left and `<count> · first 32` meta on the right. When on: 4-column × 8-row dense numeric grid (32 cells), each cell right-aligned and shown to 3 decimals (e.g. `-.184`); below the grid `Load all <count> ->` if the tensor has more than 32 elements. Clicking "Load all" expands the grid to the full count, capped at 4096 cells in v1 to keep DOM size bounded - values beyond that are reachable in a future iteration. When off: only the header line.
 
 ### State
 
-- `viz: 'dist' | 'heat'` — local state, defaults `dist`.
-- `showWeights: boolean` — local state, initialized to `graph.fileSizeBytes <= 20 * 1024 * 1024`.
-- `loaded: { stats, valuesPreview } | null` — `null` until `showWeights` flips on; computed inside the panel via `useMemo` keyed on tensor name, so switching to another initializer recomputes (and reclaims the previous tensor's values for GC).
+- `viz: 'dist' | 'heat'` - local state, defaults `dist`.
+- `showWeights: boolean` - local state, initialized to `graph.fileSizeBytes <= 20 * 1024 * 1024`.
+- `loaded: { stats, valuesPreview } | null` - `null` until `showWeights` flips on; computed inside the panel via `useMemo` keyed on tensor name, so switching to another initializer recomputes (and reclaims the previous tensor's values for GC).
 
 ### Large-model state
 
@@ -120,7 +120,7 @@ When `graph.fileSizeBytes > 20 * 1024 * 1024` and `showWeights` is off, the Dist
 2. Info section (shape + dtype + size)
 3. A single section containing the `Show weights ◯` switch followed by an amber note:
 
-   > **Large model — `<formatted size>`**
+   > **Large model - `<formatted size>`**
    > Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
 
 Toggling on calls `graph.weights.get(name)`, runs `decodeFirstN` for the values preview and `decodeWeight` + `computeStats` for the full stats, then renders the full layout in place.
@@ -165,12 +165,12 @@ if ('tensor' in t && graph.initializers.has(t.tensor.name)) {
 
 ## Testing
 
-- **`weight-decoder`** — round-trip known byte patterns for `float32`, `int8`, `uint8`, `int32`, `int64`, `float16`. `decodeFirstN` returns exactly N. Returns `null` for `string`, `complex64`.
-- **`weight-stats`** — min/max/mean/std/zeros against hand-computed reference; histogram bin counts sum to total length; heatmap length is 128.
-- **`onnx` parser** — `mnist-12.onnx`: `graph.weights` defined, `totalBytes > 0`, `weights.get('<known initializer>')` returns bytes whose length equals `shape × dtype size`.
-- **`tflite` parser** — same, against `mobilenet_v2.tflite`.
-- **Other parsers** — `graph.weights === undefined`, `graph.fileSizeBytes` matches input length.
-- **`WeightPanel`** —
+- **`weight-decoder`** - round-trip known byte patterns for `float32`, `int8`, `uint8`, `int32`, `int64`, `float16`. `decodeFirstN` returns exactly N. Returns `null` for `string`, `complex64`.
+- **`weight-stats`** - min/max/mean/std/zeros against hand-computed reference; histogram bin counts sum to total length; heatmap length is 128.
+- **`onnx` parser** - `mnist-12.onnx`: `graph.weights` defined, `totalBytes > 0`, `weights.get('<known initializer>')` returns bytes whose length equals `shape × dtype size`.
+- **`tflite` parser** - same, against `mobilenet_v2.tflite`.
+- **Other parsers** - `graph.weights === undefined`, `graph.fileSizeBytes` matches input length.
+- **`WeightPanel`** -
   - Renders header + info for an initializer.
   - Small model: panel auto-loads; switch toggles the values grid; viz toggle swaps between dist and heat.
   - Large model (mocked `fileSizeBytes` > 20 MB): renders header, info, size note + off-switch only; no stats / plot / grid until toggled.

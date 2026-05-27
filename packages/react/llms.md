@@ -106,7 +106,7 @@ The 5-stop sequential colormap (heatmap legend bar) reads from CSS variables, so
 | `--wetron-seg-on-bg`    | `#fff`    | `rgba(255,255,255,.12)` | active tab bg                 |
 | `--wetron-seg-on-color` | `#2563eb` | `#f1f5f9`               | active tab text color         |
 
-Both themes ramp pale → deep low-to-high, so the same data renders with consistent direction across modes. Tile colors are JS-computed (light vs dark stop arrays selected via `isDark` prop); the legend bar uses the matching CSS variables so the two stay in sync.
+Both themes ramp pale -> deep low-to-high, so the same data renders with consistent direction across modes. Tile colors are JS-computed (light vs dark stop arrays selected via `isDark` prop); the legend bar uses the matching CSS variables so the two stay in sync.
 
 ## Implementation notes
 
@@ -136,4 +136,4 @@ Number formatting (`formatVal`) is dtype-aware:
 - Float outside that range - scientific 2 sig figs (`1.5e-4`, `2.5e+7`).
 - `NaN` / `±Inf` / `0` are rendered as those literals.
 
-The colormap uses `pickColormap(min, max)` to choose between `sequential` (any non-zero range) and `constant` (`min === max`, returns a translucent slate so the panel bg shows through). `colorForCell(value, min, max, kind, isDark)` interpolates between 5 stops; `isDark` selects between light and dark stop arrays, both ramping pale → deep low-to-high.
+The colormap uses `pickColormap(min, max)` to choose between `sequential` (any non-zero range) and `constant` (`min === max`, returns a translucent slate so the panel bg shows through). `colorForCell(value, min, max, kind, isDark)` interpolates between 5 stops; `isDark` selects between light and dark stop arrays, both ramping pale -> deep low-to-high.

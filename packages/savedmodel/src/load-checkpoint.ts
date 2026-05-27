@@ -72,7 +72,7 @@ function buildLoadedCheckpoint(
 /**
  * Load a TF2 SavedModel checkpoint pair (variables.index + variables.data-00000-of-00001).
  * Returns a WeightSource keyed by checkpoint SSTable key plus dtype/shape metas
- * and a friendly-name → key mapping derived from the object graph blob.
+ * and a friendly-name -> key mapping derived from the object graph blob.
  */
 export async function loadSavedModelWeights(
   indexFile: File,

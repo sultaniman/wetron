@@ -1,7 +1,7 @@
 {
   "name": "@wetron/onnx",
   "version": "0.0.15",
-  "description": "ONNX model parser — extracts graph structure (nodes, edges, shapes) from .onnx files",
+  "description": "ONNX model parser - extracts graph structure (nodes, edges, shapes) from .onnx files",
   "keywords": [
     "graph",
     "model-parser",

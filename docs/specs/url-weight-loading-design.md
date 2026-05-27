@@ -1,4 +1,4 @@
-# URL Weight Loading — Design
+# URL Weight Loading - Design
 
 ## Goal
 
@@ -6,22 +6,22 @@ Add URL-based weight loading for TF2 SavedModel checkpoints and ONNX models with
 
 ## Non-goals
 
-- A unified `loadExternalWeights(graph, baseUrl)` dispatcher — two explicit functions, one per format.
-- Baking weight loading into `parseModelFromUrl` — weight loading remains a separate step.
-- Auto-discovering shard URLs from conventions — callers pass explicit URLs.
+- A unified `loadExternalWeights(graph, baseUrl)` dispatcher - two explicit functions, one per format.
+- Baking weight loading into `parseModelFromUrl` - weight loading remains a separate step.
+- Auto-discovering shard URLs from conventions - callers pass explicit URLs.
 - ONNX models where external data is not used (`data_location != EXTERNAL`).
 
 ## New functions
 
-### `@wetron/savedmodel` — `load-checkpoint.ts`
+### `@wetron/savedmodel` - `load-checkpoint.ts`
 
 ```ts
 export async function loadSavedModelWeightsFromUrls(indexUrl: string, ...dataUrls: string[]): Promise<LoadedCheckpoint>;
 ```
 
-Fetches all URLs in parallel via `fetch().arrayBuffer()`, then runs the same checkpoint parsing logic as `loadSavedModelWeights`. `dataUrls` must be in shard order (shard 0, 1, …) — the caller is responsible for ordering. Returns the same `LoadedCheckpoint` shape; use `attachCheckpointToGraph` to wire it into a `ModelGraph` as usual.
+Fetches all URLs in parallel via `fetch().arrayBuffer()`, then runs the same checkpoint parsing logic as `loadSavedModelWeights`. `dataUrls` must be in shard order (shard 0, 1, …) - the caller is responsible for ordering. Returns the same `LoadedCheckpoint` shape; use `attachCheckpointToGraph` to wire it into a `ModelGraph` as usual.
 
-### `@wetron/onnx` — new `src/load-external.ts`
+### `@wetron/onnx` - new `src/load-external.ts`
 
 ```ts
 export async function loadOnnxExternalWeightsFromUrl(modelBytes: Uint8Array, baseUrl: string): Promise<WeightSource>;
@@ -44,13 +44,13 @@ No changes to `@wetron/core`. No new IR types.
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | HTTP response not `ok`                  | `throw new ParseError(format, \`fetch ${url}: ${status}\`)`                                                     |
 | ONNX model has no external data entries | Return empty `WeightSource`                                                                                     |
-| TF2 `dataUrls` empty                    | Zero shards — `get()` always `undefined`                                                                        |
+| TF2 `dataUrls` empty                    | Zero shards - `get()` always `undefined`                                                                        |
 | Slice out of bounds                     | `ParseError` from existing checkpoint logic, unchanged                                                          |
-| CORS blocked                            | Browser throws a network error before `fetch` resolves — surfaces as an unhandled rejection, not a `ParseError` |
+| CORS blocked                            | Browser throws a network error before `fetch` resolves - surfaces as an unhandled rejection, not a `ParseError` |
 
 ## Testing
 
-Both functions mock `globalThis.fetch` to return pre-loaded fixture bytes — no real network calls.
+Both functions mock `globalThis.fetch` to return pre-loaded fixture bytes - no real network calls.
 
 - **TF2**: reuse existing `variables.index` + `variables.data` fixtures via mocked `fetch`; assert the returned `LoadedCheckpoint` matches what `loadSavedModelWeights` produces for the same files.
 - **ONNX**: small fixture ONNX model with `data_location = EXTERNAL` pointing to a `.data` file; mock `fetch` for both URLs; assert `WeightSource.get()` returns correct bytes.

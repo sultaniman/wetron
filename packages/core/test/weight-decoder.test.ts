@@ -64,7 +64,7 @@ describe("decodeWeight", () => {
   });
 
   test("returns null when shape product overflows to Infinity", () => {
-    // 1e9 * 1e9 * 1e9 = 1e27 → loses precision but is finite; use larger to actually overflow.
+    // 1e9 * 1e9 * 1e9 = 1e27 -> loses precision but is finite; use larger to actually overflow.
     // Number.MAX_SAFE_INTEGER ≈ 9e15; product of large shape elements goes to Infinity past Number.MAX_VALUE.
     const huge = [1e200, 1e200];
     expect(decodeWeight(bytesOf(0x00, 0x00, 0x80, 0x3f), "float32", huge)).toBeNull();

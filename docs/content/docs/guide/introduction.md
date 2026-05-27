@@ -61,4 +61,4 @@ model file
 ## Demo app
 
 The repo ships a small demo app under [`apps/demo`](https://github.com/sultaniman/wetron/tree/main/apps/demo) (React) and [`apps/demo-svelte`](https://github.com/sultaniman/wetron/tree/main/apps/demo-svelte) (Svelte) that wire `parseModel` up to the renderer packages and let you drop any supported file in the browser.
-{{< themed-img light="images/demo-light-empty.png" dark="images/demo-dark-empty.png" alt="Wetron demo app — empty state with drop zone" >}}
+{{< themed-img light="images/demo-light-empty.png" dark="images/demo-dark-empty.png" alt="Wetron demo app - empty state with drop zone" >}}

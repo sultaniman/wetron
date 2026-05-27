@@ -108,7 +108,7 @@ function buildSequential(
     }
   }
 
-  // Use the last successfully built node, not raw layers — layers without names
+  // Use the last successfully built node, not raw layers - layers without names
   // are skipped during the loop and would point at a name not in the graph.
   const lastNode = nodes[nodes.length - 1];
   const outputs: GraphValue[] = lastNode

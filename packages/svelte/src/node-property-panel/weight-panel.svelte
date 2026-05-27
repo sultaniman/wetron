@@ -114,7 +114,7 @@
     </div>
   {:else if isLarge && !showWeights}
     <div class="sizeNote">
-      <strong>Large model — {formatBytes(graph.fileSizeBytes)}</strong><br />
+      <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong><br />
       Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
     </div>
   {/if}

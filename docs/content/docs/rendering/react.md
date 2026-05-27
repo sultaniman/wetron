@@ -79,8 +79,8 @@ When `target` resolves to an initializer tensor (a name present in `graph.initia
 The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally; the histogram and heatmap visualisations come from the same `WeightStats.histogram` (12 bins) and `WeightStats.heatmap` (16 × 8 grid) documented in [Weights](../api/weights/).
 
 {{< themed-img-row >}}
-{{< themed-img light="images/property-panel-heatmap-light.png" dark="images/property-panel-heatmap-dark.png" alt="NodePropertyPanel weight panel — heatmap view" >}}
-{{< themed-img light="images/property-panel-bar-plot-light.png" dark="images/property-panel-bar-plot-dark.png" alt="NodePropertyPanel weight panel — histogram view" >}}
+{{< themed-img light="images/property-panel-heatmap-light.png" dark="images/property-panel-heatmap-dark.png" alt="NodePropertyPanel weight panel - heatmap view" >}}
+{{< themed-img light="images/property-panel-bar-plot-light.png" dark="images/property-panel-bar-plot-dark.png" alt="NodePropertyPanel weight panel - histogram view" >}}
 {{< /themed-img-row >}}
 
 ## PanelTarget type

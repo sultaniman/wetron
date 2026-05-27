@@ -50,7 +50,7 @@ describe("WeightPanel small model", () => {
     expect(screen.getByText("max")).toBeDefined();
     // After the changes in Task 3, the values meta is "<count> values".
     expect(screen.getByText("4 values")).toBeDefined();
-    // Load all is gone — values are virtualized.
+    // Load all is gone - values are virtualized.
     expect(screen.queryByText(/Load all/)).toBeNull();
   });
 

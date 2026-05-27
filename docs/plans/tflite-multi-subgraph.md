@@ -2,12 +2,12 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Make body subgraphs of TFLite `IF` / `WHILE` ops visible by parsing the relevant `BuiltinOptions` to find subgraph indices and inlining `subgraphs[1+]` at each control-flow call site, with prefixed names + arg binding — same shape as the existing ONNX and SavedModel inliners.
+**Goal:** Make body subgraphs of TFLite `IF` / `WHILE` ops visible by parsing the relevant `BuiltinOptions` to find subgraph indices and inlining `subgraphs[1+]` at each control-flow call site, with prefixed names + arg binding - same shape as the existing ONNX and SavedModel inliners.
 
 **Architecture:**
 
 1. Refactor `parseTflite` so the per-subgraph work (read tensors, identify initializers, parse operators) lives in a private helper `parseSubgraphAt(bb, model, idx, ctx)`. The first call uses `idx=0` with no prefix to preserve existing behavior.
-2. Add a small focused `BuiltinOptions` reader that decodes `IfOptions` (op code 51) and `WhileOptions` (op code 64) — only those two; full `BuiltinOptions` exposure is a separate piece of work.
+2. Add a small focused `BuiltinOptions` reader that decodes `IfOptions` (op code 51) and `WhileOptions` (op code 64) - only those two; full `BuiltinOptions` exposure is a separate piece of work.
 3. While walking operators in the helper, record any `IF`/`WHILE` site with its subgraph indices and resolved caller-side input tensor names into a `controlFlowSites` array on the context. After the main subgraph parse, drain that array: for each site, recurse into the referenced subgraph with `prefix = "<callName>/<branch>/"` and an `argMap` that binds the formal subgraph inputs to the caller's actual outer-scope inputs.
 4. Body initializers go into the same `initializers` map keyed by their prefixed name; the renderer's existing initializer-skip rule (`transform.ts:113`) handles them with no further changes.
 
@@ -18,16 +18,16 @@
 ## Why this needs a plan instead of just edits
 
 - The TFLite parser is hand-rolled FlatBuffer reading. Splitting per-subgraph work into a helper without breaking the existing single-subgraph flow needs deliberate ordering.
-- Tensors are referenced by index *within a subgraph*. Two subgraphs can have tensors with colliding `name` fields — the inliner must prefix every tensor reference, not just node names.
+- Tensors are referenced by index *within a subgraph*. Two subgraphs can have tensors with colliding `name` fields - the inliner must prefix every tensor reference, not just node names.
 - We have no test fixture: none of the eight committed `.tflite` models has an `IF` or `WHILE` op. Task 3 generates one with a Python script (mirroring `scripts/export_savedmodel_with_variables.py`) so subsequent integration tests have something real to assert against.
-- `BuiltinOptions` is a FlatBuffer union — to find which option type an op carries, you read `Operator.builtin_options_type` (uint8) and `Operator.builtin_options` (table offset). The plan only decodes the two option types we need; the rest stays a known gap.
+- `BuiltinOptions` is a FlatBuffer union - to find which option type an op carries, you read `Operator.builtin_options_type` (uint8) and `Operator.builtin_options` (table offset). The plan only decodes the two option types we need; the rest stays a known gap.
 
 ## File structure
 
 | Path                                                | Action  | Responsibility                                                                                  |
 | --------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
 | `packages/tflite/src/parse.ts`                      | modify  | Extract `parseSubgraphAt` helper; add `controlFlowSites` to its context; wire the inliner pass. |
-| `packages/tflite/src/builtin-options.ts`            | create  | `readIfOptions`, `readWhileOptions` — pure FlatBuffer offset reads.                             |
+| `packages/tflite/src/builtin-options.ts`            | create  | `readIfOptions`, `readWhileOptions` - pure FlatBuffer offset reads.                             |
 | `packages/tflite/test/builtin-options.test.ts`      | create  | Unit tests against hand-crafted `Builder`-encoded option bytes.                                 |
 | `packages/tflite/test/parse.test.ts`                | modify  | Add IF-fixture integration test asserting branch nodes are visible with prefixed names.         |
 | `scripts/export_tflite_multisubgraph.py`            | create  | Python script that emits a small `.tflite` model with an `IF` op via `tf.lite.TFLiteConverter`. |
@@ -41,12 +41,12 @@
 **Files:**
 - Modify: `packages/tflite/src/parse.ts:111-260` (currently the body of `parseTflite`)
 
-The existing code does model-level setup (opcodes, buffers) and then per-subgraph work for `subgraphs[0]` inline. Pull the per-subgraph block into `parseSubgraphAt(bb, model, idx, ctx)`. The model-level state (`bufferBytes`, `bufferHasData`, `opcodeNames`) is shared across subgraphs — pass it through `ctx`. Tests must keep passing after this task with no semantic changes.
+The existing code does model-level setup (opcodes, buffers) and then per-subgraph work for `subgraphs[0]` inline. Pull the per-subgraph block into `parseSubgraphAt(bb, model, idx, ctx)`. The model-level state (`bufferBytes`, `bufferHasData`, `opcodeNames`) is shared across subgraphs - pass it through `ctx`. Tests must keep passing after this task with no semantic changes.
 
 - [ ] **Step 1: Read the current parser once to confirm the boundaries**
 
 Run: `cat packages/tflite/src/parse.ts | head -270`
-Expected: confirm lines 135–239 are the per-subgraph block (subgraph indirect through operator parsing). Lines 154–173 (`bufferBytes`, `bufferHasData`) are model-level — leave outside the helper.
+Expected: confirm lines 135–239 are the per-subgraph block (subgraph indirect through operator parsing). Lines 154–173 (`bufferBytes`, `bufferHasData`) are model-level - leave outside the helper.
 
 - [ ] **Step 2: Add the new types and helper signature at the bottom of `parse.ts`**
 
@@ -90,14 +90,14 @@ The boxed `totalWeightBytes` lets the helper accumulate while the caller assembl
 
 Cut lines 135–239 of the current `parseTflite` into the helper body. Apply these textual transforms in the moved block:
 
-- `subgraph` → `vecTable(bb, model, 2, subgraphIdx)`
+- `subgraph` -> `vecTable(bb, model, 2, subgraphIdx)`
 - Each tensor's `name` field becomes `ctx.prefix + name` *only* when emitted into `ctx.tensorShapes`, `ctx.initializers`, or used as a node's input/output. Within-subgraph indexing (e.g., `tensors[idx].name`) stays raw until the moment of emission.
 - For each tensor name `t.name` resolved into an op input/output, apply `ctx.argMap.get(t.name) ?? (ctx.prefix + t.name)`. Outer-scope captures hit the `argMap`; everything else gets prefixed.
 - Replace the operator-emit block's `nodes.push({...})` with `ctx.nodes.push({...})`. Use `${ctx.prefix}op_${i}` for the node name.
 - Replace `warnings.push(...)` with `ctx.warnings.push(...)`.
 - Replace `weightBytes.set(...)` / `totalWeightBytes += ...` with `ctx.weightBytes.set(...)` / `ctx.totalWeightBytes.value += ...`.
-- Add the `BuiltinOptions` site recording (filled in in Task 4 — for now leave a `// TODO control flow` comment so later steps know where).
-- Return `{ name, inputs, outputs }` where `name` is `string_(bb, sg, 4) ?? ""` (with prefix if non-empty: `ctx.prefix ? ctx.prefix : ""` — the top-level call gets the empty prefix and uses the raw name).
+- Add the `BuiltinOptions` site recording (filled in in Task 4 - for now leave a `// TODO control flow` comment so later steps know where).
+- Return `{ name, inputs, outputs }` where `name` is `string_(bb, sg, 4) ?? ""` (with prefix if non-empty: `ctx.prefix ? ctx.prefix : ""` - the top-level call gets the empty prefix and uses the raw name).
 
 - [ ] **Step 4: Update the call site in `parseTflite`**
 
@@ -143,7 +143,7 @@ return {
 - [ ] **Step 5: Run the full tflite test suite**
 
 Run: `bun test packages/tflite`
-Expected: all existing tests pass — `mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs`, etc. **No new tests, no behavior change.**
+Expected: all existing tests pass - `mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs`, etc. **No new tests, no behavior change.**
 
 - [ ] **Step 6: Commit**
 
@@ -160,7 +160,7 @@ git commit -m "extract tflite per-subgraph parser into helper, no behavior chang
 - Create: `packages/tflite/src/builtin-options.ts`
 - Create: `packages/tflite/test/builtin-options.test.ts`
 
-`IfOptions` and `WhileOptions` each carry two `int32` fields: `IfOptions { then_subgraph_index = 1, else_subgraph_index = 2 }`, `WhileOptions { cond_subgraph_index = 1, body_subgraph_index = 2 }`. Both are FlatBuffer tables — read via vtable offsets like the rest of `parse.ts`.
+`IfOptions` and `WhileOptions` each carry two `int32` fields: `IfOptions { then_subgraph_index = 1, else_subgraph_index = 2 }`, `WhileOptions { cond_subgraph_index = 1, body_subgraph_index = 2 }`. Both are FlatBuffer tables - read via vtable offsets like the rest of `parse.ts`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -205,7 +205,7 @@ test("readIfOptions defaults missing fields to 0", () => {
 - [ ] **Step 2: Run the tests, expect FAIL**
 
 Run: `bun test packages/tflite/test/builtin-options.test.ts`
-Expected: FAIL — `Cannot find module ../src/builtin-options.ts`.
+Expected: FAIL - `Cannot find module ../src/builtin-options.ts`.
 
 - [ ] **Step 3: Implement the module**
 
@@ -248,7 +248,7 @@ export function readWhileOptions(bb: ByteBuffer, table: number): WhileOptions {
 }
 ```
 
-Note the `field(0)` / `field(1)` indices: FlatBuffers field IDs are zero-based at the vtable level even though the .fbs schema lists them as `1` and `2` (the schema uses 1-based numbering and the vtable uses 0-based offsets — confirmed by how `parse.ts` already reads `Tensor.shape` at field 0 even though the .fbs schema calls it field 1).
+Note the `field(0)` / `field(1)` indices: FlatBuffers field IDs are zero-based at the vtable level even though the .fbs schema lists them as `1` and `2` (the schema uses 1-based numbering and the vtable uses 0-based offsets - confirmed by how `parse.ts` already reads `Tensor.shape` at field 0 even though the .fbs schema calls it field 1).
 
 - [ ] **Step 4: Run the tests, expect PASS**
 
@@ -270,7 +270,7 @@ git commit -m "decode tflite IfOptions and WhileOptions"
 - Create: `scripts/export_tflite_multisubgraph.py`
 - Create: `test-models/tflite_if_branching.tflite`
 
-Use `tf.cond` inside a `tf.function` and convert via `tf.lite.TFLiteConverter` — the resulting `.tflite` will have a main subgraph with one `IF` op and two body subgraphs.
+Use `tf.cond` inside a `tf.function` and convert via `tf.lite.TFLiteConverter` - the resulting `.tflite` will have a main subgraph with one `IF` op and two body subgraphs.
 
 - [ ] **Step 1: Write the script**
 
@@ -476,7 +476,7 @@ test("tflite_if_branching: IF body subgraphs inlined with prefixed names", async
   expect(branched.some((n) => n.opType === "TANH")).toBe(true);
 
   // Branch nodes' inputs should reference the IF op's caller-side input (not a
-  // formal-param name internal to the subgraph) — proves arg binding worked.
+  // formal-param name internal to the subgraph) - proves arg binding worked.
   const reluNode = branched.find((n) => n.opType === "RELU")!;
   const ifInputs = ifOps[0].inputs;
   expect(reluNode.inputs.some((i) => ifInputs.includes(i))).toBe(true);
@@ -486,7 +486,7 @@ test("tflite_if_branching: IF body subgraphs inlined with prefixed names", async
 - [ ] **Step 5: Run the test, expect FAIL initially, then PASS after the previous steps land**
 
 Run: `bun test packages/tflite/test/parse.test.ts`
-Expected: 4 existing tests + 1 new test pass. If the IF assertion fails, double-check the `BuiltinOptions` field IDs (Task 2 step 3) — most likely cause is an off-by-one between FlatBuffer vtable indices and `.fbs` schema field numbers.
+Expected: 4 existing tests + 1 new test pass. If the IF assertion fails, double-check the `BuiltinOptions` field IDs (Task 2 step 3) - most likely cause is an off-by-one between FlatBuffer vtable indices and `.fbs` schema field numbers.
 
 - [ ] **Step 6: Run the full workspace test suite**
 
@@ -517,7 +517,7 @@ Find `**Only `subgraphs[0]` is parsed**` and replace the block with:
 
 ```markdown
 **Subgraph inlining**: TFLite control-flow ops carry their body subgraph indices
-in `BuiltinOptions` — `IfOptions.then_subgraph_index` /
+in `BuiltinOptions` - `IfOptions.then_subgraph_index` /
 `IfOptions.else_subgraph_index` for `IF`, `WhileOptions.cond_subgraph_index` /
 `WhileOptions.body_subgraph_index` for `WHILE`. The parser decodes those two
 option tables (`packages/tflite/src/builtin-options.ts`) and inlines each
@@ -536,7 +536,7 @@ Delete the TFLite multi-subgraph item from the Open work list. Add a bullet unde
 - ✅ TFLite `IF` / `WHILE` body inlining via `IfOptions` / `WhileOptions` decoding.
 ```
 
-Note that full `BuiltinOptions` exposure (Conv2D / Pooling / FullyConnected / FusedActivation) remains open — only the two option tables we needed for inlining are decoded.
+Note that full `BuiltinOptions` exposure (Conv2D / Pooling / FullyConnected / FusedActivation) remains open - only the two option tables we needed for inlining are decoded.
 
 - [ ] **Step 4: Commit doc update**
 
@@ -550,12 +550,12 @@ git commit -m "doc: tflite multi-subgraph inlining done"
 ## Self-review checklist
 
 1. **Spec coverage**:
-   - Subgraph index discovery → Task 2 (`BuiltinOptions` decoders).
-   - Per-subgraph parser reuse → Task 1 (`parseSubgraphAt` helper).
-   - Call-site inlining with prefixing + arg binding → Task 4.
-   - Test fixture with control flow → Task 3.
-   - Documentation refresh → Task 5.
-   - Renderer rendering of inlined nodes → no work needed; existing `transform.ts:113` initializer-skip rule and shared `nodes[]` list handle it.
+   - Subgraph index discovery -> Task 2 (`BuiltinOptions` decoders).
+   - Per-subgraph parser reuse -> Task 1 (`parseSubgraphAt` helper).
+   - Call-site inlining with prefixing + arg binding -> Task 4.
+   - Test fixture with control flow -> Task 3.
+   - Documentation refresh -> Task 5.
+   - Renderer rendering of inlined nodes -> no work needed; existing `transform.ts:113` initializer-skip rule and shared `nodes[]` list handle it.
 
 2. **Open prerequisites the plan does not solve**:
    - Full TFLite `BuiltinOptions` decoding (`Conv2DOptions`, `PoolingOptions`, `FusedActivation`, …) is still empty `attributes: {}` for non-IF/WHILE ops. Out of scope here; tracked in `format-graph-structures.md` open work.
@@ -566,4 +566,4 @@ git commit -m "doc: tflite multi-subgraph inlining done"
    - `IfOptions.thenSubgraphIndex` / `elseSubgraphIndex` and `WhileOptions.condSubgraphIndex` / `bodySubgraphIndex` defined once in Task 2 step 3; consumed in Task 4 step 3. Same names.
    - `parseSubgraphAt(bb, model, idx, ctx)` signature locked in Task 1 step 2; called identically in Task 1 step 4 and Task 4 step 3.
 
-4. **Placeholder scan**: no TODO/TBD/"add error handling" — all code is concrete. Field IDs and enum values come from the TFLite schema and are pinned to specific numeric values.
+4. **Placeholder scan**: no TODO/TBD/"add error handling" - all code is concrete. Field IDs and enum values come from the TFLite schema and are pinned to specific numeric values.

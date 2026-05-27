@@ -7,19 +7,19 @@ Bring `@wetron/svelte` to functional parity with `@wetron/react` for weight insp
 ## Goals
 
 - Render the same weight-inspection UI on both renderers from the same input (`{ tensor }` panel target + `ModelGraph`).
-- Reuse format / colormap helpers across renderers — they're framework-agnostic and shouldn't be duplicated.
+- Reuse format / colormap helpers across renderers - they're framework-agnostic and shouldn't be duplicated.
 - Preserve the existing Svelte component organization (one component per file, scoped `<style>` blocks, `phosphor-svelte` icons).
 - Add a real test setup for `@wetron/svelte` covering the new components.
 
 ## Non-goals
 
-- Reworking React WeightPanel internals — port behaviour as-is.
+- Reworking React WeightPanel internals - port behaviour as-is.
 - Replacing `@base-ui/react` Tabs / ScrollArea on the React side.
 - Changing the public `ModelGraph` shape or weight decode pipeline.
 
 ## Pre-work: hoist shared helpers into `@wetron/core`
 
-`packages/react/src/node-property-panel/format-val.ts` and `heatmap-color.ts` are pure TypeScript — no React imports. The Svelte port needs them verbatim, so duplicating would create immediate drift.
+`packages/react/src/node-property-panel/format-val.ts` and `heatmap-color.ts` are pure TypeScript - no React imports. The Svelte port needs them verbatim, so duplicating would create immediate drift.
 
 Move both files to `packages/core/src/`:
 
@@ -33,11 +33,11 @@ Add subpath exports in `packages/core/package.json`:
 "./heatmap-color": { "source": "./src/heatmap-color.ts", "types": "./dist/heatmap-color.d.ts", "import": "./dist/heatmap-color.js" }
 ```
 
-Update the two-pass core build only if needed (these are leaf modules with no dynamic imports — they ship in the first pass). Update React imports:
+Update the two-pass core build only if needed (these are leaf modules with no dynamic imports - they ship in the first pass). Update React imports:
 
-- `weight-panel.tsx` → `@wetron/core/format-val`
-- `weight-viz.tsx` → `@wetron/core/format-val`, `@wetron/core/heatmap-color`
-- `virtual-values.tsx` (no change — does not import either)
+- `weight-panel.tsx` -> `@wetron/core/format-val`
+- `weight-viz.tsx` -> `@wetron/core/format-val`, `@wetron/core/heatmap-color`
+- `virtual-values.tsx` (no change - does not import either)
 - React tests for `format-val` and `heatmap-color` move with the source to `packages/core/test/`.
 
 ## Svelte component structure
@@ -72,10 +72,10 @@ State:
 
 - `showWeights = $state(graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined)`
 - `viz = $state<'dist' | 'heat'>('dist')`
-- `loaded = $derived(...)` — runs `decodeWeight` + `computeStats` when `showWeights` is true and weights are present. Uses `$derived` not `$derived.by` because the inputs are simple props.
-- `$effect` to auto-enable `showWeights` on the no-weights → weights-loaded transition (mirrors the `prevHadWeights` ref pattern in React, but Svelte's `$effect` with a tracking variable handles it cleanly).
+- `loaded = $derived(...)` - runs `decodeWeight` + `computeStats` when `showWeights` is true and weights are present. Uses `$derived` not `$derived.by` because the inputs are simple props.
+- `$effect` to auto-enable `showWeights` on the no-weights -> weights-loaded transition (mirrors the `prevHadWeights` ref pattern in React, but Svelte's `$effect` with a tracking variable handles it cleanly).
 
-Tab toggle: replace `@base-ui/react` `Tabs.Root` with two `<button>` elements — the React tab list is purely visual, no roving tabindex / arrow-key behaviour to preserve.
+Tab toggle: replace `@base-ui/react` `Tabs.Root` with two `<button>` elements - the React tab list is purely visual, no roving tabindex / arrow-key behaviour to preserve.
 
 ### `weight-histogram.svelte`
 
@@ -103,9 +103,9 @@ type Props = {
 };
 ```
 
-Port of `VirtualValues` using `@tanstack/svelte-virtual`. The Svelte equivalent of `useVirtualizer` is `createVirtualizer`, which returns a writable store. The same `count`/`estimateSize`/`overscan` configuration applies. Drop `@base-ui/react/scroll-area` — Svelte uses native overflow scrolling (the rest of the panel does the same; the React `ScrollArea` is wrapped purely for cross-browser scrollbar styling, which native CSS now handles adequately).
+Port of `VirtualValues` using `@tanstack/svelte-virtual`. The Svelte equivalent of `useVirtualizer` is `createVirtualizer`, which returns a writable store. The same `count`/`estimateSize`/`overscan` configuration applies. Drop `@base-ui/react/scroll-area` - Svelte uses native overflow scrolling (the rest of the panel does the same; the React `ScrollArea` is wrapped purely for cross-browser scrollbar styling, which native CSS now handles adequately).
 
-`ROW_HEIGHT = 16`, `COLS = 5` — same constants as React.
+`ROW_HEIGHT = 16`, `COLS = 5` - same constants as React.
 
 ## Wiring into `node-property-panel.svelte`
 
@@ -130,11 +130,11 @@ Replace the current `{:else if isTensorTarget(target)}` branch:
   {/if}
 ```
 
-`isDark` is already computed at this level — pass it through.
+`isDark` is already computed at this level - pass it through.
 
 ## Wiring into `model-graph-view.svelte`
 
-The Svelte `ModelGraphView` already builds a `ModelGraph` internally. Thread it to `NodePropertyPanel` as a new prop. Public API impact: none — the `graph` prop on `NodePropertyPanel` is optional, so direct consumers of `NodePropertyPanel` keep working.
+The Svelte `ModelGraphView` already builds a `ModelGraph` internally. Thread it to `NodePropertyPanel` as a new prop. Public API impact: none - the `graph` prop on `NodePropertyPanel` is optional, so direct consumers of `NodePropertyPanel` keep working.
 
 ## Package changes
 
@@ -149,8 +149,8 @@ The Svelte `ModelGraphView` already builds a `ModelGraph` internally. Thread it 
 
 `@wetron/svelte` has no test infrastructure today. Add the absolute minimum:
 
-- `packages/svelte/test/setup.ts` — registers happy-dom (mirrors React setup).
-- `packages/svelte/test/weight-panel.test.ts` — one smoke test: WeightPanel mounts with a small initialised tensor, renders the shape / dtype / size rows, and the "Show weights" toggle is present. Skip dist/heat toggle, virtual-values rendering, external-checkpoint copy — those are covered by the equivalent React tests against the same shared core helpers.
+- `packages/svelte/test/setup.ts` - registers happy-dom (mirrors React setup).
+- `packages/svelte/test/weight-panel.test.ts` - one smoke test: WeightPanel mounts with a small initialised tensor, renders the shape / dtype / size rows, and the "Show weights" toggle is present. Skip dist/heat toggle, virtual-values rendering, external-checkpoint copy - those are covered by the equivalent React tests against the same shared core helpers.
 - Use `@testing-library/svelte`. Add it plus `@happy-dom/global-registrator` / `happy-dom` to root `devDependencies` if missing.
 - `Justfile` `test` recipe already includes `packages/svelte`; no change.
 
@@ -158,10 +158,10 @@ The Svelte `ModelGraphView` already builds a `ModelGraph` internally. Thread it 
 
 **Move / refactor**
 
-- `packages/react/src/node-property-panel/format-val.ts` → `packages/core/src/format-val.ts`
-- `packages/react/src/node-property-panel/heatmap-color.ts` → `packages/core/src/heatmap-color.ts`
-- `packages/react/test/format-val.test.ts` → `packages/core/test/format-val.test.ts`
-- `packages/react/test/heatmap-color.test.ts` → `packages/core/test/heatmap-color.test.ts`
+- `packages/react/src/node-property-panel/format-val.ts` -> `packages/core/src/format-val.ts`
+- `packages/react/src/node-property-panel/heatmap-color.ts` -> `packages/core/src/heatmap-color.ts`
+- `packages/react/test/format-val.test.ts` -> `packages/core/test/format-val.test.ts`
+- `packages/react/test/heatmap-color.test.ts` -> `packages/core/test/heatmap-color.test.ts`
 - React imports: `weight-panel.tsx`, `weight-viz.tsx` updated to `@wetron/core/format-val` / `@wetron/core/heatmap-color`.
 
 **New (Svelte)**
@@ -175,14 +175,14 @@ The Svelte `ModelGraphView` already builds a `ModelGraph` internally. Thread it 
 
 **Modify**
 
-- `packages/svelte/src/node-property-panel/node-property-panel.svelte` — accept `graph` prop, dispatch to WeightPanel.
-- `packages/svelte/src/model-graph-view.svelte` — pass `graph` to `NodePropertyPanel`.
-- `packages/svelte/src/index.ts` — export `WeightPanel` to mirror `@wetron/react`.
-- `packages/core/package.json` — add two subpath exports.
-- `packages/svelte/package.json` — add `@tanstack/svelte-virtual` peer + dev dep.
+- `packages/svelte/src/node-property-panel/node-property-panel.svelte` - accept `graph` prop, dispatch to WeightPanel.
+- `packages/svelte/src/model-graph-view.svelte` - pass `graph` to `NodePropertyPanel`.
+- `packages/svelte/src/index.ts` - export `WeightPanel` to mirror `@wetron/react`.
+- `packages/core/package.json` - add two subpath exports.
+- `packages/svelte/package.json` - add `@tanstack/svelte-virtual` peer + dev dep.
 
 ## Risks
 
 - `@tanstack/svelte-virtual`'s API differs from `@tanstack/react-virtual` in small ways (store vs hook, `getVirtualItems()` vs subscribed value). Worst case: a thin `$derived` wrapper, no architectural impact.
 - Native scrollbar styling may look inconsistent with `@base-ui/react/scroll-area` on the React side. Acceptable: each renderer has its own visual idiom; the rest of the Svelte panel already uses native overflow.
-- Svelte test setup is new infrastructure — first-time additions can have happy-dom / vite-plugin-svelte friction. Mitigation: use the existing React `setup.ts` as a template.
+- Svelte test setup is new infrastructure - first-time additions can have happy-dom / vite-plugin-svelte friction. Mitigation: use the existing React `setup.ts` as a template.
