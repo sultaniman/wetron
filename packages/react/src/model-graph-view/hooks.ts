@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useCallback } from "react";
+import { useMemo, useEffect, useCallback, useState } from "react";
 import {
   useNodesState,
   useReactFlow,
@@ -19,12 +19,17 @@ import { EDGE_THEME } from "../theme.ts";
 
 type FlowEdgeData = FlowEdge["data"];
 
-export function useModelNodes(graph: ModelGraph, rankdir: LayoutDirection = "TB") {
+export function useModelNodes(
+  graph: ModelGraph,
+  rankdir: LayoutDirection = "TB",
+) {
   const { nodes: layoutNodes, edges: layoutEdges } = useMemo(
     () => modelGraphToFlow(graph, { rankdir }),
     [graph, rankdir],
   );
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutNodes as Node<GraphNodeData>[]);
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    layoutNodes as Node<GraphNodeData>[],
+  );
   useEffect(() => {
     setNodes(layoutNodes as Node<GraphNodeData>[]);
   }, [layoutNodes, setNodes]);
@@ -138,7 +143,8 @@ export function useEdgeClickHandler(
 
       const d = edge.data as FlowEdgeData;
       const sameEdges = layoutEdges.filter(
-        (e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
+        (e) =>
+          (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
       );
       const from = { opType: d.sourceOpType, name: d.sourceNodeName };
       const to = sameEdges.map((e) => ({
@@ -166,7 +172,40 @@ export function useNodeDim(
   }, [nodes, matchedNames]);
 }
 
-export function useFitOnGraphChange(graph: ModelGraph, layoutNodes: Node<GraphNodeData>[]): void {
+export type NavStack = {
+  currentGraph: ModelGraph;
+  depth: number;
+  scopeName: string | null;
+  navigateInto: (subGraph: ModelGraph) => void;
+  navigateBack: () => void;
+};
+
+export function useNavStack(rootGraph: ModelGraph): NavStack {
+  const [stack, setStack] = useState<readonly ModelGraph[]>([rootGraph]);
+  useEffect(() => {
+    setStack([rootGraph]);
+  }, [rootGraph]);
+  const navigateInto = useCallback((sub: ModelGraph) => {
+    setStack((s) => [...s, sub]);
+  }, []);
+  const navigateBack = useCallback(() => {
+    setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+  }, []);
+  const currentGraph = stack[stack.length - 1];
+  const depth = stack.length - 1;
+  return {
+    currentGraph,
+    depth,
+    scopeName: depth > 0 ? currentGraph.name : null,
+    navigateInto,
+    navigateBack,
+  };
+}
+
+export function useFitOnGraphChange(
+  graph: ModelGraph,
+  layoutNodes: Node<GraphNodeData>[],
+): void {
   const { fitView } = useReactFlow();
   useEffect(() => {
     const topNodes = [...layoutNodes]

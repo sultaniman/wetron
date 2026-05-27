@@ -13,6 +13,8 @@ export interface GraphNode {
   readonly inputs: readonly string[];
   readonly outputs: readonly string[];
   readonly attributes: Readonly<Record<string, AttributeValue>>;
+  /** Nested graph for compound nodes (e.g. Keras Functional sub-models). */
+  readonly subGraph?: ModelGraph;
 }
 
 export interface ModelGraph {

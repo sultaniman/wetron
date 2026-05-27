@@ -22,6 +22,7 @@ export function NodeCard({
   selected = false,
   ariaLabel,
   children,
+  affordance,
 }: {
   nodeType: "graphNode" | "ioNode";
   topHandle?: boolean;
@@ -35,6 +36,7 @@ export function NodeCard({
   selected?: boolean;
   ariaLabel?: string;
   children?: React.ReactNode;
+  affordance?: React.ReactNode;
 }) {
   return (
     <div
@@ -56,6 +58,7 @@ export function NodeCard({
       }
     >
       {topHandle && <Handle type="target" position={Position.Top} />}
+      {affordance}
       <div className={css.headerRow}>
         <Tooltip text={pill} onlyIfOverflow>
           <span className={css.pill}>{pill}</span>

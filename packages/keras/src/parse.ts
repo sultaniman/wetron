@@ -194,6 +194,28 @@ function resolveInbounds(
   return result;
 }
 
+function buildSubGraphForLayer(
+  layer: KerasLayerEntry,
+  warnings: ParseWarning[],
+  fileSizeBytes: number,
+): ModelGraph | undefined {
+  if (layer.class_name !== "Functional" && layer.class_name !== "Sequential") return undefined;
+
+  const nested = layer.config["layers"];
+  if (!Array.isArray(nested)) return undefined;
+
+  const subModel: KerasModelConfig = {
+    class_name: layer.class_name,
+    config: layer.config as unknown as KerasModelConfig["config"],
+  };
+
+  if (layer.class_name === "Sequential") {
+    return buildSequential(subModel, warnings, fileSizeBytes);
+  }
+
+  return buildFunctional(subModel, warnings, fileSizeBytes);
+}
+
 function buildFunctional(
   model: KerasModelConfig,
   warnings: ParseWarning[],
@@ -226,11 +248,14 @@ function buildFunctional(
           shape: batchShape ? batchShape.map((d) => d ?? -1) : null,
           dtype: (layer.config["dtype"] as string | null) ?? null,
         });
+
         continue;
       }
 
       const inputTensors = resolveInbounds(layer.inbound_nodes, outputMap);
       inputTensors.forEach((t) => consumedTensors.add(t));
+
+      const subGraph = buildSubGraphForLayer(layer, warnings, fileSizeBytes);
 
       nodes.push({
         name,
@@ -238,6 +263,7 @@ function buildFunctional(
         inputs: inputTensors,
         outputs: [name],
         attributes: extractAttributes(layer.config),
+        ...(subGraph ? { subGraph } : {}),
       });
     } catch (e) {
       warnings.push({

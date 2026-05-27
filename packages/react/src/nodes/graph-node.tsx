@@ -5,6 +5,7 @@ import { opCategory } from "@wetron/core";
 import { opIcon } from "../theme.ts";
 import { NodeCard } from "./node-card/node-card.tsx";
 import css from "./node-card/node-card.module.css";
+import { useSubGraphNav } from "../model-graph-view/nav-context.ts";
 
 export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeData>>) {
   const cat = opCategory(data.opType);
@@ -15,6 +16,23 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
   const visible =
     total > WEIGHT_ROW_LIMIT ? data.weightInputs!.slice(0, WEIGHT_ROW_LIMIT) : data.weightInputs;
   const hiddenCount = total > WEIGHT_ROW_LIMIT ? total - WEIGHT_ROW_LIMIT : 0;
+  const subGraph = data.graphNode?.subGraph;
+  const { navigateInto } = useSubGraphNav();
+  const openTab = subGraph ? (
+    <button
+      type="button"
+      className={css.openTab}
+      aria-label={`Open ${data.opType} sub-graph`}
+      onClick={(e) => {
+        e.stopPropagation();
+        navigateInto(subGraph);
+      }}
+      style={{ background: color }}
+    >
+      ▸
+    </button>
+  ) : null;
+
   return (
     <NodeCard
       nodeType="graphNode"
@@ -28,6 +46,7 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
       tinted={!hasWeights}
       selected={selected}
       colors={{ color }}
+      affordance={openTab}
     >
       {visible && visible.length > 0
         ? visible.map((w) => (
@@ -47,6 +66,7 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
             </div>
           ))
         : null}
+
       {hiddenCount > 0 ? (
         <div
           className={css.weightMore}

@@ -22,6 +22,7 @@
     tinted?: boolean;
     selected?: boolean;
     children?: Snippet;
+    affordance?: Snippet;
   }
 
   let {
@@ -41,6 +42,7 @@
     tinted = false,
     selected = false,
     children,
+    affordance,
   }: Props = $props();
 
   const cardBg = $derived(
@@ -75,6 +77,7 @@
   {#if topHandle}
     <Handle type="target" position={Position.Top} />
   {/if}
+  {@render affordance?.()}
   <div class="header-row">
     <Tooltip text={pill} onlyIfOverflow>
       <span class="pill">{pill}</span>
@@ -96,6 +99,7 @@
 
 <style>
   .card {
+    position: relative;
     padding: 7px 8px;
     border-radius: 4px;
     width: 220px; /* must match NODE_W in transform.ts */
@@ -112,15 +116,18 @@
     word-spacing: normal;
     border-style: solid;
   }
+
   .card:hover {
     box-shadow: 0 2px 10px rgba(0,0,0,0.13);
   }
+
   .header-row {
     display: flex;
     align-items: center;
     gap: 6px;
     overflow: hidden;
   }
+
   .pill {
     font-family: monospace;
     font-size: 13px;
@@ -132,6 +139,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
   .icon {
     display: flex;
     align-items: center;
@@ -139,6 +147,7 @@
     margin-left: auto;
     color: color-mix(in oklch, var(--node-color) 70%, transparent);
   }
+
   .subtitle {
     display: inline-block;
     max-width: 100%;

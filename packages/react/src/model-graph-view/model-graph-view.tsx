@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useImperativeHandle, useMemo, forwardRef } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -18,7 +18,11 @@ import type { LayoutDirection } from "@wetron/core/transform";
 import { GraphNodeComponent } from "../nodes/graph-node.tsx";
 import { IoNodeComponent } from "../nodes/io-node.tsx";
 import { ModelEdge } from "../edges/model-edge.tsx";
-import { ColorModeContext, useColorMode, type ColorMode } from "../color-mode-context.ts";
+import {
+  ColorModeContext,
+  useColorMode,
+  type ColorMode,
+} from "../color-mode-context.ts";
 import { MINIMAP_THEME } from "../theme.ts";
 import {
   useModelNodes,
@@ -27,8 +31,11 @@ import {
   useNodeClickHandler,
   useEdgeClickHandler,
   useFitOnGraphChange,
+  useNavStack,
 } from "./hooks.ts";
 import { filterGraph } from "@wetron/core";
+import { SubGraphNavContext } from "./nav-context.ts";
+import { ScopeChrome } from "./scope-chrome.tsx";
 
 const nodeTypes: NodeTypes = {
   graphNode: GraphNodeComponent as NodeTypes[string],
@@ -39,7 +46,10 @@ const edgeTypes = { modelEdge: ModelEdge } as const;
 
 const EDGE_DEFAULTS = {
   markerEnd: { type: MarkerType.ArrowClosed, width: 10, height: 10 },
-  style: { stroke: "var(--wetron-edge-default)", opacity: "var(--wetron-edge-default-opacity)" },
+  style: {
+    stroke: "var(--wetron-edge-default)",
+    opacity: "var(--wetron-edge-default-opacity)",
+  },
 } as const;
 
 const EMPTY_NAMES: ReadonlySet<string> = new Set();
@@ -66,34 +76,66 @@ type Props = {
   rankdir?: LayoutDirection;
 };
 
-const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>(function Inner(
-  { graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, colorMode, rankdir },
+const Inner = forwardRef<
+  ModelGraphViewHandle,
+  Props & { colorMode: ColorMode }
+>(function Inner(
+  {
+    graph,
+    onTargetClick,
+    onWarnings,
+    selectedEdgeTensorName,
+    searchQuery,
+    colorMode,
+    rankdir,
+  },
   ref,
 ) {
   const isDark = useColorMode() === "dark";
   const rf = useReactFlow();
+
+  const nav = useNavStack(graph);
+  const { currentGraph, depth, scopeName, navigateInto, navigateBack } = nav;
+  const navContextValue = useMemo(
+    () => ({ depth, scopeName, navigateInto, navigateBack }),
+    [depth, scopeName, navigateInto, navigateBack],
+  );
+
   const {
     nodes: rawNodes,
     onNodesChange,
     layoutNodes,
     layoutEdges,
-  } = useModelNodes(graph, rankdir);
-  const matchedNames = searchQuery ? filterGraph(graph, searchQuery) : EMPTY_NAMES;
+  } = useModelNodes(currentGraph, rankdir);
+  const matchedNames = searchQuery
+    ? filterGraph(currentGraph, searchQuery)
+    : EMPTY_NAMES;
   const nodes = useNodeDim(rawNodes, matchedNames);
-  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark, matchedNames);
+  const edges = useEdgeHighlight(
+    layoutEdges,
+    selectedEdgeTensorName,
+    isDark,
+    matchedNames,
+  );
+
   const handleNodeClick = useNodeClickHandler(onTargetClick);
   const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
-  useFitOnGraphChange(graph, layoutNodes);
+
+  useFitOnGraphChange(currentGraph, layoutNodes);
   useEffect(() => {
-    onWarnings?.(graph.warnings ?? []);
-  }, [graph, onWarnings]);
+    onWarnings?.(currentGraph.warnings ?? []);
+  }, [currentGraph, onWarnings]);
 
   useImperativeHandle(
     ref,
     () => ({
       async fitAll() {
         const allNodes = rf.getNodes();
-        rf.fitView({ nodes: allNodes.map((n) => ({ id: n.id })), padding: 0.1, duration: 0 });
+        rf.fitView({
+          nodes: allNodes.map((n) => ({ id: n.id })),
+          padding: 0.1,
+          duration: 0,
+        });
         // Two frames: first for React to flush state, second for DOM to settle.
         await new Promise<void>((resolve) =>
           requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
@@ -116,61 +158,76 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
   );
 
   return (
-    <div
-      className="wetron-root"
-      data-theme={isDark ? "dark" : "light"}
-      style={{ width: "100%", height: "100%" }}
-    >
-      <ReactFlow
-        colorMode={colorMode}
-        nodes={nodes}
-        onNodesChange={onNodesChange}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        onNodeClick={handleNodeClick}
-        onEdgeClick={handleEdgeClick}
-        defaultEdgeOptions={EDGE_DEFAULTS}
-        nodesConnectable={false}
-        nodesDraggable={false}
-        panOnScroll
-        panOnScrollMode={PanOnScrollMode.Free}
-        zoomOnScroll={false}
-        zoomOnDoubleClick={false}
-        zoomActivationKeyCode="Meta"
-        minZoom={0.05}
-        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
-        onlyRenderVisibleElements
-        proOptions={{ hideAttribution: true }}
+    <SubGraphNavContext.Provider value={navContextValue}>
+      <div
+        className={`wetron-root${depth > 0 ? " wetron-root--nested" : ""}`}
+        data-theme={isDark ? "dark" : "light"}
+        data-depth={depth}
+        style={{ width: "100%", height: "100%" }}
       >
-        <MiniMap
-          style={{
-            background: isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background,
-            borderRadius: MINIMAP_THEME.borderRadius,
-            border: "none",
-            overflow: "hidden",
-            cursor: "crosshair",
-          }}
-          nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
-          maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
-          onClick={(_, pos) => rf.setCenter(pos.x, pos.y, { zoom: rf.getViewport().zoom })}
-        />
-        <Controls />
-        <Background color="var(--wetron-bg-pattern)" />
-      </ReactFlow>
-    </div>
+        <ScopeChrome />
+        <ReactFlow
+          colorMode={colorMode}
+          nodes={nodes}
+          onNodesChange={onNodesChange}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          onNodeClick={handleNodeClick}
+          onEdgeClick={handleEdgeClick}
+          defaultEdgeOptions={EDGE_DEFAULTS}
+          nodesConnectable={false}
+          nodesDraggable={false}
+          panOnScroll
+          panOnScrollMode={PanOnScrollMode.Free}
+          zoomOnScroll={false}
+          zoomOnDoubleClick={false}
+          zoomActivationKeyCode="Meta"
+          minZoom={0.05}
+          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          onlyRenderVisibleElements
+          proOptions={{ hideAttribution: true }}
+        >
+          <MiniMap
+            style={{
+              background: isDark
+                ? MINIMAP_THEME.dark.background
+                : MINIMAP_THEME.light.background,
+              borderRadius: MINIMAP_THEME.borderRadius,
+              border: "none",
+              overflow: "hidden",
+              cursor: "crosshair",
+            }}
+            nodeColor={
+              isDark
+                ? MINIMAP_THEME.dark.nodeColor
+                : MINIMAP_THEME.light.nodeColor
+            }
+            maskColor={
+              isDark
+                ? MINIMAP_THEME.dark.maskColor
+                : MINIMAP_THEME.light.maskColor
+            }
+            onClick={(_, pos) =>
+              rf.setCenter(pos.x, pos.y, { zoom: rf.getViewport().zoom })
+            }
+          />
+          <Controls />
+          <Background color="var(--wetron-bg-pattern)" />
+        </ReactFlow>
+      </div>
+    </SubGraphNavContext.Provider>
   );
 });
 
-export const ModelGraphView = forwardRef<ModelGraphViewHandle, Props>(function ModelGraphView(
-  { colorMode = "system", ...rest },
-  ref,
-) {
-  return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ReactFlowProvider>
-        <Inner {...rest} colorMode={colorMode} ref={ref} />
-      </ReactFlowProvider>
-    </ColorModeContext.Provider>
-  );
-});
+export const ModelGraphView = forwardRef<ModelGraphViewHandle, Props>(
+  function ModelGraphView({ colorMode = "system", ...rest }, ref) {
+    return (
+      <ColorModeContext.Provider value={colorMode}>
+        <ReactFlowProvider>
+          <Inner {...rest} colorMode={colorMode} ref={ref} />
+        </ReactFlowProvider>
+      </ColorModeContext.Provider>
+    );
+  },
+);

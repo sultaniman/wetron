@@ -16,6 +16,8 @@
   import type { PanelTarget } from './types.ts';
   import { CANVAS_VARS, MINIMAP_THEME, EDGE_THEME } from '@wetron/tokens';
   import { categoryVars } from './category-vars.ts';
+  import { provideSubGraphNav } from './model-graph-view/nav-context.ts';
+  import ScopeChrome from './model-graph-view/scope-chrome.svelte';
 
   type FlowEdgeData = FlowEdge['data'];
 
@@ -30,6 +32,28 @@
   }
 
   let { graph, onTargetClick, onWarnings, selectedEdgeTensorName = null, searchQuery = '', colorMode = 'system', exportRef = $bindable<ExportHelpers | null>(null) }: Props = $props();
+
+  let navStack = $state<ModelGraph[]>([graph]);
+  $effect.pre(() => {
+    // reset stack whenever a different root graph is provided
+    navStack = [graph];
+  });
+  const currentGraph = $derived(navStack[navStack.length - 1]);
+  const depth = $derived(navStack.length - 1);
+  provideSubGraphNav({
+    get depth() {
+      return depth;
+    },
+    get scopeName() {
+      return depth > 0 ? currentGraph.name : null;
+    },
+    navigateInto(sub: ModelGraph) {
+      navStack = [...navStack, sub];
+    },
+    navigateBack() {
+      if (navStack.length > 1) navStack = navStack.slice(0, -1);
+    },
+  });
 
   let systemIsDark = $state(resolveColorMode('system') === 'dark');
 
@@ -70,11 +94,11 @@
   );
 
   $effect(() => {
-    onWarnings?.(graph.warnings ?? []);
+    onWarnings?.(currentGraph.warnings ?? []);
   });
 
-  const rawFlow = $derived(modelGraphToFlow(graph));
-  const matchedNames = $derived(searchQuery ? filterGraph(graph, searchQuery) : new Set<string>());
+  const rawFlow = $derived(modelGraphToFlow(currentGraph));
+  const matchedNames = $derived(searchQuery ? filterGraph(currentGraph, searchQuery) : new Set<string>());
 
   // $state.raw prevents @xyflow/svelte from seeing deeply-reactive proxies;
   // it mutates node objects internally (computed dims/positions) and that would
@@ -142,12 +166,15 @@
 
 <div
   class="wetron-graph"
+  class:nested={depth > 0}
   data-theme={isDark ? 'dark' : 'light'}
+  data-depth={depth}
   style={[
     ...Object.entries(CANVAS_VARS[isDark ? 'dark' : 'light']),
     ...Object.entries(categoryVars(isDark)),
   ].map(([k, v]) => `${k}:${v}`).join(';')}
 >
+  <ScopeChrome />
   <SvelteFlow
     nodes={styledFlowNodes}
     edges={flowEdges}
@@ -181,11 +208,17 @@
 <style>
   .wetron-graph {
     all: revert;
+    position: relative;
     width: 100%;
     height: 100%;
     font-family: system-ui, sans-serif;
     font-size: 14px;
     box-sizing: border-box;
+  }
+
+  :global(.wetron-graph.nested .svelte-flow) {
+    border: 1px solid color-mix(in oklch, var(--wetron-bg-pattern, #d0d0d8) 70%, transparent);
+    border-radius: 6px;
   }
 
   /* ── Handles ── */

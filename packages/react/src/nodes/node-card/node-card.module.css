@@ -1,4 +1,5 @@
 .card {
+  position: relative;
   padding: 7px 8px;
   background: var(--wetron-node-bg, #fff);
   border: 1px solid var(--wetron-node-border, #e0e0e0);
@@ -145,4 +146,41 @@
 .weightMore:hover {
   background: color-mix(in oklch, var(--node-color) 12%, transparent);
   opacity: 1;
+}
+
+.openTab {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 26px;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  padding: 0 0 0 2px;
+  line-height: 1;
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.12);
+  transition:
+    width 0.12s,
+    right 0.12s,
+    box-shadow 0.12s;
+}
+
+.openTab:hover {
+  width: 22px;
+  right: -18px;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.18);
+}
+
+.openTab:focus-visible {
+  outline: 2px solid var(--node-color);
+  outline-offset: 2px;
 }
