@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { parseKeras } from "../src/parse.ts";
+import { parseKeras, parseKerasWithWeights } from "../src/parse.ts";
 import { ParseError } from "@wetron/core/ir";
 import { zipSync } from "fflate";
 import { parseModel } from "@wetron/core";
@@ -169,6 +169,51 @@ test("MobileNetV2: 155 nodes, correct input, single output", () => {
   expect(graph.inputs[0].shape).toEqual([-1, 224, 224, 3]);
   expect(graph.nodes[0].inputs[0]).toBe("input_layer");
 });
+
+for (const [label, fixture] of [
+  ["Keras 3", "keras3_with_subgraphs"],
+  ["Keras 2", "keras2_with_subgraphs"],
+] as const) {
+  test(`${label} fixture: structure has 3 Functional sub-graphs`, () => {
+    const bytes = new Uint8Array(
+      readFileSync(resolve(import.meta.dir, "../../../test-models/", `${fixture}.keras`)),
+    );
+    const g = parseKeras(bytes);
+    expect(g.name).toBe("branched_net");
+    expect(g.nodes.length).toBe(3);
+    expect(g.warnings ?? []).toEqual([]);
+
+    const fe = g.nodes.find((n) => n.name === "feature_extractor")!;
+    const cl = g.nodes.find((n) => n.name === "classifier")!;
+    const rg = g.nodes.find((n) => n.name === "regression")!;
+    expect(fe.opType).toBe("Functional");
+    expect(cl.opType).toBe("Functional");
+    expect(rg.opType).toBe("Functional");
+    expect(fe.subGraph?.nodes.length).toBe(11);
+    expect(cl.subGraph?.nodes.length).toBe(3);
+    expect(rg.subGraph?.nodes.length).toBe(2);
+
+    expect(fe.inputs).toEqual(["input_1"]);
+    expect(cl.inputs).toEqual(["feature_extractor"]);
+    expect(rg.inputs).toEqual(["feature_extractor"]);
+  });
+
+  test(`${label} fixture: parseKerasWithWeights loads tensors into sub-graphs`, async () => {
+    const bytes = new Uint8Array(
+      readFileSync(resolve(import.meta.dir, "../../../test-models/", `${fixture}.keras`)),
+    );
+    const g = await parseKerasWithWeights(bytes);
+    expect(g.weights).toBeDefined();
+    expect(g.initializers.size).toBe(26);
+
+    const fe = g.nodes.find((n) => n.name === "feature_extractor")!.subGraph!;
+    expect(fe.initializers.size).toBe(18);
+    const conv1 = fe.nodes.find((n) => n.name === "fe_conv1")!;
+    expect(conv1.inputs.length).toBeGreaterThan(1);
+    const kernelKey = conv1.inputs.find((k) => fe.initializers.has(k))!;
+    expect(fe.initializers.get(kernelKey)).toEqual({ shape: [3, 3, 3, 32], dtype: "float32" });
+  });
+}
 
 test("Keras 2 dict-format inbound_nodes: 99 nodes, merge edges resolve", () => {
   const bytes = new Uint8Array(
