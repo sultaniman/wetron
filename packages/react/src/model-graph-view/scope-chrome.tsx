@@ -1,3 +1,4 @@
+import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useSubGraphNav } from "./nav-context.ts";
 
 export function ScopeChrome() {
@@ -11,7 +12,8 @@ export function ScopeChrome() {
         onClick={navigateBack}
         aria-label="Back to parent graph"
       >
-        ← Back
+        <ArrowLeftIcon size={12} weight="bold" />
+        <span>Back</span>
       </button>
       {scopeName ? <span className="wetron-scope-name">{scopeName}</span> : null}
     </div>

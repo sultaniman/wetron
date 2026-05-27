@@ -31,10 +31,13 @@
 }
 
 .wetron-scope-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 3px 8px;
+  padding: 3px 8px 3px 6px;
   border-radius: 3px;
   font: inherit;
   color: inherit;
