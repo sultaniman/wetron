@@ -87,14 +87,36 @@
   .panel {
     position: relative;
     width: 320px;
+    box-sizing: border-box;
     background: var(--panel-bg);
     border-radius: 8px;
     overflow: hidden;
     font-family: system-ui, sans-serif;
     font-size: 11px;
+    line-height: 1.3;
     border: 1px solid var(--panel-border);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
     color: var(--panel-text);
+  }
+
+  .panel :global(*),
+  .panel :global(*::before),
+  .panel :global(*::after) {
+    box-sizing: border-box;
+  }
+
+  .panel :global(button) {
+    margin: 0;
+    font: inherit;
+    line-height: inherit;
+  }
+
+  .panel :global(td),
+  .panel :global(th) {
+    font-size: inherit;
+    line-height: inherit;
+    font-family: inherit;
+    color: inherit;
   }
 
 </style>

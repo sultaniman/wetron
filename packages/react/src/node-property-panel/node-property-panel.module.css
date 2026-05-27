@@ -25,10 +25,31 @@
   overflow: hidden;
   font-family: system-ui, sans-serif;
   font-size: 11px;
+  line-height: 1.3;
   border: 1px solid var(--wetron-panel-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   color: var(--wetron-panel-text);
   contain: paint;
+}
+
+.panel *,
+.panel *::before,
+.panel *::after {
+  box-sizing: border-box;
+}
+
+.panel button {
+  margin: 0;
+  font: inherit;
+  line-height: inherit;
+}
+
+.panel td,
+.panel th {
+  font-size: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  color: inherit;
 }
 
 .panel[data-theme="dark"] {
