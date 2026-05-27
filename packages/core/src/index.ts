@@ -49,8 +49,8 @@ export async function parseModel(bytes: Uint8Array, filename?: string): Promise<
   }
 
   if (format === "keras") {
-    const { parseKeras } = await import("@wetron/keras");
-    return parseKeras(bytes);
+    const { parseKerasWithWeights } = await import("@wetron/keras");
+    return parseKerasWithWeights(bytes);
   }
 
   if (format === "executorch") {

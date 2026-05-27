@@ -7,6 +7,7 @@ import type {
   ParseWarning,
 } from "@wetron/core/ir";
 import { ParseError } from "@wetron/core/ir";
+import { parseH5Weights, matchWeightsForModel, type WeightIndex } from "./parse-weights.ts";
 
 // Keras serializes inbound_nodes in three formats depending on version:
 //   - Keras 3:  [{ args: [tensorRef, ...], kwargs: {...} }]
@@ -329,4 +330,74 @@ export function parseKeras(bytes: Uint8Array): ModelGraph {
   if (!model?.config?.layers) throw new ParseError("keras", "config.json missing config.layers");
 
   return buildKerasGraph(model, bytes.byteLength);
+}
+
+function applyWeightsToSubGraph(
+  subGraph: ModelGraph,
+  index: WeightIndex,
+  functionalIdx: number,
+): ModelGraph {
+  const classNames = subGraph.nodes.map((n) => n.opType);
+  const nodeNames = subGraph.nodes.map((n) => n.name);
+  const nodeWeightMap = matchWeightsForModel(functionalIdx, classNames, nodeNames, index);
+  if (nodeWeightMap.size === 0) return subGraph;
+
+  const subInitializers = new Map<string, { shape: readonly number[]; dtype: string }>(
+    subGraph.initializers,
+  );
+  const patchedNodes: GraphNode[] = subGraph.nodes.map((node) => {
+    const paths = nodeWeightMap.get(node.name);
+    if (!paths || paths.length === 0) return node;
+    for (const path of paths) {
+      const meta = index.get(path);
+      if (meta) subInitializers.set(path, { shape: meta.shape, dtype: meta.dtype });
+    }
+    return { ...node, inputs: [...node.inputs, ...paths] };
+  });
+
+  return { ...subGraph, nodes: patchedNodes, initializers: subInitializers };
+}
+
+async function applyWeights(graph: ModelGraph, h5Bytes: Uint8Array): Promise<ModelGraph> {
+  const { index, source } = await parseH5Weights(h5Bytes);
+
+  const topInitializers = new Map<string, { shape: readonly number[]; dtype: string }>(
+    graph.initializers,
+  );
+  let functionalIdx = 0;
+  const patchedNodes: GraphNode[] = graph.nodes.map((node) => {
+    if (node.subGraph) {
+      const patched = applyWeightsToSubGraph(node.subGraph, index, functionalIdx);
+      functionalIdx++;
+      for (const [k, v] of patched.initializers) topInitializers.set(k, v);
+      return { ...node, subGraph: patched };
+    }
+    return node;
+  });
+
+  return { ...graph, nodes: patchedNodes, initializers: topInitializers, weights: source };
+}
+
+/** Like parseKeras but also loads weights from model.weights.h5 when present.
+ *  Falls back to the structure-only graph if the H5 is missing or fails to parse. */
+export async function parseKerasWithWeights(bytes: Uint8Array): Promise<ModelGraph> {
+  let files: Record<string, Uint8Array>;
+  try {
+    files = unzipSync(bytes);
+  } catch (e) {
+    throw new ParseError(
+      "keras",
+      `ZIP extraction failed: ${e instanceof Error ? e.message : String(e)}`,
+    );
+  }
+
+  const graph = parseKeras(bytes);
+  const h5Bytes = files["model.weights.h5"];
+  if (!h5Bytes) return graph;
+
+  try {
+    return await applyWeights(graph, h5Bytes);
+  } catch {
+    return graph;
+  }
 }

@@ -32,6 +32,7 @@
     }
   },
   "dependencies": {
-    "@wetron/core": "workspace:*"
+    "@wetron/core": "workspace:*",
+    "h5wasm": "^0.10.2"
   }
 }
