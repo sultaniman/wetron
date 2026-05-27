@@ -59,6 +59,10 @@ export type ModelGraphViewHandle = {
   getNodesBounds: () => { x: number; y: number; width: number; height: number };
   /** The `.react-flow__viewport` element - capture with a custom transform for PNG export. */
   getViewportElement: () => HTMLElement | null;
+  /** Push a sub-graph onto the nav stack and switch the canvas to it. */
+  navigateInto: (subGraph: ModelGraph) => void;
+  /** Pop one level. No-op at depth 0. */
+  navigateBack: () => void;
 };
 
 type Props = {
@@ -131,8 +135,10 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
       getViewportElement() {
         return document.querySelector<HTMLElement>(".react-flow__viewport");
       },
+      navigateInto,
+      navigateBack,
     }),
-    [rf],
+    [rf, navigateInto, navigateBack],
   );
 
   return (

@@ -180,7 +180,7 @@ export function useNavStack(rootGraph: ModelGraph): NavStack {
     setStack([rootGraph]);
   }, [rootGraph]);
   const navigateInto = useCallback((sub: ModelGraph) => {
-    setStack((s) => [...s, sub]);
+    setStack((s) => (s[s.length - 1] === sub ? s : [...s, sub]));
   }, []);
   const navigateBack = useCallback(() => {
     setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));

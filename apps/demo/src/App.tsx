@@ -325,6 +325,7 @@ export default function App() {
                 onTensorClick={handleTensorClick}
                 onBack={history.length > 0 ? handleBack : undefined}
                 onClose={handleClose}
+                onOpenSubGraph={(sub) => graphViewRef.current?.navigateInto(sub)}
                 colorMode={colorMode}
                 inputSources={tensorSources}
                 tensorShapes={state.graph.tensorShapes}

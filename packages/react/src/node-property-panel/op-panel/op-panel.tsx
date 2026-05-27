@@ -3,8 +3,9 @@ import {
   ArrowCircleDownIcon,
   ArrowCircleUpIcon,
   SlidersHorizontalIcon,
+  StackIcon,
 } from "@phosphor-icons/react";
-import type { GraphNode } from "@wetron/core/ir";
+import type { GraphNode, ModelGraph } from "@wetron/core/ir";
 import { opCategory } from "@wetron/core";
 import { CATEGORY_ICON, OP_ICON } from "../../theme.ts";
 import { renderIconEntry, Row, SectionLabel, BackButton } from "../panel-ui.tsx";
@@ -28,12 +29,14 @@ export function OpPanel({
   inputSources,
   onTensorClick,
   onBack,
+  onOpenSubGraph,
   opsets,
 }: {
   node: GraphNode;
   inputSources?: ReadonlyMap<string, string>;
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
+  onOpenSubGraph?: (subGraph: ModelGraph) => void;
   opsets?: ReadonlyMap<string, number>;
 }) {
   const cat = opCategory(node.opType);
@@ -73,6 +76,17 @@ export function OpPanel({
           )}
         </div>
       </div>
+      {node.subGraph && onOpenSubGraph && (
+        <div className={propertyPanelCss.section}>
+          <SectionLabel icon={<StackIcon size={12} />} title="Sub-graph" />
+          <Row
+            label={node.subGraph.name || node.name}
+            chip={`${node.subGraph.nodes.length} nodes`}
+            chipColor={`var(--wetron-category-${cat})`}
+            onClick={() => onOpenSubGraph(node.subGraph!)}
+          />
+        </div>
+      )}
       {visibleInputs.length > 0 && (
         <div
           className={`${propertyPanelCss.section} ${propertyPanelCss.scrollSection} ${propertyPanelCss.inputsScroll}`}

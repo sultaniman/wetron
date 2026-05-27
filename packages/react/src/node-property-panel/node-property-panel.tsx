@@ -37,6 +37,7 @@ export function NodePropertyPanel({
   onTensorClick,
   onBack,
   onClose,
+  onOpenSubGraph,
   colorMode,
   inputSources,
   tensorShapes,
@@ -47,6 +48,8 @@ export function NodePropertyPanel({
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
   onClose?: () => void;
+  /** Called when the panel surfaces an "Open sub-graph" affordance for a Functional/compound node. */
+  onOpenSubGraph?: (subGraph: ModelGraph) => void;
   colorMode?: ColorMode;
   inputSources?: ReadonlyMap<string, string>;
   tensorShapes?: ReadonlyMap<string, TensorInfo>;
@@ -72,6 +75,7 @@ export function NodePropertyPanel({
                   inputSources={inputSources}
                   onTensorClick={onTensorClick}
                   onBack={onBack}
+                  onOpenSubGraph={onOpenSubGraph}
                   opsets={opsets}
                 />
               ) : isEdgeTarget(target) ? (
