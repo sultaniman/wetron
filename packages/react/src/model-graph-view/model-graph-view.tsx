@@ -18,11 +18,7 @@ import type { LayoutDirection } from "@wetron/core/transform";
 import { GraphNodeComponent } from "../nodes/graph-node.tsx";
 import { IoNodeComponent } from "../nodes/io-node.tsx";
 import { ModelEdge } from "../edges/model-edge.tsx";
-import {
-  ColorModeContext,
-  useColorMode,
-  type ColorMode,
-} from "../color-mode-context.ts";
+import { ColorModeContext, useColorMode, type ColorMode } from "../color-mode-context.ts";
 import { MINIMAP_THEME } from "../theme.ts";
 import {
   useModelNodes,
@@ -76,19 +72,8 @@ type Props = {
   rankdir?: LayoutDirection;
 };
 
-const Inner = forwardRef<
-  ModelGraphViewHandle,
-  Props & { colorMode: ColorMode }
->(function Inner(
-  {
-    graph,
-    onTargetClick,
-    onWarnings,
-    selectedEdgeTensorName,
-    searchQuery,
-    colorMode,
-    rankdir,
-  },
+const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>(function Inner(
+  { graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, colorMode, rankdir },
   ref,
 ) {
   const isDark = useColorMode() === "dark";
@@ -107,16 +92,9 @@ const Inner = forwardRef<
     layoutNodes,
     layoutEdges,
   } = useModelNodes(currentGraph, rankdir);
-  const matchedNames = searchQuery
-    ? filterGraph(currentGraph, searchQuery)
-    : EMPTY_NAMES;
+  const matchedNames = searchQuery ? filterGraph(currentGraph, searchQuery) : EMPTY_NAMES;
   const nodes = useNodeDim(rawNodes, matchedNames);
-  const edges = useEdgeHighlight(
-    layoutEdges,
-    selectedEdgeTensorName,
-    isDark,
-    matchedNames,
-  );
+  const edges = useEdgeHighlight(layoutEdges, selectedEdgeTensorName, isDark, matchedNames);
 
   const handleNodeClick = useNodeClickHandler(onTargetClick);
   const handleEdgeClick = useEdgeClickHandler(onTargetClick, layoutEdges);
@@ -190,27 +168,15 @@ const Inner = forwardRef<
         >
           <MiniMap
             style={{
-              background: isDark
-                ? MINIMAP_THEME.dark.background
-                : MINIMAP_THEME.light.background,
+              background: isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background,
               borderRadius: MINIMAP_THEME.borderRadius,
               border: "none",
               overflow: "hidden",
               cursor: "crosshair",
             }}
-            nodeColor={
-              isDark
-                ? MINIMAP_THEME.dark.nodeColor
-                : MINIMAP_THEME.light.nodeColor
-            }
-            maskColor={
-              isDark
-                ? MINIMAP_THEME.dark.maskColor
-                : MINIMAP_THEME.light.maskColor
-            }
-            onClick={(_, pos) =>
-              rf.setCenter(pos.x, pos.y, { zoom: rf.getViewport().zoom })
-            }
+            nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
+            maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
+            onClick={(_, pos) => rf.setCenter(pos.x, pos.y, { zoom: rf.getViewport().zoom })}
           />
           <Controls />
           <Background color="var(--wetron-bg-pattern)" />
@@ -220,14 +186,15 @@ const Inner = forwardRef<
   );
 });
 
-export const ModelGraphView = forwardRef<ModelGraphViewHandle, Props>(
-  function ModelGraphView({ colorMode = "system", ...rest }, ref) {
-    return (
-      <ColorModeContext.Provider value={colorMode}>
-        <ReactFlowProvider>
-          <Inner {...rest} colorMode={colorMode} ref={ref} />
-        </ReactFlowProvider>
-      </ColorModeContext.Provider>
-    );
-  },
-);
+export const ModelGraphView = forwardRef<ModelGraphViewHandle, Props>(function ModelGraphView(
+  { colorMode = "system", ...rest },
+  ref,
+) {
+  return (
+    <ColorModeContext.Provider value={colorMode}>
+      <ReactFlowProvider>
+        <Inner {...rest} colorMode={colorMode} ref={ref} />
+      </ReactFlowProvider>
+    </ColorModeContext.Provider>
+  );
+});

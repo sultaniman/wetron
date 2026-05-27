@@ -79,7 +79,9 @@ export function WeightHeatmap({
       </div>
       <div className={weightVizCss.heatLegend}>
         {colormap === "sequential" ? (
-          <div className={`${weightVizCss.heatLegendBar} ${weightVizCss.heatLegendBarSequential}`} />
+          <div
+            className={`${weightVizCss.heatLegendBar} ${weightVizCss.heatLegendBarSequential}`}
+          />
         ) : (
           <div className={`${weightVizCss.heatLegendBar} ${weightVizCss.heatLegendBarConstant}`} />
         )}

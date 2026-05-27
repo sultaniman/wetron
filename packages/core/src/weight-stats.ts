@@ -90,7 +90,10 @@ export function computeStats(values: Float64Array | Int32Array): WeightStats {
     let fc = 0;
     for (let i = start; i < end; i++) {
       const x = values[i];
-      if (Number.isFinite(x)) { s += x; fc++; }
+      if (Number.isFinite(x)) {
+        s += x;
+        fc++;
+      }
     }
     // If all values in the chunk are non-finite, represent the cell as 0.
     heatmap[c] = fc > 0 ? s / fc : 0;

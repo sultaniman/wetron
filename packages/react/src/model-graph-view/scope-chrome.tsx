@@ -13,9 +13,7 @@ export function ScopeChrome() {
       >
         ← Back
       </button>
-      {scopeName ? (
-        <span className="wetron-scope-name">{scopeName}</span>
-      ) : null}
+      {scopeName ? <span className="wetron-scope-name">{scopeName}</span> : null}
     </div>
   );
 }

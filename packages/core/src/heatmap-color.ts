@@ -22,9 +22,7 @@ export function colorForCell(
   const stops = isDark ? STOPS_DARK : STOPS_LIGHT;
   if (range === 0) return stops[0];
 
-  const t = Number.isFinite(value)
-    ? Math.max(0, Math.min(1, (value - min) / range))
-    : 0;
+  const t = Number.isFinite(value) ? Math.max(0, Math.min(1, (value - min) / range)) : 0;
   return interpolateStops(t, stops);
 }
 

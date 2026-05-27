@@ -19,17 +19,12 @@ import { EDGE_THEME } from "../theme.ts";
 
 type FlowEdgeData = FlowEdge["data"];
 
-export function useModelNodes(
-  graph: ModelGraph,
-  rankdir: LayoutDirection = "TB",
-) {
+export function useModelNodes(graph: ModelGraph, rankdir: LayoutDirection = "TB") {
   const { nodes: layoutNodes, edges: layoutEdges } = useMemo(
     () => modelGraphToFlow(graph, { rankdir }),
     [graph, rankdir],
   );
-  const [nodes, setNodes, onNodesChange] = useNodesState(
-    layoutNodes as Node<GraphNodeData>[],
-  );
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutNodes as Node<GraphNodeData>[]);
   useEffect(() => {
     setNodes(layoutNodes as Node<GraphNodeData>[]);
   }, [layoutNodes, setNodes]);
@@ -143,8 +138,7 @@ export function useEdgeClickHandler(
 
       const d = edge.data as FlowEdgeData;
       const sameEdges = layoutEdges.filter(
-        (e) =>
-          (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
+        (e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
       );
       const from = { opType: d.sourceOpType, name: d.sourceNodeName };
       const to = sameEdges.map((e) => ({
@@ -202,10 +196,7 @@ export function useNavStack(rootGraph: ModelGraph): NavStack {
   };
 }
 
-export function useFitOnGraphChange(
-  graph: ModelGraph,
-  layoutNodes: Node<GraphNodeData>[],
-): void {
+export function useFitOnGraphChange(graph: ModelGraph, layoutNodes: Node<GraphNodeData>[]): void {
   const { fitView } = useReactFlow();
   useEffect(() => {
     const topNodes = [...layoutNodes]
