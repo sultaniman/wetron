@@ -19,7 +19,7 @@ const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseExecutorch(bytes); // synchronous
 ```
 
-Throws `ParseError` from `@wetron/core/ir` on malformed input or missing `ET12` identifier.
+Throws `ParseError` from `@wetron/common/ir` on malformed input or missing `ET12` identifier.
 
 ## What gets parsed
 

@@ -24,7 +24,7 @@ const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseSavedModel(bytes); // synchronous, returns ModelGraph
 ```
 
-Throws `ParseError` from `@wetron/core/ir` if the file is too short or has unrecognized `.pb` content.
+Throws `ParseError` from `@wetron/common/ir` if the file is too short or has unrecognized `.pb` content.
 
 ### Checkpoint loading
 

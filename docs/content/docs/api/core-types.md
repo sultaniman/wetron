@@ -1,6 +1,6 @@
 ---
 title: "Core Types"
-description: "Complete IR type definitions from @wetron/core/ir - ModelGraph, GraphNode, GraphValue, ParseWarning, ParseError, and flow types."
+description: "Complete IR type definitions from @wetron/common/ir - ModelGraph, GraphNode, GraphValue, ParseWarning, ParseError, and flow types."
 lead: "The shared intermediate representation all parsers emit."
 weight: 20
 ---
@@ -13,8 +13,8 @@ import type {
   ParseWarning,
   AttributeValue,
   WeightSource,
-} from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+} from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 ```
 
 ## ModelGraph

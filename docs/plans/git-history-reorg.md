@@ -103,7 +103,7 @@ s 2fb47ea fix(@wetron/core): remove any casts in readFloat16, add float8/Tier-3 
 # Group 3: ONNX parser
 pick c3c3296 chore(@wetron/onnx): add ONNX proto and compiled descriptor
 s b9dddb6 feat(@wetron/onnx): add ONNX parser with protobufjs
-s 797c9e5 fix(@wetron/onnx): import bigIntToNumber from @wetron/core/dtypes instead of inlining
+s 797c9e5 fix(@wetron/onnx): import bigIntToNumber from @wetron/common/dtypes instead of inlining
 s ac75077 fix(@wetron/onnx): fix readFileSync->Bun.file, pin node count, fix docString fallback, module-level TextDecoder
 
 # Group 4: TFLite parser

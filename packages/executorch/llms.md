@@ -8,7 +8,7 @@ ExecuTorch model parser. Reads `.pte` FlatBuffers files and returns a `ModelGrap
 function parseExecutorch(bytes: Uint8Array): ModelGraph; // synchronous
 ```
 
-Throws `ParseError` (from `@wetron/core/ir`) on malformed input or missing `ET12` identifier.
+Throws `ParseError` (from `@wetron/common/ir`) on malformed input or missing `ET12` identifier.
 
 ## What gets parsed
 

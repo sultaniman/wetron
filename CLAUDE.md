@@ -2,10 +2,11 @@
 
 ## Quick Ref
 
-- **Scope**: `@wetron/` | **TypeScript** | **Runtime/PM**: Bun (workspaces)
-- **Target**: Browser-only - no Node.js APIs
-- **Test runner**: `bun test` (all packages) - no vitest, no jest
-- **Always use `bun`/`bunx`** (never `npm`, `npx`, `pnpm`, `node`)
+- **Scope**: `@wetron/` | **TypeScript**
+- **Package manager**: pnpm (workspaces via `pnpm-workspace.yaml`)
+- **TS script runner**: bun (e.g. `bun scripts/bump-version.ts`)
+- **Test runner**: vitest (`pnpm exec vitest run`) - no bun:test, no jest
+- **Target**: Browser-only - no Node.js APIs in `src/` (tests may use `node:*`)
 - **Specs**: `docs/specs/` - `wetron-design.md` (architecture), `node-color-theme-design.md` (node theming)
 - **Reference source**: `netron-main/` (schema field layouts - read-only)
 
@@ -14,12 +15,18 @@
 ```
 wetron/
   packages/
-    core/         # shared IR types, dtypes, format detection, layout transform, unified entry
+    common/       # leaf kit: IR types, dtypes, flatbuffer helpers - what parsers consume
     onnx/         # ONNX parser (protobufjs)
     tflite/       # TFLite parser (flatbuffers)
+    keras/        # Keras parser
+    executorch/   # ExecuTorch parser (flatbuffers)
+    torchscript/  # TorchScript parser
+    savedmodel/   # SavedModel parser + checkpoint loading
+    core/         # umbrella: depends on common + all parsers, hosts parseModel, transform, format-val, etc.
+    tokens/       # design tokens shared by react/svelte
     react/        # ReactFlow rendering layer
     svelte/       # @xyflow/svelte rendering layer
-  test-models/    # .onnx and .tflite test fixtures
+  test-models/    # parser test fixtures
   netron-main/    # reference source - schema field layouts only, do not copy internals
   docs/
 ```
@@ -37,11 +44,12 @@ packages/<name>/
 
 ## Architecture Rules
 
-- IR types live in `@wetron/core/src/ir.ts` - all parsers import from there
-- `@wetron/core/src/dtypes.ts` - all exotic numeric type readers; parsers import from here, never inline shims
+- IR types live in `@wetron/common/src/ir.ts` - all parsers import via `@wetron/common/ir`
+- `@wetron/common/src/dtypes.ts` - all exotic numeric type readers; parsers import via `@wetron/common/dtypes`, never inline shims
+- `@wetron/common/src/flatbuffers.ts` - shared flatbuffer reader helpers; tflite/executorch/torchscript import via `@wetron/common/flatbuffers`
 - `@wetron/core/src/detect.ts` - magic-byte format detection
 - `@wetron/core/src/transform.ts` - IR -> ReactFlow/SvelteFlow layout (shared by renderer packages)
-- `@wetron/core/src/index.ts` - unified `parseModel` entry point
+- `@wetron/core/src/index.ts` - umbrella entry: re-exports `@wetron/common`, all parser packages, and exposes `parseModel`
 - Parsers (`onnx`, `tflite`) export a single parse function; business logic stays there
 - No weight deserialization anywhere - graph structure only
 - Never patch `DataView.prototype` or `BigInt.prototype`
@@ -76,13 +84,13 @@ These rules apply throughout all packages:
 ## Testing
 
 ```bash
-bun test                  # all packages
-bun test packages/core    # single package
+pnpm exec vitest run                       # all packages
+pnpm exec vitest run packages/core         # single package
 ```
 
-- All test files: `import { test, expect } from "bun:test"`
+- All test files: `import { test, expect } from "vitest"`
 - Assert `ModelGraph` shape (node count, input/output names + shapes, no undefined `opType`) from real test models in `test-models/`
-- Renderer tests: `@testing-library/react` for `@wetron/react`
+- Renderer tests: `@testing-library/react` for `@wetron/react` (vitest uses `happy-dom` for `packages/react/test/**` via root `vitest.config.ts`)
 - Node count must match netron's UI for the same file - use `netron-main/` as reference
 - Never skip verification - fix failing tests before proceeding
 
@@ -101,7 +109,7 @@ bun test packages/core    # single package
 - Match existing style, even if you'd do it differently.
 - Keep new tests consistent with existing test design.
 - Remove imports and variables your changes leave unused.
-- Use `bun`/`bunx` for all package management - never `npm`, `npx`, `pnpm`, or `node`.
+- Use `pnpm` for package management (install, publish, exec); use `bun` only to run TS scripts (`bun scripts/foo.ts`). Never `npm`, `npx`, or `node`.
 - Import exotic type readers from `@wetron/core/src/dtypes` - never inline shims in parsers.
 - Use native `DataView` methods for Tier 1 types (`int8`-`uint64`, `float32`, `float64`) - do not reimplement.
 - Use `DecompressionStream`, `TextDecoder`, `fetch`, `file.arrayBuffer()` - lean on the web platform.
@@ -111,7 +119,7 @@ bun test packages/core    # single package
 
 **After implementing**
 
-- Run `bun test` and fix any failures before reporting done.
+- Run `pnpm exec vitest run` and fix any failures before reporting done.
 - Verify node count against netron for the same test model after parser changes.
 
 ### Don't

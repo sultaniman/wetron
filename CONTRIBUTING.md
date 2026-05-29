@@ -24,8 +24,8 @@ Each model format is an independent package under `packages/`. The pattern is co
 
 Key rules:
 
-- Import IR types from `@wetron/core/ir` - never redefine them.
-- Import exotic dtype readers from `@wetron/core/dtypes` - never inline shims.
+- Import IR types from `@wetron/common/ir` - never redefine them.
+- Import exotic dtype readers from `@wetron/common/dtypes` - never inline shims.
 - Use native Web APIs: `DataView`, `TextDecoder`, `DecompressionStream`, `fetch`.
 - Return graph structure only - no weight data.
 - Register magic-byte detection in `packages/core/src/detect.ts`.

@@ -8,7 +8,7 @@ Keras model parser. Reads `.keras` ZIP archive files and returns a `ModelGraph` 
 function parseKeras(bytes: Uint8Array): ModelGraph;
 ```
 
-Throws `ParseError` (from `@wetron/core/ir`) on malformed input, missing `config.json`, invalid JSON, or unsupported model class.
+Throws `ParseError` (from `@wetron/common/ir`) on malformed input, missing `config.json`, invalid JSON, or unsupported model class.
 
 ## What gets parsed
 

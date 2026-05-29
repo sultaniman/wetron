@@ -838,10 +838,10 @@ At the top of the `<script lang="ts">` block, add the import after the other pan
 import WeightPanel from './weight-panel.svelte';
 ```
 
-Add `ModelGraph` to the type import from `@wetron/core/ir`:
+Add `ModelGraph` to the type import from `@wetron/common/ir`:
 
 ```ts
-import type { PanelTarget, GraphNode, GraphValue, ModelGraph } from '@wetron/core/ir';
+import type { PanelTarget, GraphNode, GraphValue, ModelGraph } from '@wetron/common/ir';
 ```
 
 Add `graph` to the props destructuring and the props type:
@@ -1000,7 +1000,7 @@ git commit -m "add svelte test setup with happy-dom and testing-library"
 ```ts
 import { test, expect } from "bun:test";
 import { render } from "@testing-library/svelte";
-import type { ModelGraph } from "@wetron/core/ir";
+import type { ModelGraph } from "@wetron/common/ir";
 import WeightPanel from "../src/node-property-panel/weight-panel.svelte";
 
 function makeGraph(weightName: string, bytes: Uint8Array): ModelGraph {
@@ -1032,7 +1032,7 @@ test("WeightPanel renders shape, dtype, size for a small initialised tensor", ()
 });
 ```
 
-If the `ModelGraph` shape in `@wetron/core/ir` has additional required fields not constructed above (the spec mentions `warnings`, `metadata`, etc.), add them as empty defaults - read `packages/core/src/ir.ts` to confirm. The test compiles or it doesn't; this is the verification.
+If the `ModelGraph` shape in `@wetron/common/ir` has additional required fields not constructed above (the spec mentions `warnings`, `metadata`, etc.), add them as empty defaults - read `packages/core/src/ir.ts` to confirm. The test compiles or it doesn't; this is the verification.
 
 - [ ] **Step 2: Run the test**
 

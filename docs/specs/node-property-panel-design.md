@@ -25,7 +25,7 @@ Add a `NodePropertyPanel` React component to `@wetron/react` that displays the p
 ## Component API
 
 ```tsx
-import type { GraphNode, GraphValue } from "@wetron/core/ir";
+import type { GraphNode, GraphValue } from "@wetron/common/ir";
 
 type PanelTarget = GraphNode | GraphValue;
 

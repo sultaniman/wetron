@@ -15,7 +15,7 @@ Browser-native neural network model visualizer. Parses ONNX, TFLite, Keras, Torc
 - `@wetron/svelte` - Svelte components: `ModelGraphView`, `NodePropertyPanel` (peer: svelte 5+, @xyflow/svelte 1.5+, phosphor-svelte 3+)
 - `@wetron/tokens` - design tokens: category colors, CSS vars - zero dependencies, all types inlined
 
-## Core IR types (`@wetron/core/ir`)
+## Core IR types (`@wetron/common/ir`)
 
 ```ts
 type AttributeValue = string | number | boolean | readonly number[] | readonly string[];
@@ -182,7 +182,7 @@ function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpoint): M
 - `detectFormat` must always return a `Format` string, never throw.
 - Weight bytes are exposed only through `WeightSource.get(name)` - parsers never preload or cache the entire weight payload.
 - No patching of `DataView.prototype` or `BigInt.prototype`.
-- Use `bigIntToNumber(v)` from `@wetron/core/dtypes` for BigInt -> number (throws RangeError if out of safe range).
+- Use `bigIntToNumber(v)` from `@wetron/common/dtypes` for BigInt -> number (throws RangeError if out of safe range).
 
 ## Platform constraints (browser-only)
 
@@ -196,6 +196,6 @@ function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpoint): M
 ## Adding a parser
 
 1. Create `packages/<format>/src/parse.ts` - export a single parse function returning `ModelGraph`.
-2. Import IR types from `@wetron/core/ir`, dtype readers from `@wetron/core/dtypes`.
+2. Import IR types from `@wetron/common/ir`, dtype readers from `@wetron/common/dtypes`.
 3. Register magic bytes in `@wetron/core/src/detect.ts` and add a dynamic import branch in `@wetron/core/src/index.ts`.
 4. Test against real model files in `test-models/` - node count must match netron's UI for the same file.

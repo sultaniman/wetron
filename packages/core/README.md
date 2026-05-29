@@ -35,8 +35,8 @@ function opInputLabels(opType: string): readonly string[];
 
 | Path                       | Contents                                           |
 | -------------------------- | -------------------------------------------------- |
-| `@wetron/core/ir`          | IR types and `ParseError`                          |
-| `@wetron/core/dtypes`      | Exotic numeric readers (bfloat16, float8, int4, …) |
+| `@wetron/common/ir`          | IR types and `ParseError`                          |
+| `@wetron/common/dtypes`      | Exotic numeric readers (bfloat16, float8, int4, …) |
 | `@wetron/core/detect`      | `detectFormat` standalone                          |
 | `@wetron/core/transform`   | `modelGraphToFlow` and flow types                  |
 | `@wetron/core/edge-path`   | Edge routing geometry                              |

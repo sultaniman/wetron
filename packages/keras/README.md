@@ -19,7 +19,7 @@ const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseKeras(bytes); // synchronous
 ```
 
-Throws `ParseError` from `@wetron/core/ir` on malformed input, missing `config.json`, or unsupported model class.
+Throws `ParseError` from `@wetron/common/ir` on malformed input, missing `config.json`, or unsupported model class.
 
 ## What gets parsed
 

@@ -8,7 +8,7 @@ TFLite model parser. Reads `.tflite` flatbuffer files synchronously and returns 
 function parseTflite(bytes: Uint8Array): ModelGraph; // synchronous
 ```
 
-Throws `ParseError` (from `@wetron/core/ir`) on malformed input.
+Throws `ParseError` (from `@wetron/common/ir`) on malformed input.
 
 ## TFLite dtype mapping
 

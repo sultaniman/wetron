@@ -25,8 +25,8 @@ packages/<format>/
 
 ```ts
 // packages/<format>/src/parse.ts
-import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 
 export function parse<Format>(bytes: Uint8Array): ModelGraph {
   // ...
@@ -36,8 +36,8 @@ export function parse<Format>(bytes: Uint8Array): ModelGraph {
 
 Rules:
 
-- Import IR types from `@wetron/core/ir` - never redefine them.
-- Import exotic dtype readers from `@wetron/core/dtypes` - never inline shims.
+- Import IR types from `@wetron/common/ir` - never redefine them.
+- Import exotic dtype readers from `@wetron/common/dtypes` - never inline shims.
 - Use native Web APIs: `DataView`, `TextDecoder`, `DecompressionStream`.
 - Use `protobufjs` for protobuf formats, `flatbuffers` for FlatBuffers formats.
 - Set `ModelGraph.fileSizeBytes` to `bytes.byteLength`. Optionally expose initializer bytes via `ModelGraph.weights` (a `WeightSource` with `totalBytes` and `get(name)`) - return raw little-endian byte slices into the source buffer; do not decode them. Decoding lives in `@wetron/core/weight-decoder`.
@@ -110,7 +110,7 @@ Add a real model file to `test-models/`. Node count must match what Netron shows
 
 - Don't decode weight tensors inside the parser - expose raw bytes via `WeightSource` and let consumers call `decodeWeight` / `decodeFirstN` from `@wetron/core` on demand.
 - Don't copy netron's internal reader classes - `parseMyFormat(bytes)` is the entire public API.
-- Don't inline dtype shims - import from `@wetron/core/dtypes`.
+- Don't inline dtype shims - import from `@wetron/common/dtypes`.
 - Don't patch `DataView.prototype` or `BigInt.prototype`.
 - Don't throw from `detectFormat` - return `"unknown"`.
 - Don't skip failing tests - fix them before reporting done.

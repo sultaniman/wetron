@@ -8,7 +8,7 @@ TensorFlow SavedModel `.pb` parser. Reads both `saved_model.pb` (TF op graph) an
 function parseSavedModel(bytes: Uint8Array): ModelGraph; // synchronous
 ```
 
-Throws `ParseError` (from `@wetron/core/ir`) on malformed input, unrecognised format, or missing graph data.
+Throws `ParseError` (from `@wetron/common/ir`) on malformed input, unrecognised format, or missing graph data.
 
 ## Format variants
 

@@ -8,7 +8,7 @@ TorchScript model parser. Reads `.pt` files (both ZIP-based from `torch.jit.save
 function parseTorchscript(bytes: Uint8Array): ModelGraph; // synchronous
 ```
 
-Throws `ParseError` (from `@wetron/core/ir`) on malformed input or unrecognised format.
+Throws `ParseError` (from `@wetron/common/ir`) on malformed input or unrecognised format.
 
 ## Format variants
 

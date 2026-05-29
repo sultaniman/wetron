@@ -68,14 +68,14 @@ interface WeightStats {
 
 ## Sub-path exports
 
-- `@wetron/core/ir` - IR types and `ParseError`
-- `@wetron/core/dtypes` - exotic numeric readers (bfloat16, float8, int4, …)
+- `@wetron/common/ir` - IR types and `ParseError`
+- `@wetron/common/dtypes` - exotic numeric readers (bfloat16, float8, int4, …)
 - `@wetron/core/detect` - `detectFormat` standalone
 - `@wetron/core/transform` - `modelGraphToFlow` and flow types
 - `@wetron/core/edge-path` - edge routing geometry
 - `@wetron/core/panel-utils` - property panel helpers
 
-## IR types (`@wetron/core/ir`)
+## IR types (`@wetron/common/ir`)
 
 ```ts
 type AttributeValue = string | number | boolean | readonly number[] | readonly string[];
@@ -185,8 +185,8 @@ type FlowEdge = {
 - Parsers never copy weight bytes eagerly. ONNX and TFLite expose them through `WeightSource.get(name)` (zero-copy slices into the input `Uint8Array` for TFLite; protobufjs-decoded `raw_data` / typed-arrays for ONNX). Other parsers leave `weights` undefined.
 - `detectFormat` always returns `Format`, never throws.
 - Do not patch `DataView.prototype` or `BigInt.prototype`.
-- Use `bigIntToNumber(v: bigint): number` from `@wetron/core/dtypes` for BigInt -> number (throws `RangeError` if outside safe integer range).
-- All exotic dtype readers live in `@wetron/core/dtypes` - parsers import from there, never inline shims.
+- Use `bigIntToNumber(v: bigint): number` from `@wetron/common/dtypes` for BigInt -> number (throws `RangeError` if outside safe integer range).
+- All exotic dtype readers live in `@wetron/common/dtypes` - parsers import from there, never inline shims.
 
 ## Weight inspection pipeline
 

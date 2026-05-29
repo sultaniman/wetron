@@ -19,7 +19,7 @@ const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseTorchscript(bytes); // synchronous
 ```
 
-Throws `ParseError` from `@wetron/core/ir` on malformed input.
+Throws `ParseError` from `@wetron/common/ir` on malformed input.
 
 ## Format variants
 
