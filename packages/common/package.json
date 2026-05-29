@@ -42,9 +42,15 @@
       "source": "./src/flatbuffers.ts",
       "types": "./dist/flatbuffers.d.ts",
       "import": "./dist/flatbuffers.js"
+    },
+    "./protobuf": {
+      "source": "./src/protobuf.ts",
+      "types": "./dist/protobuf.d.ts",
+      "import": "./dist/protobuf.js"
     }
   },
   "dependencies": {
-    "flatbuffers": "^25.9.23"
+    "flatbuffers": "^25.9.23",
+    "protobufjs": "^8.0.3"
   }
 }

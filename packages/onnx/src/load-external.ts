@@ -1,14 +1,10 @@
-import protobuf from "protobufjs/light.js";
-import type { Root, INamespace } from "protobufjs/light.js";
+import type { INamespace } from "protobufjs/light.js";
 import type { WeightSource } from "@wetron/common/ir";
 import { ParseError } from "@wetron/common/ir";
+import { memoizeRoot } from "@wetron/common/protobuf";
 import descriptor from "./onnx-descriptor.json" with { type: "json" };
 
-let _root: Root | null = null;
-function getRoot(): Root {
-  if (!_root) _root = protobuf.Root.fromJSON(descriptor as INamespace);
-  return _root;
-}
+const getRoot = memoizeRoot(descriptor as INamespace);
 
 interface ExternalRef {
   readonly location: string;

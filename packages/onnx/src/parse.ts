@@ -1,5 +1,4 @@
-import protobuf from "protobufjs/light.js";
-import type { Root, INamespace } from "protobufjs/light.js";
+import type { INamespace } from "protobufjs/light.js";
 import type {
   ModelGraph,
   GraphNode,
@@ -9,13 +8,10 @@ import type {
 } from "@wetron/common/ir";
 import { ParseError } from "@wetron/common/ir";
 import { bigIntToNumber } from "@wetron/common/dtypes";
+import { memoizeRoot } from "@wetron/common/protobuf";
 import descriptor from "./onnx-descriptor.json" with { type: "json" };
 
-let _root: Root | null = null;
-function getRoot(): Root {
-  if (!_root) _root = protobuf.Root.fromJSON(descriptor as INamespace);
-  return _root;
-}
+const getRoot = memoizeRoot(descriptor as INamespace);
 
 // protobufjs int64 values come back as Long objects, plain numbers, or bigints
 function longToNumber(v: unknown): number {

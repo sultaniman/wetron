@@ -6,11 +6,12 @@ export default defineConfig({
     ir: "src/ir.ts",
     dtypes: "src/dtypes.ts",
     flatbuffers: "src/flatbuffers.ts",
+    protobuf: "src/protobuf.ts",
   },
   format: ["esm"],
   dts: true,
   sourcemap: true,
   tsconfig: "../../tsconfig.build.json",
   clean: true,
-  external: ["flatbuffers"],
+  external: ["flatbuffers", "protobufjs"],
 });

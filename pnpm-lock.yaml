@@ -167,6 +167,9 @@ importers:
       flatbuffers:
         specifier: ^25.9.23
         version: 25.9.23
+      protobufjs:
+        specifier: ^8.0.3
+        version: 8.4.2
 
   packages/core:
     dependencies:
@@ -221,6 +224,9 @@ importers:
       '@wetron/common':
         specifier: workspace:*
         version: link:../common
+      protobufjs:
+        specifier: ^8.0.3
+        version: 8.4.2
 
   packages/react:
     dependencies:
@@ -264,6 +270,9 @@ importers:
       '@wetron/keras':
         specifier: workspace:*
         version: link:../keras
+      protobufjs:
+        specifier: ^8.0.3
+        version: 8.4.2
 
   packages/svelte:
     dependencies:
