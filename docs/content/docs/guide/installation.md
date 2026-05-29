@@ -8,7 +8,7 @@ weight: 20
 ## React
 
 ```bash
-bun add @wetron/react
+pnpm add @wetron/react
 ```
 
 `@wetron/react` -> `@wetron/core` -> all parser packages. One command installs the renderer, core, and all five format parsers.
@@ -16,7 +16,7 @@ bun add @wetron/react
 Peer dependencies you must install separately:
 
 ```bash
-bun add react react-dom @xyflow/react @phosphor-icons/react @base-ui/react
+pnpm add react react-dom @xyflow/react @phosphor-icons/react @base-ui/react
 ```
 
 Import the stylesheet once in your entry point:
@@ -28,13 +28,13 @@ import "@wetron/react/styles.css";
 ## Svelte
 
 ```bash
-bun add @wetron/svelte
+pnpm add @wetron/svelte
 ```
 
 Peer dependencies:
 
 ```bash
-bun add svelte @xyflow/svelte phosphor-svelte
+pnpm add svelte @xyflow/svelte phosphor-svelte
 ```
 
 ## Core only (no renderer)
@@ -42,7 +42,7 @@ bun add svelte @xyflow/svelte phosphor-svelte
 If you only need parsing - custom rendering, server-side analysis, or testing:
 
 ```bash
-bun add @wetron/core
+pnpm add @wetron/core
 ```
 
 This pulls in all parser packages as transitive dependencies.

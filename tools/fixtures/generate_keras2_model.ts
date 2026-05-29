@@ -4,8 +4,11 @@
 // Output: test-models/keras2_synthetic.keras
 
 import { writeFileSync } from "fs";
-import { resolve } from "path";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 import { zipSync } from "fflate";
+
+const here = dirname(fileURLToPath(import.meta.url));
 
 type Layer = {
   class_name: string;
@@ -123,6 +126,6 @@ const out = zipSync({
   ),
 });
 
-const dest = resolve(import.meta.dir, "..", "test-models", "keras2_synthetic.keras");
+const dest = resolve(here, "..", "test-models", "keras2_synthetic.keras");
 writeFileSync(dest, out);
 console.log(`wrote ${dest} - ${layers.length} layers`);

@@ -8,9 +8,12 @@
 //   test-models/keras2_with_subgraphs.keras   (Keras 2 dict-format inbound_nodes)
 
 import { writeFileSync } from "fs";
-import { resolve } from "path";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 import { zipSync } from "fflate";
 import h5wasm from "h5wasm";
+
+const here = dirname(fileURLToPath(import.meta.url));
 
 type Format = "keras2" | "keras3";
 
@@ -278,7 +281,7 @@ async function generate(format: Format, outName: string): Promise<void> {
     "model.weights.h5": h5Bytes,
   });
 
-  const dest = resolve(import.meta.dir, "..", "test-models", outName);
+  const dest = resolve(here, "..", "test-models", outName);
   writeFileSync(dest, zipped);
   console.log(
     `wrote ${dest} — h5=${h5Bytes.length}b, zip=${zipped.length}b`,
