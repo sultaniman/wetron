@@ -1,6 +1,6 @@
 {
   "name": "@wetron/core",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "description": "Umbrella entry for wetron - parses every supported model format via parseModel and re-exports the parser-specific APIs",
   "keywords": [
     "graph",
