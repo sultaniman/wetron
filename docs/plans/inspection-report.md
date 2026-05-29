@@ -6,7 +6,7 @@
 
 **Architecture:** Five phases. Phase 1 builds a pure-TypeScript `report` module in `@wetron/core` covering hashing, canonical serialisation, build, parse, and verify - no DOM, no React. Phase 2 wires React components: toolbar export dropdown, node-scoped export, verify file picker, verification panel, print stylesheet, graph-node badges. Phase 3 mirrors the React work in Svelte. Phase 4 wires the two demo apps. Phase 5 ships docs (Hugo pages + `llms.md`).
 
-**Tech stack:** Bun workspaces, TypeScript, WebCrypto (`crypto.subtle.digest`) for SHA-256, native `String.prototype.normalize('NFD')` for tensor-name canonicalisation, React 19, Svelte 5 (runes), `bun test` for tests, `@testing-library/react` and `@testing-library/svelte` for components, browser print stylesheet for the PDF export. All package operations go through `bun` / `bunx` - never `npm`/`npx`/`pnpm`/`node`. Commits go straight to `main`. Commit messages: lowercase verb + short description. Stage files individually - never `git add -A`.
+**Tech stack:** pnpm workspaces, TypeScript, WebCrypto (`crypto.subtle.digest`) for SHA-256, native `String.prototype.normalize('NFD')` for tensor-name canonicalisation, React 19, Svelte 5 (runes), `pnpm exec vitest run` for tests, `@testing-library/react` and `@testing-library/svelte` for components, browser print stylesheet for the PDF export. All package operations go through `pnpm` - never `npm`/`npx`/`node`/`bun`. Commits go straight to `main`. Commit messages: lowercase verb + short description. Stage files individually - never `git add -A`.
 
 ---
 
@@ -24,7 +24,7 @@ The core module is the load-bearing piece. UI surfaces in later phases call into
 
 ```ts
 // packages/core/test/report/hash.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { sha256Hex } from "../../src/report/hash.ts";
 
 test("sha256Hex of empty input is the known digest", async () => {
@@ -45,7 +45,7 @@ test("sha256Hex returns lowercase hex only", async () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `bun test packages/core/test/report/hash.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/hash.test.ts`
 Expected: FAIL - `sha256Hex` is not defined.
 
 - [ ] **Step 3: Implement the hash utility**
@@ -65,7 +65,7 @@ export async function sha256Hex(bytes: Uint8Array): Promise<string> {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/core/test/report/hash.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/hash.test.ts`
 Expected: PASS - 3 tests.
 
 - [ ] **Step 5: Commit**
@@ -164,7 +164,7 @@ git commit -m "add inspection report types"
 
 ```ts
 // packages/core/test/report/normalize.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { normalizeName } from "../../src/report/normalize.ts";
 
 test("ASCII names pass through unchanged", () => {
@@ -194,7 +194,7 @@ test("two strings that are visually equivalent normalise to the same value", () 
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `bun test packages/core/test/report/normalize.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/normalize.test.ts`
 Expected: FAIL - `normalizeName` is not defined.
 
 - [ ] **Step 3: Implement**
@@ -208,7 +208,7 @@ export function normalizeName(name: string): string {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/core/test/report/normalize.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/normalize.test.ts`
 Expected: PASS - 4 tests.
 
 - [ ] **Step 5: Commit**
@@ -230,7 +230,7 @@ git commit -m "add nfd name normalisation helper"
 
 ```ts
 // packages/core/test/report/serialize.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { canonicalStringify } from "../../src/report/serialize.ts";
 
 test("object keys are sorted at every nesting level", () => {
@@ -258,7 +258,7 @@ test("null is preserved", () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `bun test packages/core/test/report/serialize.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/serialize.test.ts`
 Expected: FAIL - `canonicalStringify` is not defined.
 
 - [ ] **Step 3: Implement**
@@ -287,7 +287,7 @@ function stringify(value: unknown): string {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/core/test/report/serialize.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/serialize.test.ts`
 Expected: PASS - 4 tests.
 
 - [ ] **Step 5: Commit**
@@ -309,7 +309,7 @@ git commit -m "add canonical json serialiser for reports"
 
 ```ts
 // packages/core/test/report/build-global.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { buildGlobalReport } from "../../src/report/build.ts";
 import type { ModelGraph, WeightSource } from "../../src/ir.ts";
 
@@ -413,7 +413,7 @@ test("tensors are sorted by NFD-normalised name", async () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `bun test packages/core/test/report/build-global.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/build-global.test.ts`
 Expected: FAIL - `buildGlobalReport` is not defined.
 
 - [ ] **Step 3: Implement**
@@ -507,7 +507,7 @@ export async function buildGlobalReport(opts: BuildOptions): Promise<Report> {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/core/test/report/build-global.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/build-global.test.ts`
 Expected: PASS - 3 tests.
 
 - [ ] **Step 5: Commit**
@@ -529,7 +529,7 @@ git commit -m "build global inspection report"
 
 ```ts
 // packages/core/test/report/build-node.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { buildNodeReport } from "../../src/report/build.ts";
 import type { ModelGraph, WeightSource } from "../../src/ir.ts";
 
@@ -609,7 +609,7 @@ test("buildNodeReport throws when the node has no weight inputs", async () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `bun test packages/core/test/report/build-node.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/build-node.test.ts`
 Expected: FAIL - `buildNodeReport` is not exported.
 
 - [ ] **Step 3: Implement**
@@ -662,7 +662,7 @@ export async function buildNodeReport(opts: BuildNodeOptions): Promise<Report> {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/core/test/report/build-node.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/build-node.test.ts`
 Expected: PASS - 3 tests.
 
 - [ ] **Step 5: Commit**
@@ -684,7 +684,7 @@ git commit -m "build node-scoped inspection report"
 
 ```ts
 // packages/core/test/report/parse.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { parseReport } from "../../src/report/parse.ts";
 
 test("parseReport accepts a valid v1 report", () => {
@@ -735,7 +735,7 @@ test("parseReport accepts node scope", () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `bun test packages/core/test/report/parse.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/parse.test.ts`
 Expected: FAIL - `parseReport` is not defined.
 
 - [ ] **Step 3: Implement**
@@ -779,7 +779,7 @@ export function parseReport(json: string): ParseResult {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/core/test/report/parse.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/parse.test.ts`
 Expected: PASS - 4 tests.
 
 - [ ] **Step 5: Commit**
@@ -801,7 +801,7 @@ git commit -m "parse and validate inspection report json"
 
 ```ts
 // packages/core/test/report/verify.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { verifyReports } from "../../src/report/verify.ts";
 import type { Report } from "../../src/report/types.ts";
 
@@ -885,7 +885,7 @@ test("cross-mode verification compares only identity fields", () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `bun test packages/core/test/report/verify.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/verify.test.ts`
 Expected: FAIL - `verifyReports` is not defined.
 
 - [ ] **Step 3: Implement**
@@ -971,7 +971,7 @@ export function verifyReports(expected: Report, observed: Report): Verdict {
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/core/test/report/verify.test.ts`
+Run: `pnpm exec vitest run packages/core/test/report/verify.test.ts`
 Expected: PASS - 7 tests.
 
 - [ ] **Step 5: Commit**
@@ -1053,7 +1053,7 @@ In `packages/core/package.json`, inside the `exports` object, add (alphabetised 
 
 - [ ] **Step 4: Run all core tests to verify nothing regressed**
 
-Run: `bun test packages/core`
+Run: `pnpm exec vitest run packages/core`
 Expected: PASS - all existing tests plus the new `report/*` tests.
 
 - [ ] **Step 5: Commit**
@@ -1079,7 +1079,7 @@ git commit -m "export inspection report module from @wetron/core"
 
 ```tsx
 // packages/react/test/verification-panel.test.tsx
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { VerificationPanel } from "../src/verification-panel/index.ts";
 import type { Report, Verdict } from "@wetron/core";
@@ -1116,7 +1116,7 @@ test("VerificationPanel renders a MISMATCH banner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun test packages/react/test/verification-panel.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/verification-panel.test.tsx`
 Expected: FAIL - `VerificationPanel` does not exist.
 
 - [ ] **Step 3: Implement**
@@ -1194,7 +1194,7 @@ export type { VerificationPanelProps } from "./verification-panel.tsx";
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun test packages/react/test/verification-panel.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/verification-panel.test.tsx`
 Expected: PASS - 2 tests.
 
 - [ ] **Step 5: Commit**
@@ -1235,7 +1235,7 @@ test("table renders one row per tensor verdict", () => {
 
 - [ ] **Step 2: Run to verify the new test fails**
 
-Run: `bun test packages/react/test/verification-panel.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/verification-panel.test.tsx`
 Expected: FAIL - no rows rendered.
 
 - [ ] **Step 3: Add the table to the component**
@@ -1289,7 +1289,7 @@ Add CSS:
 
 - [ ] **Step 4: Run tests to verify all pass**
 
-Run: `bun test packages/react/test/verification-panel.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/verification-panel.test.tsx`
 Expected: PASS - 3 tests.
 
 - [ ] **Step 5: Commit**
@@ -1328,7 +1328,7 @@ Append to `verification-panel.module.css`:
 
 - [ ] **Step 2: Verify build passes**
 
-Run: `bun run build`
+Run: `pnpm run build`
 Expected: builds without errors.
 
 - [ ] **Step 3: Commit**
@@ -1351,7 +1351,7 @@ git commit -m "add print stylesheet for verification panel"
 
 ```tsx
 // packages/react/test/export-report-button.test.tsx
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ExportReportButton } from "../src/verification-panel/index.ts";
 
@@ -1369,7 +1369,7 @@ test("the button is disabled when no model is loaded", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun test packages/react/test/export-report-button.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/export-report-button.test.tsx`
 Expected: FAIL - `ExportReportButton` not exported.
 
 - [ ] **Step 3: Implement**
@@ -1417,7 +1417,7 @@ export type { ExportReportButtonProps } from "./export-report-button.tsx";
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/react/test/export-report-button.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/export-report-button.test.tsx`
 Expected: PASS - 2 tests.
 
 - [ ] **Step 5: Commit**
@@ -1440,7 +1440,7 @@ git commit -m "add react export-report toolbar button"
 
 ```tsx
 // packages/react/test/export-node-button.test.tsx
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ExportNodeReportButton } from "../src/verification-panel/index.ts";
 
@@ -1454,7 +1454,7 @@ test("export-node fires onExport with the node name and selected mode", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun test packages/react/test/export-node-button.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/export-node-button.test.tsx`
 Expected: FAIL - component missing.
 
 - [ ] **Step 3: Implement**
@@ -1488,7 +1488,7 @@ export type { ExportNodeReportButtonProps } from "./export-node-button.tsx";
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun test packages/react/test/export-node-button.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/export-node-button.test.tsx`
 Expected: PASS - 1 test.
 
 - [ ] **Step 5: Commit**
@@ -1511,7 +1511,7 @@ git commit -m "add react export-node-report button"
 
 ```tsx
 // packages/react/test/verify-button.test.tsx
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { VerifyButton } from "../src/verification-panel/index.ts";
 
@@ -1536,7 +1536,7 @@ test("VerifyButton is disabled with no model loaded", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun test packages/react/test/verify-button.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/verify-button.test.tsx`
 Expected: FAIL - component missing.
 
 - [ ] **Step 3: Implement**
@@ -1582,7 +1582,7 @@ export type { VerifyButtonProps } from "./verify-button.tsx";
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/react/test/verify-button.test.tsx`
+Run: `pnpm exec vitest run packages/react/test/verify-button.test.tsx`
 Expected: PASS - 2 tests.
 
 - [ ] **Step 5: Commit**
@@ -1605,7 +1605,7 @@ git commit -m "add react verify-against-report button"
 
 ```ts
 // packages/react/test/node-status.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { computeNodeStatuses } from "../src/verification-panel/node-status.ts";
 import type { Verdict } from "@wetron/core";
 
@@ -1638,7 +1638,7 @@ test("nodes with no weight tensors get no status", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun test packages/react/test/node-status.test.ts`
+Run: `pnpm exec vitest run packages/react/test/node-status.test.ts`
 Expected: FAIL - helper missing.
 
 - [ ] **Step 3: Implement the helper**
@@ -1702,7 +1702,7 @@ Update the node-data TypeScript type to include `verificationStatus`. The plumbi
 
 - [ ] **Step 5: Run tests**
 
-Run: `bun test packages/react`
+Run: `pnpm exec vitest run packages/react`
 Expected: PASS - all existing + new node-status test.
 
 - [ ] **Step 6: Commit**
@@ -1729,7 +1729,7 @@ Phase 3 mirrors Phase 2 in `@wetron/svelte`. Same boundaries, same type names, s
 
 ```ts
 // packages/svelte/test/verification-panel.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { render, screen } from "@testing-library/svelte";
 import VerificationPanel from "../src/verification-panel/verification-panel.svelte";
 import type { Report, Verdict } from "@wetron/core";
@@ -1754,7 +1754,7 @@ test("renders MATCH banner", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun test packages/svelte/test/verification-panel.test.ts`
+Run: `pnpm exec vitest run packages/svelte/test/verification-panel.test.ts`
 Expected: FAIL - component missing.
 
 - [ ] **Step 3: Implement**
@@ -1854,7 +1854,7 @@ export { default as VerificationPanel } from "./verification-panel.svelte";
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `bun test packages/svelte/test/verification-panel.test.ts`
+Run: `pnpm exec vitest run packages/svelte/test/verification-panel.test.ts`
 Expected: PASS - 1 test.
 
 - [ ] **Step 5: Commit**
@@ -1879,7 +1879,7 @@ git commit -m "add svelte verification panel"
 
 ```ts
 // packages/svelte/test/export-report-button.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/svelte";
 import ExportReportButton from "../src/verification-panel/export-report-button.svelte";
 
@@ -1892,7 +1892,7 @@ test("clicking opens the mode picker", async () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `bun test packages/svelte/test/export-report-button.test.ts`
+Run: `pnpm exec vitest run packages/svelte/test/export-report-button.test.ts`
 Expected: FAIL - component missing.
 
 - [ ] **Step 3: Implement the three Svelte components**
@@ -1953,7 +1953,7 @@ export { default as VerifyButton } from "./verify-button.svelte";
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `bun test packages/svelte`
+Run: `pnpm exec vitest run packages/svelte`
 Expected: PASS - all existing + new tests.
 
 - [ ] **Step 5: Commit**
@@ -1997,7 +1997,7 @@ Move the React test under `packages/core/test/report/node-status.test.ts`. Delet
 
 - [ ] **Step 2: Run all tests**
 
-Run: `bun test`
+Run: `pnpm exec vitest run`
 Expected: PASS - node-status tests now run from `@wetron/core`.
 
 - [ ] **Step 3: Render the Svelte badge in `packages/svelte/src/nodes/graph-node.svelte`**
@@ -2114,7 +2114,7 @@ Add the property-panel `ExportNodeReportButton` inside `NodePropertyPanel` when 
 
 - [ ] **Step 2: Verify the demo runs**
 
-Run: `cd apps/demo && bun dev`
+Run: `cd apps/demo && pnpm dev`
 Open the URL, load a model, click "Export report ▾", choose `identity`, click "Download report.json". Verify the JSON downloads and parses with `jq`.
 Click "Verify against report…", pick the just-downloaded JSON. Verify the `MATCH` banner appears.
 Re-pick a different model file's report. Verify `INCOMPATIBLE` due to file SHA mismatch.
@@ -2142,7 +2142,7 @@ Same shape as 4.1, ported to Svelte 5 runes.
 
 - [ ] **Step 2: Verify the demo runs**
 
-Run: `cd apps/demo-svelte && bun dev`
+Run: `cd apps/demo-svelte && pnpm dev`
 Same manual verification as 4.1.
 
 - [ ] **Step 3: Commit**
@@ -2222,7 +2222,7 @@ Sorted-keys, no-whitespace JSON serialiser. Two reports for the same file produc
 
 - [ ] **Step 2: Build the docs site**
 
-Run: `cd docs && bun run build`
+Run: `cd docs && pnpm run build`
 Expected: builds clean, no warnings about missing pages.
 
 - [ ] **Step 3: Commit**

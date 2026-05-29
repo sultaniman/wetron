@@ -5,7 +5,7 @@ Svelte components for neural network graph visualization. Renders a `ModelGraph`
 ## Install
 
 ```bash
-bun add @wetron/svelte
+pnpm add @wetron/svelte
 ```
 
 ## Usage

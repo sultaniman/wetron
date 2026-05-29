@@ -11,7 +11,7 @@
 3. While walking operators in the helper, record any `IF`/`WHILE` site with its subgraph indices and resolved caller-side input tensor names into a `controlFlowSites` array on the context. After the main subgraph parse, drain that array: for each site, recurse into the referenced subgraph with `prefix = "<callName>/<branch>/"` and an `argMap` that binds the formal subgraph inputs to the caller's actual outer-scope inputs.
 4. Body initializers go into the same `initializers` map keyed by their prefixed name; the renderer's existing initializer-skip rule (`transform.ts:113`) handles them with no further changes.
 
-**Tech Stack:** TypeScript, `flatbuffers/ByteBuffer` for hand-rolled offset reads, `bun:test` for tests, Python + TensorFlow for fixture generation. Source files: `packages/tflite/src/`, `packages/tflite/test/`, `scripts/`.
+**Tech Stack:** TypeScript, `flatbuffers/ByteBuffer` for hand-rolled offset reads, `vitest` for tests, Python + TensorFlow for fixture generation. Source files: `packages/tflite/src/`, `packages/tflite/test/`, `scripts/`.
 
 ---
 
@@ -142,7 +142,7 @@ return {
 
 - [ ] **Step 5: Run the full tflite test suite**
 
-Run: `bun test packages/tflite`
+Run: `pnpm exec vitest run packages/tflite`
 Expected: all existing tests pass - `mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs`, etc. **No new tests, no behavior change.**
 
 - [ ] **Step 6: Commit**
@@ -167,7 +167,7 @@ git commit -m "extract tflite per-subgraph parser into helper, no behavior chang
 `packages/tflite/test/builtin-options.test.ts`:
 
 ```ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { ByteBuffer, Builder } from "flatbuffers";
 import { readIfOptions, readWhileOptions } from "../src/builtin-options.ts";
 
@@ -204,7 +204,7 @@ test("readIfOptions defaults missing fields to 0", () => {
 
 - [ ] **Step 2: Run the tests, expect FAIL**
 
-Run: `bun test packages/tflite/test/builtin-options.test.ts`
+Run: `pnpm exec vitest run packages/tflite/test/builtin-options.test.ts`
 Expected: FAIL - `Cannot find module ../src/builtin-options.ts`.
 
 - [ ] **Step 3: Implement the module**
@@ -252,7 +252,7 @@ Note the `field(0)` / `field(1)` indices: FlatBuffers field IDs are zero-based a
 
 - [ ] **Step 4: Run the tests, expect PASS**
 
-Run: `bun test packages/tflite/test/builtin-options.test.ts`
+Run: `pnpm exec vitest run packages/tflite/test/builtin-options.test.ts`
 Expected: 3 tests pass.
 
 - [ ] **Step 5: Commit**
@@ -332,7 +332,7 @@ Expected: stdout `Wrote test-models/tflite_if_branching.tflite (~XXX bytes)`. Th
 Run:
 
 ```bash
-bun -e '
+node -e '
 import { ByteBuffer } from "flatbuffers";
 const bytes = new Uint8Array(await Bun.file("test-models/tflite_if_branching.tflite").arrayBuffer());
 const bb = new ByteBuffer(bytes);
@@ -485,12 +485,12 @@ test("tflite_if_branching: IF body subgraphs inlined with prefixed names", async
 
 - [ ] **Step 5: Run the test, expect FAIL initially, then PASS after the previous steps land**
 
-Run: `bun test packages/tflite/test/parse.test.ts`
+Run: `pnpm exec vitest run packages/tflite/test/parse.test.ts`
 Expected: 4 existing tests + 1 new test pass. If the IF assertion fails, double-check the `BuiltinOptions` field IDs (Task 2 step 3) - most likely cause is an off-by-one between FlatBuffer vtable indices and `.fbs` schema field numbers.
 
 - [ ] **Step 6: Run the full workspace test suite**
 
-Run: `bun test`
+Run: `pnpm exec vitest run`
 Expected: all tests pass.
 
 - [ ] **Step 7: Commit**

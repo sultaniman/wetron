@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const version = process.argv[2];
 if (!version) {
-  console.error("usage: bun scripts/bump-version.ts <version>");
+  console.error("usage: pnpm exec tsx scripts/bump-version.ts <version>");
   process.exit(1);
 }
 

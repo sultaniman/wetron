@@ -5,7 +5,7 @@ TFLite model parser for wetron. Reads `.tflite` flatbuffer files and returns a `
 ## Install
 
 ```bash
-bun add @wetron/tflite
+pnpm add @wetron/tflite
 ```
 
 Included automatically when you install `@wetron/core` or `@wetron/react`.

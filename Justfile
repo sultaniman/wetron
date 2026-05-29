@@ -1,5 +1,5 @@
 # wetron release tooling
-# Requires: pnpm in PATH (bun for TS scripts), npm authenticated (run `npm login` or set NPM_TOKEN)
+# Requires: pnpm in PATH, npm authenticated (run `npm login` or set NPM_TOKEN)
 
 set shell := ["bash", "-euc"]
 
@@ -30,7 +30,7 @@ check: build test
 
 # Set version across all packages: just bump 0.1.0
 bump version:
-    bun scripts/bump-version.ts {{version}}
+    pnpm exec tsx scripts/bump-version.ts {{version}}
 
 # Publish all packages to npm in dependency order (run `just build` first)
 publish:

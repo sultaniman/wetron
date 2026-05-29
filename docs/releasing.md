@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - `just` installed
-- `bun` in PATH
+- `pnpm` in PATH
 - npm authenticated (`npm login` or `NPM_TOKEN` set)
 
 ## Steps
@@ -35,10 +35,10 @@ Runs in sequence:
 
 1. **bump** - sets version again (idempotent if already bumped)
 2. **build** - tsup for all parser/core/token packages, vite build for `@wetron/react`
-3. **test** - full `bun test` across all packages
+3. **test** - full `pnpm exec vitest run` across all packages
 4. **preview** - dry-run publish for each package; shows resolved files and versions
 5. **confirm** - prompts `[y/N]`; abort here if anything looks wrong
-6. **publish** - `bun publish --access public` for each package in dependency order
+6. **publish** - `pnpm publish --access public` for each package in dependency order
 
 ## Publish order
 

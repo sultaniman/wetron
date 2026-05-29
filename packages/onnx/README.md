@@ -5,7 +5,7 @@ ONNX model parser for wetron. Reads `.onnx` files and returns a `ModelGraph` IR.
 ## Install
 
 ```bash
-bun add @wetron/onnx
+pnpm add @wetron/onnx
 ```
 
 Included automatically when you install `@wetron/core` or `@wetron/react`.

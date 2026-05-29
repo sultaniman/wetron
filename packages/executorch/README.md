@@ -5,7 +5,7 @@ ExecuTorch model parser for wetron. Reads `.pte` FlatBuffers files and returns a
 ## Install
 
 ```bash
-bun add @wetron/executorch
+pnpm add @wetron/executorch
 ```
 
 Included automatically when you install `@wetron/core` or `@wetron/react`.

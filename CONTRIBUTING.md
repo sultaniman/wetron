@@ -2,7 +2,7 @@
 
 Feel free to open a PR with a bugfix or a new feature. Before you do, make sure you have:
 
-1. Tests - all changes should be covered by `bun test`.
+1. Tests - all changes should be covered by `pnpm exec vitest run`.
 2. No regressions - node counts in parser tests must still match Netron's output for the same file.
 3. Updated docs if you changed a public API or added a new format.
 
@@ -11,12 +11,12 @@ Please ask yourself before implementing a large feature whether the project actu
 ## Setup
 
 ```bash
-bun install
-bun test         # run all tests
-bun test packages/core   # single package
+pnpm install
+pnpm exec vitest run                      # run all tests
+pnpm exec vitest run packages/core        # single package
 ```
 
-Runtime is **Bun** throughout - never `npm`, `npx`, `pnpm`, or `node`.
+Package manager is **pnpm** throughout - never `npm`, `npx`, `node`, or `bun`. Run TS scripts with `pnpm exec tsx`.
 
 ## Adding a new format
 

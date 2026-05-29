@@ -4,8 +4,8 @@
 
 - **Scope**: `@wetron/` | **TypeScript**
 - **Package manager**: pnpm (workspaces via `pnpm-workspace.yaml`)
-- **TS script runner**: bun (e.g. `bun scripts/bump-version.ts`)
-- **Test runner**: vitest (`pnpm exec vitest run`) - no bun:test, no jest
+- **TS script runner**: tsx (e.g. `pnpm exec tsx scripts/bump-version.ts`)
+- **Test runner**: vitest (`pnpm exec vitest run`) - no jest
 - **Target**: Browser-only - no Node.js APIs in `src/` (tests may use `node:*`)
 - **Specs**: `docs/specs/` - `wetron-design.md` (architecture), `node-color-theme-design.md` (node theming)
 - **Reference source**: `netron-main/` (schema field layouts - read-only)
@@ -37,7 +37,7 @@ Each package follows:
 packages/<name>/
   src/
     index.ts      # public exports
-  test/           # bun:test files
+  test/           # vitest files
   package.json
   tsconfig.json
 ```
@@ -109,7 +109,7 @@ pnpm exec vitest run packages/core         # single package
 - Match existing style, even if you'd do it differently.
 - Keep new tests consistent with existing test design.
 - Remove imports and variables your changes leave unused.
-- Use `pnpm` for package management (install, publish, exec); use `bun` only to run TS scripts (`bun scripts/foo.ts`). Never `npm`, `npx`, or `node`.
+- Use `pnpm` for everything (install, publish, exec, scripts). Run TS scripts with `pnpm exec tsx scripts/foo.ts`. Never `npm`, `npx`, `node`, or `bun`.
 - Import exotic type readers from `@wetron/core/src/dtypes` - never inline shims in parsers.
 - Use native `DataView` methods for Tier 1 types (`int8`-`uint64`, `float32`, `float64`) - do not reimplement.
 - Use `DecompressionStream`, `TextDecoder`, `fetch`, `file.arrayBuffer()` - lean on the web platform.

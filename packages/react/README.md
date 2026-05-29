@@ -5,7 +5,7 @@ React components for neural network graph visualization. Renders a `ModelGraph` 
 ## Install
 
 ```bash
-bun add @wetron/react
+pnpm add @wetron/react
 ```
 
 ## Usage

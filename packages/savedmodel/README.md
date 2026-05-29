@@ -10,7 +10,7 @@ Returns a `ModelGraph` IR. Graph structure only - no weight tensors are deserial
 ## Install
 
 ```bash
-bun add @wetron/savedmodel
+pnpm add @wetron/savedmodel
 ```
 
 Included automatically when you install `@wetron/core`.

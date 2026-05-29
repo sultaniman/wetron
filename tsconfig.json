@@ -12,6 +12,6 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "typeRoots": ["./types", "./node_modules/@types"],
-    "types": ["bun", "css"]
+    "types": ["node", "css"]
   }
 }

@@ -5,7 +5,7 @@ TorchScript model parser for wetron. Reads `.pt` files (ZIP-based and FlatBuffer
 ## Install
 
 ```bash
-bun add @wetron/torchscript
+pnpm add @wetron/torchscript
 ```
 
 Included automatically when you install `@wetron/core` or `@wetron/react`.

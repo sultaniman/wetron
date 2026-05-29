@@ -5,7 +5,7 @@ Keras model parser for wetron. Reads `.keras` ZIP archive files and returns a `M
 ## Install
 
 ```bash
-bun add @wetron/keras
+pnpm add @wetron/keras
 ```
 
 Included automatically when you install `@wetron/core` or `@wetron/react`.

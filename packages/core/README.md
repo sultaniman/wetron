@@ -5,7 +5,7 @@ Shared foundation for the wetron monorepo. Provides the IR types all parsers pro
 ## Install
 
 ```bash
-bun add @wetron/core
+pnpm add @wetron/core
 ```
 
 ## API

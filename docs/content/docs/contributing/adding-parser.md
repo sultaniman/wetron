@@ -71,7 +71,7 @@ case "myformat": {
 
 ```ts
 // packages/<format>/test/parse.test.ts
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { readFileSync } from "fs";
 import { parseMyFormat } from "../src/index.ts";
 

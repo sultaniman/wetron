@@ -104,14 +104,14 @@ Vite library mode in `packages/embed/vite.config.ts`:
 - `define: { 'process.env.NODE_ENV': '"production"' }` so Svelte and any transitive deps drop dev checks.
 - No externals - everything is inlined.
 
-Add to root `package.json` `build:ui`: `(cd packages/embed && bunx vite build)` after the svelte build it depends on (introduce a `build:svelte` step alongside).
+Add to root `package.json` `build:ui`: `(cd packages/embed && pnpm exec vite build)` after the svelte build it depends on (introduce a `build:svelte` step alongside).
 
 ## Testing
 
 - `mount.test.ts` (happy-dom): mount a fixture model via `bytes`, assert the container gets a SvelteFlow root and a node count matching the fixture's IR.
 - Auto-mount test: inject `<div data-wetron-model="...">` plus a `fetch` mock, fire `DOMContentLoaded`, assert mount.
 - Error-card test: `fetch` rejects -> assert the element contains the error string and does _not_ throw.
-- Bundle-size test: a Bun test that reads `dist/wetron.js` and `dist/wetron.js.br` (built in CI) and fails over budget.
+- Bundle-size test: a vitest test that reads `dist/wetron.js` and `dist/wetron.js.br` (built in CI) and fails over budget.
 
 ## Docs
 

@@ -31,16 +31,16 @@ Parsing runs on `ArrayBuffer` / `DataView` / `TextDecoder` / `DecompressionStrea
 
 `@wetron/tokens` is intentionally standalone: zero runtime or peer dependencies, usable without any other wetron package.
 
-> **Keeping tokens in sync with core:** `OpCategory` is defined in both `@wetron/core` and `@wetron/tokens`. If you add a new category, update both - then update `CATEGORY_THEME` in `tokens/src/index.ts`. `bun test packages/tokens` enforces this at runtime.
+> **Keeping tokens in sync with core:** `OpCategory` is defined in both `@wetron/core` and `@wetron/tokens`. If you add a new category, update both - then update `CATEGORY_THEME` in `tokens/src/index.ts`. `pnpm exec vitest run packages/tokens` enforces this at runtime.
 
 ## Install
 
 ```sh
 # parse + render with React
-bun add @wetron/react
+pnpm add @wetron/react
 
 # parse only (no UI)
-bun add @wetron/core
+pnpm add @wetron/core
 ```
 
 `@wetron/react` depends on `@wetron/core`, and `@wetron/core` depends on all parser packages.
@@ -70,33 +70,33 @@ See the [docs](docs/) for the full API reference, Svelte examples, and theming t
 ```sh
 git clone ssh://git@codeberg.org/askar/wetron.git
 cd wetron
-bun install
+pnpm install
 ```
 
 ### Build
 
 ```sh
-bun run build        # all packages (core libs -> parsers -> core index -> react/tokens)
+pnpm run build        # all packages (core libs -> parsers -> core index -> react/tokens)
 ```
 
 ### Test
 
 ```sh
-bun test             # all packages
-bun test packages/core  # one package
+pnpm exec vitest run                       # all packages
+pnpm exec vitest run packages/core         # one package
 ```
 
 ### Demo apps
 
 ```sh
-cd apps/demo && bun dev          # React
-cd apps/demo-svelte && bun dev   # Svelte
+cd apps/demo && pnpm dev          # React
+cd apps/demo-svelte && pnpm dev   # Svelte
 ```
 
 ### Docs
 
 ```sh
-cd docs && bun install && bun run dev   # Hugo site at localhost:1313
+cd docs && pnpm install && pnpm run dev   # Hugo site at localhost:1313
 ```
 
 ## Documentation

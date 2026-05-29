@@ -5,7 +5,7 @@ Design tokens for wetron graph visualization components. Theme colors for op cat
 ## Install
 
 ```bash
-bun add @wetron/tokens
+pnpm add @wetron/tokens
 ```
 
 ## API

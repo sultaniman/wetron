@@ -117,7 +117,7 @@ The css-isolation duplicate is the single exception to the "do not delete" rule,
 
 After implementation:
 
-- `bun run --cwd docs build` (or equivalent Hugo build) succeeds with no broken internal links.
+- `pnpm --filter wetron-docs build` (or equivalent Hugo build) succeeds with no broken internal links.
 - `grep -rn "no weight\|not deserialised\|always empty" docs/content/ docs/llms.md` returns no occurrences in the wrong-claim contexts identified in B1.
 - New `docs/content/docs/api/weights.md` page renders.
 - `ls docs/superpowers/` errors (directory removed).
