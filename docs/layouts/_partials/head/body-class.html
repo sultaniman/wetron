@@ -1,0 +1,4 @@
+{{- $class := slice .Kind -}}
+{{- if .Type }}{{ $class = $class | append .Type }}{{ end -}}
+{{- if .IsHome }}{{ $class = $class | append "home" }}{{ end -}}
+{{- .Scratch.Set "class" $class -}}
