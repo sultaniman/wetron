@@ -1,3 +1,0 @@
-[test]
-preload = ["./packages/react/test/setup.ts"]
-pathIgnorePatterns = ["netron-main/**"]
