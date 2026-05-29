@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
-import { parseModel } from "../packages/core/src/index";
-import { modelGraphToFlow } from "../packages/core/src/transform";
+import { parseModel } from "@wetron/core";
+import { modelGraphToFlow } from "@wetron/core/transform";
 
 async function check(path: string) {
   const bytes = new Uint8Array(readFileSync(path));

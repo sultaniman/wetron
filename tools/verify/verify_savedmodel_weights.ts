@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
-import { parseSavedModel, attachCheckpointToGraph } from "../packages/savedmodel/src/index";
-import { parseCheckpointIndex } from "../packages/savedmodel/src/parse-checkpoint-index";
-import { modelGraphToFlow } from "../packages/core/src/transform";
-import type { WeightSource } from "../packages/core/src/ir";
+import { parseSavedModel, attachCheckpointToGraph } from "@wetron/savedmodel";
+import { parseCheckpointIndex } from "@wetron/savedmodel";
+import { modelGraphToFlow } from "@wetron/core/transform";
+import type { WeightSource } from "@wetron/common/ir";
 
 type WeightRow = {
   slot: number;
@@ -45,8 +45,8 @@ const dataBuffer = dataBuf.buffer.slice(
 );
 
 // Build LoadedCheckpoint manually (the public loader takes Files; we have buffers).
-import { parseCheckpointableObjectGraph } from "../packages/savedmodel/src/parse-object-graph";
-import { ParseError } from "../packages/core/src/ir";
+import { parseCheckpointableObjectGraph } from "../../packages/savedmodel/src/parse-object-graph.ts";
+import { ParseError } from "@wetron/common/ir";
 
 const index = parseCheckpointIndex(indexBytes);
 const OBJECT_GRAPH_KEY = "_CHECKPOINTABLE_OBJECT_GRAPH";

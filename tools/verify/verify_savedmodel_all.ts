@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { parseSavedModel } from "../packages/savedmodel/src/parse.ts";
+import { parseSavedModel } from "@wetron/savedmodel";
 
 const files = [
   "test-models/small_saved_model.pb",

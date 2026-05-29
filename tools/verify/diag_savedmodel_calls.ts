@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { parseSavedModel } from "../packages/savedmodel/src/index";
+import { parseSavedModel } from "@wetron/savedmodel";
 
 const pbBytes = new Uint8Array(readFileSync("test-models/vertical_tf2/saved_model.pb"));
 const g = parseSavedModel(pbBytes);
