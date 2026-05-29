@@ -1,6 +1,6 @@
 {
   "name": "@wetron/tflite",
-  "version": "0.0.21",
+  "version": "0.0.30",
   "description": "TFLite model parser - extracts graph structure from .tflite flatbuffer files",
   "keywords": [
     "graph",
