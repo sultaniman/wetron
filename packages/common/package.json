@@ -1,0 +1,50 @@
+{
+  "name": "@wetron/common",
+  "version": "0.0.21",
+  "description": "Shared kit for wetron parsers - IR types, dtype readers, flatbuffer helpers",
+  "keywords": [
+    "graph",
+    "model-parser",
+    "neural-network",
+    "visualization"
+  ],
+  "homepage": "https://codeberg.org/askar/wetron",
+  "license": "MIT",
+  "author": "Sultan Iman",
+  "repository": {
+    "type": "git",
+    "url": "https://codeberg.org/askar/wetron.git",
+    "directory": "packages/common"
+  },
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ir": {
+      "source": "./src/ir.ts",
+      "types": "./dist/ir.d.ts",
+      "import": "./dist/ir.js"
+    },
+    "./dtypes": {
+      "source": "./src/dtypes.ts",
+      "types": "./dist/dtypes.d.ts",
+      "import": "./dist/dtypes.js"
+    },
+    "./flatbuffers": {
+      "source": "./src/flatbuffers.ts",
+      "types": "./dist/flatbuffers.d.ts",
+      "import": "./dist/flatbuffers.js"
+    }
+  },
+  "dependencies": {
+    "flatbuffers": "^25.9.23"
+  }
+}
