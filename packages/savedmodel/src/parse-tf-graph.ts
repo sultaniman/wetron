@@ -1,20 +1,20 @@
-import { Root } from "protobufjs/light";
-import type { INamespace } from "protobufjs/light";
+import protobuf from "protobufjs/light.js";
+import type { Root, INamespace } from "protobufjs/light.js";
 import type {
   ModelGraph,
   GraphNode,
   GraphValue,
   AttributeValue,
   ParseWarning,
-} from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
-import { bigIntToNumber } from "@wetron/core/dtypes";
+} from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
+import { bigIntToNumber } from "@wetron/common/dtypes";
 import { TF_DTYPE } from "./tf-dtype.ts";
 import descriptor from "./tf-descriptor.json" with { type: "json" };
 
 let _root: Root | null = null;
 function getRoot(): Root {
-  if (!_root) _root = Root.fromJSON(descriptor as INamespace);
+  if (!_root) _root = protobuf.Root.fromJSON(descriptor as INamespace);
   return _root;
 }
 

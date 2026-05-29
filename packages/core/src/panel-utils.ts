@@ -1,4 +1,4 @@
-import type { AttributeValue } from "./ir.ts";
+import type { AttributeValue } from "@wetron/common/ir";
 
 export function attrChipLabel(value: AttributeValue): string {
   if (typeof value === "boolean") return "bool";

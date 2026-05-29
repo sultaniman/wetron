@@ -1,4 +1,4 @@
-import { test, expect, describe } from "bun:test";
+import { test, expect, describe } from "vitest";
 import { pickColormap, colorForCell } from "../src/heatmap-color.ts";
 
 describe("pickColormap", () => {

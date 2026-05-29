@@ -1,5 +1,5 @@
 import { JSX, useEffect, useMemo, useRef, useState } from "react";
-import type { ModelGraph } from "@wetron/core/ir";
+import type { ModelGraph } from "@wetron/common/ir";
 import { decodeWeight, computeStats } from "@wetron/core";
 import type { WeightStats } from "@wetron/core";
 import { Tabs } from "@base-ui/react/tabs";

@@ -14,7 +14,7 @@ import {
   type FlowEdge,
   type LayoutDirection,
 } from "@wetron/core/transform";
-import type { ModelGraph, PanelTarget } from "@wetron/core/ir";
+import type { ModelGraph, PanelTarget } from "@wetron/common/ir";
 import { EDGE_THEME } from "../theme.ts";
 
 type FlowEdgeData = FlowEdge["data"];

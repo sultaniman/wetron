@@ -1,6 +1,7 @@
-import { test, expect, describe } from "bun:test";
+import { test, expect, describe } from "vitest";
+import { readFile } from "node:fs/promises";
 import { parseModel, detectFormat, filterGraph, ParseError } from "../src/index.ts";
-import type { ModelGraph } from "../src/ir.ts";
+import type { ModelGraph } from "@wetron/common/ir";
 
 test("parseModel throws ParseError on unknown format", async () => {
   const bytes = new Uint8Array([0x00, 0x00, 0x00]);
@@ -82,7 +83,7 @@ describe("parseModel dispatch", () => {
   for (const { format, path, filename } of cases) {
     test(`routes ${format} to its parser`, async () => {
       const url = new URL(path, import.meta.url);
-      const bytes = new Uint8Array(await Bun.file(url).arrayBuffer());
+      const bytes = new Uint8Array(await readFile(url));
       const graph = await parseModel(bytes, filename);
       expect(graph).toBeDefined();
       expect(graph.nodes.length).toBeGreaterThan(0);

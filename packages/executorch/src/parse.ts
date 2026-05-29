@@ -1,6 +1,6 @@
 import { ByteBuffer } from "flatbuffers";
-import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 import {
   int8_,
   int32_,
@@ -10,7 +10,7 @@ import {
   vecInt32,
   unionType,
   unionTable,
-} from "@wetron/core/flatbuffers";
+} from "@wetron/common/flatbuffers";
 
 // PyTorch / ExecuTorch ScalarType enum -> dtype string
 const SCALAR_TYPE: Record<number, string> = {

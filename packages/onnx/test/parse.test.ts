@@ -1,12 +1,12 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
+import { readFile } from "node:fs/promises";
 import { parseOnnx } from "../src/parse.ts";
-import { ParseError } from "@wetron/core/ir";
+import { ParseError } from "@wetron/common/ir";
 
 const MODEL_PATH = new URL("../../../test-models/mnist-12.onnx", import.meta.url);
 
 async function loadModel() {
-  const buf = await Bun.file(MODEL_PATH).arrayBuffer();
-  return new Uint8Array(buf);
+  return new Uint8Array(await readFile(MODEL_PATH));
 }
 
 test("mnist-12: 12 nodes, 1 input (float32), 1 output, initializers not in inputs", async () => {

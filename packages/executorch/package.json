@@ -1,6 +1,6 @@
 {
   "name": "@wetron/executorch",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "ExecuTorch model parser - extracts graph structure from .pte flatbuffer files",
   "keywords": [
     "executorch",
@@ -33,6 +33,6 @@
     }
   },
   "dependencies": {
-    "@wetron/core": "workspace:*"
+    "@wetron/common": "workspace:*"
   }
 }

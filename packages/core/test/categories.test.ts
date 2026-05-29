@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { opCategory } from "../src/categories.ts";
 
 test("ONNX ops map to correct categories", () => {

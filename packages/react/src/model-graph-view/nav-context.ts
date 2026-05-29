@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { ModelGraph } from "@wetron/core/ir";
+import type { ModelGraph } from "@wetron/common/ir";
 
 type SubGraphNav = {
   depth: number;

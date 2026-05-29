@@ -1,7 +1,7 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { readFileSync } from "fs";
 import { parseSavedModel } from "../src/parse.ts";
-import { ParseError } from "@wetron/core/ir";
+import { ParseError } from "@wetron/common/ir";
 
 const fixtureDir = new URL("../../../test-models/", import.meta.url);
 

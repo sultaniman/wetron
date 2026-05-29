@@ -1,6 +1,6 @@
 import { defineConfig } from "tsup";
 
-// Pass 2: entry point - dynamically imports parsers, runs after parsers are built
+// Pass 2: entry point - statically re-exports parsers, runs after parsers are built
 export default defineConfig({
   entry: { index: "src/index.ts" },
   format: ["esm"],
@@ -9,6 +9,7 @@ export default defineConfig({
   tsconfig: "../../tsconfig.build.json",
   clean: false,
   external: [
+    "@wetron/common",
     "@wetron/onnx",
     "@wetron/tflite",
     "@wetron/keras",

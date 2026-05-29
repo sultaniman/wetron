@@ -2,9 +2,8 @@
   import { SunIcon, MoonIcon, DesktopIcon } from 'phosphor-svelte';
   import { toPng } from 'html-to-image';
   import { getViewportForBounds } from '@xyflow/svelte';
-  import { parseModel } from '@wetron/core';
+  import { parseModel, loadSavedModelWeights, attachCheckpointToGraph } from '@wetron/core';
   import type { ModelGraph } from '@wetron/core';
-  import { loadSavedModelWeights, attachCheckpointToGraph } from '@wetron/savedmodel';
   import { ModelGraphView, NodePropertyPanel } from '@wetron/svelte';
   import type { PanelTarget, ColorMode, ExportHelpers } from '@wetron/svelte';
 

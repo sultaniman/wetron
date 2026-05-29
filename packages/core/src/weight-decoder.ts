@@ -1,4 +1,4 @@
-import { readFloat16, readBfloat16 } from "./dtypes.ts";
+import { readFloat16, readBfloat16 } from "@wetron/common/dtypes";
 
 type DecodedArray = Float64Array | Int32Array | BigInt64Array;
 

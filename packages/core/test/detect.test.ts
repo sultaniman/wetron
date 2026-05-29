@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { detectFormat } from "../src/detect.ts";
 
 test("detects TFLite by TFL3 magic at offset 4", () => {

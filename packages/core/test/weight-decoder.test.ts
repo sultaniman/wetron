@@ -1,4 +1,4 @@
-import { test, expect, describe } from "bun:test";
+import { test, expect, describe } from "vitest";
 import { decodeWeight, decodeFirstN } from "../src/weight-decoder.ts";
 
 function bytesOf(...vals: number[]): Uint8Array {

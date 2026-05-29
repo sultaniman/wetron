@@ -1,6 +1,6 @@
-import { test, expect, describe, afterEach } from "bun:test";
+import { test, expect, describe, afterEach } from "vitest";
 import { loadSavedModelWeightsFromUrls } from "../src/load-checkpoint.ts";
-import { ParseError } from "@wetron/core/ir";
+import { ParseError } from "@wetron/common/ir";
 
 function writeVarint(out: number[], v: number): void {
   while (v > 0x7f) {

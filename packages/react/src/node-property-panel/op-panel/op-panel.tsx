@@ -5,7 +5,7 @@ import {
   SlidersHorizontalIcon,
   StackIcon,
 } from "@phosphor-icons/react";
-import type { GraphNode, ModelGraph } from "@wetron/core/ir";
+import type { GraphNode, ModelGraph } from "@wetron/common/ir";
 import { opCategory } from "@wetron/core";
 import { CATEGORY_ICON, OP_ICON } from "../../theme.ts";
 import { renderIconEntry, Row, SectionLabel, BackButton } from "../panel-ui.tsx";

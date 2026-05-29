@@ -1,4 +1,4 @@
-import type { ModelGraph, WeightSource } from "@wetron/core/ir";
+import type { ModelGraph, WeightSource } from "@wetron/common/ir";
 import type { LoadedCheckpoint } from "./load-checkpoint.ts";
 
 const SUFFIX = "/.ATTRIBUTES/VARIABLE_VALUE";

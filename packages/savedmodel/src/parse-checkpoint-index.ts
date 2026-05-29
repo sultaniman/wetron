@@ -1,4 +1,4 @@
-import { ParseError } from "@wetron/core/ir";
+import { ParseError } from "@wetron/common/ir";
 import { readVarint } from "./varint.ts";
 import { TF_DTYPE } from "./tf-dtype.ts";
 

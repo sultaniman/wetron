@@ -4,8 +4,8 @@ import {
   loadSavedModelWeights,
   loadSavedModelWeightsFromUrls,
   attachCheckpointToGraph,
-} from "@wetron/savedmodel";
-import type { ModelGraph } from "@wetron/core";
+  type ModelGraph,
+} from "@wetron/core";
 import css from "./weights-dialog.module.css";
 
 type LoadState = { status: "idle" } | { status: "loading" } | { status: "error"; message: string };

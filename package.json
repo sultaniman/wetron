@@ -2,16 +2,14 @@
   "name": "wetron",
   "private": true,
   "author": "Sultan Iman",
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
+  "packageManager": "pnpm@10.28.2",
   "scripts": {
-    "build": "bun run build:core:libs && bun run build:parsers && bun run build:core:index && bun run build:ui",
-    "build:core:libs": "cd packages/core && bunx tsup",
-    "build:core:index": "cd packages/core && bunx tsup --config tsup.index.config.ts",
-    "build:parsers": "(cd packages/onnx && bunx tsup) && (cd packages/tflite && bunx tsup) && (cd packages/keras && bunx tsup) && (cd packages/executorch && bunx tsup) && (cd packages/torchscript && bunx tsup) && (cd packages/savedmodel && bunx tsup)",
-    "build:ui": "(cd packages/tokens && bunx tsup) && (cd packages/react && bunx vite build)"
+    "build": "pnpm run build:core:libs && pnpm run build:parsers && pnpm run build:core:index && pnpm run build:ui",
+    "build:core:libs": "cd packages/core && pnpm exec tsup",
+    "build:core:index": "cd packages/core && pnpm exec tsup --config tsup.index.config.ts",
+    "build:parsers": "(cd packages/onnx && pnpm exec tsup) && (cd packages/tflite && pnpm exec tsup) && (cd packages/keras && pnpm exec tsup) && (cd packages/executorch && pnpm exec tsup) && (cd packages/torchscript && pnpm exec tsup) && (cd packages/savedmodel && pnpm exec tsup)",
+    "build:ui": "(cd packages/tokens && pnpm exec tsup) && (cd packages/react && pnpm exec vite build)",
+    "test": "vitest run"
   },
   "dependencies": {
     "dagre": "^0.8.5",
@@ -21,7 +19,6 @@
     "svelte": "^5.55.7"
   },
   "devDependencies": {
-    "@happy-dom/global-registrator": "^20.9.0",
     "@phosphor-icons/react": "^2.1.10",
     "@playwright/test": "^1.59.1",
     "@tanstack/svelte-virtual": "^3.13.24",
@@ -29,6 +26,7 @@
     "@testing-library/react": "^16.3.2",
     "@types/bun": "^1.3.13",
     "@types/dagre": "^0.7.54",
+    "@types/node": "^22.10.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
@@ -42,6 +40,7 @@
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "vite": "^8.0.10",
-    "vite-plugin-dts": "^5.0.0"
+    "vite-plugin-dts": "^5.0.0",
+    "vitest": "^3.0.0"
   }
 }

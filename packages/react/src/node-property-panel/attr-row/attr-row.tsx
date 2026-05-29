@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { AttributeValue } from "@wetron/core/ir";
+import type { AttributeValue } from "@wetron/common/ir";
 import { formatAttrBrief } from "@wetron/core/panel-utils";
 import { attrChipLabel, formatAttr, Chip } from "../panel-ui.tsx";
 import propertyPanelCss from "../node-property-panel.module.css";

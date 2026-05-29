@@ -1,6 +1,7 @@
-import { test, expect } from "bun:test";
-import { readFileSync } from "fs";
-import { resolve } from "path";
+import { test, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   CATEGORY_THEME,
   MINIMAP_THEME,
@@ -8,6 +9,8 @@ import {
   CANVAS_VARS,
   PANEL_VARS,
 } from "../src/index.ts";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function extractOpCategoryValues(filePath: string): string[] {
   const src = readFileSync(filePath, "utf-8");
@@ -18,15 +21,15 @@ function extractOpCategoryValues(filePath: string): string[] {
 
 test("OpCategory in tokens matches core", () => {
   const coreValues = extractOpCategoryValues(
-    resolve(import.meta.dir, "../../core/src/categories.ts"),
+    resolve(__dirname, "../../core/src/categories.ts"),
   );
-  const tokenValues = extractOpCategoryValues(resolve(import.meta.dir, "../src/index.ts"));
+  const tokenValues = extractOpCategoryValues(resolve(__dirname, "../src/index.ts"));
   expect(tokenValues).toEqual(coreValues);
 });
 
 test("CATEGORY_THEME has a light and dark entry for every OpCategory in core", () => {
   const coreValues = extractOpCategoryValues(
-    resolve(import.meta.dir, "../../core/src/categories.ts"),
+    resolve(__dirname, "../../core/src/categories.ts"),
   );
   expect(Object.keys(CATEGORY_THEME).sort()).toEqual(coreValues);
   for (const v of Object.values(CATEGORY_THEME)) {
@@ -90,7 +93,7 @@ function extractCssVar(src: string, varName: string, selectorMarker: string): st
 
 test("react CSS --wetron-category-* matches CATEGORY_THEME", () => {
   const css = readFileSync(
-    resolve(import.meta.dir, "../../react/src/model-graph-view/model-graph-view.css"),
+    resolve(__dirname, "../../react/src/model-graph-view/model-graph-view.css"),
     "utf-8",
   );
   // Light theme is in `.wetron-root`/`:where(...)` selector without [data-theme="dark"].

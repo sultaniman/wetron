@@ -1,5 +1,5 @@
 import { ScrollArea } from "@base-ui/react/scroll-area";
-import type { GraphNode, ModelGraph, PanelTarget } from "@wetron/core/ir";
+import type { GraphNode, ModelGraph, PanelTarget } from "@wetron/common/ir";
 import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";
 import { OpPanel } from "./op-panel/op-panel.tsx";
 import { IoPanel } from "./io-panel/io-panel.tsx";

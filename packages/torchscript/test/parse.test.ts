@@ -1,10 +1,12 @@
-import { test, expect } from "bun:test";
-import { readFileSync, existsSync } from "fs";
-import { join } from "path";
+import { test, expect } from "vitest";
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseTorchscript } from "../src/parse.ts";
 
-const MODEL = join(import.meta.dir, "../../../test-models/div_tensor.pt");
-const MODEL_ZIP = join(import.meta.dir, "../../../test-models/mobilenet_v2.pt");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const MODEL = join(__dirname, "../../../test-models/div_tensor.pt");
+const MODEL_ZIP = join(__dirname, "../../../test-models/mobilenet_v2.pt");
 
 test("parseTorchscript: div_tensor.pt parses successfully", () => {
   const bytes = new Uint8Array(readFileSync(MODEL));

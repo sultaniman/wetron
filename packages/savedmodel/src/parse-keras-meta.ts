@@ -1,11 +1,11 @@
-import { Reader } from "protobufjs/light";
-import type { ModelGraph } from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+import protobuf from "protobufjs/light.js";
+import type { ModelGraph } from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 import type { KerasModelConfig } from "@wetron/keras";
 import { buildKerasGraph } from "@wetron/keras";
 
 export function parseKerasMetadataPb(bytes: Uint8Array, fileSizeBytes: number): ModelGraph {
-  const reader = Reader.create(bytes);
+  const reader = protobuf.Reader.create(bytes);
   while (reader.pos < reader.len) {
     const tag = reader.uint32();
     if (tag >>> 3 === 1) {

@@ -1,9 +1,11 @@
-import { test, expect } from "bun:test";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { test, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseExecutorch } from "../src/parse.ts";
 
-const MODEL = join(import.meta.dir, "../../../test-models/add.pte");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const MODEL = join(__dirname, "../../../test-models/add.pte");
 
 test("parseExecutorch: add.pte parses successfully", () => {
   const bytes = new Uint8Array(readFileSync(MODEL));

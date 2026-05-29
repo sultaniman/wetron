@@ -2,6 +2,6 @@ export { ModelGraphView } from "./model-graph-view/model-graph-view.tsx";
 export type { ModelGraphViewHandle } from "./model-graph-view/model-graph-view.tsx";
 export { NodePropertyPanel, isGraphNode } from "./node-property-panel/node-property-panel.tsx";
 export { WeightPanel } from "./node-property-panel/weight-panel/weight-panel.tsx";
-export type { PanelTarget } from "@wetron/core/ir";
+export type { PanelTarget } from "@wetron/common/ir";
 export type { ColorMode } from "./color-mode-context.ts";
 export { Tooltip } from "./tooltip.tsx";

@@ -1,9 +1,9 @@
 // @happy-dom
-import { test, expect, describe, afterEach } from "bun:test";
+import { test, expect, describe, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent, act } from "@testing-library/react";
 import React from "react";
 import { NodePropertyPanel } from "../src/node-property-panel/node-property-panel.tsx";
-import type { GraphNode, GraphValue } from "@wetron/core/ir";
+import type { GraphNode, GraphValue } from "@wetron/common/ir";
 
 afterEach(cleanup);
 
@@ -77,7 +77,7 @@ describe("edge panel", () => {
   });
 });
 
-import type { ModelGraph } from "@wetron/core/ir";
+import type { ModelGraph } from "@wetron/common/ir";
 
 const graphWithInit: ModelGraph = {
   name: "",

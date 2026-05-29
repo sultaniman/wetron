@@ -1,4 +1,4 @@
-import { test, expect, describe } from "bun:test";
+import { test, expect, describe } from "vitest";
 import { loadSavedModelWeights } from "../src/load-checkpoint.ts";
 
 function writeVarint(out: number[], v: number): void {

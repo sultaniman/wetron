@@ -7,5 +7,5 @@ export default defineConfig({
   sourcemap: true,
   tsconfig: "../../tsconfig.build.json",
   clean: true,
-  external: ["@wetron/core", "@wetron/keras", "protobufjs"],
+  external: ["@wetron/common", "@wetron/keras", "protobufjs"],
 });

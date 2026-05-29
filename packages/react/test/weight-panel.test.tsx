@@ -1,9 +1,9 @@
 // @happy-dom
-import { test, expect, describe, afterEach } from "bun:test";
+import { test, expect, describe, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent, act } from "@testing-library/react";
 import React from "react";
 import { WeightPanel } from "../src/node-property-panel/weight-panel/weight-panel.tsx";
-import type { ModelGraph } from "@wetron/core/ir";
+import type { ModelGraph } from "@wetron/common/ir";
 
 afterEach(cleanup);
 

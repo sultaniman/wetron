@@ -84,14 +84,18 @@ export function NodeCard({
             <Tooltip text={scopeName} onlyIfOverflow>
               <span className={css.scopeName}>{scopeName}</span>
             </Tooltip>
-            <CaretRightIcon className={css.scopeChev} size={12} weight="bold" aria-hidden="true" />
+            <span className={css.scopeChev} aria-hidden="true">
+              <CaretRightIcon size={12} weight="bold" />
+            </span>
           </button>
         ) : (
           <div className={css.scopeRow}>
             <Tooltip text={scopeName} onlyIfOverflow>
               <span className={css.scopeName}>{scopeName}</span>
             </Tooltip>
-            <CaretRightIcon className={css.scopeChev} size={12} weight="bold" aria-hidden="true" />
+            <span className={css.scopeChev} aria-hidden="true">
+              <CaretRightIcon size={12} weight="bold" />
+            </span>
           </div>
         )
       ) : (

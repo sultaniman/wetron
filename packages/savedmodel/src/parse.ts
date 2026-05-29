@@ -1,5 +1,5 @@
-import type { ModelGraph } from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+import type { ModelGraph } from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 import { parseKerasMetadataPb } from "./parse-keras-meta.ts";
 import { parseTfGraph } from "./parse-tf-graph.ts";
 

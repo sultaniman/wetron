@@ -1,7 +1,7 @@
 import { ByteBuffer } from "flatbuffers";
 import { unzipSync } from "fflate/browser";
-import type { ModelGraph, GraphNode, ParseWarning } from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+import type { ModelGraph, GraphNode, ParseWarning } from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 import {
   string_,
   vecLen,
@@ -10,7 +10,7 @@ import {
   vecStructBase,
   unionType,
   unionTable,
-} from "@wetron/core/flatbuffers";
+} from "@wetron/common/flatbuffers";
 
 function isTorchscript(bytes: Uint8Array): boolean {
   if (bytes.length < 8) return false;

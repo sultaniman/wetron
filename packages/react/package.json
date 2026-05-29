@@ -1,6 +1,6 @@
 {
   "name": "@wetron/react",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "React components for neural network graph visualization, built on ReactFlow",
   "keywords": [
     "graph",
@@ -37,6 +37,7 @@
     "./styles.css": "./dist/index.css"
   },
   "dependencies": {
+    "@wetron/common": "workspace:*",
     "@wetron/core": "workspace:*",
     "@wetron/tokens": "workspace:*"
   },

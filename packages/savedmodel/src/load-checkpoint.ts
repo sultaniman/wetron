@@ -1,5 +1,5 @@
-import type { WeightSource } from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+import type { WeightSource } from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 import { parseCheckpointIndex } from "./parse-checkpoint-index.ts";
 import type { CheckpointMeta } from "./parse-checkpoint-index.ts";
 import { parseCheckpointableObjectGraph } from "./parse-object-graph.ts";

@@ -1,5 +1,5 @@
 import * as Dagre from "dagre";
-import type { ModelGraph, GraphNode, GraphValue, AttributeValue } from "./ir.ts";
+import type { ModelGraph, GraphNode, GraphValue, AttributeValue } from "@wetron/common/ir";
 import { opInputLabels } from "./op-inputs.ts";
 
 export type GraphNodeData = {

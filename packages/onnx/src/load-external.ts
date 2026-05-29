@@ -1,12 +1,12 @@
-import { Root } from "protobufjs/light";
-import type { INamespace } from "protobufjs/light";
-import type { WeightSource } from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+import protobuf from "protobufjs/light.js";
+import type { Root, INamespace } from "protobufjs/light.js";
+import type { WeightSource } from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 import descriptor from "./onnx-descriptor.json" with { type: "json" };
 
 let _root: Root | null = null;
 function getRoot(): Root {
-  if (!_root) _root = Root.fromJSON(descriptor as INamespace);
+  if (!_root) _root = protobuf.Root.fromJSON(descriptor as INamespace);
   return _root;
 }
 

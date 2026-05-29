@@ -1,10 +1,12 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { parseKeras, parseKerasWithWeights } from "../src/parse.ts";
-import { ParseError } from "@wetron/core/ir";
+import { ParseError } from "@wetron/common/ir";
 import { zipSync } from "fflate";
-import { parseModel } from "@wetron/core";
-import { readFileSync } from "fs";
-import { resolve } from "path";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 function makeKerasZip(files: Record<string, unknown>): Uint8Array {
   const enc = new TextEncoder();
@@ -154,14 +156,9 @@ test("functional merge: Concatenate receives two inputs from two InputLayers", (
   expect(graph.inputs.length).toBe(2);
 });
 
-test("parseModel dispatches .keras bytes to parseKeras", async () => {
-  const graph = await parseModel(makeKerasZip({ "config.json": SEQ_CONFIG }), "model.keras");
-  expect(graph.nodes.length).toBe(2);
-});
-
 test("MobileNetV2: 155 nodes, correct input, single output", () => {
   const bytes = new Uint8Array(
-    readFileSync(resolve(import.meta.dir, "../../../test-models/mobilenet.keras")),
+    readFileSync(resolve(__dirname, "../../../test-models/mobilenet.keras")),
   );
   const graph = parseKeras(bytes);
   expect(graph.name).toBe("mobilenetv2_1.00_224");
@@ -176,7 +173,7 @@ for (const [label, fixture] of [
 ] as const) {
   test(`${label} fixture: structure has 3 Functional sub-graphs`, () => {
     const bytes = new Uint8Array(
-      readFileSync(resolve(import.meta.dir, "../../../test-models/", `${fixture}.keras`)),
+      readFileSync(resolve(__dirname, "../../../test-models/", `${fixture}.keras`)),
     );
     const g = parseKeras(bytes);
     expect(g.name).toBe("branched_net");
@@ -200,7 +197,7 @@ for (const [label, fixture] of [
 
   test(`${label} fixture: parseKerasWithWeights loads tensors into sub-graphs`, async () => {
     const bytes = new Uint8Array(
-      readFileSync(resolve(import.meta.dir, "../../../test-models/", `${fixture}.keras`)),
+      readFileSync(resolve(__dirname, "../../../test-models/", `${fixture}.keras`)),
     );
     const g = await parseKerasWithWeights(bytes);
     expect(g.weights).toBeDefined();
@@ -217,7 +214,7 @@ for (const [label, fixture] of [
 
 test("Keras 2 dict-format inbound_nodes: 99 nodes, merge edges resolve", () => {
   const bytes = new Uint8Array(
-    readFileSync(resolve(import.meta.dir, "../../../test-models/keras2_synthetic.keras")),
+    readFileSync(resolve(__dirname, "../../../test-models/keras2_synthetic.keras")),
   );
   const graph = parseKeras(bytes);
   expect(graph.name).toBe("keras2_synthetic");

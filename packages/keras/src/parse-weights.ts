@@ -1,4 +1,4 @@
-import type { WeightSource } from "@wetron/core/ir";
+import type { WeightSource } from "@wetron/common/ir";
 
 export type WeightMeta = {
   readonly shape: readonly number[];
@@ -46,7 +46,7 @@ async function getH5Wasm(): Promise<H5Wasm> {
 /**
  * snake_case for Keras class names matching the H5 group key convention.
  *   FooBarConv2D -> foo_bar_conv2d  (NOT conv2_d - the second regex is [a-z], not [a-z0-9])
- *   DSPFooSTFT128 -> dsp_foo_stft128
+ *   LSTMCell -> lstm_cell
  */
 export function kerasSnakeCase(name: string): string {
   let s = name.replace(/(.)([A-Z][a-z]+)/g, "$1_$2");

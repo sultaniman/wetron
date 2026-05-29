@@ -1,6 +1,6 @@
 import { ByteBuffer } from "flatbuffers";
-import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 import { BUILTIN_OP_NAMES } from "./builtin-ops.ts";
 import { TENSOR_TYPE_NAMES } from "./tensor-types.ts";
 

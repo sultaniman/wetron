@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { parseOnnx } from "../src/index.ts";
 import { readFileSync } from "node:fs";
 

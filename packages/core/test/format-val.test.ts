@@ -1,4 +1,4 @@
-import { test, expect, describe } from "bun:test";
+import { test, expect, describe } from "vitest";
 import { formatVal, isIntegerDtype } from "../src/format-val.ts";
 
 describe("isIntegerDtype", () => {

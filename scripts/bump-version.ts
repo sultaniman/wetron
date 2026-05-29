@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const version = process.argv[2];
 if (!version) {
@@ -7,6 +7,7 @@ if (!version) {
 }
 
 const packages = [
+  "packages/common",
   "packages/core",
   "packages/tokens",
   "packages/onnx",

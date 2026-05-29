@@ -1,5 +1,5 @@
 // @happy-dom
-import { test, expect, describe, afterEach, beforeEach } from "bun:test";
+import { test, expect, describe, afterEach, beforeEach } from "vitest";
 import { render, screen, cleanup, act } from "@testing-library/react";
 import React from "react";
 import { VirtualValues } from "../src/node-property-panel/virtual-values/virtual-values.tsx";

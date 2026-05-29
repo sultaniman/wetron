@@ -1,6 +1,6 @@
 {
   "name": "@wetron/svelte",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Svelte components for neural network graph visualization, built on SvelteFlow",
   "keywords": [
     "graph",
@@ -33,6 +33,7 @@
     }
   },
   "dependencies": {
+    "@wetron/common": "workspace:*",
     "@wetron/core": "workspace:*",
     "@wetron/tokens": "workspace:*"
   },

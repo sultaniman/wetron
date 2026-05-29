@@ -1,12 +1,12 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
+import { readFile } from "node:fs/promises";
 import { parseTflite } from "../src/parse.ts";
-import { ParseError } from "@wetron/core/ir";
+import { ParseError } from "@wetron/common/ir";
 
 const MODEL_PATH = new URL("../../../test-models/mobilenet_v2.tflite", import.meta.url);
 
 async function loadModel() {
-  const buf = await Bun.file(MODEL_PATH).arrayBuffer();
-  return new Uint8Array(buf);
+  return new Uint8Array(await readFile(MODEL_PATH));
 }
 
 test("mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs", async () => {
@@ -29,7 +29,7 @@ test("throws ParseError on garbage input", () => {
 
 test("style_predict_quantized_256: parses quantized weights with int/uint dtypes", async () => {
   const url = new URL("../../../test-models/style_predict_quantized_256.tflite", import.meta.url);
-  const bytes = new Uint8Array(await Bun.file(url).arrayBuffer());
+  const bytes = new Uint8Array(await readFile(url));
   const graph = parseTflite(bytes);
   expect(graph.nodes.length).toBeGreaterThan(0);
   // A quantized model must declare at least one int8 / uint8 / int16 / int32 initializer.

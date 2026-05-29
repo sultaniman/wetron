@@ -1,5 +1,5 @@
 import { ArrowFatDownIcon, ArrowFatUpIcon } from "@phosphor-icons/react";
-import type { GraphValue } from "@wetron/core/ir";
+import type { GraphValue } from "@wetron/common/ir";
 import { Row, BackButton } from "../panel-ui.tsx";
 import { Tooltip } from "../../tooltip.tsx";
 import propertyPanelCss from "../node-property-panel.module.css";

@@ -1,6 +1,6 @@
 {
   "name": "@wetron/keras",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Keras model parser - extracts graph structure from .keras archive files",
   "keywords": [
     "graph",
@@ -32,7 +32,7 @@
     }
   },
   "dependencies": {
-    "@wetron/core": "workspace:*",
+    "@wetron/common": "workspace:*",
     "h5wasm": "^0.10.2"
   }
 }

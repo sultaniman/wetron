@@ -1,7 +1,7 @@
 {
   "name": "@wetron/core",
-  "version": "0.0.20",
-  "description": "IR types, format detection, dtype utilities and layout transform for neural network graph visualization",
+  "version": "0.0.21",
+  "description": "Umbrella entry for wetron - parses every supported model format via parseModel and re-exports the parser-specific APIs",
   "keywords": [
     "graph",
     "keras",
@@ -32,16 +32,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./ir": {
-      "source": "./src/ir.ts",
-      "types": "./dist/ir.d.ts",
-      "import": "./dist/ir.js"
-    },
-    "./dtypes": {
-      "source": "./src/dtypes.ts",
-      "types": "./dist/dtypes.d.ts",
-      "import": "./dist/dtypes.js"
-    },
     "./detect": {
       "source": "./src/detect.ts",
       "types": "./dist/detect.d.ts",
@@ -62,11 +52,6 @@
       "types": "./dist/panel-utils.d.ts",
       "import": "./dist/panel-utils.js"
     },
-    "./flatbuffers": {
-      "source": "./src/flatbuffers.ts",
-      "types": "./dist/flatbuffers.d.ts",
-      "import": "./dist/flatbuffers.js"
-    },
     "./format-val": {
       "source": "./src/format-val.ts",
       "types": "./dist/format-val.d.ts",
@@ -79,6 +64,7 @@
     }
   },
   "dependencies": {
+    "@wetron/common": "workspace:*",
     "@wetron/executorch": "workspace:*",
     "@wetron/keras": "workspace:*",
     "@wetron/onnx": "workspace:*",
@@ -87,7 +73,6 @@
     "@wetron/torchscript": "workspace:*",
     "dagre": "^0.8.5",
     "fflate": "^0.8.2",
-    "flatbuffers": "^25.9.23",
     "protobufjs": "^8.0.3"
   }
 }

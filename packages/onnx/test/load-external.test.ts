@@ -1,12 +1,12 @@
-import { test, expect, describe, afterEach } from "bun:test";
-import { Root } from "protobufjs/light";
-import type { INamespace } from "protobufjs/light";
+import { test, expect, describe, afterEach } from "vitest";
+import protobuf from "protobufjs/light.js";
+import type { INamespace } from "protobufjs/light.js";
 import descriptor from "../src/onnx-descriptor.json" with { type: "json" };
 import { loadOnnxExternalWeightsFromUrl } from "../src/load-external.ts";
-import { ParseError } from "@wetron/core/ir";
+import { ParseError } from "@wetron/common/ir";
 
 function buildModelBytes(initializers: Array<Record<string, unknown>>): Uint8Array {
-  const root = Root.fromJSON(descriptor as INamespace);
+  const root = protobuf.Root.fromJSON(descriptor as INamespace);
   const ModelProto = root.lookupType("onnx.ModelProto");
   const msg = ModelProto.create({
     irVersion: 7,

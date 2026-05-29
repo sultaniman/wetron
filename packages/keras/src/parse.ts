@@ -5,8 +5,8 @@ import type {
   GraphValue,
   AttributeValue,
   ParseWarning,
-} from "@wetron/core/ir";
-import { ParseError } from "@wetron/core/ir";
+} from "@wetron/common/ir";
+import { ParseError } from "@wetron/common/ir";
 import { parseH5Weights, matchWeightsForModel, type WeightIndex } from "./parse-weights.ts";
 
 // Keras serializes inbound_nodes in three formats depending on version:
@@ -153,46 +153,53 @@ function resolveInbounds(
   const first = inboundNodes[0];
   if (first == null) return [];
 
+  const result: string[] = [];
+
   // Legacy list format: [[["layerName", nodeIdx, tensorIdx, {}], ...]]
   if (Array.isArray(first)) {
-    return (first as unknown[]).flatMap((tuple) => {
-      if (!Array.isArray(tuple) || tuple.length === 0) return [];
+    for (const tuple of first as unknown[]) {
+      if (!Array.isArray(tuple) || tuple.length === 0) continue;
       const name = typeof tuple[0] === "string" ? tuple[0] : null;
-      if (!name) return [];
+      if (!name) continue;
       const tensor = outputMap.get(name);
-      return tensor ? [tensor] : [];
-    });
-  }
-
-  const obj = first as Record<string, unknown>;
-
-  // Keras 3 format: { args: [tensorRef, ...], kwargs: {...} }
-  if (Array.isArray(obj["args"])) {
-    const firstArg = (obj["args"] as unknown[])[0];
-    if (firstArg == null) return [];
-    if (Array.isArray(firstArg)) {
-      return (firstArg as unknown[]).flatMap((item) => {
-        const name = kerasHistoryLayerName(item);
-        if (!name) return [];
-        const tensor = outputMap.get(name);
-        return tensor ? [tensor] : [];
-      });
-    }
-    const name = kerasHistoryLayerName(firstArg);
-    if (!name) return [];
-    const tensor = outputMap.get(name);
-    return tensor ? [tensor] : [];
-  }
-
-  // Keras 2 dict format: { argName: [layerName, nodeIdx, tensorIdx, {}], ... }
-  const result: string[] = [];
-  for (const val of Object.values(obj)) {
-    if (Array.isArray(val) && val.length > 0 && typeof val[0] === "string") {
-      const tensor = outputMap.get(val[0]);
       if (tensor) result.push(tensor);
     }
+  } else {
+    const obj = first as Record<string, unknown>;
+
+    // Keras 3 format: { args: [tensorRef, ...], kwargs: {...} }
+    if (Array.isArray(obj["args"])) {
+      const firstArg = (obj["args"] as unknown[])[0];
+      if (firstArg != null) {
+        if (Array.isArray(firstArg)) {
+          for (const item of firstArg as unknown[]) {
+            const name = kerasHistoryLayerName(item);
+            if (!name) continue;
+            const tensor = outputMap.get(name);
+            if (tensor) result.push(tensor);
+          }
+        } else {
+          const name = kerasHistoryLayerName(firstArg);
+          if (name) {
+            const tensor = outputMap.get(name);
+            if (tensor) result.push(tensor);
+          }
+        }
+      }
+    } else {
+      // Keras 2 dict format: { argName: [layerName, nodeIdx, tensorIdx, {}], ... }
+      for (const val of Object.values(obj)) {
+        if (Array.isArray(val) && val.length > 0 && typeof val[0] === "string") {
+          const tensor = outputMap.get(val[0]);
+          if (tensor) result.push(tensor);
+        }
+      }
+    }
   }
-  return result;
+
+  // Multiple dict keys (e.g. inputs, mask, training) can reference the same upstream
+  // layer. Deduplicate while preserving order so we emit one edge per unique tensor.
+  return [...new Set(result)];
 }
 
 function buildSubGraphForLayer(

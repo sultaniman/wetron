@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { opInputLabels } from "../src/op-inputs.ts";
 
 test("opInputLabels: Conv returns W and B labels", () => {

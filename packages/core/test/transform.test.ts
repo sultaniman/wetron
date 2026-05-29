@@ -1,6 +1,6 @@
-import { test, expect } from "bun:test";
+import { test, expect } from "vitest";
 import { modelGraphToFlow } from "../src/transform.ts";
-import type { ModelGraph } from "../src/ir.ts";
+import type { ModelGraph } from "@wetron/common/ir";
 
 const GRAPH: ModelGraph = {
   name: "test",

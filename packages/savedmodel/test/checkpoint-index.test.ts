@@ -1,6 +1,6 @@
-import { test, expect, describe } from "bun:test";
+import { test, expect, describe } from "vitest";
 import { parseCheckpointIndex } from "../src/parse-checkpoint-index.ts";
-import { ParseError } from "@wetron/core/ir";
+import { ParseError } from "@wetron/common/ir";
 
 function writeVarint(out: number[], v: number): void {
   while (v > 0x7f) {
