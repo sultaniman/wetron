@@ -1,5 +1,10 @@
 import { ByteBuffer } from "flatbuffers";
-import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/common/ir";
+import type {
+  ModelGraph,
+  GraphNode,
+  GraphValue,
+  ParseWarning,
+} from "@wetron/common/ir";
 import { ParseError } from "@wetron/common/ir";
 import { BUILTIN_OP_NAMES } from "./builtin-ops.ts";
 import { TENSOR_TYPE_NAMES } from "./tensor-types.ts";
@@ -19,12 +24,22 @@ function int8_(bb: ByteBuffer, table: number, fieldN: number, def = 0): number {
   return off ? bb.readInt8(table + off) : def;
 }
 
-function int32_(bb: ByteBuffer, table: number, fieldN: number, def = 0): number {
+function int32_(
+  bb: ByteBuffer,
+  table: number,
+  fieldN: number,
+  def = 0,
+): number {
   const off = voff(bb, table, fieldN);
   return off ? bb.readInt32(table + off) : def;
 }
 
-function uint32_(bb: ByteBuffer, table: number, fieldN: number, def = 0): number {
+function uint32_(
+  bb: ByteBuffer,
+  table: number,
+  fieldN: number,
+  def = 0,
+): number {
   const off = voff(bb, table, fieldN);
   return off ? bb.readUint32(table + off) : def;
 }
@@ -43,14 +58,24 @@ function vecLen(bb: ByteBuffer, table: number, fieldN: number): number {
   return off ? bb.__vector_len(table + off) : 0;
 }
 
-function vecTable(bb: ByteBuffer, table: number, fieldN: number, i: number): number {
+function vecTable(
+  bb: ByteBuffer,
+  table: number,
+  fieldN: number,
+  i: number,
+): number {
   const off = voff(bb, table, fieldN);
   if (!off) return 0;
   const vec = bb.__vector(table + off);
   return bb.__indirect(vec + i * 4);
 }
 
-function vecInt32(bb: ByteBuffer, table: number, fieldN: number, i: number): number {
+function vecInt32(
+  bb: ByteBuffer,
+  table: number,
+  fieldN: number,
+  i: number,
+): number {
   const off = voff(bb, table, fieldN);
   if (!off) return 0;
   const vec = bb.__vector(table + off);
@@ -79,7 +104,11 @@ const TFLITE_MAGIC = [
 function isTflite(bytes: Uint8Array): boolean {
   if (bytes.length < 8) return false;
   return TFLITE_MAGIC.some(
-    (m) => bytes[4] === m[0] && bytes[5] === m[1] && bytes[6] === m[2] && bytes[7] === m[3],
+    (m) =>
+      bytes[4] === m[0] &&
+      bytes[5] === m[1] &&
+      bytes[6] === m[2] &&
+      bytes[7] === m[3],
   );
 }
 
@@ -110,7 +139,10 @@ function readTensor(
 
 export function parseTflite(bytes: Uint8Array): ModelGraph {
   if (!isTflite(bytes)) {
-    throw new ParseError("tflite", "Not a TFLite file (missing magic bytes TFL3/ODLF)");
+    throw new ParseError(
+      "tflite",
+      "Not a TFLite file (missing magic bytes TFL3/ODLF)",
+    );
   }
 
   let bb: ByteBuffer;
@@ -136,18 +168,32 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
 
   // SubGraph field indices: 0=tensors, 1=inputs, 2=outputs, 3=operators, 4=name
   const numTensors = vecLen(bb, subgraph, 0);
+  // Count raw names first so we can suffix duplicates with their index.
+  // TFLite models sometimes reuse the same tensor name for distinct tensors
+  // (e.g. copied/unrolled weights), which would collapse them to one Map entry.
+  const rawNameCount = new Map<string, number>();
+  for (let i = 0; i < numTensors; i++) {
+    const { name } = readTensor(bb, vecTable(bb, subgraph, 0, i));
+    rawNameCount.set(name, (rawNameCount.get(name) ?? 0) + 1);
+  }
+
   const tensors: Array<{ name: string; shape: number[]; dtype: string }> = [];
   for (let i = 0; i < numTensors; i++) {
-    tensors.push(readTensor(bb, vecTable(bb, subgraph, 0, i)));
+    const raw = readTensor(bb, vecTable(bb, subgraph, 0, i));
+    const name =
+      (rawNameCount.get(raw.name) ?? 1) > 1 ? `${raw.name}_${i}` : raw.name;
+    tensors.push({ ...raw, name });
   }
 
   const numInputIdxs = vecLen(bb, subgraph, 1);
   const inputIdxs: number[] = [];
-  for (let i = 0; i < numInputIdxs; i++) inputIdxs.push(vecInt32(bb, subgraph, 1, i));
+  for (let i = 0; i < numInputIdxs; i++)
+    inputIdxs.push(vecInt32(bb, subgraph, 1, i));
 
   const numOutputIdxs = vecLen(bb, subgraph, 2);
   const outputIdxs: number[] = [];
-  for (let i = 0; i < numOutputIdxs; i++) outputIdxs.push(vecInt32(bb, subgraph, 2, i));
+  for (let i = 0; i < numOutputIdxs; i++)
+    outputIdxs.push(vecInt32(bb, subgraph, 2, i));
 
   // Identify constant tensors (initializers) via buffer presence.
   // Model field 4 = buffers; Buffer field 0 = data; Tensor field 2 = buffer index.
@@ -169,20 +215,33 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
       continue;
     }
     const start = vecStructBase(bb, buf, 0, 0, 1);
-    bufferBytes.push(start >= 0 ? bytes.subarray(start, start + len) : undefined);
+    bufferBytes.push(
+      start >= 0 ? bytes.subarray(start, start + len) : undefined,
+    );
   }
 
   const inputIdxSet = new Set(inputIdxs);
   const outputIdxSet = new Set(outputIdxs);
-  const initializers = new Map<string, { shape: readonly number[]; dtype: string }>();
+  const initializers = new Map<
+    string,
+    { shape: readonly number[]; dtype: string }
+  >();
   const weightBytes = new Map<string, Uint8Array>();
   let totalWeightBytes = 0;
   for (let i = 0; i < numTensors; i++) {
     const tensorTable = vecTable(bb, subgraph, 0, i);
     const bufIdx = uint32_(bb, tensorTable, 2, 0);
-    if (bufIdx > 0 && bufferHasData[bufIdx] && !inputIdxSet.has(i) && !outputIdxSet.has(i)) {
+    if (
+      bufIdx > 0 &&
+      bufferHasData[bufIdx] &&
+      !inputIdxSet.has(i) &&
+      !outputIdxSet.has(i)
+    ) {
       const t = tensors[i];
-      initializers.set(t.name, { shape: t.shape as readonly number[], dtype: t.dtype });
+      initializers.set(t.name, {
+        shape: t.shape as readonly number[],
+        dtype: t.dtype,
+      });
       const buf = bufferBytes[bufIdx];
       if (buf) {
         weightBytes.set(t.name, buf);
@@ -211,7 +270,9 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
           opInputs.push("");
           continue;
         }
-        opInputs.push(idx < tensors.length ? tensors[idx].name : `tensor_${idx}`);
+        opInputs.push(
+          idx < tensors.length ? tensors[idx].name : `tensor_${idx}`,
+        );
       }
 
       const numOpOutputs = vecLen(bb, op, 2);
@@ -219,7 +280,9 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
       for (let j = 0; j < numOpOutputs; j++) {
         const idx = vecInt32(bb, op, 2, j);
         if (idx < 0) continue; // -1 = optional output, skip
-        opOutputs.push(idx < tensors.length ? tensors[idx].name : `tensor_${idx}`);
+        opOutputs.push(
+          idx < tensors.length ? tensors[idx].name : `tensor_${idx}`,
+        );
       }
 
       nodes.push({
@@ -246,7 +309,10 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
   };
 
   const tensorShapes = new Map(
-    tensors.map((t) => [t.name, { shape: t.shape as readonly number[], dtype: t.dtype }]),
+    tensors.map((t) => [
+      t.name,
+      { shape: t.shape as readonly number[], dtype: t.dtype },
+    ]),
   );
 
   return {
