@@ -60,8 +60,9 @@ test("FlowNode and FlowEdge ids are unique", () => {
   expect(new Set(edges.map((e) => e.id)).size).toBe(edges.length);
 });
 
-test("edge ids are unique when a node consumes the same tensor in two slots", () => {
-  // Add(x, x) - same input tensor in slot 0 and slot 1.
+test("same tensor consumed in multiple slots produces one edge, not N", () => {
+  // Add(x, x) - same input tensor in slot 0 and slot 1. Should produce one
+  // edge from input::x to Add rather than two overlapping ones.
   const graph: ModelGraph = {
     name: "selfadd",
     inputs: [{ name: "x", shape: [1], dtype: "float32" }],
@@ -71,12 +72,11 @@ test("edge ids are unique when a node consumes the same tensor in two slots", ()
     tensorShapes: new Map(),
   };
   const { edges } = modelGraphToFlow(graph);
-  // 2 edges from input::x to Add (one per slot) + 1 from Add to output::y.
-  expect(edges.length).toBe(3);
+  // 1 edge from input::x to Add + 1 from Add to output::y.
+  expect(edges.length).toBe(2);
   expect(new Set(edges.map((e) => e.id)).size).toBe(edges.length);
   const addInputs = edges.filter((e) => e.source.startsWith("input::"));
-  expect(addInputs.length).toBe(2);
-  expect(new Set(addInputs.map((e) => e.id)).size).toBe(2);
+  expect(addInputs.length).toBe(1);
 });
 
 test("FlowNode ids are unique when two graph inputs share a name", () => {

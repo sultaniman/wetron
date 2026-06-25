@@ -194,32 +194,38 @@ export function modelGraphToFlow(
     nodeIdToName.set(id, gv.name);
   }
 
+  // Track emitted (source, target, tensor) triples so that ops which consume the
+  // same tensor in multiple slots (e.g. CONCAT(x,x,...,x) for tf.repeat) produce
+  // one FlowEdge rather than N visually-overlapping ones.
+  const emittedEdgeKeys = new Set<string>();
+
   for (const fn of flowNodes) {
     if (fn.type === "ioNode" && fn.data.opType === "Input") continue;
 
-    // Slot index is part of the edge id so a node consuming the same tensor
-    // in two slots (e.g. Add(x, x), MatMul(x, x.T)) produces two distinct
-    // FlowEdge.id values - otherwise React Flow keys collide.
     for (let slot = 0; slot < fn.data.inputs.length; slot++) {
       const inputName = fn.data.inputs[slot];
       const srcId = outputToNodeId.get(inputName);
-      if (srcId) {
-        flowEdges.push({
-          id: `${srcId}=>${fn.id}::${inputName}#${slot}`,
-          source: srcId,
-          target: fn.id,
-          type: "modelEdge",
-          data: {
-            tensorName: inputName,
-            sourceOpType: nodeIdToOpType.get(srcId) ?? "",
-            sourceNodeName: nodeIdToName.get(srcId) ?? "",
-            targetOpType: fn.data.opType,
-            targetNodeName: nodeIdToName.get(fn.id) ?? "",
-          },
-        });
+      if (!srcId) continue;
 
-        if (!g.hasEdge(srcId, fn.id)) g.setEdge(srcId, fn.id);
-      }
+      const edgeKey = `${srcId}=>${fn.id}::${inputName}`;
+      if (emittedEdgeKeys.has(edgeKey)) continue;
+      emittedEdgeKeys.add(edgeKey);
+
+      flowEdges.push({
+        id: edgeKey,
+        source: srcId,
+        target: fn.id,
+        type: "modelEdge",
+        data: {
+          tensorName: inputName,
+          sourceOpType: nodeIdToOpType.get(srcId) ?? "",
+          sourceNodeName: nodeIdToName.get(srcId) ?? "",
+          targetOpType: fn.data.opType,
+          targetNodeName: nodeIdToName.get(fn.id) ?? "",
+        },
+      });
+
+      if (!g.hasEdge(srcId, fn.id)) g.setEdge(srcId, fn.id);
     }
   }
 
