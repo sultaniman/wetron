@@ -172,20 +172,12 @@ export async function parseH5Weights(
   return { index, source };
 }
 
-/**
- * Build a map from node names to their H5 weight paths via class-ordering:
- * the N-th node of class X in the config maps to the N-th H5 key matching
- * snake_case(X) within the sub-model's H5 group.
- */
-export function matchWeightsForModel(
-  subModelFunctionalIndex: number,
+function matchWeightsWithPrefix(
+  modelPrefix: string,
   classNames: string[],
   nodeNames: string[],
   index: WeightIndex,
 ): Map<string, string[]> {
-  const modelKey = functionalKey(subModelFunctionalIndex);
-  const modelPrefix = `layers/${modelKey}/layers/`;
-
   const byBase = new Map<string, string[]>();
   for (const path of index.keys()) {
     if (!path.startsWith(modelPrefix)) continue;
@@ -229,4 +221,36 @@ export function matchWeightsForModel(
   }
 
   return result;
+}
+
+/**
+ * Build a map from node names to their H5 weight paths via class-ordering:
+ * the N-th node of class X in the config maps to the N-th H5 key matching
+ * snake_case(X) within the sub-model's H5 group.
+ */
+export function matchWeightsForModel(
+  subModelFunctionalIndex: number,
+  classNames: string[],
+  nodeNames: string[],
+  index: WeightIndex,
+): Map<string, string[]> {
+  return matchWeightsWithPrefix(
+    `layers/${functionalKey(subModelFunctionalIndex)}/layers/`,
+    classNames,
+    nodeNames,
+    index,
+  );
+}
+
+/**
+ * Flat Keras 3 format: layers/<class_name>[_N]/vars/<idx>.
+ * Same class-ordinal logic as matchWeightsForModel but for models where the H5
+ * stores layer weights directly under "layers/" without functional-model nesting.
+ */
+export function matchWeightsFlatFormat(
+  classNames: string[],
+  nodeNames: string[],
+  index: WeightIndex,
+): Map<string, string[]> {
+  return matchWeightsWithPrefix("layers/", classNames, nodeNames, index);
 }

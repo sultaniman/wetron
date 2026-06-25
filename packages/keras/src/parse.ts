@@ -7,7 +7,12 @@ import type {
   ParseWarning,
 } from "@wetron/common/ir";
 import { ParseError } from "@wetron/common/ir";
-import { parseH5Weights, matchWeightsForModel, type WeightIndex } from "./parse-weights.ts";
+import {
+  parseH5Weights,
+  matchWeightsForModel,
+  matchWeightsFlatFormat,
+  type WeightIndex,
+} from "./parse-weights.ts";
 
 // Keras serializes inbound_nodes in three formats depending on version:
 //   - Keras 3:  [{ args: [tensorRef, ...], kwargs: {...} }]
@@ -346,7 +351,11 @@ function applyWeightsToSubGraph(
 ): ModelGraph {
   const classNames = subGraph.nodes.map((n) => n.opType);
   const nodeNames = subGraph.nodes.map((n) => n.name);
-  const nodeWeightMap = matchWeightsForModel(functionalIdx, classNames, nodeNames, index);
+  // Try nested format first (layers/functional_N/layers/...), then flat Keras 3 format.
+  let nodeWeightMap = matchWeightsForModel(functionalIdx, classNames, nodeNames, index);
+  if (nodeWeightMap.size === 0) {
+    nodeWeightMap = matchWeightsFlatFormat(classNames, nodeNames, index);
+  }
   if (nodeWeightMap.size === 0) return subGraph;
 
   const subInitializers = new Map<string, { shape: readonly number[]; dtype: string }>(
@@ -371,15 +380,31 @@ async function applyWeights(graph: ModelGraph, h5Bytes: Uint8Array): Promise<Mod
   const topInitializers = new Map<string, { shape: readonly number[]; dtype: string }>(
     graph.initializers,
   );
+
+  // Flat Keras 3 format: layers/<class_name>[_N]/vars/<idx> with no functional nesting.
+  // Match top-level nodes up front; falls back gracefully (empty map) for the nested format.
+  const flatMap = matchWeightsFlatFormat(
+    graph.nodes.map((n) => n.opType),
+    graph.nodes.map((n) => n.name),
+    index,
+  );
+
   let functionalIdx = 0;
   const patchedNodes: GraphNode[] = graph.nodes.map((node) => {
     if (node.subGraph) {
+      // Nested Functional/Sequential sub-model: class-ordinal matching within its group.
       const patched = applyWeightsToSubGraph(node.subGraph, index, functionalIdx);
       functionalIdx++;
       for (const [k, v] of patched.initializers) topInitializers.set(k, v);
       return { ...node, subGraph: patched };
     }
-    return node;
+    const paths = flatMap.get(node.name);
+    if (!paths || paths.length === 0) return node;
+    for (const path of paths) {
+      const meta = index.get(path);
+      if (meta) topInitializers.set(path, { shape: meta.shape, dtype: meta.dtype });
+    }
+    return { ...node, inputs: [...node.inputs, ...paths] };
   });
 
   return { ...graph, nodes: patchedNodes, initializers: topInitializers, weights: source };
