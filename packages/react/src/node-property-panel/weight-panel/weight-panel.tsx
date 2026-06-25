@@ -212,6 +212,9 @@ export function WeightPanel({
               <span className={propertyPanelCss.rowLabel}>zeros</span>
               <span className={propertyPanelCss.rowValue}>{loaded.stats.zeros}</span>
             </div>
+            <div className={weightPanelCss.valuesMeta}>
+              Stats computed on flattened weights
+            </div>
 
             <Tabs.Panel value="dist">
               <WeightHistogram stats={loaded.stats} dtype={dtype} />

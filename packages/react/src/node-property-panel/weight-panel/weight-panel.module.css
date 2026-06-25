@@ -86,6 +86,7 @@
 }
 
 .valuesMeta {
+  margin-top: 4px;
   font-family: ui-monospace, Menlo, monospace;
   font-size: 9px;
   color: var(--wetron-panel-subtitle);
