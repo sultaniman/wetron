@@ -212,12 +212,18 @@ importers:
       '@wetron/common':
         specifier: workspace:*
         version: link:../common
+      flatbuffers:
+        specifier: ^25.9.23
+        version: 25.9.23
 
   packages/keras:
     dependencies:
       '@wetron/common':
         specifier: workspace:*
         version: link:../common
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.3
       h5wasm:
         specifier: ^0.10.2
         version: 0.10.2
@@ -306,6 +312,9 @@ importers:
       '@wetron/common':
         specifier: workspace:*
         version: link:../common
+      flatbuffers:
+        specifier: ^25.9.23
+        version: 25.9.23
 
   packages/tokens: {}
 
@@ -314,6 +323,12 @@ importers:
       '@wetron/common':
         specifier: workspace:*
         version: link:../common
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.3
+      flatbuffers:
+        specifier: ^25.9.23
+        version: 25.9.23
 
 packages:
 

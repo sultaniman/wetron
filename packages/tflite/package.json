@@ -33,6 +33,7 @@
     }
   },
   "dependencies": {
-    "@wetron/common": "workspace:*"
+    "@wetron/common": "workspace:*",
+    "flatbuffers": "^25.9.23"
   }
 }
