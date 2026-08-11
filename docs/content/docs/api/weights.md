@@ -1,6 +1,6 @@
 ---
 title: "Weights"
-description: "Weight inspection API - WeightSource on ModelGraph, decodeWeight / decodeFirstN for typed-array views, computeStats for histogram + heatmap previews, loadSavedModelWeights for TF2 checkpoints."
+description: "Weight inspection API - WeightSource on ModelGraph, scalar and GGUF Q4_0 decoding, summary statistics, and TF2 checkpoint loading."
 lead: "Lazily decode initializer bytes into typed arrays and summary statistics."
 weight: 30
 ---
@@ -31,6 +31,7 @@ interface WeightSource {
 | ------------------------------------------------------ | ------------------------------------------------------------------------ |
 | ONNX                                                   | `parseOnnx` (inline initializer payloads)                                |
 | TFLite                                                 | `parseTflite` (buffer table referenced by tensors)                       |
+| GGUF                                                   | `parseGguf` (zero-copy encoded tensor payload views)                     |
 | SavedModel (`saved_model.pb`)                          | `attachCheckpointToGraph` after `loadSavedModelWeights` (TF2 checkpoint) |
 | Keras / TorchScript / ExecuTorch / `keras_metadata.pb` | not surfaced - weights live in separate files this stack does not load   |
 
@@ -41,16 +42,19 @@ function decodeWeight(
   bytes: Uint8Array,
   dtype: string,
   shape: readonly number[],
-): Float64Array | Int32Array | BigInt64Array | null;
+): Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array | null;
 ```
 
 Decodes the entire byte slice into a typed array sized to `shape`. Returns `null` for unknown dtypes.
 
 Output element kind:
 
-- `Float64Array` for `float16`, `bfloat16`, `float32`, `float64`
-- `Int32Array` for `int8`, `uint8`, `int16`, `uint16`, `int32`, `uint32`, `bool`
-- `BigInt64Array` for `int64`, `uint64`
+- `Float64Array` for floating-point scalar types, GGML `F16` / `F32` / `BF16` / `F64`, and GGML `Q4_0`
+- `Int32Array` for signed integer types, `uint8`, `uint16`, `bool`, and GGML `I8` / `I16` / `I32`
+- `Uint32Array` for `uint32`
+- `BigInt64Array` or `BigUint64Array` for 64-bit integer types
+
+Other GGML quantization formats return `null` until a decoder is implemented. Their encoded bytes remain available through `graph.weights`.
 
 ## decodeFirstN
 
@@ -59,7 +63,7 @@ function decodeFirstN(
   bytes: Uint8Array,
   dtype: string,
   n: number,
-): Float64Array | Int32Array | BigInt64Array | null;
+): Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array | null;
 ```
 
 Same kind mapping as `decodeWeight`. Decodes the first `n` elements (or fewer if the byte slice is shorter). Use this for previews of large tensors.
@@ -67,7 +71,7 @@ Same kind mapping as `decodeWeight`. Decodes the first `n` elements (or fewer if
 ## computeStats
 
 ```ts
-function computeStats(values: Float64Array | Int32Array): WeightStats;
+function computeStats(values: Float64Array | Int32Array | Uint32Array): WeightStats;
 ```
 
 The `BigInt64Array` output of `decodeWeight` is not a valid input - convert int64 weights to a numeric form first if you need stats.

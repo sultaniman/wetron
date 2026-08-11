@@ -48,6 +48,7 @@ import { parseKeras } from "@wetron/keras";
 import { parseTorchscript } from "@wetron/torchscript";
 import { parseExecutorch } from "@wetron/executorch";
 import { parseSavedModel } from "@wetron/savedmodel";
+import { parseGguf } from "@wetron/gguf";
 
 const graph = parseOnnx(bytes);
 const graph = parseTflite(bytes);
@@ -55,6 +56,7 @@ const graph = parseKeras(bytes);
 const graph = parseTorchscript(bytes);
 const graph = parseExecutorch(bytes);
 const graph = parseSavedModel(bytes);
+const graph = parseGguf(bytes);
 ```
 
 ## detectFormat
@@ -62,7 +64,7 @@ const graph = parseSavedModel(bytes);
 ```ts
 import { detectFormat } from "@wetron/core";
 
-type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
+type Format = "onnx" | "tflite" | "keras" | "gguf" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 ```
@@ -72,6 +74,7 @@ Returns a format string - never throws. Useful for showing format badges in a UI
 | Format        | Detection                                                       |
 | ------------- | --------------------------------------------------------------- |
 | `savedmodel`  | `.pb` filename extension (checked before ONNX)                  |
+| `gguf`        | `GGUF` magic at byte 0                                           |
 | `onnx`        | protobuf field 1 varint tag `0x08`                              |
 | `tflite`      | `TFL3` or `ODLF` at offset 4                                    |
 | `keras`       | ZIP magic `PK\x03\x04` + `.keras` extension (default for ZIP)   |

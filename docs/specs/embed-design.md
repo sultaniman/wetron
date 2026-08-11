@@ -329,7 +329,6 @@ Explicitly not tested in v1:
 
 - New page `docs/content/docs/embed/_index.md` with a copy-pasteable snippet, the attribute table, the CDN URL pattern, theming examples, and the event/method reference.
 - Update `README.md` "Install" section to add a `<script type="module">` example alongside the `pnpm add` examples.
-- Update `docs/llms.md` to reference the embed entry.
 
 ## File-by-file change list
 
@@ -350,7 +349,6 @@ Explicitly not tested in v1:
 - Root `package.json` - add `build:embed` script; chain after `build:svelte`.
 - `pnpm-workspace.yaml` - include `packages/embed`.
 - `README.md` - add CDN install snippet.
-- `docs/llms.md` - reference the new package.
 
 **Depends on (must ship first)**
 

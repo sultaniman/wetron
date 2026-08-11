@@ -98,4 +98,4 @@ type PanelTarget =
 - `colorMode="system"` reads `prefers-color-scheme` via a media query listener.
 - Layout is computed once on mount via Dagre; re-computed when `graph` changes.
 - Theme colours for node categories come from `@wetron/tokens`.
-- The weight inspection panel (histogram + heatmap) is currently only available in `@wetron/react`. The Svelte `NodePropertyPanel` falls back to `TensorPanel` for initializer tensors. Decode bytes manually with `decodeWeight` / `computeStats` from `@wetron/core` if you need stats in a Svelte app today.
+- Initializer tensors use the same weight-inspection flow as React: lazy decoding, statistics, histogram/heatmap views, and a virtualized values grid. Pass `graph` to `NodePropertyPanel` so it can distinguish initializers from live tensors.

@@ -28,7 +28,7 @@ export default function App() {
 
   return (
     <>
-      <input type="file" accept=".onnx,.tflite,.keras,.pt,.pte,.pb" onChange={handleFile} />
+      <input type="file" accept=".onnx,.tflite,.keras,.gguf,.pt,.pte,.pb" onChange={handleFile} />
       {graph && <ModelGraphView graph={graph} onTargetClick={setSelected} colorMode="system" />}
       <NodePropertyPanel
         target={selected}
@@ -58,7 +58,7 @@ export default function App() {
   }
 </script>
 
-<input type="file" accept=".onnx,.tflite,.keras,.pt,.pte,.pb" onchange={handleFile} />
+<input type="file" accept=".onnx,.tflite,.keras,.gguf,.pt,.pte,.pb" onchange={handleFile} />
 {#if graph}
   <ModelGraphView {graph} onTargetClick={(t) => selected = t} colorMode="system" />
 {/if}
@@ -90,13 +90,13 @@ try {
 import { detectFormat } from "@wetron/core";
 
 const format = detectFormat(bytes, file.name);
-// "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown"
+// "onnx" | "tflite" | "keras" | "gguf" | "torchscript" | "executorch" | "savedmodel" | "unknown"
 // never throws
 ```
 
 ## Inspect weights
 
-ONNX and TFLite expose initializer bytes via `graph.weights`. Decode the first few thousand values for a preview and feed them to `computeStats` for the property panel's histogram and heatmap.
+ONNX, TFLite, and GGUF expose initializer bytes via `graph.weights`. Decode the first few thousand supported values for a preview and feed them to `computeStats` for the property panel's histogram and heatmap.
 
 ```ts
 import { decodeFirstN, computeStats } from "@wetron/core";

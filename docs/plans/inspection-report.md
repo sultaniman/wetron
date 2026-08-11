@@ -4,7 +4,7 @@
 
 **Goal:** Ship the inspection-report feature defined in `docs/specs/inspection-report-design.md` - a JSON report format with file + per-tensor SHA-256, a verification panel that compares a dropped report against a loaded model, an `Export PDF` print flow, and graph-node status badges. Two-level scope (global + node) and two modes (`identity`, `identity+stats`).
 
-**Architecture:** Five phases. Phase 1 builds a pure-TypeScript `report` module in `@wetron/core` covering hashing, canonical serialisation, build, parse, and verify - no DOM, no React. Phase 2 wires React components: toolbar export dropdown, node-scoped export, verify file picker, verification panel, print stylesheet, graph-node badges. Phase 3 mirrors the React work in Svelte. Phase 4 wires the two demo apps. Phase 5 ships docs (Hugo pages + `llms.md`).
+**Architecture:** Five phases. Phase 1 builds a pure-TypeScript `report` module in `@wetron/core` covering hashing, canonical serialisation, build, parse, and verify - no DOM, no React. Phase 2 wires React components: toolbar export dropdown, node-scoped export, verify file picker, verification panel, print stylesheet, graph-node badges. Phase 3 mirrors the React work in Svelte. Phase 4 wires the two demo apps. Phase 5 ships Hugo documentation.
 
 **Tech stack:** pnpm workspaces, TypeScript, WebCrypto (`crypto.subtle.digest`) for SHA-256, native `String.prototype.normalize('NFD')` for tensor-name canonicalisation, React 19, Svelte 5 (runes), `pnpm exec vitest run` for tests, `@testing-library/react` and `@testing-library/svelte` for components, browser print stylesheet for the PDF export. All package operations go through `pnpm` - never `npm`/`npx`/`node`/`bun`. Commits go straight to `main`. Commit messages: lowercase verb + short description. Stage files individually - never `git add -A`.
 
@@ -2234,25 +2234,7 @@ git commit -m "add inspection report api docs"
 
 ---
 
-### Task 5.2: Update `llms.md`
-
-**Files:**
-- Modify: `docs/llms.md`
-
-- [ ] **Step 1: Add an Inspection Report section**
-
-Insert a new top-level section listing the new API (`buildGlobalReport`, `buildNodeReport`, `parseReport`, `verifyReports`, `canonicalStringify`, `Report`, `Verdict`, `ReportMode`, `ReportScope`). Keep the entries one-line each, matching the existing style.
-
-- [ ] **Step 2: Commit**
-
-```bash
-git add docs/llms.md
-git commit -m "document inspection report api in llms.md"
-```
-
----
-
-### Task 5.3: Cross-link from existing docs
+### Task 5.2: Cross-link from existing docs
 
 **Files:**
 - Modify: `docs/content/docs/rendering/react.md`

@@ -4,7 +4,7 @@ Two-phase pass on the documentation surface. Mechanical, no rewriting beyond wha
 
 ## Goal
 
-1. The published docs (`docs/content/` and `docs/llms.md`) accurately describe what wetron does today, especially weight inspection, which the docs currently claim does not exist.
+1. The published docs (`docs/content/`) accurately describe what wetron does today, especially weight inspection, which the docs currently claim does not exist.
 2. Internal docs (`docs/specs/`, `docs/plans/`) live in one canonical tree, with a glanceable index showing what's still load-bearing.
 
 ## Phase B - capability sweep
@@ -13,8 +13,6 @@ Two-phase pass on the documentation surface. Mechanical, no rewriting beyond wha
 
 Files with claims contradicted by current code:
 
-- `docs/llms.md` line 3 - "Graph structure only - no weight data is read or stored anywhere in the stack."
-- `docs/llms.md` line 140 - "No weight deserialization anywhere - graph structure only."
 - `docs/content/docs/formats/onnx.md` line 18 - "Initializers - weight tensor shapes and dtypes (no raw data)" and the "Notes" line about weight values not being deserialised.
 - `docs/content/docs/formats/tflite.md` line 52 - "Initializer buffers (weight data) are skipped"
 - `docs/content/docs/formats/keras.md` line 30 - "ModelGraph.initializers is always empty"
@@ -118,7 +116,7 @@ The css-isolation duplicate is the single exception to the "do not delete" rule,
 After implementation:
 
 - `pnpm --filter wetron-docs build` (or equivalent Hugo build) succeeds with no broken internal links.
-- `grep -rn "no weight\|not deserialised\|always empty" docs/content/ docs/llms.md` returns no occurrences in the wrong-claim contexts identified in B1.
+- `grep -rn "no weight\|not deserialised\|always empty" docs/content/` returns no occurrences in the wrong-claim contexts identified in B1.
 - New `docs/content/docs/api/weights.md` page renders.
 - `ls docs/superpowers/` errors (directory removed).
 - `find docs -name "2026-*"` returns nothing.

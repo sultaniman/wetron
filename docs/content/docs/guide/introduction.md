@@ -11,7 +11,7 @@ weight: 10
 
 Wetron reads neural network model files and produces a structured graph of operators, inputs, and outputs. That graph can then be rendered as an interactive diagram using the React or Svelte renderer packages.
 
-For ONNX and TFLite the parser also exposes initializer bytes through `ModelGraph.weights`, so the property panel can decode tensor previews and show histograms / heatmaps. TF2 SavedModel models load weights from the external checkpoint pair via `loadSavedModelWeights`.
+ONNX, TFLite, and GGUF expose initializer bytes through `ModelGraph.weights`, so the property panel can decode supported tensor types and show histograms and heatmaps. TF2 SavedModel models load weights from the external checkpoint pair via `loadSavedModelWeights`.
 
 All parsing runs in the browser via native Web APIs - `ArrayBuffer`, `DataView`, `TextDecoder`, `DecompressionStream`. No model data leaves the device.
 
@@ -23,6 +23,7 @@ All parsing runs in the browser via native Web APIs - `ArrayBuffer`, `DataView`,
 | `@wetron/onnx`        | ONNX parser (protobufjs)                                          |
 | `@wetron/tflite`      | TFLite FlatBuffers parser, synchronous                            |
 | `@wetron/keras`       | Keras 3 `.keras` archive parser                                   |
+| `@wetron/gguf`        | GGUF metadata, quantized tensor, and weight parser                |
 | `@wetron/torchscript` | TorchScript Mobile and ZIP-based `.pt` parser                     |
 | `@wetron/executorch`  | ExecuTorch `.pte` FlatBuffers parser                              |
 | `@wetron/savedmodel`  | TF SavedModel `.pb` and Keras metadata `.pb` parser               |
@@ -57,6 +58,7 @@ model file
 | TorchScript ZIP    | ZIP magic + `.pt`/`.ptl` extension               |
 | TorchScript Mobile | `PTMF` at offset 4                               |
 | ExecuTorch         | `ET12` at offset 4                               |
+| GGUF               | `GGUF` at offset 0                               |
 
 ## Demo app
 
