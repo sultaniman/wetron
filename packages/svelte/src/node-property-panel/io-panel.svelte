@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ArrowFatDownIcon, ArrowFatUpIcon } from 'phosphor-svelte';
-  import type { GraphValue } from '@wetron/core/ir';
+  import type { GraphValue } from '@wetron/common/ir';
   import Row from './row.svelte';
   import PanelHeader from './panel-header.svelte';
 

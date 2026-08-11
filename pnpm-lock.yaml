@@ -33,6 +33,9 @@ importers:
       '@playwright/test':
         specifier: ^1.59.1
         version: 1.60.0
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^7.1.2
+        version: 7.3.0(svelte@5.55.10)(vite@8.0.14(@types/node@22.19.19)(esbuild@0.27.7)(tsx@4.22.3))
       '@tanstack/svelte-virtual':
         specifier: ^3.13.24
         version: 3.13.26(svelte@5.55.10)
@@ -182,6 +185,9 @@ importers:
       '@wetron/executorch':
         specifier: workspace:*
         version: link:../executorch
+      '@wetron/gguf':
+        specifier: workspace:*
+        version: link:../gguf
       '@wetron/keras':
         specifier: workspace:*
         version: link:../keras
@@ -215,6 +221,12 @@ importers:
       flatbuffers:
         specifier: ^25.9.23
         version: 25.9.23
+
+  packages/gguf:
+    dependencies:
+      '@wetron/common':
+        specifier: workspace:*
+        version: link:../common
 
   packages/keras:
     dependencies:
@@ -1069,6 +1081,13 @@ packages:
       svelte: ^5.46.4
       vite: ^8.0.0-beta.7 || ^8.0.0
 
+  '@sveltejs/vite-plugin-svelte@7.3.0':
+    resolution: {integrity: sha512-QbRoJyD92e9R0ufeQIWRHrCC0ObcqSv/aBDdrQMoU+sypav3cDx5wytdQ6GLdXjEMO6xjrXGzfkUygng8JMv0A==}
+    engines: {node: ^20.19 || ^22.12 || >=24}
+    peerDependencies:
+      svelte: ^5.46.4
+      vite: ^8.0.0-beta.7 || ^8.0.0
+
   '@tanstack/react-virtual@3.13.26':
     resolution: {integrity: sha512-DosdgjOxCLahkn0o+ilmZYwEjo1glfMGuRT/j3PQ18yr5XqA8N/BCaL9IJ3B5TRl+nnzyK2IOFgAILwzN3a9xQ==}
     peerDependencies:
@@ -1805,6 +1824,9 @@ packages:
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
+
+  magic-string@1.1.0:
+    resolution: {integrity: sha512-kS3VHe0nEPST2saQV4Rbkchcd3UBRkVTQHo1D3h/ZTwFDhai/mfKkmtPAtD129EOI7K3HlHIsFOt0WrI2/oU9g==}
 
   markdown-it-anchor@8.6.7:
     resolution: {integrity: sha512-FlCHFwNnutLgVTflOYHPW2pPcl2AACqVzExlkGQNsi4CJgqOHN7YTgDd4LuhgN1BFO3TS0vLAruV1Td6dwWPJA==}
@@ -2928,6 +2950,15 @@ snapshots:
       vite: 8.0.14(@types/node@22.19.19)(esbuild@0.28.0)(tsx@4.22.3)
       vitefu: 1.1.3(vite@8.0.14(@types/node@22.19.19)(esbuild@0.28.0)(tsx@4.22.3))
 
+  '@sveltejs/vite-plugin-svelte@7.3.0(svelte@5.55.10)(vite@8.0.14(@types/node@22.19.19)(esbuild@0.27.7)(tsx@4.22.3))':
+    dependencies:
+      deepmerge: 4.3.1
+      magic-string: 1.1.0
+      obug: 2.1.1
+      svelte: 5.55.10
+      vite: 8.0.14(@types/node@22.19.19)(esbuild@0.27.7)(tsx@4.22.3)
+      vitefu: 1.1.3(vite@8.0.14(@types/node@22.19.19)(esbuild@0.27.7)(tsx@4.22.3))
+
   '@tanstack/react-virtual@3.13.26(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
       '@tanstack/virtual-core': 3.16.0
@@ -3644,6 +3675,10 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  magic-string@1.1.0:
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.5.5
+
   markdown-it-anchor@8.6.7(@types/markdown-it@14.1.2)(markdown-it@14.2.0):
     dependencies:
       '@types/markdown-it': 14.1.2
@@ -4155,6 +4190,10 @@ snapshots:
       esbuild: 0.28.0
       fsevents: 2.3.3
       tsx: 4.22.3
+
+  vitefu@1.1.3(vite@8.0.14(@types/node@22.19.19)(esbuild@0.27.7)(tsx@4.22.3)):
+    optionalDependencies:
+      vite: 8.0.14(@types/node@22.19.19)(esbuild@0.27.7)(tsx@4.22.3)
 
   vitefu@1.1.3(vite@8.0.14(@types/node@22.19.19)(esbuild@0.28.0)(tsx@4.22.3)):
     optionalDependencies:

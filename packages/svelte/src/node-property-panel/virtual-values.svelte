@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createVirtualizer } from '@tanstack/svelte-virtual';
 
-  type Values = Float64Array | Int32Array | BigInt64Array;
+  type Values = Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array;
 
   let { values, format, align = 'center' }: {
     values: Values;
-    format: (v: number) => string;
+    format: (v: number | bigint) => string;
     align?: 'center' | 'right';
   } = $props();
 
@@ -45,9 +45,7 @@
         {#each Array.from({ length: COLS }, (_, c) => c) as c (c)}
           {@const idx = row.index * COLS + c}
           {#if idx < values.length}
-            {@const raw = values[idx]}
-            {@const num = typeof raw === 'bigint' ? Number(raw) : raw}
-            <span>{format(num)}</span>
+            <span>{format(values[idx])}</span>
           {:else}
             <span></span>
           {/if}

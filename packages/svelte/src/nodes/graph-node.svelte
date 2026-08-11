@@ -59,6 +59,12 @@
           <span class="weight-label">{w.label}</span>
           <span class="weight-name" title={w.name}>{w.name}</span>
           <span class="weight-shape">〈{w.shape.join('×')}〉</span>
+          <span
+            class="weight-dtype"
+            data-weight-dtype-badge={w.dtype}
+            title="Tensor type {w.dtype}"
+            aria-hidden="true"
+          >{w.dtype}</span>
         </div>
       {/each}
       {#if hiddenCount > 0}
@@ -116,6 +122,18 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .weight-dtype {
+    flex-shrink: 0;
+    padding: 1px 3px;
+    border-radius: 3px;
+    background: color-mix(in oklch, var(--node-color) 12%, transparent);
+    color: var(--node-color);
+    font-family: ui-monospace, Menlo, monospace;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
   }
 
   .weight-more {

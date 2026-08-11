@@ -4,4 +4,4 @@ export { default as WeightPanel } from "./node-property-panel/weight-panel.svelt
 export { default as Tooltip } from "./tooltip.svelte";
 export type { PanelTarget } from "./types.ts";
 export type { ColorMode } from "./color-mode-context.ts";
-export type { ExportHelpers } from "./export-helper.svelte";
+export type { ExportHelpers } from "./export-helper.ts";

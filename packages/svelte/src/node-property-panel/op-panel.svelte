@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon } from 'phosphor-svelte';
-  import type { GraphNode } from '@wetron/core/ir';
+  import type { GraphNode } from '@wetron/common/ir';
   import { opCategory } from '@wetron/core';
   import CategoryIcon from '../nodes/category-icon.svelte';
   import Row from './row.svelte';
@@ -24,17 +24,33 @@
     return version != null ? `${displayDomain} v${version}` : displayDomain;
   }
 
+  function formatGgufQuantization(value: GraphNode): string | null {
+    if (!value.opType.startsWith('GGUF')) return null;
+    const fileType = value.attributes['general.file_type_name'];
+    const version = value.attributes['general.quantization_version'];
+    let typeLabel: string | null = null;
+    if (typeof fileType === 'string') {
+      if (fileType.startsWith('MOSTLY_')) typeLabel = `${fileType.slice(7)} (mostly)`;
+      else if (fileType.startsWith('ALL_')) typeLabel = fileType.slice(4);
+      else typeLabel = fileType;
+    }
+    if (typeLabel && typeof version === 'number') return `${typeLabel} · quant v${version}`;
+    if (typeLabel) return typeLabel;
+    return typeof version === 'number' ? `Quantization v${version}` : null;
+  }
+
   const cat = $derived(opCategory(node.opType));
   const color = $derived(`var(--wetron-category-${cat})`);
   const iconBg = $derived(`color-mix(in oklch, var(--wetron-category-${cat}) 12%, transparent)`);
   const module = $derived(formatModule(node.domain, opsets));
+  const quantization = $derived(formatGgufQuantization(node));
   // Preserve slot index so the {#each} key is unique even when a node consumes
   // the same tensor twice (e.g. Add(x, x)).
   const visibleInputs = $derived(node.inputs.map((name, slot) => ({ name, slot })).filter(({ name }) => name !== ''));
   const attrEntries = $derived(Object.entries(node.attributes));
 </script>
 
-<PanelHeader title={node.opType} subtitle={module ?? (node.name || undefined)} extraSubtitle={module ? (node.name || undefined) : undefined} iconBg={iconBg} iconColor={color} {onBack}>
+<PanelHeader title={node.opType} subtitle={module ?? (node.name || undefined)} extraSubtitle={quantization ?? (module ? (node.name || undefined) : undefined)} iconBg={iconBg} iconColor={color} {onBack}>
   {#snippet icon()}<CategoryIcon {cat} op={node.opType} size={15} />{/snippet}
 </PanelHeader>
 {#if visibleInputs.length > 0}

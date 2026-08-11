@@ -3,12 +3,12 @@
   import FitViewHelper from './fit-view-helper.svelte';
   import MinimapNav from './minimap-nav.svelte';
   import ExportHelper from './export-helper.svelte';
-  import type { ExportHelpers } from './export-helper.svelte';
+  import type { ExportHelpers } from './export-helper.ts';
   import '@xyflow/svelte/dist/style.css';
   import { untrack } from 'svelte';
   import { modelGraphToFlow, filterGraph } from '@wetron/core';
   import type { FlowEdge, GraphNodeData } from '@wetron/core/transform';
-  import type { ModelGraph, ParseWarning } from '@wetron/core/ir';
+  import type { ModelGraph, ParseWarning } from '@wetron/common/ir';
   import GraphNodeComponent from './nodes/graph-node.svelte';
   import IoNodeComponent from './nodes/io-node.svelte';
   import ModelEdgeComponent from './edges/model-edge.svelte';
@@ -32,8 +32,9 @@
   }
 
   let { graph, onTargetClick, onWarnings, selectedEdgeTensorName = null, searchQuery = '', colorMode = 'system', exportRef = $bindable<ExportHelpers | null>(null) }: Props = $props();
+  let rootElement = $state<HTMLDivElement | null>(null);
 
-  let navStack = $state<ModelGraph[]>([graph]);
+  let navStack = $state<ModelGraph[]>(untrack(() => [graph]));
   $effect.pre(() => {
     // reset stack whenever a different root graph is provided
     navStack = [graph];
@@ -165,6 +166,7 @@
 </script>
 
 <div
+  bind:this={rootElement}
   class="wetron-graph"
   class:nested={depth > 0}
   data-theme={isDark ? 'dark' : 'light'}
@@ -201,7 +203,7 @@
     <Controls />
     <Background patternColor={isDark ? '#2a2a3a' : '#d0d0d8'} />
     <FitViewHelper nodes={flowNodes} />
-    <ExportHelper bind:ref={exportRef} />
+    <ExportHelper bind:ref={exportRef} root={rootElement} />
   </SvelteFlow>
 </div>
 

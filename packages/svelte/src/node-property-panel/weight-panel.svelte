@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type { ModelGraph, WeightStats } from '@wetron/core';
   import { decodeWeight, computeStats } from '@wetron/core';
   import { formatVal, isIntegerDtype } from '@wetron/core/format-val';
@@ -28,16 +29,18 @@
       float32: 4, float64: 8, float16: 2, bfloat16: 2,
       int8: 1, uint8: 1, int16: 2, uint16: 2,
       int32: 4, uint32: 4, int64: 8, uint64: 8, bool: 1,
+      F32: 4, F16: 2, BF16: 2, I8: 1, I16: 2, I32: 4, I64: 8, F64: 8,
+      Q4_0: 18 / 32,
     };
     return sizes[dtype] ?? 0;
   }
 
-  let showWeights = $state(graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined);
+  let showWeights = $state(untrack(() => graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined));
   let viz = $state<'dist' | 'heat'>('heat');
 
   // Auto-enable on the no-weights -> weights-loaded transition (e.g. checkpoint
   // file dropped after the panel was opened). Don't override a manual toggle.
-  let prevHadWeights = graph.weights !== undefined;
+  let prevHadWeights = untrack(() => graph.weights !== undefined);
   $effect(() => {
     const has = graph.weights !== undefined;
     if (has && !prevHadWeights && graph.fileSizeBytes <= SIZE_THRESHOLD) {
@@ -55,7 +58,7 @@
 
   type Loaded = {
     stats: WeightStats;
-    values: Float64Array | Int32Array | BigInt64Array;
+    values: Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array;
   };
 
   const loaded = $derived.by((): Loaded | null => {
@@ -67,8 +70,8 @@
     const decoded = decodeWeight(bytes, d, s);
     if (!decoded) return null;
 
-    let numericForStats: Float64Array | Int32Array;
-    if (decoded instanceof BigInt64Array) {
+    let numericForStats: Float64Array | Int32Array | Uint32Array;
+    if (decoded instanceof BigInt64Array || decoded instanceof BigUint64Array) {
       const f = new Float64Array(decoded.length);
       for (let i = 0; i < decoded.length; i++) f[i] = Number(decoded[i]);
       numericForStats = f;
@@ -96,29 +99,33 @@
   {/if}
 </div>
 
-<div class="section">
-  <div class="toggleRow">
-    <span>Show weights</span>
-    <button
-      data-testid="show-weights-switch"
-      class="switch {showWeights ? '' : 'switchOff'}"
-      onclick={() => (showWeights = !showWeights)}
-      aria-label="Show weights"
-      disabled={graph.hasExternalWeights && graph.weights === undefined}
-    ></button>
+{#if graph.weights !== undefined || graph.hasExternalWeights}
+  <div class="section">
+    <div class="toggleRow">
+      <span>Show weights</span>
+      <button
+        data-testid="show-weights-switch"
+        class="switch {showWeights ? '' : 'switchOff'}"
+        onclick={() => (showWeights = !showWeights)}
+        aria-label="Show weights"
+        disabled={graph.weights === undefined}
+      ></button>
+    </div>
+    {#if graph.hasExternalWeights && graph.weights === undefined}
+      <div class="sizeNote">
+        <strong>Weights live in an external checkpoint.</strong><br />
+        Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see stats and plots for this tensor.
+      </div>
+    {:else if isLarge && !showWeights}
+      <div class="sizeNote">
+        <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong><br />
+        Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
+      </div>
+    {:else if showWeights && loaded === null}
+      <div class="sizeNote">Value decoding is not available for {dtype || 'this tensor type'}.</div>
+    {/if}
   </div>
-  {#if graph.hasExternalWeights && graph.weights === undefined}
-    <div class="sizeNote">
-      <strong>Weights live in an external checkpoint.</strong><br />
-      Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see stats and plots for this tensor.
-    </div>
-  {:else if isLarge && !showWeights}
-    <div class="sizeNote">
-      <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong><br />
-      Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
-    </div>
-  {/if}
-</div>
+{/if}
 
 {#if loaded}
   <div class="section">
@@ -158,7 +165,7 @@
       </div>
       <VirtualValues
         values={loaded.values}
-        format={(v: number) => formatVal(v, dtype || 'float32')}
+        format={(v: number | bigint) => typeof v === 'bigint' ? v.toString() : formatVal(v, dtype || 'float32')}
         align={isIntegerDtype(dtype || 'float32') ? 'center' : 'right'}
       />
     </div>

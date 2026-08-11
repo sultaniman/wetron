@@ -1,14 +1,14 @@
 <script lang="ts">
-  import type { AttributeValue } from '@wetron/core/ir';
+  import type { AttributeValue } from '@wetron/common/ir';
   import Chip from './chip.svelte';
   import { attrChipLabel, formatAttr, formatAttrBrief } from '@wetron/core/panel-utils';
 
   let { name, value }: { name: string; value: AttributeValue } = $props();
 
   let expanded = $state(false);
-  const full = $derived(formatAttr(value));
   const brief = $derived(formatAttrBrief(value));
-  const needsExpand = $derived(brief !== full);
+  const needsExpand = $derived(Array.isArray(value) ? value.length > 4 : String(value).length > 26);
+  const full = $derived(expanded ? formatAttr(value) : '');
 </script>
 
 <svelte:window onkeydown={(e) => { if (expanded && e.key === 'Escape') expanded = false; }} />

@@ -1,19 +1,13 @@
 <script lang="ts">
   import { useSvelteFlow, getNodesBounds } from '@xyflow/svelte';
-
-  export type ExportHelpers = {
-    fitAll: () => Promise<void>;
-    getViewport: () => { x: number; y: number; zoom: number };
-    setViewport: (vp: { x: number; y: number; zoom: number }) => void;
-    getNodesBounds: () => { x: number; y: number; width: number; height: number };
-    getViewportElement: () => HTMLElement | null;
-  };
+  import type { ExportHelpers } from './export-helper.ts';
 
   interface Props {
     ref?: ExportHelpers | null;
+    root?: HTMLElement | null;
   }
 
-  let { ref = $bindable<ExportHelpers | null>(null) }: Props = $props();
+  let { ref = $bindable<ExportHelpers | null>(null), root = null }: Props = $props();
 
   const { fitView, getViewport, setViewport, getNodes } = useSvelteFlow();
 
@@ -33,7 +27,7 @@
         return getNodesBounds(getNodes());
       },
       getViewportElement() {
-        return document.querySelector<HTMLElement>('.svelte-flow__viewport');
+        return root?.querySelector<HTMLElement>('.svelte-flow__viewport') ?? null;
       },
     };
     return () => { ref = null; };

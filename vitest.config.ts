@@ -1,4 +1,5 @@
 import { defineConfig } from "vitest/config";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 export default defineConfig({
   test: {
@@ -13,7 +14,20 @@ export default defineConfig({
             "**/node_modules/**",
             "**/dist/**",
             "packages/react/test/**",
+            "packages/svelte/test/**",
           ],
+        },
+      },
+      {
+        extends: true,
+        plugins: [svelte()],
+        resolve: { conditions: ["browser"] },
+        ssr: { noExternal: ["@xyflow/svelte"] },
+        test: {
+          name: "svelte",
+          include: ["packages/svelte/test/**/*.test.ts"],
+          exclude: ["**/node_modules/**", "**/dist/**"],
+          environment: "happy-dom",
         },
       },
       {

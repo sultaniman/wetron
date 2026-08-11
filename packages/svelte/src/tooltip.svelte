@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+  import { untrack, type Snippet } from 'svelte';
 
   interface Props {
     text: string;
@@ -11,7 +11,7 @@
 
   let wrapEl = $state<HTMLSpanElement | undefined>(undefined);
   let visible = $state(false);
-  let disabled = $state(onlyIfOverflow);
+  let disabled = $state(untrack(() => onlyIfOverflow));
   let px = $state(0);
   let py = $state(0);
 
@@ -44,6 +44,7 @@
 </script>
 
 <span
+  role="presentation"
   bind:this={wrapEl}
   style="display: contents"
   onmouseenter={show}

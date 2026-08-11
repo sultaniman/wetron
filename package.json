@@ -5,11 +5,14 @@
   "packageManager": "pnpm@10.28.2",
   "scripts": {
     "build": "pnpm run build:core:libs && pnpm run build:parsers && pnpm run build:core:index && pnpm run build:ui",
-    "build:core:libs": "cd packages/core && pnpm exec tsup",
+    "build:core:libs": "(cd packages/common && pnpm exec tsup) && (cd packages/core && pnpm exec tsup)",
     "build:core:index": "cd packages/core && pnpm exec tsup --config tsup.index.config.ts",
-    "build:parsers": "(cd packages/onnx && pnpm exec tsup) && (cd packages/tflite && pnpm exec tsup) && (cd packages/keras && pnpm exec tsup) && (cd packages/executorch && pnpm exec tsup) && (cd packages/torchscript && pnpm exec tsup) && (cd packages/savedmodel && pnpm exec tsup)",
-    "build:ui": "(cd packages/tokens && pnpm exec tsup) && (cd packages/react && pnpm exec vite build)",
-    "test": "vitest run"
+    "build:parsers": "(cd packages/onnx && pnpm exec tsup) && (cd packages/tflite && pnpm exec tsup) && (cd packages/keras && pnpm exec tsup) && (cd packages/executorch && pnpm exec tsup) && (cd packages/torchscript && pnpm exec tsup) && (cd packages/savedmodel && pnpm exec tsup) && (cd packages/gguf && pnpm exec tsup)",
+    "build:ui": "(cd packages/tokens && pnpm exec tsup) && (cd packages/react && pnpm exec vite build) && pnpm run check:svelte",
+    "test": "vitest run",
+    "check:svelte": "vitest run --project svelte",
+    "typecheck": "pnpm run typecheck:ts && pnpm run check:svelte",
+    "typecheck:ts": "pnpm exec tsc --noEmit -p packages/common/tsconfig.json && pnpm exec tsc --noEmit -p packages/onnx/tsconfig.json && pnpm exec tsc --noEmit -p packages/tflite/tsconfig.json && pnpm exec tsc --noEmit -p packages/keras/tsconfig.json && pnpm exec tsc --noEmit -p packages/executorch/tsconfig.json && pnpm exec tsc --noEmit -p packages/torchscript/tsconfig.json && pnpm exec tsc --noEmit -p packages/savedmodel/tsconfig.json && pnpm exec tsc --noEmit -p packages/gguf/tsconfig.json && pnpm exec tsc --noEmit -p packages/core/tsconfig.json && pnpm exec tsc --noEmit -p packages/tokens/tsconfig.json && pnpm exec tsc --noEmit -p packages/react/tsconfig.json && pnpm exec tsc --noEmit -p packages/svelte/tsconfig.json"
   },
   "dependencies": {
     "dagre": "^0.8.5",
@@ -25,6 +28,7 @@
     "@tanstack/svelte-virtual": "^3.13.24",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@types/dagre": "^0.7.54",
     "@types/node": "^22.10.5",
     "@types/react": "^19.2.14",

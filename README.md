@@ -1,6 +1,6 @@
 # wetron
 
-**[wetron.app](https://wetron.app)** - Browser-native inspector for neural network models. Open a model file and explore its computation graph, tensor shapes, and weight statistics - fully in the browser, no upload, no server, no telemetry.
+**[wetron.app](https://wetron.app)** - Browser-native inspector for neural network models and GGUF LLM files. Open a model file and explore its computation graph, metadata, tensor shapes, and weight statistics - fully in the browser, no upload, no server, no telemetry.
 
 ## Why
 
@@ -12,7 +12,7 @@ Wetron is a model inspector that runs entirely client-side as an embeddable libr
 - **Privacy-sensitive ML** - medical, defence, and on-device models can be inspected without leaving the host machine.
 - **FOSS infrastructure** - the `@wetron/*` packages are designed to be embedded by other open-source projects (model registries, dataset cards, scientific notebooks).
 
-Parsing runs on `ArrayBuffer` / `DataView` / `TextDecoder` / `DecompressionStream` - nothing else. Weight bytes are decoded lazily on demand for the property panel; they're never uploaded or persisted.
+Parsing uses browser APIs such as `ArrayBuffer`, `DataView`, `TextDecoder`, and `DecompressionStream`, together with format libraries including protobufjs, flatbuffers, fflate, and h5wasm. Weight bytes are decoded lazily on demand for the property panel; they're never uploaded or persisted.
 
 ## Packages
 
@@ -22,6 +22,7 @@ Parsing runs on `ArrayBuffer` / `DataView` / `TextDecoder` / `DecompressionStrea
 | `@wetron/onnx`        | ONNX parser (protobufjs)                                  |
 | `@wetron/tflite`      | TFLite parser (flatbuffers)                               |
 | `@wetron/keras`       | Keras `.keras` archive parser                             |
+| `@wetron/gguf`        | GGUF metadata, quantized tensor, and weight parser        |
 | `@wetron/torchscript` | TorchScript Mobile and ZIP-based `.pt` parser             |
 | `@wetron/executorch`  | ExecuTorch `.pte` parser (flatbuffers)                    |
 | `@wetron/savedmodel`  | TF SavedModel `.pb` parser + TF2 checkpoint loader        |
@@ -76,7 +77,7 @@ pnpm install
 ### Build
 
 ```sh
-pnpm run build        # all packages (core libs -> parsers -> core index -> react/tokens)
+pnpm run build        # all packages (common/core libs -> parsers -> core index -> React/tokens + Svelte validation)
 ```
 
 ### Test
@@ -103,10 +104,9 @@ cd docs && pnpm install && pnpm run dev   # Hugo site at localhost:1313
 
 - [Guide](docs/content/docs/guide/) - installation, quick start, architecture
 - [API Reference](docs/content/docs/api/) - parseModel, detectFormat, IR types
-- [Formats](docs/content/docs/formats/) - ONNX, TFLite, Keras, TorchScript, ExecuTorch
+- [Formats](docs/content/docs/formats/) - ONNX, TFLite, Keras, GGUF, TorchScript, ExecuTorch
 - [Rendering](docs/content/docs/rendering/) - React, Svelte, theming tokens
 - [Contributing](docs/content/docs/contributing/) - adding a new parser
-- [llms.md](docs/llms.md) - machine-readable summary for LLM context
 
 ## Constraints
 
