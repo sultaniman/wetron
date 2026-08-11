@@ -61,6 +61,7 @@ export default function App() {
       const buf = await file.arrayBuffer();
       const graph = await parseModel(new Uint8Array(buf), file.name);
       setState({ status: "ready", graph, name: file.name });
+      if (graph.nodes[0]?.opType.startsWith("GGUF")) setSelected(graph.nodes[0]);
     } catch (e) {
       setState({
         status: "error",
@@ -87,6 +88,7 @@ export default function App() {
     try {
       const graph = await parseModelFromUrl(url);
       setState({ status: "ready", graph, name });
+      if (graph.nodes[0]?.opType.startsWith("GGUF")) setSelected(graph.nodes[0]);
     } catch (e) {
       setState({
         status: "error",
@@ -231,6 +233,7 @@ export default function App() {
           <span className={css.stats}>
             {state.graph.nodes.length} nodes · {state.graph.inputs.length} inputs ·{" "}
             {state.graph.outputs.length} outputs
+            {state.graph.initializers.size > 0 && ` · ${state.graph.initializers.size} tensors`}
           </span>
         )}
         {ready && (

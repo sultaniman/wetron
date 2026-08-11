@@ -102,6 +102,7 @@
       const buf = await file.arrayBuffer();
       const parsed = await parseModel(new Uint8Array(buf), file.name);
       graph = parsed;
+      if (parsed.nodes[0]?.opType.startsWith('GGUF')) selected = parsed.nodes[0];
       appState = { status: 'ready', name: file.name };
     } catch (e) {
       appState = { status: 'error', message: e instanceof Error ? e.message : String(e), name: file.name };
@@ -225,7 +226,7 @@
     {/if}
     {#if appState.status === 'ready' && graph}
       <span style="color:{chrome.faint};font-size:13px">
-        {graph.nodes.length} nodes · {graph.inputs.length} inputs · {graph.outputs.length} outputs
+        {graph.nodes.length} nodes · {graph.inputs.length} inputs · {graph.outputs.length} outputs{graph.initializers.size > 0 ? ` · ${graph.initializers.size} tensors` : ''}
       </span>
     {/if}
     {#if appState.status === 'ready'}
@@ -271,7 +272,7 @@
     {/if}
     <label style="{appState.status !== 'ready' ? 'margin-left:auto;' : ''}padding:6px 14px;background:#1a73e8;color:#fff;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500">
       Open model
-      <input type="file" accept=".onnx,.tflite,.keras,.pb,.pte,.pt" style="display:none" onchange={onFileChange} />
+      <input type="file" accept=".onnx,.tflite,.keras,.gguf,.pb,.pte,.pt" style="display:none" onchange={onFileChange} />
     </label>
     <button
       onclick={cycleMode}
@@ -303,11 +304,11 @@
           Open a neural network model
         </div>
         <div style="color:{chrome.sub};font-size:13px">
-          Supports .onnx, .tflite, .keras, .pt, .pte and .pb
+          Supports .onnx, .tflite, .keras, .gguf, .pt, .pte and .pb
         </div>
         <label style="margin-top:8px;padding:9px 20px;background:#1a73e8;color:#fff;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;box-shadow:0 1px 2px rgba(26,115,232,0.25)">
           Open model
-          <input type="file" accept=".onnx,.tflite,.keras,.pte,.pt,.pb" style="display:none" onchange={onFileChange} />
+          <input type="file" accept=".onnx,.tflite,.keras,.gguf,.pte,.pt,.pb" style="display:none" onchange={onFileChange} />
         </label>
         <div style="color:{chrome.faint};font-size:12px">or drop a file here</div>
       </div>

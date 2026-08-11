@@ -63,12 +63,12 @@ export function OpenModelDialog({
         <div className={css.body}>
           <section className={css.section}>
             <div className={css.sectionTitle}>From file</div>
-            <div className={css.sectionHint}>.onnx, .tflite, .keras, .pt, .pte, or .pb</div>
+            <div className={css.sectionHint}>.onnx, .tflite, .keras, .gguf, .pt, .pte, or .pb</div>
             <label className={css.fileChooser}>
               <span className={css.fileChooserLabel}>Choose file…</span>
               <input
                 type="file"
-                accept=".onnx,.tflite,.keras,.pte,.pt,.pb"
+                accept=".onnx,.tflite,.keras,.gguf,.pte,.pt,.pb"
                 className={css.hiddenInput}
                 onChange={onFileChange}
               />

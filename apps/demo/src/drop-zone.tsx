@@ -27,7 +27,7 @@ export function DropZone({
     >
       <BrandMark size={64} />
       <div className={css.headline}>Open a neural network model</div>
-      <div className={css.subline}>Supports .onnx, .tflite, .keras, .pt, .pte and .pb</div>
+      <div className={css.subline}>Supports .onnx, .tflite, .keras, .gguf, .pt, .pte and .pb</div>
       <button onClick={onOpen} className={css.openButton}>
         Open model
       </button>
