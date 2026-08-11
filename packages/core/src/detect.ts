@@ -5,9 +5,20 @@ export type Format =
   | "executorch"
   | "torchscript"
   | "savedmodel"
+  | "gguf"
   | "unknown";
 
 export function detectFormat(bytes: Uint8Array, filename?: string): Format {
+  // GGUF
+  if (
+    bytes.length >= 4 &&
+    bytes[0] === 0x47 &&
+    bytes[1] === 0x47 &&
+    bytes[2] === 0x55 &&
+    bytes[3] === 0x46
+  )
+    return "gguf";
+
   if (bytes.length >= 8) {
     // TFL3
     if (bytes[4] === 0x54 && bytes[5] === 0x46 && bytes[6] === 0x4c && bytes[7] === 0x33)
@@ -50,6 +61,7 @@ export function detectFormat(bytes: Uint8Array, filename?: string): Format {
   if (filename?.endsWith(".keras")) return "keras";
   if (filename?.endsWith(".pte")) return "executorch";
   if (filename?.endsWith(".pt") || filename?.endsWith(".ptl")) return "torchscript";
+  if (filename?.endsWith(".gguf")) return "gguf";
 
   return "unknown";
 }

@@ -39,6 +39,14 @@ test("Keras ops map to correct categories", () => {
   expect(opCategory("ConvLSTM2D")).toBe("recurrent");
 });
 
+test("GGUF synthesized stages map to correct categories", () => {
+  expect(opCategory("GGUF v3")).toBe("constant");
+  expect(opCategory("Embedding")).toBe("math");
+  expect(opCategory("Attention")).toBe("attention");
+  expect(opCategory("FeedForward")).toBe("math");
+  expect(opCategory("StateSpace")).toBe("recurrent");
+});
+
 test("aten:: ops strip namespace and overload", () => {
   expect(opCategory("aten::conv2d.default")).toBe("conv");
   expect(opCategory("aten::add.Tensor")).toBe("math");

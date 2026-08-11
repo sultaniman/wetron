@@ -61,6 +61,8 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
   linear: "math",
   qlinearmatmul: "math",
   fullyconnected: "math",
+  embedding: "math",
+  feedforward: "math",
   batchmatmul: "math",
   stablehlodotgeneral: "math",
   dense: "math",
@@ -244,6 +246,9 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
 
   // Constant / creation
   constant: "constant",
+  weights: "constant",
+  "gguf v2": "constant",
+  "gguf v3": "constant",
   constantofshape: "constant",
   const: "constant",
   varhandleop: "constant",
@@ -323,6 +328,8 @@ const CATEGORY_MAP: Record<string, OpCategory> = {
 
   // Recurrent
   lstm: "recurrent",
+  statespace: "recurrent",
+  transformerblock: "recurrent",
   gru: "recurrent",
   rnn: "recurrent",
   unidirectionalsequencelstm: "recurrent",

@@ -18,6 +18,10 @@ test("detects keras by ZIP magic bytes", () => {
   expect(detectFormat(new Uint8Array([0x50, 0x4b, 0x03, 0x04]))).toBe("keras");
 });
 
+test("detects GGUF by magic bytes", () => {
+  expect(detectFormat(new Uint8Array([0x47, 0x47, 0x55, 0x46]))).toBe("gguf");
+});
+
 test("TFLite magic beats .onnx extension", () => {
   const bytes = new Uint8Array(8);
   bytes[4] = 0x54;
