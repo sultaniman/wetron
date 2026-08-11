@@ -21,6 +21,7 @@ const GRAPH: ModelGraph = {
     ["bias", { shape: [64], dtype: "float32" }],
   ]),
   tensorShapes: new Map(),
+  fileSizeBytes: 0,
 };
 
 test("node and edge counts: 2 ops + 2 IO nodes, 3 edges", () => {
@@ -70,6 +71,7 @@ test("same tensor consumed in multiple slots produces one edge, not N", () => {
     nodes: [{ name: "add", opType: "Add", inputs: ["x", "x"], outputs: ["y"], attributes: {} }],
     initializers: new Map(),
     tensorShapes: new Map(),
+    fileSizeBytes: 0,
   };
   const { edges } = modelGraphToFlow(graph);
   // 1 edge from input::x to Add + 1 from Add to output::y.
@@ -91,6 +93,7 @@ test("FlowNode ids are unique when two graph inputs share a name", () => {
     nodes: [{ name: "id", opType: "Identity", inputs: ["x"], outputs: ["y"], attributes: {} }],
     initializers: new Map(),
     tensorShapes: new Map(),
+    fileSizeBytes: 0,
   };
   const { nodes } = modelGraphToFlow(graph);
   const inputIds = nodes.filter((n) => n.data.opType === "Input").map((n) => n.id);

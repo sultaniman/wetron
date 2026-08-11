@@ -43,11 +43,47 @@ describe("decodeWeight", () => {
     expect(out[0]).toBe(42n);
   });
 
+  test("preserves the maximum uint32 value", () => {
+    const bytes = new Uint8Array(4);
+    new DataView(bytes.buffer).setUint32(0, 0xffff_ffff, true);
+    const out = decodeWeight(bytes, "uint32", [1]) as Uint32Array;
+    expect(out).toBeInstanceOf(Uint32Array);
+    expect(out[0]).toBe(0xffff_ffff);
+  });
+
+  test("preserves the maximum uint64 value", () => {
+    const bytes = new Uint8Array(8);
+    new DataView(bytes.buffer).setBigUint64(0, 0xffff_ffff_ffff_ffffn, true);
+    const out = decodeWeight(bytes, "uint64", [1]) as BigUint64Array;
+    expect(out).toBeInstanceOf(BigUint64Array);
+    expect(out[0]).toBe(0xffff_ffff_ffff_ffffn);
+  });
+
   test("decodes float16 (1.0)", () => {
     // half-precision 1.0 = 0x3c00
     const bytes = bytesOf(0x00, 0x3c);
     const out = decodeWeight(bytes, "float16", [1]) as Float64Array;
     expect(out[0]).toBeCloseTo(1.0, 4);
+  });
+
+  test("decodes GGML scalar dtype names", () => {
+    const bytes = bytesOf(0x00, 0x00, 0x80, 0x3f);
+    const out = decodeWeight(bytes, "F32", [1]) as Float64Array;
+    expect(out[0]).toBeCloseTo(1, 6);
+  });
+
+  test("dequantizes a GGML Q4_0 block", () => {
+    const bytes = new Uint8Array(18);
+    new DataView(bytes.buffer).setUint16(0, 0x3c00, true);
+    for (let i = 0; i < 16; i++) bytes[2 + i] = i | ((15 - i) << 4);
+
+    const out = decodeWeight(bytes, "Q4_0", [32]) as Float64Array;
+    expect(Array.from(out.subarray(0, 16))).toEqual([
+      -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7,
+    ]);
+    expect(Array.from(out.subarray(16))).toEqual([
+      7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8,
+    ]);
   });
 
   test("returns null for unsupported dtypes", () => {

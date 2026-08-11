@@ -429,7 +429,11 @@ export async function parseKerasWithWeights(bytes: Uint8Array): Promise<ModelGra
 
   try {
     return await applyWeights(graph, h5Bytes);
-  } catch {
-    return graph;
+  } catch (e) {
+    const warning: ParseWarning = {
+      code: "keras-weight-load-failed",
+      context: `model.weights.h5 could not be loaded: ${e instanceof Error ? e.message : String(e)}`,
+    };
+    return { ...graph, warnings: [...(graph.warnings ?? []), warning] };
   }
 }

@@ -90,3 +90,15 @@ describe("parseModel dispatch", () => {
     });
   }
 });
+
+test("routes GGUF to its parser", async () => {
+  const bytes = new Uint8Array(24);
+  bytes.set([0x47, 0x47, 0x55, 0x46]);
+  const view = new DataView(bytes.buffer);
+  view.setUint32(4, 3, true);
+  view.setBigUint64(8, 0n, true);
+  view.setBigUint64(16, 0n, true);
+
+  const graph = await parseModel(bytes, "empty.gguf");
+  expect(graph.nodes[0].opType).toBe("GGUF v3");
+});

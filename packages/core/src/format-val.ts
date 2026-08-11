@@ -5,7 +5,8 @@ export function isIntegerDtype(dtype: string): boolean {
   return INTEGER_PREFIXES.some((p) => dtype.startsWith(p));
 }
 
-export function formatVal(v: number, dtype: string): string {
+export function formatVal(v: number | bigint, dtype: string): string {
+  if (typeof v === "bigint") return v.toString();
   if (Number.isNaN(v)) return "NaN";
   if (!Number.isFinite(v)) return v > 0 ? "+Inf" : "-Inf";
   if (v === 0) return "0";

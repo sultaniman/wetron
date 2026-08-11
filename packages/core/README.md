@@ -12,7 +12,7 @@ pnpm add @wetron/core
 
 ```ts
 // Detect format from magic bytes - never throws, returns "unknown" on no match
-type Format = "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown";
+type Format = "onnx" | "tflite" | "keras" | "gguf" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // Parse a model file - dispatches to the right parser based on format detection

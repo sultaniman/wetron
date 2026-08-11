@@ -113,9 +113,9 @@ function mockFetch(routes: Record<string, Uint8Array | { status: number }>): voi
     const hit = routes[url];
     if (!hit) return new Response(null, { status: 404 });
     if (hit instanceof Uint8Array) {
-      return new Response(hit.buffer.slice(hit.byteOffset, hit.byteOffset + hit.byteLength), {
-        status: 200,
-      });
+      const body = new ArrayBuffer(hit.byteLength);
+      new Uint8Array(body).set(hit);
+      return new Response(body, { status: 200 });
     }
     return new Response(null, { status: hit.status });
   }) as typeof fetch;

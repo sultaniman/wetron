@@ -30,6 +30,21 @@ test("throws ParseError on garbage, missing config.json, invalid JSON, unsupport
   ).toThrow(ParseError);
 });
 
+test("parseKerasWithWeights warns when model.weights.h5 cannot be loaded", async () => {
+  const graph = await parseKerasWithWeights(
+    makeKerasZip({
+      "config.json": SEQ_CONFIG,
+      "model.weights.h5": "not an HDF5 file",
+    }),
+  );
+
+  expect(graph.nodes.length).toBe(2);
+  expect(graph.weights).toBeUndefined();
+  expect(graph.warnings).toEqual([
+    expect.objectContaining({ code: "keras-weight-load-failed" }),
+  ]);
+});
+
 const SEQ_CONFIG = {
   class_name: "Sequential",
   config: {

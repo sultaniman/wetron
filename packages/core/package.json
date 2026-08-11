@@ -21,8 +21,7 @@
   },
   "files": [
     "README.md",
-    "dist",
-    "llms.md"
+    "dist"
   ],
   "type": "module",
   "sideEffects": false,
@@ -66,6 +65,7 @@
   "dependencies": {
     "@wetron/common": "workspace:*",
     "@wetron/executorch": "workspace:*",
+    "@wetron/gguf": "workspace:*",
     "@wetron/keras": "workspace:*",
     "@wetron/onnx": "workspace:*",
     "@wetron/savedmodel": "workspace:*",

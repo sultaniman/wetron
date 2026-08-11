@@ -30,9 +30,9 @@ function mockFetch(routes: Record<string, Uint8Array | { status: number }>): voi
     const hit = routes[url];
     if (!hit) return new Response(null, { status: 404 });
     if (hit instanceof Uint8Array) {
-      return new Response(hit.buffer.slice(hit.byteOffset, hit.byteOffset + hit.byteLength), {
-        status: 200,
-      });
+      const body = new ArrayBuffer(hit.byteLength);
+      new Uint8Array(body).set(hit);
+      return new Response(body, { status: 200 });
     }
     return new Response(null, { status: hit.status });
   }) as typeof fetch;
@@ -121,6 +121,51 @@ describe("loadOnnxExternalWeightsFromUrl", () => {
       },
     ]);
     mockFetch({ "https://x/missing.bin": { status: 404 } });
+    await expect(loadOnnxExternalWeightsFromUrl(modelBytes, "https://x")).rejects.toBeInstanceOf(
+      ParseError,
+    );
+  });
+
+  test.each([
+    ["negative", "-1"],
+    ["fractional", "1.5"],
+    ["non-finite", "Infinity"],
+    ["unsafe", "9007199254740992"],
+  ])("rejects %s external offsets", async (_label, offset) => {
+    const modelBytes = buildModelBytes([
+      {
+        name: "w",
+        dataType: 1,
+        dims: [1],
+        dataLocation: 1,
+        externalData: [
+          { key: "location", value: "weights.bin" },
+          { key: "offset", value: offset },
+          { key: "length", value: "4" },
+        ],
+      },
+    ]);
+
+    await expect(loadOnnxExternalWeightsFromUrl(modelBytes, "https://x")).rejects.toBeInstanceOf(
+      ParseError,
+    );
+  });
+
+  test("rejects a negative implicit length when offset exceeds the file", async () => {
+    const modelBytes = buildModelBytes([
+      {
+        name: "w",
+        dataType: 1,
+        dims: [1],
+        dataLocation: 1,
+        externalData: [
+          { key: "location", value: "weights.bin" },
+          { key: "offset", value: "8" },
+        ],
+      },
+    ]);
+    mockFetch({ "https://x/weights.bin": new Uint8Array(4) });
+
     await expect(loadOnnxExternalWeightsFromUrl(modelBytes, "https://x")).rejects.toBeInstanceOf(
       ParseError,
     );

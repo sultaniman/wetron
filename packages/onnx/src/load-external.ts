@@ -12,6 +12,17 @@ interface ExternalRef {
   readonly length: number;
 }
 
+function externalLength(ref: ExternalRef, bufferBytes: number): number {
+  const length = ref.length > 0 ? ref.length : bufferBytes - ref.offset;
+  if (!Number.isSafeInteger(length) || length < 0 || ref.offset + length > bufferBytes) {
+    throw new ParseError(
+      "onnx",
+      `external slice [${ref.offset}, ${ref.offset + length}) exceeds "${ref.location}" buffer (${bufferBytes} bytes)`,
+    );
+  }
+  return length;
+}
+
 function isExternalLocation(loc: unknown): boolean {
   return loc === 1 || loc === "EXTERNAL";
 }
@@ -25,6 +36,16 @@ function readEntries(entries: unknown): Map<string, string> {
     if (key) out.set(key, value);
   }
   return out;
+}
+
+function parseRangeValue(entries: Map<string, string>, key: "offset" | "length"): number {
+  const raw = entries.get(key);
+  if (raw === undefined) return 0;
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new ParseError("onnx", `external data ${key} must be a non-negative safe integer`);
+  }
+  return value;
 }
 
 function collectExternalRefs(decoded: Record<string, unknown>): Map<string, ExternalRef> {
@@ -45,8 +66,8 @@ function collectExternalRefs(decoded: Record<string, unknown>): Map<string, Exte
     if (!location) continue;
     refs.set(name, {
       location,
-      offset: Number(entries.get("offset") ?? 0),
-      length: Number(entries.get("length") ?? 0),
+      offset: parseRangeValue(entries, "offset"),
+      length: parseRangeValue(entries, "length"),
     });
   }
   return refs;
@@ -98,8 +119,8 @@ export async function loadOnnxExternalWeightsFromUrl(
   let totalBytes = 0;
   for (const ref of refs.values()) {
     const buf = fileBuffers.get(ref.location);
-    const length = ref.length > 0 ? ref.length : (buf?.byteLength ?? 0) - ref.offset;
-    totalBytes += Math.max(0, length);
+    if (!buf) continue;
+    totalBytes += externalLength(ref, buf.byteLength);
   }
 
   return {
@@ -111,13 +132,7 @@ export async function loadOnnxExternalWeightsFromUrl(
       const buf = fileBuffers.get(ref.location);
       if (!buf) return undefined;
 
-      const length = ref.length > 0 ? ref.length : buf.byteLength - ref.offset;
-      if (ref.offset + length > buf.byteLength) {
-        throw new ParseError(
-          "onnx",
-          `external slice [${ref.offset}, ${ref.offset + length}) exceeds "${ref.location}" buffer (${buf.byteLength} bytes)`,
-        );
-      }
+      const length = externalLength(ref, buf.byteLength);
       return new Uint8Array(buf, ref.offset, length);
     },
   };

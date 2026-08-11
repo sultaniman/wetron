@@ -6,6 +6,7 @@ export type { Format } from "./detect.ts";
 export { modelGraphToFlow } from "./transform.ts";
 export type { FlowNode, FlowEdge, GraphNodeData, LayoutDirection } from "./transform.ts";
 export { decodeWeight, decodeFirstN } from "./weight-decoder.ts";
+export type { DecodedWeight } from "./weight-decoder.ts";
 export { computeStats } from "./weight-stats.ts";
 export type { WeightStats } from "./weight-stats.ts";
 
@@ -26,6 +27,7 @@ export { parseKeras, parseKerasWithWeights, buildKerasGraph } from "@wetron/kera
 export type { KerasModelConfig } from "@wetron/keras";
 export { parseExecutorch } from "@wetron/executorch";
 export { parseTorchscript } from "@wetron/torchscript";
+export { parseGguf } from "@wetron/gguf";
 export {
   parseSavedModel,
   loadSavedModelWeights,
@@ -48,6 +50,7 @@ import { parseKerasWithWeights } from "@wetron/keras";
 import { parseExecutorch } from "@wetron/executorch";
 import { parseTorchscript } from "@wetron/torchscript";
 import { parseSavedModel } from "@wetron/savedmodel";
+import { parseGguf } from "@wetron/gguf";
 
 export function filterGraph(graph: ModelGraph, query: string): ReadonlySet<string> {
   const q = query.trim().toLowerCase();
@@ -70,6 +73,7 @@ export async function parseModel(bytes: Uint8Array, filename?: string): Promise<
   if (format === "executorch") return parseExecutorch(bytes);
   if (format === "torchscript") return parseTorchscript(bytes);
   if (format === "savedmodel") return parseSavedModel(bytes);
+  if (format === "gguf") return parseGguf(bytes);
   throw new ParseError("unknown", `Cannot detect format${filename ? ` for "${filename}"` : ""}`);
 }
 

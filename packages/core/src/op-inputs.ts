@@ -1,4 +1,10 @@
 const OP_INPUT_LABELS: Record<string, readonly string[]> = {
+  // GGUF synthesized architecture stages
+  Embedding: ["input", "W", "position"],
+  Attention: ["input", "Q", "K", "V", "O", "norm"],
+  FeedForward: ["input", "gate", "down", "up", "norm"],
+  Output: ["input", "norm", "W"],
+
   // Core weighted ops
   Conv: ["X", "W", "B"],
   ConvTranspose: ["X", "W", "B"],

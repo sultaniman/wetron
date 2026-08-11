@@ -24,7 +24,7 @@ const HEAT_COLS = 16;
 const HEAT_ROWS = 8;
 const HEAT_CELLS = HEAT_COLS * HEAT_ROWS;
 
-export function computeStats(values: Float64Array | Int32Array): WeightStats {
+export function computeStats(values: Float64Array | Int32Array | Uint32Array): WeightStats {
   const n = values.length;
   if (n === 0) {
     return {
