@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useMemo, forwardRef } from "react";
+import { useEffect, useImperativeHandle, useMemo, useRef, forwardRef } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -82,6 +82,7 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
 ) {
   const isDark = useColorMode() === "dark";
   const rf = useReactFlow();
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const nav = useNavStack(graph);
   const { currentGraph, depth, scopeName, navigateInto, navigateBack } = nav;
@@ -133,7 +134,7 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
         return getNodesBounds(rf.getNodes());
       },
       getViewportElement() {
-        return document.querySelector<HTMLElement>(".react-flow__viewport");
+        return rootRef.current?.querySelector<HTMLElement>(".react-flow__viewport") ?? null;
       },
       navigateInto,
       navigateBack,
@@ -144,6 +145,7 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
   return (
     <SubGraphNavContext.Provider value={navContextValue}>
       <div
+        ref={rootRef}
         className={`wetron-root${depth > 0 ? " wetron-root--nested" : ""}`}
         data-theme={isDark ? "dark" : "light"}
         data-depth={depth}

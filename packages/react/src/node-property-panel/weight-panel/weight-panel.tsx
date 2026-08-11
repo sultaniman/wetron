@@ -35,13 +35,22 @@ function elementSize(dtype: string): number {
     int64: 8,
     uint64: 8,
     bool: 1,
+    F32: 4,
+    F16: 2,
+    BF16: 2,
+    I8: 1,
+    I16: 2,
+    I32: 4,
+    I64: 8,
+    F64: 8,
+    Q4_0: 18 / 32,
   };
   return sizes[dtype] ?? 0;
 }
 
 interface Loaded {
   stats: WeightStats;
-  values: Float64Array | Int32Array | BigInt64Array;
+  values: Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array;
 }
 
 export function WeightPanel({
@@ -84,8 +93,8 @@ export function WeightPanel({
     if (!decoded) return null;
 
     // Stats need a numeric typed array; coerce BigInt to f64 once.
-    let numericForStats: Float64Array | Int32Array;
-    if (decoded instanceof BigInt64Array) {
+    let numericForStats: Float64Array | Int32Array | Uint32Array;
+    if (decoded instanceof BigInt64Array || decoded instanceof BigUint64Array) {
       const f = new Float64Array(decoded.length);
       for (let i = 0; i < decoded.length; i++) f[i] = Number(decoded[i]);
       numericForStats = f;
@@ -138,33 +147,40 @@ export function WeightPanel({
         )}
       </div>
 
-      <div className={propertyPanelCss.section}>
-        <div className={weightPanelCss.toggleRow}>
-          <span>Show weights</span>
-          <button
-            data-testid="show-weights-switch"
-            className={`${weightPanelCss.switch}${showWeights ? "" : ` ${weightPanelCss.switchOff}`}`}
-            onClick={() => setShowWeights((v) => !v)}
-            aria-label="Show weights"
-            disabled={graph.hasExternalWeights && graph.weights === undefined}
-          />
+      {(graph.weights !== undefined || graph.hasExternalWeights) && (
+        <div className={propertyPanelCss.section}>
+          <div className={weightPanelCss.toggleRow}>
+            <span>Show weights</span>
+            <button
+              data-testid="show-weights-switch"
+              className={`${weightPanelCss.switch}${showWeights ? "" : ` ${weightPanelCss.switchOff}`}`}
+              onClick={() => setShowWeights((v) => !v)}
+              aria-label="Show weights"
+              disabled={graph.weights === undefined}
+            />
+          </div>
+          {graph.hasExternalWeights && graph.weights === undefined && (
+            <div className={weightPanelCss.sizeNote}>
+              <strong>Weights live in an external checkpoint.</strong>
+              <br />
+              Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see
+              stats and plots for this tensor.
+            </div>
+          )}
+          {isLarge && !showWeights && graph.weights !== undefined && (
+            <div className={weightPanelCss.sizeNote}>
+              <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong>
+              <br />
+              Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
+            </div>
+          )}
+          {showWeights && graph.weights !== undefined && loaded === null && (
+            <div className={weightPanelCss.sizeNote}>
+              Value decoding is not available for {dtype || "this tensor type"}.
+            </div>
+          )}
         </div>
-        {graph.hasExternalWeights && graph.weights === undefined && (
-          <div className={weightPanelCss.sizeNote}>
-            <strong>Weights live in an external checkpoint.</strong>
-            <br />
-            Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see
-            stats and plots for this tensor.
-          </div>
-        )}
-        {isLarge && !showWeights && !(graph.hasExternalWeights && graph.weights === undefined) && (
-          <div className={weightPanelCss.sizeNote}>
-            <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong>
-            <br />
-            Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
-          </div>
-        )}
-      </div>
+      )}
 
       {loaded && (
         <Tabs.Root value={viz} onValueChange={(v) => setViz(v as "dist" | "heat")}>
@@ -237,7 +253,9 @@ export function WeightPanel({
           <VirtualValues
             data-testid="values-grid"
             values={loaded.values}
-            format={(v) => formatVal(v, dtype || "float32")}
+            format={(v) =>
+              typeof v === "bigint" ? v.toString() : formatVal(v, dtype || "float32")
+            }
             align={isIntegerDtype(dtype || "float32") ? "center" : "right"}
           />
         </div>

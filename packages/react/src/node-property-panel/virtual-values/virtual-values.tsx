@@ -7,7 +7,7 @@ import virtualValuesCss from "./virtual-values.module.css";
 const ROW_HEIGHT = 16;
 const COLS = 5;
 
-type Values = Float64Array | Int32Array | BigInt64Array;
+type Values = Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array;
 
 export function VirtualValues({
   values,
@@ -16,7 +16,7 @@ export function VirtualValues({
   "data-testid": testId,
 }: {
   values: Values;
-  format: (v: number) => string;
+  format: (v: number | bigint) => string;
   align?: "center" | "right";
   "data-testid"?: string;
 }) {
@@ -50,9 +50,7 @@ export function VirtualValues({
                 {Array.from({ length: COLS }, (_, c) => {
                   const idx = row.index * COLS + c;
                   if (idx >= values.length) return <span key={c} />;
-                  const raw = values[idx];
-                  const num = typeof raw === "bigint" ? Number(raw) : raw;
-                  return <span key={c}>{format(num)}</span>;
+                  return <span key={c}>{format(values[idx])}</span>;
                 })}
               </div>
             ))}

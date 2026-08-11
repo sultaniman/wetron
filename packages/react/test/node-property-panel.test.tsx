@@ -30,6 +30,22 @@ describe("op panel", () => {
     const { container } = render(React.createElement(NodePropertyPanel, { target: null }));
     expect(container.firstChild).toBeNull();
   });
+
+  test("shows the GGUF model-level quantization summary", async () => {
+    const ggufNode: GraphNode = {
+      name: "llama",
+      opType: "GGUF v3",
+      inputs: [],
+      outputs: ["output"],
+      attributes: {
+        "general.file_type_name": "MOSTLY_Q4_0",
+        "general.quantization_version": 2,
+      },
+    };
+    render(React.createElement(NodePropertyPanel, { target: ggufNode }));
+    await act(async () => {});
+    expect(screen.getByText("Q4_0 (mostly) · quant v2")).toBeDefined();
+  });
 });
 
 describe("IO panel", () => {

@@ -20,8 +20,7 @@
   },
   "files": [
     "README.md",
-    "dist",
-    "llms.md"
+    "dist"
   ],
   "type": "module",
   "sideEffects": [

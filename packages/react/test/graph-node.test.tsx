@@ -43,8 +43,8 @@ test("unknown op renders unknown icon", () => {
   expect(container.querySelector('[data-icon="unknown"]')).toBeDefined();
 });
 
-test("weight rows render label and shape when weightInputs provided", () => {
-  renderNode("Conv", {
+test("weight rows render label, shape, and tensor type when weightInputs provided", () => {
+  const { container } = renderNode("Conv", {
     weightInputs: [
       { slot: 1, label: "W", name: "weight", shape: [64, 3, 3, 3], dtype: "float32" },
       { slot: 2, label: "B", name: "bias", shape: [64], dtype: "float32" },
@@ -52,11 +52,12 @@ test("weight rows render label and shape when weightInputs provided", () => {
   });
   expect(screen.getByText("W")).toBeDefined();
   expect(screen.getByText("〈64×3×3×3〉")).toBeDefined();
+  expect(container.querySelectorAll('[data-weight-dtype-badge="float32"]')).toHaveLength(2);
 });
 
 test("color prop uses CSS category var not hex", () => {
   const { container } = renderNode("Conv");
-  const card = container.querySelector('[data-nodetype="graphNode"]')!;
+  const card = container.querySelector<HTMLElement>('[data-nodetype="graphNode"]')!;
   expect(card.style.getPropertyValue("--node-color")).toBe("var(--wetron-category-conv)");
 });
 

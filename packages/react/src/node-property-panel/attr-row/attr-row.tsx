@@ -7,9 +7,9 @@ import attrRowCss from "./attr-row.module.css";
 
 export function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
   const [expanded, setExpanded] = useState(false);
-  const full = formatAttr(value);
   const brief = formatAttrBrief(value);
-  const needsExpand = brief !== full;
+  const needsExpand = Array.isArray(value) ? value.length > 4 : String(value).length > 26;
+  const full = expanded ? formatAttr(value) : null;
 
   return (
     <div className={attrRowCss.attrRow}>
@@ -31,7 +31,7 @@ export function AttrRow({ name, value }: { name: string; value: AttributeValue }
         )}
         <Chip label={attrChipLabel(value)} />
       </div>
-      {expanded && <pre className={attrRowCss.valueExpanded}>{full}</pre>}
+      {expanded && full !== null && <pre className={attrRowCss.valueExpanded}>{full}</pre>}
     </div>
   );
 }

@@ -29,7 +29,7 @@ describe("VirtualValues", () => {
     render(
       React.createElement(VirtualValues, {
         values,
-        format: (v: number) => v.toFixed(0),
+        format: (v: number | bigint) => Number(v).toFixed(0),
       }),
     );
     await act(async () => {});
@@ -42,7 +42,7 @@ describe("VirtualValues", () => {
     render(
       React.createElement(VirtualValues, {
         values,
-        format: (v: number) => v.toFixed(0),
+        format: (v: number | bigint) => Number(v).toFixed(0),
       }),
     );
     await act(async () => {});
@@ -50,12 +50,24 @@ describe("VirtualValues", () => {
     expect(screen.getByText("40")).toBeDefined();
   });
 
+  test("formats BigUint64Array values without losing precision", async () => {
+    const values = new BigUint64Array([18_446_744_073_709_551_615n]);
+    render(
+      React.createElement(VirtualValues, {
+        values,
+        format: (v: number | bigint) => v.toString(),
+      }),
+    );
+    await act(async () => {});
+    expect(screen.getByText("18446744073709551615")).toBeDefined();
+  });
+
   test("forwards data-testid to the scroll viewport", async () => {
     const values = new Float64Array([1, 2]);
     render(
       React.createElement(VirtualValues, {
         values,
-        format: (v: number) => v.toFixed(0),
+        format: (v: number | bigint) => Number(v).toFixed(0),
         "data-testid": "values-grid",
       } as Parameters<typeof VirtualValues>[0]),
     );

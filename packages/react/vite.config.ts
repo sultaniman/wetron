@@ -30,6 +30,7 @@ export default defineConfig({
         "@base-ui/react/tooltip",
         "@base-ui/react/collapsible",
         "@base-ui/react/scroll-area",
+        "@base-ui/react/tabs",
         "@wetron/common",
         "@wetron/common/ir",
         "@wetron/core",

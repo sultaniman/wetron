@@ -129,6 +129,18 @@
   white-space: nowrap;
 }
 
+.weightDtype {
+  flex-shrink: 0;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: color-mix(in oklch, var(--node-color) 12%, transparent);
+  color: var(--node-color);
+  font-family: ui-monospace, Menlo, monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
 .weightMore {
   font-size: 10px;
   color: var(--node-color);

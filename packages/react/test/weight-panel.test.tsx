@@ -102,6 +102,52 @@ describe("WeightPanel small model", () => {
   });
 });
 
+test("hides raw-value controls when the parser only exposes tensor metadata", () => {
+  const graph: ModelGraph = {
+    name: "gguf",
+    inputs: [],
+    outputs: [],
+    nodes: [],
+    initializers: new Map([["w", { shape: [64, 512], dtype: "Q4_0" }]]),
+    tensorShapes: new Map([["w", { shape: [64, 512], dtype: "Q4_0" }]]),
+    fileSizeBytes: 1024,
+  };
+
+  render(
+    React.createElement(WeightPanel, {
+      target: { name: "w", shape: [64, 512], dtype: "Q4_0" },
+      graph,
+    }),
+  );
+
+  expect(screen.getByText("[64 × 512]")).toBeDefined();
+  expect(screen.getByText("Q4_0")).toBeDefined();
+  expect(screen.queryByTestId("show-weights-switch")).toBeNull();
+  expect(screen.queryByText(/Raw tensor values/)).toBeNull();
+});
+
+test("explains when encoded weights use an unsupported dtype", () => {
+  const graph: ModelGraph = {
+    name: "gguf",
+    inputs: [],
+    outputs: [],
+    nodes: [],
+    initializers: new Map([["w", { shape: [256], dtype: "Q4_K" }]]),
+    tensorShapes: new Map([["w", { shape: [256], dtype: "Q4_K" }]]),
+    fileSizeBytes: 1024,
+    weights: { totalBytes: 144, get: () => new Uint8Array(144) },
+  };
+
+  render(
+    React.createElement(WeightPanel, {
+      target: { name: "w", shape: [256], dtype: "Q4_K" },
+      graph,
+    }),
+  );
+
+  expect(screen.getByText("Value decoding is not available for Q4_K.")).toBeDefined();
+});
+
 function largeGraph(): ModelGraph {
   const buf = new ArrayBuffer(16);
   const view = new DataView(buf);

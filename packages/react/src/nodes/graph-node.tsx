@@ -50,6 +50,14 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
                 {w.name}
               </span>
               <span className={css.weightShape}>〈{w.shape.join("×")}〉</span>
+              <span
+                className={css.weightDtype}
+                data-weight-dtype-badge={w.dtype}
+                title={`Tensor type ${w.dtype}`}
+                aria-hidden="true"
+              >
+                {w.dtype}
+              </span>
             </div>
           ))
         : null}

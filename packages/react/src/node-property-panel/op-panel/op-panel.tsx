@@ -24,6 +24,27 @@ function formatModule(
   return version != null ? `${displayDomain} v${version}` : displayDomain;
 }
 
+function formatGgufQuantization(node: GraphNode): string | null {
+  if (!node.opType.startsWith("GGUF")) return null;
+  const fileType = node.attributes["general.file_type_name"];
+  const version = node.attributes["general.quantization_version"];
+
+  let typeLabel: string | null = null;
+  if (typeof fileType === "string") {
+    if (fileType.startsWith("MOSTLY_")) typeLabel = `${fileType.slice(7)} (mostly)`;
+    else if (fileType.startsWith("ALL_")) typeLabel = fileType.slice(4);
+    else typeLabel = fileType;
+  }
+
+  if (typeLabel && typeof version === "number") {
+    return `${typeLabel} · quant v${version}`;
+  }
+
+  if (typeLabel) return typeLabel;
+
+  return typeof version === "number" ? `Quantization v${version}` : null;
+}
+
 export function OpPanel({
   node,
   inputSources,
@@ -50,6 +71,7 @@ export function OpPanel({
     .filter(({ name }) => name !== "");
   const attrEntries = Object.entries(node.attributes);
   const module = formatModule(node.domain, opsets);
+  const quantization = formatGgufQuantization(node);
   return (
     <>
       <div className={propertyPanelCss.header}>
@@ -72,6 +94,11 @@ export function OpPanel({
           {node.name && (
             <Tooltip text={node.name} onlyIfOverflow>
               <div className={propertyPanelCss.nodeSubtitle}>{node.name}</div>
+            </Tooltip>
+          )}
+          {quantization && (
+            <Tooltip text={quantization} onlyIfOverflow>
+              <div className={propertyPanelCss.nodeSubtitle}>{quantization}</div>
             </Tooltip>
           )}
         </div>
