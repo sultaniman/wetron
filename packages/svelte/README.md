@@ -25,8 +25,43 @@ pnpm add @wetron/svelte
 </script>
 
 <ModelGraphView {graph} onTargetClick={(t) => (target = t)} />
-<NodePropertyPanel {target} onClose={() => (target = null)} />
+<NodePropertyPanel {target} {graph} onClose={() => (target = null)} />
 ```
+
+Passing `graph` routes initializer tensors to the default heatmap, distribution histogram, and virtualized values grid. Models larger than 20 MiB remain deferred until the user enables `Show weights` for the selected tensor.
+
+### Custom weight inspectors
+
+Create an inspector component that reads the nearest `WeightPanel` context:
+
+```svelte
+<!-- TensorCount.svelte -->
+<script lang="ts">
+  import { getWeightInspection } from "@wetron/svelte";
+
+  const context = getWeightInspection();
+  const inspection = $derived(context.current);
+</script>
+
+<div>
+  {inspection.tensor.name}:
+  {inspection.status === "ready" ? `${inspection.values.length} values` : inspection.status}
+</div>
+```
+
+Pass it through the `weightInspector` snippet:
+
+```svelte
+<NodePropertyPanel {target} {graph}>
+  {#snippet weightInspector()}
+    <TensorCount />
+  {/snippet}
+</NodePropertyPanel>
+```
+
+`getWeightInspection()` reads the nearest `WeightPanel` and throws outside one. Its `current` getter stays reactive as loading state changes. Deferred, external, and unavailable inspections expose `bytes`, `values`, and `stats` as `null`; unsupported inspections expose bytes only. The panel's `Show weights` switch controls the deferred gate.
+
+Custom inspector selectors should mount only their active inspector when analysis is expensive. Changing tensors remounts the inspector subtree and resets its local state.
 
 ## API
 
@@ -61,6 +96,7 @@ type ExportHelpers = {
 ```svelte
 <NodePropertyPanel
   target={PanelTarget | null}
+  graph={ModelGraph}
   colorMode={"light" | "dark" | "system"}
   opsets={ReadonlyMap<string, number>}
   inputSources={ReadonlyMap<string, string>}
@@ -68,7 +104,9 @@ type ExportHelpers = {
   onTensorClick={(name: string) => void}
   onBack={() => void}
   onClose={() => void}
-/>
+>
+  {#snippet weightInspector()}{/* custom inspector */}{/snippet}
+</NodePropertyPanel>
 ```
 
 ### PanelTarget

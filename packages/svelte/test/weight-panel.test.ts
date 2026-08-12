@@ -1,7 +1,16 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { mount, tick, unmount } from "svelte";
 import type { ModelGraph } from "@wetron/common/ir";
-import { NodePropertyPanel, type ExportHelpers } from "../src/index.ts";
+import {
+  DefaultWeightInspectors,
+  NodePropertyPanel,
+  VirtualValues,
+  WeightHeatmap,
+  WeightHistogram,
+  getWeightInspection,
+  type ExportHelpers,
+  type WeightInspectionContextValue,
+} from "../src/index.ts";
 
 const mounted: Array<ReturnType<typeof mount>> = [];
 
@@ -36,6 +45,13 @@ describe("Svelte package surface", () => {
       getViewportElement: () => null,
     };
     expect(handle.getViewportElement()).toBeNull();
+    const contextType: WeightInspectionContextValue | null = null;
+    expect(contextType).toBeNull();
+    expect(getWeightInspection).toBeTypeOf("function");
+    expect(DefaultWeightInspectors).toBeDefined();
+    expect(WeightHistogram).toBeDefined();
+    expect(WeightHeatmap).toBeDefined();
+    expect(VirtualValues).toBeDefined();
   });
 
   test("routes initializers to the weight panel", async () => {

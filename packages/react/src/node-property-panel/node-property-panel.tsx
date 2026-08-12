@@ -1,4 +1,5 @@
 import { ScrollArea } from "@base-ui/react/scroll-area";
+import type { ReactNode } from "react";
 import type { GraphNode, ModelGraph, PanelTarget } from "@wetron/common/ir";
 import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";
 import { OpPanel } from "./op-panel/op-panel.tsx";
@@ -42,6 +43,7 @@ export function NodePropertyPanel({
   inputSources,
   tensorShapes,
   opsets,
+  weightInspector,
 }: {
   target: PanelTarget | null;
   graph?: ModelGraph;
@@ -54,6 +56,7 @@ export function NodePropertyPanel({
   inputSources?: ReadonlyMap<string, string>;
   tensorShapes?: ReadonlyMap<string, TensorInfo>;
   opsets?: ReadonlyMap<string, number>;
+  weightInspector?: ReactNode;
 }) {
   const theme = useResolvedColorMode(colorMode ?? "system");
   const isDark = theme === "dark";
@@ -87,7 +90,9 @@ export function NodePropertyPanel({
                     graph={graph}
                     onBack={onBack}
                     isDark={isDark}
-                  />
+                  >
+                    {weightInspector}
+                  </WeightPanel>
                 ) : (
                   <TensorPanel tensor={target.tensor} onBack={onBack} />
                 )

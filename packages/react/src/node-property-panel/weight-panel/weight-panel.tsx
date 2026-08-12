@@ -1,13 +1,11 @@
-import { JSX, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ModelGraph } from "@wetron/common/ir";
-import { decodeWeight, computeStats } from "@wetron/core";
-import type { WeightStats } from "@wetron/core";
-import { Tabs } from "@base-ui/react/tabs";
+import { computeStats, decodeWeight, type WeightInspectionData } from "@wetron/core";
+import { formatVal } from "@wetron/core/format-val";
 import { BackButton } from "../panel-ui.tsx";
 import { Tooltip } from "../../tooltip.tsx";
-import { formatVal, isIntegerDtype } from "@wetron/core/format-val";
-import { VirtualValues } from "../virtual-values/virtual-values.tsx";
-import { WeightHistogram, WeightHeatmap } from "../weight-viz/weight-viz.tsx";
+import { DefaultWeightInspectors } from "../default-weight-inspectors.tsx";
+import { WeightInspectionProvider } from "../weight-inspection-context.tsx";
 import propertyPanelCss from "../node-property-panel.module.css";
 import weightPanelCss from "./weight-panel.module.css";
 
@@ -48,9 +46,44 @@ function elementSize(dtype: string): number {
   return sizes[dtype] ?? 0;
 }
 
-interface Loaded {
-  stats: WeightStats;
-  values: Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array;
+type WeightTarget = {
+  readonly name: string;
+  readonly shape: readonly number[] | null;
+  readonly dtype: string | null;
+};
+
+function useWeightInspectionData(
+  target: WeightTarget,
+  graph: ModelGraph,
+  showWeights: boolean,
+): WeightInspectionData {
+  return useMemo((): WeightInspectionData => {
+    const empty = (status: "deferred" | "external" | "unavailable"): WeightInspectionData => ({
+      status,
+      tensor: target,
+      bytes: null,
+      values: null,
+      stats: null,
+    });
+    if (!graph.weights) return empty(graph.hasExternalWeights ? "external" : "unavailable");
+    if (!showWeights) return empty("deferred");
+
+    const bytes = graph.weights.get(target.name);
+    if (!bytes) return empty("unavailable");
+    const dtype = target.dtype ?? "float32";
+    const shape = target.shape ?? [bytes.byteLength / (elementSize(dtype) || 1)];
+    const values = decodeWeight(bytes, dtype, shape);
+    if (!values) return { status: "unsupported", tensor: target, bytes, values: null, stats: null };
+
+    let numeric: Float64Array | Int32Array | Uint32Array;
+    if (values instanceof BigInt64Array || values instanceof BigUint64Array) {
+      numeric = new Float64Array(values.length);
+      for (let i = 0; i < values.length; i++) numeric[i] = Number(values[i]);
+    } else {
+      numeric = values;
+    }
+    return { status: "ready", tensor: target, bytes, values, stats: computeStats(numeric) };
+  }, [graph.hasExternalWeights, graph.weights, showWeights, target]);
 }
 
 export function WeightPanel({
@@ -58,58 +91,42 @@ export function WeightPanel({
   graph,
   onBack,
   isDark = false,
+  children,
 }: {
-  target: { name: string; shape: readonly number[] | null; dtype: string | null };
+  target: WeightTarget;
   graph: ModelGraph;
   onBack?: () => void;
   isDark?: boolean;
-}): JSX.Element {
-  const [showWeights, setShowWeights] = useState(
-    graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined,
-  );
-  const [viz, setViz] = useState<"dist" | "heat">("heat");
+  children?: ReactNode;
+}) {
+  const defaultShowWeights = graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined;
+  const [storedShowWeights, setStoredShowWeights] = useState(defaultShowWeights);
+  const previousTensorName = useRef(target.name);
+  const previousHadWeights = useRef(graph.weights !== undefined);
+  const showWeights =
+    previousTensorName.current === target.name ? storedShowWeights : defaultShowWeights;
 
-  // Auto-enable on the transition from no-weights to weights-loaded so a user
-  // who opens this panel before loading external weights (TF2 SavedModel) sees
-  // stats appear automatically once the load completes. Don't override a manual toggle.
-  const prevHadWeights = useRef(graph.weights !== undefined);
   useEffect(() => {
-    const has = graph.weights !== undefined;
-    if (has && !prevHadWeights.current && graph.fileSizeBytes <= SIZE_THRESHOLD) {
-      setShowWeights(true);
+    if (previousTensorName.current !== target.name) {
+      setStoredShowWeights(defaultShowWeights);
+      previousTensorName.current = target.name;
+      previousHadWeights.current = graph.weights !== undefined;
+      return;
     }
-    prevHadWeights.current = has;
-  }, [graph.weights, graph.fileSizeBytes]);
+    const hasWeights = graph.weights !== undefined;
+    if (hasWeights && !previousHadWeights.current && graph.fileSizeBytes <= SIZE_THRESHOLD) {
+      setStoredShowWeights(true);
+    }
+    previousHadWeights.current = hasWeights;
+  }, [defaultShowWeights, graph.fileSizeBytes, graph.weights, target.name]);
 
+  const inspection = useWeightInspectionData(target, graph, showWeights);
   const dtype = target.dtype ?? "";
-
-  const loaded = useMemo((): Loaded | null => {
-    if (!showWeights) return null;
-    const bytes = graph.weights?.get(target.name);
-    if (!bytes) return null;
-    const d = target.dtype ?? "float32";
-    const shape = target.shape ?? [bytes.byteLength / (elementSize(d) || 1)];
-    const decoded = decodeWeight(bytes, d, shape);
-    if (!decoded) return null;
-
-    // Stats need a numeric typed array; coerce BigInt to f64 once.
-    let numericForStats: Float64Array | Int32Array | Uint32Array;
-    if (decoded instanceof BigInt64Array || decoded instanceof BigUint64Array) {
-      const f = new Float64Array(decoded.length);
-      for (let i = 0; i < decoded.length; i++) f[i] = Number(decoded[i]);
-      numericForStats = f;
-    } else {
-      numericForStats = decoded;
-    }
-
-    return { stats: computeStats(numericForStats), values: decoded };
-  }, [target.name, showWeights, graph.weights, target.dtype, target.shape]);
-
-  const isLarge = graph.fileSizeBytes > SIZE_THRESHOLD;
   const shape = target.shape;
   const shapeLabel = shape ? `[${shape.join(" × ")}]` : "unknown";
   const totalElements = shape ? shape.reduce((a, b) => a * b, 1) : 0;
   const sizeBytes = dtype ? totalElements * elementSize(dtype) : 0;
+  const isLarge = graph.fileSizeBytes > SIZE_THRESHOLD;
 
   return (
     <>
@@ -154,12 +171,12 @@ export function WeightPanel({
             <button
               data-testid="show-weights-switch"
               className={`${weightPanelCss.switch}${showWeights ? "" : ` ${weightPanelCss.switchOff}`}`}
-              onClick={() => setShowWeights((v) => !v)}
+              onClick={() => setStoredShowWeights(!showWeights)}
               aria-label="Show weights"
               disabled={graph.weights === undefined}
             />
           </div>
-          {graph.hasExternalWeights && graph.weights === undefined && (
+          {inspection.status === "external" && (
             <div className={weightPanelCss.sizeNote}>
               <strong>Weights live in an external checkpoint.</strong>
               <br />
@@ -167,14 +184,14 @@ export function WeightPanel({
               stats and plots for this tensor.
             </div>
           )}
-          {isLarge && !showWeights && graph.weights !== undefined && (
+          {isLarge && inspection.status === "deferred" && (
             <div className={weightPanelCss.sizeNote}>
               <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong>
               <br />
               Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
             </div>
           )}
-          {showWeights && graph.weights !== undefined && loaded === null && (
+          {inspection.status === "unsupported" && (
             <div className={weightPanelCss.sizeNote}>
               Value decoding is not available for {dtype || "this tensor type"}.
             </div>
@@ -182,84 +199,33 @@ export function WeightPanel({
         </div>
       )}
 
-      {loaded && (
-        <Tabs.Root value={viz} onValueChange={(v) => setViz(v as "dist" | "heat")}>
-          <div className={propertyPanelCss.section}>
-            <div className={weightPanelCss.sectionLabelRow}>
-              <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
-              <Tabs.List className={weightPanelCss.seg}>
-                <Tabs.Tab
-                  value="heat"
-                  data-testid="viz-heat"
-                  className={viz === "heat" ? weightPanelCss.segOn : ""}
-                >
-                  heat
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="dist"
-                  data-testid="viz-dist"
-                  className={viz === "dist" ? weightPanelCss.segOn : ""}
-                >
-                  dist
-                </Tabs.Tab>
-              </Tabs.List>
-            </div>
-
-            <div className={propertyPanelCss.row}>
-              <span className={propertyPanelCss.rowLabel}>min</span>
-              <span className={propertyPanelCss.rowValue}>
-                {formatVal(loaded.stats.min, dtype || "float32")}
-              </span>
-            </div>
-            <div className={propertyPanelCss.row}>
-              <span className={propertyPanelCss.rowLabel}>max</span>
-              <span className={propertyPanelCss.rowValue}>
-                {formatVal(loaded.stats.max, dtype || "float32")}
-              </span>
-            </div>
-            <div className={propertyPanelCss.row}>
-              <span className={propertyPanelCss.rowLabel}>{"μ ± σ"}</span>
-              <span className={propertyPanelCss.rowValue}>
-                {formatVal(loaded.stats.mean, dtype || "float32")} ±{" "}
-                {formatVal(loaded.stats.std, dtype || "float32")}
-              </span>
-            </div>
-            <div className={propertyPanelCss.row}>
-              <span className={propertyPanelCss.rowLabel}>zeros</span>
-              <span className={propertyPanelCss.rowValue}>{loaded.stats.zeros}</span>
-            </div>
-            <div className={weightPanelCss.valuesMeta}>
-              Stats computed on flattened weights
-            </div>
-
-            <Tabs.Panel value="dist">
-              <WeightHistogram stats={loaded.stats} dtype={dtype} />
-            </Tabs.Panel>
-            <Tabs.Panel value="heat">
-              <WeightHeatmap stats={loaded.stats} dtype={dtype} isDark={isDark} />
-            </Tabs.Panel>
+      {inspection.status === "ready" && (
+        <div className={propertyPanelCss.section}>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>min</span>
+            <span className={propertyPanelCss.rowValue}>{formatVal(inspection.stats.min, dtype || "float32")}</span>
           </div>
-        </Tabs.Root>
-      )}
-
-      {loaded && showWeights && (
-        <div className={propertyPanelCss.sectionLast}>
-          <div className={weightPanelCss.sectionLabelRow}>
-            <span>Values</span>
-            <span className={weightPanelCss.valuesMeta}>
-              {loaded.values.length.toLocaleString()} values
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>max</span>
+            <span className={propertyPanelCss.rowValue}>{formatVal(inspection.stats.max, dtype || "float32")}</span>
+          </div>
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>{"μ ± σ"}</span>
+            <span className={propertyPanelCss.rowValue}>
+              {formatVal(inspection.stats.mean, dtype || "float32")} ± {formatVal(inspection.stats.std, dtype || "float32")}
             </span>
           </div>
-          <VirtualValues
-            data-testid="values-grid"
-            values={loaded.values}
-            format={(v) =>
-              typeof v === "bigint" ? v.toString() : formatVal(v, dtype || "float32")
-            }
-            align={isIntegerDtype(dtype || "float32") ? "center" : "right"}
-          />
+          <div className={propertyPanelCss.row}>
+            <span className={propertyPanelCss.rowLabel}>zeros</span>
+            <span className={propertyPanelCss.rowValue}>{inspection.stats.zeros}</span>
+          </div>
+          <div className={weightPanelCss.valuesMeta}>Stats computed on flattened weights</div>
         </div>
       )}
+
+      <WeightInspectionProvider key={target.name} inspection={inspection} isDark={isDark}>
+        {children ?? <DefaultWeightInspectors />}
+      </WeightInspectionProvider>
     </>
   );
 }

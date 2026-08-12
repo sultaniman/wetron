@@ -1,18 +1,24 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
-  import type { ModelGraph, WeightStats } from '@wetron/core';
-  import { decodeWeight, computeStats } from '@wetron/core';
-  import { formatVal, isIntegerDtype } from '@wetron/core/format-val';
+  import { untrack, type Snippet } from 'svelte';
+  import type { ModelGraph, WeightInspectionData } from '@wetron/core';
+  import { computeStats, decodeWeight } from '@wetron/core';
+  import { formatVal } from '@wetron/core/format-val';
+  import DefaultWeightInspectors from './default-weight-inspectors.svelte';
   import PanelHeader from './panel-header.svelte';
-  import VirtualValues from './virtual-values.svelte';
-  import WeightHistogram from './weight-histogram.svelte';
-  import WeightHeatmap from './weight-heatmap.svelte';
+  import { provideWeightInspection } from './weight-inspection-context.ts';
 
-  let { target, graph, onBack, isDark = false }: {
-    target: { name: string; shape: readonly number[] | null; dtype: string | null };
+  type WeightTarget = {
+    readonly name: string;
+    readonly shape: readonly number[] | null;
+    readonly dtype: string | null;
+  };
+
+  let { target, graph, onBack, isDark = false, children }: {
+    target: WeightTarget;
     graph: ModelGraph;
     onBack?: () => void;
     isDark?: boolean;
+    children?: Snippet;
   } = $props();
 
   const SIZE_THRESHOLD = 20 * 1024 * 1024;
@@ -35,18 +41,20 @@
     return sizes[dtype] ?? 0;
   }
 
-  let showWeights = $state(untrack(() => graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined));
-  let viz = $state<'dist' | 'heat'>('heat');
-
-  // Auto-enable on the no-weights -> weights-loaded transition (e.g. checkpoint
-  // file dropped after the panel was opened). Don't override a manual toggle.
-  let prevHadWeights = untrack(() => graph.weights !== undefined);
-  $effect(() => {
-    const has = graph.weights !== undefined;
-    if (has && !prevHadWeights && graph.fileSizeBytes <= SIZE_THRESHOLD) {
-      showWeights = true;
+  const defaultShowWeights = $derived(graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined);
+  let showWeights = $state(untrack(() => defaultShowWeights));
+  let previousTensorName = untrack(() => target.name);
+  let previousHadWeights = untrack(() => graph.weights !== undefined);
+  $effect.pre(() => {
+    if (previousTensorName !== target.name) {
+      showWeights = defaultShowWeights;
+      previousTensorName = target.name;
+      previousHadWeights = graph.weights !== undefined;
+      return;
     }
-    prevHadWeights = has;
+    const hasWeights = graph.weights !== undefined;
+    if (hasWeights && !previousHadWeights && graph.fileSizeBytes <= SIZE_THRESHOLD) showWeights = true;
+    previousHadWeights = hasWeights;
   });
 
   const dtype = $derived(target.dtype ?? '');
@@ -56,30 +64,37 @@
   const sizeBytes = $derived(dtype ? totalElements * elementSize(dtype) : 0);
   const isLarge = $derived(graph.fileSizeBytes > SIZE_THRESHOLD);
 
-  type Loaded = {
-    stats: WeightStats;
-    values: Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array;
-  };
+  const inspection = $derived.by((): WeightInspectionData => {
+    const empty = (status: 'deferred' | 'external' | 'unavailable'): WeightInspectionData => ({
+      status,
+      tensor: target,
+      bytes: null,
+      values: null,
+      stats: null,
+    });
+    if (!graph.weights) return empty(graph.hasExternalWeights ? 'external' : 'unavailable');
+    if (!showWeights) return empty('deferred');
 
-  const loaded = $derived.by((): Loaded | null => {
-    if (!showWeights) return null;
-    const bytes = graph.weights?.get(target.name);
-    if (!bytes) return null;
-    const d = target.dtype ?? 'float32';
-    const s = target.shape ?? [bytes.byteLength / (elementSize(d) || 1)];
-    const decoded = decodeWeight(bytes, d, s);
-    if (!decoded) return null;
+    const bytes = graph.weights.get(target.name);
+    if (!bytes) return empty('unavailable');
+    const decodedDtype = target.dtype ?? 'float32';
+    const decodedShape = target.shape ?? [bytes.byteLength / (elementSize(decodedDtype) || 1)];
+    const values = decodeWeight(bytes, decodedDtype, decodedShape);
+    if (!values) return { status: 'unsupported', tensor: target, bytes, values: null, stats: null };
 
-    let numericForStats: Float64Array | Int32Array | Uint32Array;
-    if (decoded instanceof BigInt64Array || decoded instanceof BigUint64Array) {
-      const f = new Float64Array(decoded.length);
-      for (let i = 0; i < decoded.length; i++) f[i] = Number(decoded[i]);
-      numericForStats = f;
+    let numeric: Float64Array | Int32Array | Uint32Array;
+    if (values instanceof BigInt64Array || values instanceof BigUint64Array) {
+      numeric = new Float64Array(values.length);
+      for (let i = 0; i < values.length; i++) numeric[i] = Number(values[i]);
     } else {
-      numericForStats = decoded;
+      numeric = values;
     }
+    return { status: 'ready', tensor: target, bytes, values, stats: computeStats(numeric) };
+  });
 
-    return { stats: computeStats(numericForStats), values: decoded };
+  provideWeightInspection({
+    get current() { return inspection; },
+    get isDark() { return isDark; },
   });
 </script>
 
@@ -111,66 +126,39 @@
         disabled={graph.weights === undefined}
       ></button>
     </div>
-    {#if graph.hasExternalWeights && graph.weights === undefined}
+    {#if inspection.status === 'external'}
       <div class="sizeNote">
         <strong>Weights live in an external checkpoint.</strong><br />
         Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see stats and plots for this tensor.
       </div>
-    {:else if isLarge && !showWeights}
+    {:else if isLarge && inspection.status === 'deferred'}
       <div class="sizeNote">
         <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong><br />
         Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
       </div>
-    {:else if showWeights && loaded === null}
+    {:else if inspection.status === 'unsupported'}
       <div class="sizeNote">Value decoding is not available for {dtype || 'this tensor type'}.</div>
     {/if}
   </div>
 {/if}
 
-{#if loaded}
+{#if inspection.status === 'ready'}
   <div class="section">
-    <div class="sectionLabelRow">
-      <span>{viz === 'dist' ? 'Distribution' : 'Heatmap'}</span>
-      <div class="seg">
-        <button
-          data-testid="viz-heat"
-          class={viz === 'heat' ? 'segOn' : ''}
-          onclick={() => (viz = 'heat')}
-        >heat</button>
-        <button
-          data-testid="viz-dist"
-          class={viz === 'dist' ? 'segOn' : ''}
-          onclick={() => (viz = 'dist')}
-        >dist</button>
-      </div>
-    </div>
-
-    <div class="row"><span class="rowLabel">min</span><span class="rowValue">{formatVal(loaded.stats.min, dtype || 'float32')}</span></div>
-    <div class="row"><span class="rowLabel">max</span><span class="rowValue">{formatVal(loaded.stats.max, dtype || 'float32')}</span></div>
-    <div class="row"><span class="rowLabel">μ ± σ</span><span class="rowValue">{formatVal(loaded.stats.mean, dtype || 'float32')} ± {formatVal(loaded.stats.std, dtype || 'float32')}</span></div>
-    <div class="row"><span class="rowLabel">zeros</span><span class="rowValue">{loaded.stats.zeros}</span></div>
-
-    {#if viz === 'dist'}
-      <WeightHistogram stats={loaded.stats} {dtype} />
-    {:else}
-      <WeightHeatmap stats={loaded.stats} {dtype} {isDark} />
-    {/if}
+    <div class="row"><span class="rowLabel">min</span><span class="rowValue">{formatVal(inspection.stats.min, dtype || 'float32')}</span></div>
+    <div class="row"><span class="rowLabel">max</span><span class="rowValue">{formatVal(inspection.stats.max, dtype || 'float32')}</span></div>
+    <div class="row"><span class="rowLabel">μ ± σ</span><span class="rowValue">{formatVal(inspection.stats.mean, dtype || 'float32')} ± {formatVal(inspection.stats.std, dtype || 'float32')}</span></div>
+    <div class="row"><span class="rowLabel">zeros</span><span class="rowValue">{inspection.stats.zeros}</span></div>
+    <div class="valuesMeta">Stats computed on flattened weights</div>
   </div>
-
-  {#if showWeights}
-    <div class="sectionLast">
-      <div class="sectionLabelRow">
-        <span>Values</span>
-        <span class="valuesMeta">{loaded.values.length.toLocaleString()} values</span>
-      </div>
-      <VirtualValues
-        values={loaded.values}
-        format={(v: number | bigint) => typeof v === 'bigint' ? v.toString() : formatVal(v, dtype || 'float32')}
-        align={isIntegerDtype(dtype || 'float32') ? 'center' : 'right'}
-      />
-    </div>
-  {/if}
 {/if}
+
+{#key target.name}
+  {#if children}
+    {@render children()}
+  {:else}
+    <DefaultWeightInspectors />
+  {/if}
+{/key}
 
 <style>
   .glyphIcon {
@@ -181,9 +169,6 @@
     padding: 7px 11px;
     border-bottom: 1px solid var(--panel-section-border);
   }
-  .sectionLast {
-    padding: 7px 11px;
-  }
   .row {
     display: flex;
     justify-content: space-between;
@@ -191,12 +176,8 @@
     font-size: 11px;
     line-height: 16px;
   }
-  .rowLabel {
-    opacity: 0.65;
-  }
-  .rowValue {
-    font-variant-numeric: tabular-nums;
-  }
+  .rowLabel { opacity: 0.65; }
+  .rowValue { font-variant-numeric: tabular-nums; }
   .toggleRow {
     display: flex;
     justify-content: space-between;
@@ -225,60 +206,18 @@
     background: #fff;
     transition: left 0.15s;
   }
-  .switchOff {
-    background: #94a3b8;
-  }
-  .switchOff::after {
-    left: 2px;
-  }
-  .switch:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  .switchOff { background: #94a3b8; }
+  .switchOff::after { left: 2px; }
+  .switch:disabled { opacity: 0.5; cursor: not-allowed; }
   .sizeNote {
     margin-top: 6px;
     font-size: 11px;
     opacity: 0.8;
     line-height: 1.4;
   }
-  .sectionLabelRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--panel-label);
-    margin-bottom: 6px;
-  }
-  .seg {
-    display: inline-flex;
-    background: var(--panel-seg-bg, #f1f5f9);
-    border-radius: 6px;
-    padding: 2px;
-  }
-  .seg button {
-    background: none;
-    border: none;
-    font: inherit;
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: var(--panel-seg-color, #64748b);
-    text-transform: none;
-    letter-spacing: 0;
-  }
-  .seg .segOn {
-    background: var(--panel-seg-on-bg, #fff);
-    color: var(--panel-seg-on-color, #2563eb);
-    font-weight: 600;
-  }
   .valuesMeta {
     font-family: ui-monospace, Menlo, monospace;
     font-size: 9px;
     color: var(--panel-subtitle);
-    text-transform: none;
-    letter-spacing: 0;
   }
 </style>

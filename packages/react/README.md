@@ -29,6 +29,35 @@ const graph = await parseModel(bytes, file.name);
 
 Pass `graph` to `NodePropertyPanel` if you want clicks on initializer tensors to open the built-in `WeightPanel` (stats, distribution histogram, heatmap, virtualized values grid). For models larger than 20 MiB the panel starts in a deferred state; the user opts in per tensor with a `Show weights` switch and the bytes are only decoded once.
 
+### Custom weight inspectors
+
+Pass a React node through `weightInspector` to replace the built-in visualization and values grid. The panel header, metadata, loading switch, and statistical summary remain fixed.
+
+```tsx
+import { NodePropertyPanel, useWeightInspection } from "@wetron/react";
+
+function TensorCount() {
+  const inspection = useWeightInspection();
+  return (
+    <div>
+      {inspection.tensor.name}: {inspection.status === "ready"
+        ? `${inspection.values.length} values`
+        : inspection.status}
+    </div>
+  );
+}
+
+<NodePropertyPanel
+  target={target}
+  graph={graph}
+  weightInspector={<TensorCount />}
+/>
+```
+
+`useWeightInspection()` reads the nearest `WeightPanel` and throws outside one. Deferred, external, and unavailable inspections expose `bytes`, `values`, and `stats` as `null`; unsupported inspections expose bytes only. The panel's `Show weights` switch controls the deferred gate.
+
+Custom inspector selectors should mount only their active inspector when analysis is expensive. Changing tensors remounts the inspector subtree and resets its local state.
+
 ## API
 
 ```ts
@@ -57,6 +86,7 @@ function NodePropertyPanel(props: {
   opsets?: ReadonlyMap<string, number>;
   inputSources?: ReadonlyMap<string, string>;
   tensorShapes?: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
+  weightInspector?: React.ReactNode;
   onTensorClick?: (name: string) => void;
   onBack?: () => void;
   onClose?: () => void;
@@ -67,6 +97,7 @@ function WeightPanel(props: {
   graph: ModelGraph;
   onBack?: () => void;
   isDark?: boolean;
+  children?: React.ReactNode;
 }): JSX.Element;
 
 type PanelTarget =

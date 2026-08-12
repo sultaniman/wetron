@@ -100,6 +100,42 @@ describe("WeightPanel small model", () => {
     expect(screen.queryByTestId("histogram")).not.toBeNull();
     expect(screen.queryByTestId("heatmap")).toBeNull();
   });
+
+  test("custom children replace default inspectors but keep the fixed summary", () => {
+    render(
+      React.createElement(
+        WeightPanel,
+        { target: { name: "w", shape: [4], dtype: "float32" }, graph: smallGraph() },
+        React.createElement("div", { "data-testid": "custom-inspector" }, "custom"),
+      ),
+    );
+    expect(screen.getByTestId("custom-inspector")).toBeDefined();
+    expect(screen.getByText("min")).toBeDefined();
+    expect(screen.queryByTestId("heatmap")).toBeNull();
+    expect(screen.queryByTestId("values-grid")).toBeNull();
+  });
+
+  test("changing tensors resets the active default visualization", async () => {
+    const g = smallGraph();
+    const graphWithTwo = {
+      ...g,
+      initializers: new Map([
+        ...g.initializers,
+        ["w2", { shape: [4] as const, dtype: "float32" }],
+      ]),
+      weights: { ...g.weights!, get: () => g.weights!.get("w") },
+    } satisfies ModelGraph;
+    const { rerender } = render(
+      <WeightPanel target={{ name: "w", shape: [4], dtype: "float32" }} graph={graphWithTwo} />,
+    );
+    await act(async () => fireEvent.click(screen.getByTestId("viz-dist")));
+    expect(screen.queryByTestId("histogram")).not.toBeNull();
+    rerender(
+      <WeightPanel target={{ name: "w2", shape: [4], dtype: "float32" }} graph={graphWithTwo} />,
+    );
+    expect(screen.queryByTestId("heatmap")).not.toBeNull();
+    expect(screen.queryByTestId("histogram")).toBeNull();
+  });
 });
 
 test("hides raw-value controls when the parser only exposes tensor metadata", () => {

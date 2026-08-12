@@ -9,6 +9,7 @@ export { decodeWeight, decodeFirstN } from "./weight-decoder.ts";
 export type { DecodedWeight } from "./weight-decoder.ts";
 export { computeStats } from "./weight-stats.ts";
 export type { WeightStats } from "./weight-stats.ts";
+export type { WeightInspectionData, WeightInspectionStatus } from "./weight-inspection.ts";
 
 export { ParseError } from "@wetron/common/ir";
 export type {

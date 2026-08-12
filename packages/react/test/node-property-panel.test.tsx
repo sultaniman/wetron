@@ -3,6 +3,7 @@ import { test, expect, describe, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent, act } from "@testing-library/react";
 import React from "react";
 import { NodePropertyPanel } from "../src/node-property-panel/node-property-panel.tsx";
+import { useWeightInspection } from "../src/node-property-panel/weight-inspection-context.tsx";
 import type { GraphNode, GraphValue } from "@wetron/common/ir";
 
 afterEach(cleanup);
@@ -132,6 +133,22 @@ describe("initializer routing", () => {
     await act(async () => {});
     expect(screen.getByText("Tensor")).toBeDefined();
     expect(screen.getByText("activation_42")).toBeDefined();
+  });
+
+  test("forwards weightInspector into the initializer provider", () => {
+    function Inspector() {
+      const inspection = useWeightInspection();
+      return <div data-testid="forwarded-inspector">{inspection.tensor.name}</div>;
+    }
+    render(
+      <NodePropertyPanel
+        target={{ tensor: { name: "conv1.weight", shape: [4], dtype: "float32" } }}
+        graph={graphWithInit}
+        weightInspector={<Inspector />}
+      />,
+    );
+    expect(screen.getByTestId("forwarded-inspector").textContent).toBe("conv1.weight");
+    expect(screen.queryByTestId("heatmap")).toBeNull();
   });
 });
 

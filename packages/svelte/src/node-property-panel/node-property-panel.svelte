@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolveColorMode, type ColorMode } from '../color-mode-context.ts';
+  import type { Snippet } from 'svelte';
   import type { PanelTarget, GraphNode, GraphValue, ModelGraph } from '@wetron/common/ir';
   import { PANEL_VARS } from '@wetron/tokens';
   import { categoryVars } from '../category-vars.ts';
@@ -12,7 +13,7 @@
 
   type TensorInfo = { readonly shape: readonly number[] | null; readonly dtype: string | null };
 
-  let { target, graph, onTensorClick, onBack, onClose, colorMode, inputSources, tensorShapes, opsets }: {
+  let { target, graph, onTensorClick, onBack, onClose, colorMode, inputSources, tensorShapes, opsets, weightInspector }: {
     target: PanelTarget | null;
     graph?: ModelGraph;
     onTensorClick?: (name: string) => void;
@@ -22,6 +23,7 @@
     inputSources?: ReadonlyMap<string, string>;
     tensorShapes?: ReadonlyMap<string, TensorInfo>;
     opsets?: ReadonlyMap<string, number>;
+    weightInspector?: Snippet;
   } = $props();
 
   let systemIsDark = $state(resolveColorMode('system') === 'dark');
@@ -73,7 +75,7 @@
       <EdgePanel edge={target.edge} {tensorShapes} {onBack} />
     {:else if isTensorTarget(target)}
       {#if graph?.initializers.has(target.tensor.name)}
-        <WeightPanel target={target.tensor} {graph} {onBack} {isDark} />
+        <WeightPanel target={target.tensor} {graph} {onBack} {isDark} children={weightInspector} />
       {:else}
         <TensorPanel tensor={target.tensor} {onBack} />
       {/if}
