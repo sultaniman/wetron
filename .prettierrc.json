@@ -1,7 +1,0 @@
-{
-  "plugins": ["prettier-plugin-svelte"],
-  "printWidth": 120,
-  "tabWidth": 4,
-  "singleQuote": true,
-  "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
-}

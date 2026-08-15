@@ -1,0 +1,16 @@
+{
+  "printWidth": 120,
+  "singleQuote": true,
+  "sortPackageJson": false,
+  "svelte": {},
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    ".pnpm-store",
+    "netron-main",
+    "tmp",
+    "test-models",
+    "docs/assets",
+    "docs/layouts"
+  ]
+}
