@@ -1,32 +1,32 @@
 <script lang="ts">
-  import { XIcon } from 'phosphor-svelte';
+    import { XIcon } from 'phosphor-svelte';
 
-  let { onClose }: { onClose: () => void } = $props();
+    let { onClose }: { onClose: () => void } = $props();
 </script>
 
 <button class="closeButton" onclick={onClose} aria-label="Close">
-  <XIcon size={13} />
+    <XIcon size={13} />
 </button>
 
 <style>
-  .closeButton {
-    position: absolute;
-    top: 9px;
-    right: 9px;
-    width: 24px;
-    height: 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--panel-subtitle);
-    padding: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .closeButton:hover {
-    background: var(--panel-close-hover);
-    color: var(--panel-text);
-  }
+    .closeButton {
+        position: absolute;
+        top: 9px;
+        right: 9px;
+        width: 24px;
+        height: 24px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--panel-subtitle);
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .closeButton:hover {
+        background: var(--panel-close-hover);
+        color: var(--panel-text);
+    }
 </style>
