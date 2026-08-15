@@ -28,7 +28,20 @@ pnpm add @wetron/svelte
 <NodePropertyPanel {target} {graph} onClose={() => (target = null)} />
 ```
 
-Passing `graph` routes initializer tensors to the default heatmap, distribution histogram, and virtualized values grid. Models larger than 20 MiB remain deferred until the user enables `Show weights` for the selected tensor.
+Passing `graph` routes initializer tensors to the built-in inspectors. Rank-2 and higher tensors open in the matrix inspector; scalars and vectors open in the distribution inspector. Models larger than 20 MiB remain deferred until the user enables `Show weights`.
+
+Built-in inspectors appear when their inputs are supported:
+
+- Matrix/slice: rank 2+, with explicit display axes and fixed indices.
+- Distribution: histogram, percentiles, non-finite counts, linear/log scale.
+- Per-axis profile: mean, standard deviation, L1/L2, maximum absolute value, zero ratio.
+- Sparsity: exact or near-zero ratios and source-traceable blocks.
+- Kernel gallery: rank 3–5 after selecting `OIHW`, `OHWI`, `HWIO`, or `IHWO` explicitly.
+- Quantization: encoded `Q4_0` block diagnostics.
+- Diagnostics: non-finite values, constant slices, and norm outliers.
+- Values: the flattened virtualized value grid.
+
+Only the selected inspector is mounted. `WeightHeatmap` remains exported for compatibility but is not part of the default composition.
 
 ### Custom weight inspectors
 
@@ -38,14 +51,18 @@ Create an inspector component that reads the nearest `WeightPanel` context:
 <!-- TensorCount.svelte -->
 <script lang="ts">
   import { getWeightInspection } from "@wetron/svelte";
+  import { computeWeightDistribution } from "@wetron/core/weight-distribution";
 
   const context = getWeightInspection();
   const inspection = $derived(context.current);
+  const distribution = $derived(
+    inspection.status === "ready" ? computeWeightDistribution(inspection.values, 24) : null,
+  );
 </script>
 
 <div>
   {inspection.tensor.name}:
-  {inspection.status === "ready" ? `${inspection.values.length} values` : inspection.status}
+  {distribution ? `median ${distribution.percentiles.p50}` : inspection.status}
 </div>
 ```
 

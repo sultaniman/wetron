@@ -58,7 +58,11 @@ test("throws a strict error outside WeightPanel", () => {
 
 describe("getter-backed inspection context", () => {
   test("exposes ready data, tensor metadata, and theme", async () => {
-    const { element } = mountHost({ graph: graph({ bytes: new Uint8Array(8) }), target, isDark: true });
+    const { element } = mountHost({
+      graph: graph({ bytes: new Uint8Array(8) }),
+      target,
+      isDark: true,
+    });
     await tick();
     expect(element.querySelector('[data-testid="inspection-probe"]')?.textContent?.trim()).toBe(
       "ready|w|float32|2|8|2|2|dark",
@@ -71,7 +75,8 @@ describe("getter-backed inspection context", () => {
       target,
     });
     await tick();
-    const probe = () => element.querySelector('[data-testid="inspection-probe"]')?.textContent ?? "";
+    const probe = () =>
+      element.querySelector('[data-testid="inspection-probe"]')?.textContent ?? "";
     expect(probe()).toContain("deferred|w|float32|2|no-bytes|no-values|no-stats");
     (element.querySelector('[data-testid="show-weights-switch"]') as HTMLButtonElement).click();
     await tick();
@@ -93,7 +98,8 @@ describe("getter-backed inspection context", () => {
   test("reports external, unavailable, and unsupported data boundaries", async () => {
     const { component, element } = mountHost({ graph: graph({ external: true }), target });
     await tick();
-    const probe = () => element.querySelector('[data-testid="inspection-probe"]')?.textContent ?? "";
+    const probe = () =>
+      element.querySelector('[data-testid="inspection-probe"]')?.textContent ?? "";
     expect(probe()).toContain("external|w|float32|2|no-bytes|no-values|no-stats");
     component.setGraph(graph({}));
     await tick();
@@ -125,19 +131,22 @@ describe("getter-backed inspection context", () => {
     expect(panel.element.querySelector('[data-testid="heatmap"]')).toBeNull();
   });
 
-  test("keys the default visualization selector by tensor name", async () => {
+  test("preserves a supported active inspector across tensor changes", async () => {
     const { component, element } = mountHost({
       graph: graph({ bytes: new Uint8Array(8) }),
       target,
       mode: "default",
     });
     await tick();
-    (element.querySelector('[data-testid="viz-dist"]') as HTMLButtonElement).click();
+    const selector = element.querySelector('[aria-label="Weight inspector"]') as HTMLSelectElement;
+    selector.value = "values";
+    selector.dispatchEvent(new Event("input", { bubbles: true }));
+    selector.dispatchEvent(new Event("change", { bubbles: true }));
     await tick();
-    expect(element.querySelector('[data-testid="histogram"]')).not.toBeNull();
-    component.setTarget({ name: "w2", shape: [2], dtype: "float32" });
+    expect(element.querySelector('[data-testid="values-inspector"]')).not.toBeNull();
+    component.setTarget({ name: "w2", shape: [1, 2], dtype: "float32" });
     await tick();
-    expect(element.querySelector('[data-testid="heatmap"]')).not.toBeNull();
-    expect(element.querySelector('[data-testid="histogram"]')).toBeNull();
+    expect(element.querySelector('[data-testid="values-inspector"]')).not.toBeNull();
+    expect(element.querySelector('[data-testid="matrix-inspector"]')).toBeNull();
   });
 });

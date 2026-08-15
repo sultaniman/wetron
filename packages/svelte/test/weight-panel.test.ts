@@ -7,6 +7,14 @@ import {
   VirtualValues,
   WeightHeatmap,
   WeightHistogram,
+  MatrixInspector,
+  DistributionInspector,
+  AxisProfileInspector,
+  SparsityInspector,
+  KernelGalleryInspector,
+  QuantizationInspector,
+  DiagnosticsInspector,
+  ValuesInspector,
   getWeightInspection,
   type ExportHelpers,
   type WeightInspectionContextValue,
@@ -52,6 +60,17 @@ describe("Svelte package surface", () => {
     expect(WeightHistogram).toBeDefined();
     expect(WeightHeatmap).toBeDefined();
     expect(VirtualValues).toBeDefined();
+    for (const inspector of [
+      MatrixInspector,
+      DistributionInspector,
+      AxisProfileInspector,
+      SparsityInspector,
+      KernelGalleryInspector,
+      QuantizationInspector,
+      DiagnosticsInspector,
+      ValuesInspector,
+    ])
+      expect(inspector).toBeDefined();
   });
 
   test("routes initializers to the weight panel", async () => {

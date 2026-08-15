@@ -1,124 +1,143 @@
 <script lang="ts">
-  import { resolveColorMode, type ColorMode } from '../color-mode-context.ts';
-  import type { Snippet } from 'svelte';
-  import type { PanelTarget, GraphNode, GraphValue, ModelGraph } from '@wetron/common/ir';
-  import { PANEL_VARS } from '@wetron/tokens';
-  import { categoryVars } from '../category-vars.ts';
-  import OpPanel from './op-panel.svelte';
-  import IoPanel from './io-panel.svelte';
-  import EdgePanel from './edge-panel.svelte';
-  import TensorPanel from './tensor-panel.svelte';
-  import WeightPanel from './weight-panel.svelte';
-  import CloseButton from './close-button.svelte';
+    import { resolveColorMode, type ColorMode } from '../color-mode-context.ts';
+    import type { Snippet } from 'svelte';
+    import type { PanelTarget, GraphNode, GraphValue, ModelGraph } from '@wetron/common/ir';
+    import { PANEL_VARS } from '@wetron/tokens';
+    import { categoryVars } from '../category-vars.ts';
+    import OpPanel from './op-panel.svelte';
+    import IoPanel from './io-panel.svelte';
+    import EdgePanel from './edge-panel.svelte';
+    import TensorPanel from './tensor-panel.svelte';
+    import WeightPanel from './weight-panel.svelte';
+    import CloseButton from './close-button.svelte';
 
-  type TensorInfo = { readonly shape: readonly number[] | null; readonly dtype: string | null };
+    type TensorInfo = { readonly shape: readonly number[] | null; readonly dtype: string | null };
 
-  let { target, graph, onTensorClick, onBack, onClose, colorMode, inputSources, tensorShapes, opsets, weightInspector }: {
-    target: PanelTarget | null;
-    graph?: ModelGraph;
-    onTensorClick?: (name: string) => void;
-    onBack?: () => void;
-    onClose?: () => void;
-    colorMode?: ColorMode;
-    inputSources?: ReadonlyMap<string, string>;
-    tensorShapes?: ReadonlyMap<string, TensorInfo>;
-    opsets?: ReadonlyMap<string, number>;
-    weightInspector?: Snippet;
-  } = $props();
+    let {
+        target,
+        graph,
+        onTensorClick,
+        onBack,
+        onClose,
+        colorMode,
+        inputSources,
+        tensorShapes,
+        opsets,
+        weightInspector,
+    }: {
+        target: PanelTarget | null;
+        graph?: ModelGraph;
+        onTensorClick?: (name: string) => void;
+        onBack?: () => void;
+        onClose?: () => void;
+        colorMode?: ColorMode;
+        inputSources?: ReadonlyMap<string, string>;
+        tensorShapes?: ReadonlyMap<string, TensorInfo>;
+        opsets?: ReadonlyMap<string, number>;
+        weightInspector?: Snippet;
+    } = $props();
 
-  let systemIsDark = $state(resolveColorMode('system') === 'dark');
+    let systemIsDark = $state(resolveColorMode('system') === 'dark');
 
-  $effect(() => {
-    const mode = colorMode ?? 'system';
-    if (mode !== 'system') return;
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    systemIsDark = mq.matches;
-    const handler = (e: MediaQueryListEvent) => { systemIsDark = e.matches; };
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  });
+    $effect(() => {
+        const mode = colorMode ?? 'system';
+        if (mode !== 'system') return;
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        systemIsDark = mq.matches;
+        const handler = (e: MediaQueryListEvent) => {
+            systemIsDark = e.matches;
+        };
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    });
 
-  const isDark = $derived(
-    (colorMode ?? 'system') === 'dark' ? true :
-    (colorMode ?? 'system') === 'light' ? false :
-    systemIsDark
-  );
-  const theme = $derived(isDark ? 'dark' : 'light');
+    const isDark = $derived(
+        (colorMode ?? 'system') === 'dark' ? true : (colorMode ?? 'system') === 'light' ? false : systemIsDark,
+    );
+    const theme = $derived(isDark ? 'dark' : 'light');
 
-  function isGraphNode(t: PanelTarget): t is GraphNode {
-    return 'opType' in t;
-  }
-  function isEdgeTarget(t: PanelTarget): t is { edge: { tensorName: string; from: { opType: string; name: string }; to: Array<{ opType: string; name: string }> } } {
-    return 'edge' in t;
-  }
-  function isTensorTarget(t: PanelTarget): t is { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } } {
-    return 'tensor' in t;
-  }
-  function isIoTarget(t: PanelTarget): t is { graphValue: GraphValue; direction: 'input' | 'output' } {
-    return 'graphValue' in t;
-  }
+    function isGraphNode(t: PanelTarget): t is GraphNode {
+        return 'opType' in t;
+    }
+    function isEdgeTarget(
+        t: PanelTarget,
+    ): t is {
+        edge: {
+            tensorName: string;
+            from: { opType: string; name: string };
+            to: Array<{ opType: string; name: string }>;
+        };
+    } {
+        return 'edge' in t;
+    }
+    function isTensorTarget(
+        t: PanelTarget,
+    ): t is { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } } {
+        return 'tensor' in t;
+    }
+    function isIoTarget(t: PanelTarget): t is { graphValue: GraphValue; direction: 'input' | 'output' } {
+        return 'graphValue' in t;
+    }
 </script>
 
 {#if target}
-  <div
-    class="panel"
-    data-theme={theme}
-    style={[
-      ...Object.entries(PANEL_VARS[isDark ? 'dark' : 'light']),
-      ...Object.entries(categoryVars(isDark)),
-    ].map(([k, v]) => `${k}:${v}`).join(';')}
-  >
-    {#if onClose}<CloseButton {onClose} />{/if}
-    {#if isGraphNode(target)}
-      <OpPanel node={target} {inputSources} {onTensorClick} {onBack} {opsets} />
-    {:else if isEdgeTarget(target)}
-      <EdgePanel edge={target.edge} {tensorShapes} {onBack} />
-    {:else if isTensorTarget(target)}
-      {#if graph?.initializers.has(target.tensor.name)}
-        <WeightPanel target={target.tensor} {graph} {onBack} {isDark} children={weightInspector} />
-      {:else}
-        <TensorPanel tensor={target.tensor} {onBack} />
-      {/if}
-    {:else if isIoTarget(target)}
-      <IoPanel graphValue={target.graphValue} direction={target.direction} {onBack} />
-    {/if}
-  </div>
+    <div
+        class="panel"
+        data-theme={theme}
+        style={[...Object.entries(PANEL_VARS[isDark ? 'dark' : 'light']), ...Object.entries(categoryVars(isDark))]
+            .map(([k, v]) => `${k}:${v}`)
+            .join(';')}
+    >
+        {#if onClose}<CloseButton {onClose} />{/if}
+        {#if isGraphNode(target)}
+            <OpPanel node={target} {inputSources} {onTensorClick} {onBack} {opsets} />
+        {:else if isEdgeTarget(target)}
+            <EdgePanel edge={target.edge} {tensorShapes} {onBack} />
+        {:else if isTensorTarget(target)}
+            {#if graph?.initializers.has(target.tensor.name)}
+                <WeightPanel target={target.tensor} {graph} {onBack} {isDark} children={weightInspector} />
+            {:else}
+                <TensorPanel tensor={target.tensor} {onBack} />
+            {/if}
+        {:else if isIoTarget(target)}
+            <IoPanel graphValue={target.graphValue} direction={target.direction} {onBack} />
+        {/if}
+    </div>
 {/if}
 
 <style>
-  .panel {
-    position: relative;
-    width: 320px;
-    box-sizing: border-box;
-    background: var(--panel-bg);
-    border-radius: 8px;
-    overflow: hidden;
-    font-family: system-ui, sans-serif;
-    font-size: 11px;
-    line-height: 1.3;
-    border: 1px solid var(--panel-border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
-    color: var(--panel-text);
-  }
+    .panel {
+        position: relative;
+        width: 320px;
+        box-sizing: border-box;
+        background: var(--panel-bg);
+        border-radius: 8px;
+        overflow: hidden;
+        font-family: system-ui, sans-serif;
+        font-size: 11px;
+        line-height: 1.3;
+        border: 1px solid var(--panel-border);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        color: var(--panel-text);
+    }
 
-  .panel :global(*),
-  .panel :global(*::before),
-  .panel :global(*::after) {
-    box-sizing: border-box;
-  }
+    .panel :global(*),
+    .panel :global(*::before),
+    .panel :global(*::after) {
+        box-sizing: border-box;
+    }
 
-  .panel :global(button) {
-    margin: 0;
-    font: inherit;
-    line-height: inherit;
-  }
+    .panel :global(button) {
+        margin: 0;
+        font: inherit;
+        line-height: inherit;
+    }
 
-  .panel :global(td),
-  .panel :global(th) {
-    font-size: inherit;
-    line-height: inherit;
-    font-family: inherit;
-    color: inherit;
-  }
-
+    .panel :global(td),
+    .panel :global(th) {
+        font-size: inherit;
+        line-height: inherit;
+        font-family: inherit;
+        color: inherit;
+    }
 </style>
