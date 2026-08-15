@@ -1,7 +1,7 @@
 ---
-title: "TFLite"
-description: "TensorFlow Lite model parser for Wetron - parses .tflite FlatBuffers files synchronously, including built-in ops, custom ops, and dtype mapping."
-lead: "Parses `.tflite` FlatBuffers files synchronously using the flatbuffers npm package."
+title: 'TFLite'
+description: 'TensorFlow Lite model parser for Wetron - parses .tflite FlatBuffers files synchronously, including built-in ops, custom ops, and dtype mapping.'
+lead: 'Parses `.tflite` FlatBuffers files synchronously using the flatbuffers npm package.'
 weight: 20
 ---
 
@@ -19,7 +19,7 @@ Synchronous - no `await` needed.
 - Op types from the built-in `BuiltinOperator` enum; custom ops use their `custom_code` string
 - Tensor shapes and dtypes for all tensors in the parsed subgraph
 - Graph inputs and outputs from the primary subgraph
-- Initializer bytes exposed via `ModelGraph.weights.get(name)` - tensors with a non-empty buffer reference
+- Initializer bytes exposed via `ModelGraph.weights.source.get(name)` when `weights.kind === "available"` - tensors with a non-empty buffer reference
 
 ## Detection
 
@@ -50,5 +50,5 @@ Detects both:
 
 ## Notes
 
-- Initializer buffers are exposed lazily through `ModelGraph.weights`; consumers call `weights.get(name)` for raw bytes and `decodeWeight` / `computeStats` from `@wetron/core` to inspect values. See [Weights](../api/weights/).
+- Initializer buffers are exposed lazily through `ModelGraph.weights`; when `kind === "available"`, consumers call `weights.source.get(name)` for raw bytes and use `decodeWeight` / `computeStats` from `@wetron/core`. See [Weights](../api/weights/).
 - Synchronous because FlatBuffers decoding requires no async I/O.

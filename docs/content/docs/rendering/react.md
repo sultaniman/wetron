@@ -1,28 +1,28 @@
 ---
-title: "React"
-description: "ModelGraphView and NodePropertyPanel React components for Wetron - built on @xyflow/react with full TypeScript types and CSS custom property theming."
-lead: "Drop-in components built on @xyflow/react."
+title: 'React'
+description: 'ModelGraphView and NodePropertyPanel React components for Wetron - built on @xyflow/react with full TypeScript types and CSS custom property theming.'
+lead: 'Drop-in components built on @xyflow/react.'
 weight: 10
 ---
 
 Import the stylesheet once in your entry point:
 
 ```ts
-import "@wetron/react/styles.css";
+import '@wetron/react/styles.css';
 ```
 
 ## ModelGraphView
 
 ```tsx
-import { ModelGraphView } from "@wetron/react";
+import { ModelGraphView } from '@wetron/react';
 
 <ModelGraphView
-  graph={graph} // ModelGraph - required
-  onTargetClick={setSelected} // (target: PanelTarget) => void
-  colorMode="system" // "light" | "dark" | "system" (default: "system")
-  onWarnings={(w) => console.warn(w)} // called when graph has parse warnings
-  selectedEdgeTensorName={null} // highlights the matching edge
-  searchQuery="" // dims nodes that don't match the query
+    graph={graph} // ModelGraph - required
+    onTargetClick={setSelected} // (target: PanelTarget) => void
+    colorMode="system" // "light" | "dark" | "system" (default: "system")
+    onWarnings={(w) => console.warn(w)} // called when graph has parse warnings
+    selectedEdgeTensorName={null} // highlights the matching edge
+    searchQuery="" // dims nodes that don't match the query
 />;
 ```
 
@@ -44,17 +44,17 @@ Renders the full interactive graph. Nodes are coloured by operator category. Cli
 ## NodePropertyPanel
 
 ```tsx
-import { NodePropertyPanel } from "@wetron/react";
+import { NodePropertyPanel } from '@wetron/react';
 
 <NodePropertyPanel
-  target={selected} // PanelTarget | null - null renders nothing
-  graph={graph} // ModelGraph - enables the weight panel for initializer tensors
-  colorMode="system"
-  opsets={graph?.opsets} // ReadonlyMap<string, number> - ONNX domain versions
-  tensorShapes={graph?.tensorShapes} // shape info for edge panels
-  onTensorClick={(name) => {}} // called when a tensor name chip is clicked
-  onBack={() => {}} // shows a back arrow when provided
-  onClose={() => setSelected(null)} // shows a close button when provided
+    target={selected} // PanelTarget | null - null renders nothing
+    graph={graph} // ModelGraph - enables the weight panel for initializer tensors
+    colorMode="system"
+    opsets={graph?.opsets} // ReadonlyMap<string, number> - ONNX domain versions
+    tensorShapes={graph?.tensorShapes} // shape info for edge panels
+    onTensorClick={(name) => {}} // called when a tensor name chip is clicked
+    onBack={() => {}} // shows a back arrow when provided
+    onClose={() => setSelected(null)} // shows a close button when provided
 />;
 ```
 
@@ -74,7 +74,7 @@ import { NodePropertyPanel } from "@wetron/react";
 
 ### Weight panel
 
-When `target` resolves to an initializer tensor (a name present in `graph.initializers`) and `graph` is supplied, the panel switches to the weight panel. It auto-enables decoding for models where `fileSizeBytes <= 20MB` and `graph.weights` is present, and offers an explicit "Show weights" toggle for larger files. The toggle is disabled when `graph.hasExternalWeights && !graph.weights` - the prompt to load checkpoint files is shown in that state.
+When `target` resolves to an initializer tensor (a name present in `graph.initializers`) and `graph` is supplied, the panel switches to the weight panel. It auto-enables decoding for models where `fileSizeBytes <= 20MB` and `graph.weights.kind === "available"`, and offers an explicit "Show weights" toggle for larger files. The toggle is disabled for `weights.kind === "external"`; the panel identifies whether SavedModel checkpoint files or ONNX external data are required.
 
 The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally; the histogram and heatmap visualisations come from the same `WeightStats.histogram` (12 bins) and `WeightStats.heatmap` (16 × 8 grid) documented in [Weights](../api/weights/).
 
@@ -87,16 +87,16 @@ The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally;
 
 ```ts
 type PanelTarget =
-  | GraphNode
-  | { graphValue: GraphValue; direction: "input" | "output" }
-  | {
-      edge: {
-        tensorName: string;
-        from: { opType: string; name: string };
-        to: Array<{ opType: string; name: string }>;
-      };
-    }
-  | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
+    | GraphNode
+    | { graphValue: GraphValue; direction: 'input' | 'output' }
+    | {
+          edge: {
+              tensorName: string;
+              from: { opType: string; name: string };
+              to: Array<{ opType: string; name: string }>;
+          };
+      }
+    | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```
 
 Use `isGraphNode(target)` from `@wetron/react` to narrow to `GraphNode`.
@@ -109,11 +109,11 @@ Pass a `ref` to `ModelGraphView` to get imperative control:
 const ref = useRef<ModelGraphViewHandle>(null);
 
 type ModelGraphViewHandle = {
-  fitAll: () => Promise<void>;
-  getViewport: () => { x: number; y: number; zoom: number };
-  setViewport: (vp: { x: number; y: number; zoom: number }) => void;
-  getNodesBounds: () => { x: number; y: number; width: number; height: number };
-  getViewportElement: () => HTMLElement | null;
+    fitAll: () => Promise<void>;
+    getViewport: () => { x: number; y: number; zoom: number };
+    setViewport: (vp: { x: number; y: number; zoom: number }) => void;
+    getNodesBounds: () => { x: number; y: number; width: number; height: number };
+    getViewportElement: () => HTMLElement | null;
 };
 ```
 
