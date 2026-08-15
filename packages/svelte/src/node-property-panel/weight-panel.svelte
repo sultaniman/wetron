@@ -1,7 +1,7 @@
 <script lang="ts">
     import { untrack, type Snippet } from 'svelte';
     import type { ModelGraph, WeightInspectionData } from '@wetron/core';
-    import { computeStats, decodeWeight } from '@wetron/core';
+    import { computeStats, decodeWeight, elementSize } from '@wetron/core';
     import { formatVal } from '@wetron/core/format-val';
     import { weightStatsHint } from '@wetron/core/inspector-hints';
     import Hint from './hint.svelte';
@@ -37,34 +37,6 @@
         if (n < 1024 * 1024) return `${(n / 1024).toFixed(2)} KB`;
         if (n < 1024 * 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(2)} MB`;
         return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-    }
-
-    function elementSize(dtype: string): number {
-        const sizes: Record<string, number> = {
-            float32: 4,
-            float64: 8,
-            float16: 2,
-            bfloat16: 2,
-            int8: 1,
-            uint8: 1,
-            int16: 2,
-            uint16: 2,
-            int32: 4,
-            uint32: 4,
-            int64: 8,
-            uint64: 8,
-            bool: 1,
-            F32: 4,
-            F16: 2,
-            BF16: 2,
-            I8: 1,
-            I16: 2,
-            I32: 4,
-            I64: 8,
-            F64: 8,
-            Q4_0: 18 / 32,
-        };
-        return sizes[dtype] ?? 0;
     }
 
     const defaultShowWeights = $derived(graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined);

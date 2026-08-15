@@ -40,6 +40,14 @@ const GGML_SCALAR_DTYPES: Readonly<Record<string, string>> = {
   F64: "float64",
 };
 
+/** Bytes per element for a dtype name, accepting native and GGML scalar names.
+ *  Returns 0 for unknown dtypes. Q4_0 is block-quantized: 18 bytes per 32 elements,
+ *  so its per-element size is fractional. */
+export function elementSize(dtype: string): number {
+  if (dtype === "Q4_0") return 18 / 32;
+  return DTYPES[GGML_SCALAR_DTYPES[dtype] ?? dtype]?.bytesPerEl ?? 0;
+}
+
 function decodeQ4_0(bytes: Uint8Array, count: number): Float64Array {
   const blockSize = 18;
   const valuesPerBlock = 32;

@@ -1,5 +1,5 @@
 import { test, expect, describe } from "vitest";
-import { decodeWeight, decodeFirstN } from "../src/weight-decoder.ts";
+import { decodeWeight, decodeFirstN, elementSize } from "../src/weight-decoder.ts";
 
 function bytesOf(...vals: number[]): Uint8Array {
   return new Uint8Array(vals);
@@ -128,5 +128,52 @@ describe("decodeFirstN", () => {
     new DataView(buf).setFloat32(4, 9.5, true);
     const out = decodeFirstN(new Uint8Array(buf), "float32", 1000) as Float64Array;
     expect(out.length).toBe(2);
+  });
+});
+
+describe("elementSize", () => {
+  test("returns byte width for native dtypes", () => {
+    expect(elementSize("float32")).toBe(4);
+    expect(elementSize("float64")).toBe(8);
+    expect(elementSize("float16")).toBe(2);
+    expect(elementSize("bfloat16")).toBe(2);
+    expect(elementSize("int8")).toBe(1);
+    expect(elementSize("uint8")).toBe(1);
+    expect(elementSize("int16")).toBe(2);
+    expect(elementSize("uint16")).toBe(2);
+    expect(elementSize("int32")).toBe(4);
+    expect(elementSize("uint32")).toBe(4);
+    expect(elementSize("int64")).toBe(8);
+    expect(elementSize("uint64")).toBe(8);
+    expect(elementSize("bool")).toBe(1);
+  });
+
+  test("resolves GGML scalar aliases to their native width", () => {
+    expect(elementSize("F32")).toBe(4);
+    expect(elementSize("F16")).toBe(2);
+    expect(elementSize("BF16")).toBe(2);
+    expect(elementSize("I8")).toBe(1);
+    expect(elementSize("I16")).toBe(2);
+    expect(elementSize("I32")).toBe(4);
+    expect(elementSize("I64")).toBe(8);
+    expect(elementSize("F64")).toBe(8);
+  });
+
+  test("returns the fractional block width for Q4_0", () => {
+    // 18 bytes per 32-element block.
+    expect(elementSize("Q4_0")).toBe(18 / 32);
+  });
+
+  test("returns 0 for an unknown dtype", () => {
+    expect(elementSize("not_a_dtype")).toBe(0);
+    expect(elementSize("")).toBe(0);
+  });
+
+  test("covers every dtype decodeWeight can decode", () => {
+    // Guards the drift this export exists to prevent: a dtype the decoder
+    // understands but the size table does not would make byte math silently wrong.
+    for (const dtype of ["float32", "int8", "uint32", "int64", "uint64", "Q4_0"]) {
+      expect(elementSize(dtype)).toBeGreaterThan(0);
+    }
   });
 });
