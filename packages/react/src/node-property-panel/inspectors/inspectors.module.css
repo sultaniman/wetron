@@ -1,0 +1,570 @@
+.root {
+  --inspector-accent: #3b82f6;
+  --inspector-accent-strong: #2563eb;
+  --inspector-border: var(--wetron-panel-border);
+  --inspector-label: var(--wetron-panel-label);
+  --inspector-muted: var(--wetron-panel-subtitle);
+  --inspector-surface: color-mix(in oklch, var(--wetron-panel-text) 4%, transparent);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--wetron-panel-section-border);
+}
+
+.picker {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding-block: 8px;
+}
+
+.picker .caption {
+  font-size: 9px;
+}
+
+.selector {
+  width: 100%;
+  height: 30px;
+  padding: 4px 8px;
+  border: 1px solid var(--inspector-border);
+  border-radius: 6px;
+  background: var(--inspector-surface);
+  color: var(--wetron-panel-text);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.selector:focus-visible,
+.field:focus-visible {
+  border-color: var(--inspector-accent);
+  outline: 2px solid color-mix(in oklch, var(--inspector-accent) 35%, transparent);
+  outline-offset: 1px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: end;
+}
+
+.control {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.caption {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--inspector-label);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hint {
+  display: inline-flex;
+  width: 12px;
+  height: 12px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--inspector-muted);
+  cursor: help;
+}
+
+.hint:hover,
+.hint:focus-visible {
+  color: var(--inspector-accent);
+}
+
+.hint:focus-visible {
+  border-radius: 50%;
+  outline: 2px solid color-mix(in oklch, var(--inspector-accent) 35%, transparent);
+  outline-offset: 1px;
+}
+
+/* A number field paired with its upper bound, e.g. "0" … "of 2,592". */
+.bounded {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.bounded .field {
+  flex: 1;
+}
+
+.bound {
+  flex: none;
+  color: var(--inspector-label);
+  font:
+    9px ui-monospace,
+    monospace;
+  white-space: nowrap;
+}
+
+.scale {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  color: var(--inspector-label);
+  font:
+    8px ui-monospace,
+    monospace;
+}
+
+.scaleRamp {
+  height: 7px;
+  flex: 1;
+  border-radius: 2px;
+}
+
+.nonFinite {
+  display: flex;
+  gap: 12px;
+  margin-top: 9px;
+  padding-top: 7px;
+  border-top: 1px dashed var(--inspector-border);
+  color: var(--wetron-panel-text);
+  font:
+    9px ui-monospace,
+    monospace;
+}
+
+.nonFinite b {
+  color: var(--inspector-label);
+  font-weight: 400;
+}
+
+/* Applied explicitly to form controls. Never an element-type selector - the
+   inspectors also render buttons and inputs that must not look like fields. */
+.field {
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  padding: 3px 7px;
+  border: 1px solid var(--inspector-border);
+  border-radius: 5px;
+  background: var(--inspector-surface);
+  color: var(--wetron-panel-text);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Cells are square, so a slice with few columns would stretch each cell to the
+   full panel width. The inline max-width caps a cell at --matrix-cell. */
+.matrix {
+  display: grid;
+  width: 100%;
+  margin-inline: auto;
+  gap: 1px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--inspector-border);
+}
+
+.cell {
+  min-height: 4px;
+  aspect-ratio: 1;
+  border: 0;
+  padding: 0;
+}
+
+.plot {
+  padding: 8px 8px 5px;
+  border: 1px solid var(--inspector-border);
+  border-radius: 6px;
+  background: var(--inspector-surface);
+}
+
+.bars {
+  display: flex;
+  height: 78px;
+  align-items: end;
+  gap: 2px;
+  border-bottom: 1px solid var(--inspector-border);
+  background: linear-gradient(
+    to bottom,
+    transparent 49%,
+    color-mix(in oklch, var(--inspector-border) 55%, transparent) 50%,
+    transparent 51%
+  );
+}
+
+.bars span {
+  min-width: 2px;
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  background: var(--inspector-accent);
+}
+
+.chartAxis {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+  color: var(--inspector-muted);
+  font:
+    8px ui-monospace,
+    monospace;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 8px;
+  margin-top: 9px;
+}
+
+.stat {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 5px;
+  font-size: 9px;
+}
+
+.statLabel {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--inspector-label);
+}
+
+.statValue {
+  overflow: hidden;
+  color: var(--wetron-panel-text);
+  font:
+    9px ui-monospace,
+    monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile {
+  max-height: 264px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.profileInner {
+  position: relative;
+  width: 100%;
+}
+
+.profileRow {
+  display: grid;
+  height: 22px;
+  grid-template-columns: 40px minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 7px;
+  color: var(--inspector-label);
+  font-size: 9px;
+}
+
+.profileRow > :first-child {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.profileRow > :last-child {
+  color: var(--wetron-panel-text);
+  font-family: ui-monospace, monospace;
+  text-align: right;
+}
+
+.profileTrack {
+  position: relative;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--inspector-surface);
+}
+
+.profileTrack[data-signed="true"]::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--inspector-border);
+  content: "";
+}
+
+.profileBar {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  min-width: 1px;
+  border-radius: 2px;
+  background: var(--inspector-accent);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 9px;
+}
+
+.summaryItem {
+  padding: 7px 8px;
+  border: 1px solid var(--inspector-border);
+  border-radius: 6px;
+  background: var(--inspector-surface);
+}
+
+.summaryValue {
+  display: block;
+  color: var(--wetron-panel-text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.summaryLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  color: var(--inspector-label);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.blockMap {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.block {
+  min-height: 22px;
+  border: 1px solid var(--inspector-border);
+  border-radius: 4px;
+}
+
+.empty {
+  background: transparent;
+}
+
+.partial {
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklch, var(--inspector-accent) 55%, transparent),
+    color-mix(in oklch, var(--inspector-accent) 55%, transparent) 3px,
+    transparent 3px,
+    transparent 6px
+  );
+}
+
+.full {
+  border-color: var(--inspector-accent-strong);
+  background: var(--inspector-accent-strong);
+}
+
+.legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 7px;
+  color: var(--inspector-label);
+  font-size: 8px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--inspector-border);
+  border-radius: 2px;
+}
+
+.gallery {
+  display: grid;
+  max-height: 320px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+/* Two fixed header lines. A single run-on line wraps once L2 grows past three
+   digits, which makes cards uneven and breaks the gallery's row rhythm. */
+.kernelOut {
+  display: block;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kernelL2 {
+  display: block;
+  overflow: hidden;
+  color: var(--inspector-label);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kernel {
+  padding: 4px;
+  border: 1px solid var(--inspector-border);
+  border-radius: 4px;
+  font-size: 8px;
+}
+
+.kernelGrid {
+  display: grid;
+  gap: 1px;
+  margin-top: 3px;
+}
+
+.kernelGrid span {
+  aspect-ratio: 1;
+}
+
+.findings {
+  display: grid;
+  gap: 6px;
+}
+
+.findingGroup {
+  overflow: hidden;
+  border: 1px solid var(--inspector-border);
+  border-radius: 6px;
+  background: var(--inspector-surface);
+}
+
+.findingHeader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+}
+
+.finding {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 18px minmax(0, 1fr) auto 14px;
+  align-items: center;
+  gap: 5px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--wetron-panel-text);
+  font-size: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.finding:hover {
+  background: color-mix(in oklch, var(--inspector-accent) 7%, transparent);
+}
+
+.findingIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--inspector-label);
+  font-size: 11px;
+}
+
+.findingIcon[data-severity="error"] {
+  color: #ef4444;
+}
+.findingIcon[data-severity="warning"] {
+  color: #f59e0b;
+}
+.findingIcon[data-severity="info"] {
+  color: var(--inspector-accent);
+}
+
+.findingLabel {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.findingCount {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: color-mix(in oklch, var(--inspector-label) 12%, transparent);
+  color: var(--inspector-label);
+  font:
+    8px ui-monospace,
+    monospace;
+  text-align: center;
+}
+
+.findingCaret {
+  color: var(--inspector-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.findingDetails {
+  display: grid;
+  max-height: 150px;
+  overflow-y: auto;
+  border-top: 1px solid var(--inspector-border);
+}
+
+.findingDetail {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px 5px 31px;
+  color: var(--inspector-label);
+  font:
+    8px ui-monospace,
+    monospace;
+}
+
+.findingDetail + .findingDetail {
+  border-top: 1px solid color-mix(in oklch, var(--inspector-border) 60%, transparent);
+}
+
+.detail {
+  margin-top: 7px;
+  color: var(--inspector-label);
+  font:
+    9px ui-monospace,
+    monospace;
+}
+
+.note {
+  color: var(--inspector-muted);
+  font-size: 9px;
+  line-height: 1.45;
+}
