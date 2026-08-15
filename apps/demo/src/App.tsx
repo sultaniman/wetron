@@ -199,7 +199,10 @@ export default function App() {
 
   const ModeIcon = MODE_ICON[colorMode];
   const ready = state.status === "ready";
-  const showWeightsButton = ready && state.graph.hasExternalWeights && !state.graph.weights;
+  const showWeightsButton =
+    ready &&
+    state.graph.weights?.kind === "external" &&
+    state.graph.weights.format === "savedmodel";
 
   return (
     <div className={css.root} data-theme={resolvedMode}>
@@ -255,10 +258,10 @@ export default function App() {
             Load weights…
           </button>
         )}
-        {ready && state.graph.weights && (
+        {ready && state.graph.weights?.kind === "available" && (
           <span
             className={css.weightsStatus}
-            title={`${state.graph.weights.totalBytes.toLocaleString()} bytes loaded`}
+            title={`${state.graph.weights.source.totalBytes.toLocaleString()} bytes loaded`}
           >
             ✓ weights loaded
           </span>

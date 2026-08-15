@@ -258,7 +258,7 @@
                 Export PNG
             </button>
         {/if}
-        {#if appState.status === 'ready' && graph && graph.hasExternalWeights && !graph.weights}
+        {#if appState.status === 'ready' && graph?.weights?.kind === 'external' && graph.weights.format === 'savedmodel'}
             <label
                 title="Pick variables.index + variables.data-XXXXX-of-XXXXX from the SavedModel directory"
                 style="padding:5px 12px;background:{weightsLoad.status === 'loading'
@@ -285,10 +285,10 @@
                 />
             </label>
         {/if}
-        {#if appState.status === 'ready' && graph && graph.weights}
+        {#if appState.status === 'ready' && graph?.weights?.kind === 'available'}
             <span
                 style="padding:5px 10px;color:{chrome.muted};font-size:12px"
-                title="{graph.weights.totalBytes.toLocaleString()} bytes loaded"
+                title="{graph.weights.source.totalBytes.toLocaleString()} bytes loaded"
             >
                 ✓ weights loaded
             </span>
