@@ -6,6 +6,7 @@ export default defineConfig({
     projects: [
       {
         extends: true,
+        ssr: { resolve: { conditions: ["source"] } },
         test: {
           name: "node",
           include: ["packages/*/test/**/*.test.ts"],
