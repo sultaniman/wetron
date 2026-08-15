@@ -12,7 +12,8 @@ pnpm add @wetron/core
 
 ```ts
 // Detect format from magic bytes - never throws, returns "unknown" on no match
-type Format = "onnx" | "tflite" | "keras" | "gguf" | "torchscript" | "executorch" | "savedmodel" | "unknown";
+type Format =
+  "onnx" | "tflite" | "keras" | "gguf" | "torchscript" | "executorch" | "savedmodel" | "unknown";
 function detectFormat(bytes: Uint8Array, filename?: string): Format;
 
 // Parse a model file - dispatches to the right parser based on format detection
@@ -35,8 +36,8 @@ function opInputLabels(opType: string): readonly string[];
 
 | Path                       | Contents                                           |
 | -------------------------- | -------------------------------------------------- |
-| `@wetron/common/ir`          | IR types and `ParseError`                          |
-| `@wetron/common/dtypes`      | Exotic numeric readers (bfloat16, float8, int4, …) |
+| `@wetron/common/ir`        | IR types and `ParseError`                          |
+| `@wetron/common/dtypes`    | Exotic numeric readers (bfloat16, float8, int4, …) |
 | `@wetron/core/detect`      | `detectFormat` standalone                          |
 | `@wetron/core/transform`   | `modelGraphToFlow` and flow types                  |
 | `@wetron/core/edge-path`   | Edge routing geometry                              |

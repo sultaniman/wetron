@@ -40,9 +40,7 @@ test("parseKerasWithWeights warns when model.weights.h5 cannot be loaded", async
 
   expect(graph.nodes.length).toBe(2);
   expect(graph.weights).toBeUndefined();
-  expect(graph.warnings).toEqual([
-    expect.objectContaining({ code: "keras-weight-load-failed" }),
-  ]);
+  expect(graph.warnings).toEqual([expect.objectContaining({ code: "keras-weight-load-failed" })]);
 });
 
 const SEQ_CONFIG = {

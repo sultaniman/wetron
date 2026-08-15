@@ -60,6 +60,50 @@ const GGML_TYPES: Readonly<Record<number, string>> = {
   39: "MXFP4",
 };
 
+const GGML_TYPE_LAYOUTS: Readonly<Record<number, readonly [blockSize: number, typeSize: number]>> =
+  {
+    0: [1, 4],
+    1: [1, 2],
+    2: [32, 18],
+    3: [32, 20],
+    4: [16, 10],
+    5: [16, 12],
+    6: [32, 22],
+    7: [32, 24],
+    8: [32, 34],
+    9: [32, 40],
+    10: [256, 84],
+    11: [256, 110],
+    12: [256, 144],
+    13: [256, 176],
+    14: [256, 210],
+    15: [256, 292],
+    16: [256, 66],
+    17: [256, 74],
+    18: [256, 98],
+    19: [256, 50],
+    20: [32, 18],
+    21: [256, 110],
+    22: [256, 82],
+    23: [256, 136],
+    24: [1, 1],
+    25: [1, 2],
+    26: [1, 4],
+    27: [1, 8],
+    28: [1, 8],
+    29: [256, 56],
+    30: [1, 2],
+    31: [32, 18],
+    32: [32, 18],
+    33: [32, 18],
+    34: [256, 54],
+    35: [256, 66],
+    36: [32, 18],
+    37: [32, 18],
+    38: [32, 18],
+    39: [32, 17],
+  };
+
 const FILE_TYPES: Readonly<Record<number, string>> = {
   0: "ALL_F32",
   1: "MOSTLY_F16",
@@ -213,7 +257,8 @@ class Reader {
         return this.float32(context);
       case VALUE_TYPE.BOOL: {
         const value = this.uint8(context);
-        if (value !== 0 && value !== 1) throw new ParseError("gguf", `Invalid boolean in ${context}`);
+        if (value !== 0 && value !== 1)
+          throw new ParseError("gguf", `Invalid boolean in ${context}`);
         return value === 1;
       }
       case VALUE_TYPE.STRING:
@@ -262,28 +307,30 @@ function tensorElementCount(shape: readonly number[]): number | null {
 }
 
 function tensorByteLength(info: TensorInfo): number | null {
+  const layout = GGML_TYPE_LAYOUTS[info.type];
+  if (!layout) return null;
+
   const count = tensorElementCount(info.shape);
-  if (count === null) return null;
-  const bytesPerElement: Readonly<Record<number, number>> = {
-    0: 4,
-    1: 2,
-    24: 1,
-    25: 2,
-    26: 4,
-    27: 8,
-    28: 8,
-    30: 2,
-  };
-  const scalarSize = bytesPerElement[info.type];
-  if (scalarSize !== undefined) {
-    const size = count * scalarSize;
-    return Number.isSafeInteger(size) ? size : null;
+  if (count === null) {
+    throw new ParseError(
+      "gguf",
+      `Tensor ${info.name} element count exceeds the safe integer range`,
+    );
   }
-  if (info.type === 2 && count % 32 === 0) {
-    const size = (count / 32) * 18;
-    return Number.isSafeInteger(size) ? size : null;
+
+  const [blockSize, typeSize] = layout;
+  const rowSize = info.shape[0] ?? 1;
+  if (rowSize % blockSize !== 0) {
+    throw new ParseError(
+      "gguf",
+      `Tensor ${info.name} first dimension ${rowSize} is not divisible by ${blockSize}`,
+    );
   }
-  return null;
+  const size = (count / blockSize) * typeSize;
+  if (!Number.isSafeInteger(size)) {
+    throw new ParseError("gguf", `Tensor ${info.name} byte length exceeds the safe integer range`);
+  }
+  return size;
 }
 
 function looksLikeHtml(bytes: Uint8Array): boolean {
@@ -372,22 +419,44 @@ function buildNodes(
   const ordered = [...groups.values()].sort(
     (a, b) => a.order - b.order || a.key.localeCompare(b.key),
   );
+  const nodeNames = new Set(tensorNames);
+  const valueNames = new Set(tensorNames);
+  const uniqueName = (preferred: string, used: Set<string>, qualifier: string): string => {
+    if (!used.has(preferred)) {
+      used.add(preferred);
+      return preferred;
+    }
+    let index = 1;
+    let candidate = `${preferred} (${qualifier})`;
+    while (used.has(candidate)) {
+      index++;
+      candidate = `${preferred} (${qualifier} ${index})`;
+    }
+    used.add(candidate);
+    return candidate;
+  };
+  const stageName = (index: number): string =>
+    uniqueName(`gguf::stage:${index}`, valueNames, "stage");
+  const firstStage = stageName(0);
   const nodes: GraphNode[] = [
     {
-      name: architecture,
+      name: uniqueName(architecture, nodeNames, "model"),
       opType: `GGUF v${version}`,
       inputs: [],
-      outputs: ["gguf::stage:0"],
+      outputs: [firstStage],
       attributes,
     },
   ];
 
-  let previous = "gguf::stage:0";
+  let previous = firstStage;
   for (let i = 0; i < ordered.length; i++) {
     const group = ordered[i];
-    const output = i === ordered.length - 1 ? "output" : `gguf::stage:${i + 1}`;
+    const output =
+      i === ordered.length - 1
+        ? uniqueName("output", valueNames, "model output")
+        : stageName(i + 1);
     nodes.push({
-      name: group.name,
+      name: uniqueName(group.name, nodeNames, "group"),
       opType: group.opType,
       inputs: [previous, ...group.tensors],
       outputs: [output],
@@ -462,17 +531,21 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
     if (!Number.isSafeInteger(alignment) || alignment <= 0) {
       throw new ParseError("gguf", `Invalid tensor alignment ${String(alignmentValue)}`);
     }
-    const tensorDataOffset = tensorInfos.length === 0 ? reader.offset : alignOffset(reader.offset, alignment);
+    const tensorDataOffset =
+      tensorInfos.length === 0 ? reader.offset : alignOffset(reader.offset, alignment);
     if (tensorDataOffset > bytes.byteLength) {
       throw new ParseError("gguf", "Tensor data starts beyond the end of the file");
     }
 
-    const orderedOffsets = [...new Set(tensorInfos.map((info) => info.offset))].sort((a, b) => a - b);
+    const orderedOffsets = [...new Set(tensorInfos.map((info) => info.offset))].sort(
+      (a, b) => a - b,
+    );
     const nextOffsets = new Map<number, number | undefined>(
       orderedOffsets.map((offset, index) => [offset, orderedOffsets[index + 1]]),
     );
     const tensorRanges = new Map<string, { start: number; end: number }>();
     let totalWeightBytes = 0;
+    let hasUnknownTensorType = false;
     for (const info of tensorInfos) {
       if (info.offset % alignment !== 0) {
         throw new ParseError("gguf", `Tensor ${info.name} offset is not ${alignment}-byte aligned`);
@@ -480,11 +553,16 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
       const start = tensorDataOffset + info.offset;
       const nextRelativeOffset = nextOffsets.get(info.offset);
       const exactLength = tensorByteLength(info);
-      const end = exactLength === null
-        ? tensorDataOffset + (nextRelativeOffset ?? bytes.byteLength - tensorDataOffset)
-        : start + exactLength;
+      if (exactLength === null) hasUnknownTensorType = true;
+      const end =
+        exactLength === null
+          ? tensorDataOffset + (nextRelativeOffset ?? bytes.byteLength - tensorDataOffset)
+          : start + exactLength;
       if (start > bytes.byteLength || end < start || end > bytes.byteLength) {
         throw new ParseError("gguf", `Tensor ${info.name} data exceeds the file size`);
+      }
+      if (nextRelativeOffset !== undefined && end > tensorDataOffset + nextRelativeOffset) {
+        throw new ParseError("gguf", `Tensor ${info.name} data overlaps the next tensor`);
       }
       tensorRanges.set(info.name, { start, end });
       totalWeightBytes += end - start;
@@ -492,7 +570,12 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
 
     const architecture = metadata.get("general.architecture");
     const modelName = metadata.get("general.name");
-    const name = typeof modelName === "string" ? modelName : typeof architecture === "string" ? architecture : "GGUF";
+    const name =
+      typeof modelName === "string"
+        ? modelName
+        : typeof architecture === "string"
+          ? architecture
+          : "GGUF";
     const tensorNames = [...initializers.keys()];
     const tensorShapes = new Map(initializers);
     const attributes = Object.fromEntries(metadata);
@@ -512,7 +595,8 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
     >(tensorShapes);
     for (const node of graph.nodes) {
       for (const output of node.outputs) {
-        if (!fullTensorShapes.has(output)) fullTensorShapes.set(output, { shape: null, dtype: null });
+        if (!fullTensorShapes.has(output))
+          fullTensorShapes.set(output, { shape: null, dtype: null });
       }
     }
 
@@ -524,15 +608,16 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
       initializers,
       tensorShapes: fullTensorShapes,
       fileSizeBytes: bytes.byteLength,
-      weights: reader.littleEndian
-        ? {
-            totalBytes: totalWeightBytes,
-            get: (tensorName) => {
-              const range = tensorRanges.get(tensorName);
-              return range ? bytes.subarray(range.start, range.end) : undefined;
-            },
-          }
-        : undefined,
+      weights:
+        reader.littleEndian && !hasUnknownTensorType
+          ? {
+              totalBytes: totalWeightBytes,
+              get: (tensorName) => {
+                const range = tensorRanges.get(tensorName);
+                return range ? bytes.subarray(range.start, range.end) : undefined;
+              },
+            }
+          : undefined,
     };
   } catch (error) {
     if (error instanceof ParseError) throw error;

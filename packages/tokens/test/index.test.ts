@@ -20,17 +20,13 @@ function extractOpCategoryValues(filePath: string): string[] {
 }
 
 test("OpCategory in tokens matches core", () => {
-  const coreValues = extractOpCategoryValues(
-    resolve(__dirname, "../../core/src/categories.ts"),
-  );
+  const coreValues = extractOpCategoryValues(resolve(__dirname, "../../core/src/categories.ts"));
   const tokenValues = extractOpCategoryValues(resolve(__dirname, "../src/index.ts"));
   expect(tokenValues).toEqual(coreValues);
 });
 
 test("CATEGORY_THEME has a light and dark entry for every OpCategory in core", () => {
-  const coreValues = extractOpCategoryValues(
-    resolve(__dirname, "../../core/src/categories.ts"),
-  );
+  const coreValues = extractOpCategoryValues(resolve(__dirname, "../../core/src/categories.ts"));
   expect(Object.keys(CATEGORY_THEME).sort()).toEqual(coreValues);
   for (const v of Object.values(CATEGORY_THEME)) {
     expect(typeof v.light).toBe("string");

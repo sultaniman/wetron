@@ -1,5 +1,7 @@
 import { test, expect } from "vitest";
+import { readFileSync } from "node:fs";
 import { ParseError } from "@wetron/common/ir";
+import { modelGraphToFlow } from "../../core/src/transform.ts";
 import { parseGguf } from "../src/index.ts";
 
 class Writer {
@@ -69,34 +71,75 @@ function fixture(outputType = 0): Uint8Array {
 
   writer.string("token_embd.weight");
   writer.uint32(2);
-  writer.uint64(4n);
-  writer.uint64(8n);
+  writer.uint64(256n);
+  writer.uint64(1n);
   writer.uint32(12);
   writer.uint64(0n);
 
   writer.string("blk.0.attn_q.weight");
   writer.uint32(2);
-  writer.uint64(8n);
-  writer.uint64(8n);
+  writer.uint64(256n);
+  writer.uint64(1n);
   writer.uint32(12);
-  writer.uint64(32n);
+  writer.uint64(160n);
 
   writer.string("blk.0.ffn_up.weight");
   writer.uint32(2);
-  writer.uint64(8n);
-  writer.uint64(16n);
+  writer.uint64(32n);
+  writer.uint64(4n);
   writer.uint32(2);
-  writer.uint64(64n);
+  writer.uint64(320n);
 
   writer.string("output_norm.weight");
   writer.uint32(1);
   writer.uint64(8n);
   writer.uint32(outputType);
-  writer.uint64(160n);
+  writer.uint64(416n);
 
   writer.padTo(32);
-  writer.raw(new Uint8Array(192));
+  writer.raw(new Uint8Array(448));
 
+  return writer.bytes();
+}
+
+function singleTensorFixture(type: number, rowSize: number, payloadSize: number): Uint8Array {
+  const writer = new Writer();
+  writer.raw([0x47, 0x47, 0x55, 0x46]);
+  writer.uint32(3);
+  writer.uint64(1n);
+  writer.uint64(0n);
+  writer.string("weight");
+  writer.uint32(1);
+  writer.uint64(BigInt(rowSize));
+  writer.uint32(type);
+  writer.uint64(0n);
+  writer.padTo(32);
+  writer.raw(new Uint8Array(payloadSize));
+  return writer.bytes();
+}
+
+function collisionFixture(): Uint8Array {
+  const writer = new Writer();
+  writer.raw([0x47, 0x47, 0x55, 0x46]);
+  writer.uint32(3);
+  writer.uint64(2n);
+  writer.uint64(1n);
+  entry(writer, "general.architecture", 8, () => writer.string("test"));
+
+  writer.string("class_embd");
+  writer.uint32(1);
+  writer.uint64(1n);
+  writer.uint32(0);
+  writer.uint64(0n);
+
+  writer.string("output");
+  writer.uint32(1);
+  writer.uint64(1n);
+  writer.uint32(0);
+  writer.uint64(32n);
+
+  writer.padTo(32);
+  writer.raw(new Uint8Array(36));
   return writer.bytes();
 }
 
@@ -124,20 +167,120 @@ test("parses GGUF metadata and tensor descriptors", () => {
   expect(graph.nodes[0].attributes["tokenizer.ggml.tokens"]).toEqual(["<s>", "</s>"]);
   expect(graph.nodes[0].attributes["general.file_type"]).toBe(15);
   expect(graph.nodes[0].attributes["general.file_type_name"]).toBe("MOSTLY_Q4_K_M");
-  expect(graph.initializers.get("token_embd.weight")).toEqual({ shape: [4, 8], dtype: "Q4_K" });
+  expect(graph.initializers.get("token_embd.weight")).toEqual({ shape: [256, 1], dtype: "Q4_K" });
   expect(graph.tensorShapes.get("output_norm.weight")).toEqual({ shape: [8], dtype: "F32" });
   expect(graph.fileSizeBytes).toBe(fixture().byteLength);
+  expect(graph.weights?.get("token_embd.weight")?.byteLength).toBe(144);
+  expect(graph.weights?.get("blk.0.attn_q.weight")?.byteLength).toBe(144);
   expect(graph.weights?.get("blk.0.ffn_up.weight")?.byteLength).toBe(72);
   expect(graph.weights?.get("output_norm.weight")?.byteLength).toBe(32);
   expect(graph.weights?.get("missing")).toBeUndefined();
-  expect(graph.weights?.totalBytes).toBe(168);
+  expect(graph.weights?.totalBytes).toBe(392);
 });
 
 test("uses a forward-compatible name for unknown GGML tensor types", () => {
-  expect(parseGguf(fixture(99)).initializers.get("output_norm.weight")?.dtype).toBe(
-    "GGML_TYPE_99",
+  const graph = parseGguf(fixture(99));
+  expect(graph.initializers.get("output_norm.weight")?.dtype).toBe("GGML_TYPE_99");
+  expect(graph.weights).toBeUndefined();
+});
+
+test("computes exact payload lengths for every known GGML tensor type", () => {
+  const layouts = [
+    [1, 4],
+    [1, 2],
+    [32, 18],
+    [32, 20],
+    [16, 10],
+    [16, 12],
+    [32, 22],
+    [32, 24],
+    [32, 34],
+    [32, 40],
+    [256, 84],
+    [256, 110],
+    [256, 144],
+    [256, 176],
+    [256, 210],
+    [256, 292],
+    [256, 66],
+    [256, 74],
+    [256, 98],
+    [256, 50],
+    [32, 18],
+    [256, 110],
+    [256, 82],
+    [256, 136],
+    [1, 1],
+    [1, 2],
+    [1, 4],
+    [1, 8],
+    [1, 8],
+    [256, 56],
+    [1, 2],
+    [32, 18],
+    [32, 18],
+    [32, 18],
+    [256, 54],
+    [256, 66],
+    [32, 18],
+    [32, 18],
+    [32, 18],
+    [32, 17],
+  ] as const;
+
+  for (let type = 0; type < layouts.length; type++) {
+    const [blockSize, typeSize] = layouts[type];
+    const graph = parseGguf(singleTensorFixture(type, blockSize, typeSize));
+    expect(graph.weights?.get("weight")?.byteLength, `type ${type}`).toBe(typeSize);
+    expect(graph.weights?.totalBytes, `type ${type}`).toBe(typeSize);
+  }
+});
+
+test("rejects a quantized tensor whose row is not block-aligned", () => {
+  expect(() => parseGguf(singleTensorFixture(12, 32, 144))).toThrow(
+    "first dimension 32 is not divisible by 256",
   );
 });
+
+test("keeps synthetic GGUF names outside the initializer namespace", () => {
+  const graph = parseGguf(collisionFixture());
+  expect(graph.nodes.every((node) => !graph.initializers.has(node.name))).toBe(true);
+  expect(
+    graph.nodes.flatMap((node) => node.outputs).every((name) => !graph.initializers.has(name)),
+  ).toBe(true);
+  expect(graph.nodes.map((node) => node.name)).toEqual([
+    "test",
+    "class_embd (group)",
+    "output (group)",
+  ]);
+  expect(graph.outputs[0].name).toBe("output (model output)");
+
+  const flow = modelGraphToFlow(graph);
+  expect(flow.nodes).toHaveLength(4);
+  expect(flow.edges).toHaveLength(3);
+});
+
+for (const [filename, expectedNodes, expectedTensors] of [
+  ["stories260K.gguf", 13, 48],
+  ["stories15M-q4_0.gguf", 15, 57],
+] as const) {
+  test(`parses real fixture ${filename}`, () => {
+    const bytes = readFileSync(new URL(`../../../test-models/${filename}`, import.meta.url));
+    const graph = parseGguf(bytes);
+    expect(graph.nodes).toHaveLength(expectedNodes);
+    expect(graph.initializers.size).toBe(expectedTensors);
+    expect(graph.weights).toBeDefined();
+    let totalBytes = 0;
+    for (const name of graph.initializers.keys()) {
+      const tensorBytes = graph.weights?.get(name);
+      expect(tensorBytes, name).toBeDefined();
+      totalBytes += tensorBytes?.byteLength ?? 0;
+    }
+    expect(graph.weights?.totalBytes).toBe(totalBytes);
+    expect(graph.nodes.every((node) => node.opType.length > 0)).toBe(true);
+    expect(graph.outputs).toHaveLength(1);
+  });
+}
 
 test("parses v2 and big-endian v3 headers", () => {
   for (const [version, littleEndian] of [
@@ -162,7 +305,7 @@ test("rejects unsupported versions and truncated files with ParseError context",
 });
 
 test("identifies an HTML download page saved with a GGUF extension", () => {
-  expect(() => parseGguf(new TextEncoder().encode("<!doctype html><title>Hugging Face</title>"))).toThrow(
-    "This is an HTML page, not a GGUF model",
-  );
+  expect(() =>
+    parseGguf(new TextEncoder().encode("<!doctype html><title>Hugging Face</title>")),
+  ).toThrow("This is an HTML page, not a GGUF model");
 });

@@ -8,6 +8,14 @@ import {
   VirtualValues,
   WeightHeatmap,
   WeightHistogram,
+  MatrixInspector,
+  DistributionInspector,
+  AxisProfileInspector,
+  SparsityInspector,
+  KernelGalleryInspector,
+  QuantizationInspector,
+  DiagnosticsInspector,
+  ValuesInspector,
   WeightPanel,
   useWeightInspection,
   type WeightInspectionContextValue,
@@ -68,6 +76,17 @@ test("exports the context contract and reusable built-in inspectors", () => {
   expect(WeightHistogram).toBeTypeOf("function");
   expect(WeightHeatmap).toBeTypeOf("function");
   expect(VirtualValues).toBeTypeOf("function");
+  for (const inspector of [
+    MatrixInspector,
+    DistributionInspector,
+    AxisProfileInspector,
+    SparsityInspector,
+    KernelGalleryInspector,
+    QuantizationInspector,
+    DiagnosticsInspector,
+    ValuesInspector,
+  ])
+    expect(inspector).toBeTypeOf("function");
 });
 
 describe("inspection statuses", () => {
@@ -88,7 +107,9 @@ describe("inspection statuses", () => {
         <Probe />
       </WeightPanel>,
     );
-    expect(screen.getByTestId("probe").textContent).toContain("deferred|w|float32|2|no-bytes|no-values|no-stats");
+    expect(screen.getByTestId("probe").textContent).toContain(
+      "deferred|w|float32|2|no-bytes|no-values|no-stats",
+    );
     await act(async () => fireEvent.click(screen.getByTestId("show-weights-switch")));
     expect(screen.getByTestId("probe").textContent).toContain("ready|w|float32|2|8|2|2");
   });
@@ -120,13 +141,17 @@ describe("inspection statuses", () => {
         <Probe />
       </WeightPanel>,
     );
-    expect(screen.getByTestId("probe").textContent).toContain("external|w|float32|2|no-bytes|no-values|no-stats");
+    expect(screen.getByTestId("probe").textContent).toContain(
+      "external|w|float32|2|no-bytes|no-values|no-stats",
+    );
     rerender(
       <WeightPanel target={target} graph={graph({})}>
         <Probe />
       </WeightPanel>,
     );
-    expect(screen.getByTestId("probe").textContent).toContain("unavailable|w|float32|2|no-bytes|no-values|no-stats");
+    expect(screen.getByTestId("probe").textContent).toContain(
+      "unavailable|w|float32|2|no-bytes|no-values|no-stats",
+    );
   });
 
   test("unsupported exposes bytes without values or stats", () => {
@@ -136,6 +161,8 @@ describe("inspection statuses", () => {
         <Probe />
       </WeightPanel>,
     );
-    expect(screen.getByTestId("probe").textContent).toContain("unsupported|w|Q4_K|8|8|no-values|no-stats");
+    expect(screen.getByTestId("probe").textContent).toContain(
+      "unsupported|w|Q4_K|8|8|no-values|no-stats",
+    );
   });
 });

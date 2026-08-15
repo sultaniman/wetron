@@ -12,9 +12,13 @@ test("weight inspection statuses expose only their available data", () => {
     "ready",
   ];
   const emptyStatuses = ["deferred", "external", "unavailable"] as const;
-  const empty = emptyStatuses.map(
-    (status): WeightInspectionData => ({ status, tensor, bytes: null, values: null, stats: null }),
-  );
+  const empty = emptyStatuses.map((status): WeightInspectionData => ({
+    status,
+    tensor,
+    bytes: null,
+    values: null,
+    stats: null,
+  }));
   const bytes = new Uint8Array(8);
   const unsupported: WeightInspectionData = {
     status: "unsupported",

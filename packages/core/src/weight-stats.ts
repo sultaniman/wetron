@@ -65,19 +65,7 @@ export function computeStats(values: Float64Array | Int32Array | Uint32Array): W
   const variance = finiteCount > 0 ? sumSq / finiteCount - mean * mean : 0;
   const std = Math.sqrt(Math.max(0, variance));
 
-  const histogram = Array.from({ length: HIST_BINS }, () => 0);
-  const range = max - min;
-  if (range > 0) {
-    const inv = HIST_BINS / range;
-    for (let i = 0; i < n; i++) {
-      const x = values[i];
-      let bin = Math.floor((x - min) * inv);
-      if (bin >= HIST_BINS) bin = HIST_BINS - 1;
-      histogram[bin]++;
-    }
-  } else {
-    histogram[Math.floor(HIST_BINS / 2)] = n;
-  }
+  const histogram = computeWeightDistribution(values, HIST_BINS).fullRange.counts;
 
   const heatmap = Array.from({ length: HEAT_CELLS }, () => 0);
   const chunkSize = Math.max(1, Math.floor(n / HEAT_CELLS));
@@ -107,3 +95,4 @@ export function computeStats(values: Float64Array | Int32Array | Uint32Array): W
 
   return { count: n, min, max, mean, std, zeros, histogram, heatmap, chunkSize, filledCells };
 }
+import { computeWeightDistribution } from "./weight-distribution.ts";

@@ -48,13 +48,11 @@ describe("WeightPanel small model", () => {
     // stat labels
     expect(screen.getByText("min")).toBeDefined();
     expect(screen.getByText("max")).toBeDefined();
-    // After the changes in Task 3, the values meta is "<count> values".
-    expect(screen.getByText("4 values")).toBeDefined();
-    // Load all is gone - values are virtualized.
+    expect(screen.getByTestId("distribution-inspector")).toBeDefined();
     expect(screen.queryByText(/Load all/)).toBeNull();
   });
 
-  test("toggling Show weights hides values grid", async () => {
+  test("values remain reachable through the inspector selector", async () => {
     const g = smallGraph();
     render(
       React.createElement(WeightPanel, {
@@ -63,13 +61,16 @@ describe("WeightPanel small model", () => {
       }),
     );
     await act(async () => {});
+    await act(async () =>
+      fireEvent.change(screen.getByLabelText("Weight inspector"), { target: { value: "values" } }),
+    );
     expect(screen.queryByTestId("values-grid")).not.toBeNull();
     const sw = screen.getByTestId("show-weights-switch");
     await act(async () => fireEvent.click(sw));
     expect(screen.queryByTestId("values-grid")).toBeNull();
   });
 
-  test("toggling Show weights hides heatmap and grid (master gate)", async () => {
+  test("toggling Show weights hides the active inspector (master gate)", async () => {
     const g = smallGraph();
     render(
       React.createElement(WeightPanel, {
@@ -78,14 +79,12 @@ describe("WeightPanel small model", () => {
       }),
     );
     await act(async () => {});
-    expect(screen.queryByTestId("heatmap")).not.toBeNull();
-    expect(screen.queryByTestId("values-grid")).not.toBeNull();
+    expect(screen.queryByTestId("distribution-inspector")).not.toBeNull();
     await act(async () => fireEvent.click(screen.getByTestId("show-weights-switch")));
-    expect(screen.queryByTestId("heatmap")).toBeNull();
-    expect(screen.queryByTestId("values-grid")).toBeNull();
+    expect(screen.queryByTestId("distribution-inspector")).toBeNull();
   });
 
-  test("viz toggle swaps heat and dist", async () => {
+  test("inspector selector swaps distribution and values", async () => {
     const g = smallGraph();
     render(
       React.createElement(WeightPanel, {
@@ -94,11 +93,12 @@ describe("WeightPanel small model", () => {
       }),
     );
     await act(async () => {});
-    expect(screen.queryByTestId("heatmap")).not.toBeNull();
-    expect(screen.queryByTestId("histogram")).toBeNull();
-    await act(async () => fireEvent.click(screen.getByTestId("viz-dist")));
-    expect(screen.queryByTestId("histogram")).not.toBeNull();
-    expect(screen.queryByTestId("heatmap")).toBeNull();
+    expect(screen.queryByTestId("distribution-inspector")).not.toBeNull();
+    await act(async () =>
+      fireEvent.change(screen.getByLabelText("Weight inspector"), { target: { value: "values" } }),
+    );
+    expect(screen.queryByTestId("values-inspector")).not.toBeNull();
+    expect(screen.queryByTestId("distribution-inspector")).toBeNull();
   });
 
   test("custom children replace default inspectors but keep the fixed summary", () => {
@@ -115,26 +115,30 @@ describe("WeightPanel small model", () => {
     expect(screen.queryByTestId("values-grid")).toBeNull();
   });
 
-  test("changing tensors resets the active default visualization", async () => {
+  test("changing tensors preserves a supported active inspector", async () => {
     const g = smallGraph();
     const graphWithTwo = {
       ...g,
       initializers: new Map([
         ...g.initializers,
-        ["w2", { shape: [4] as const, dtype: "float32" }],
+        ["w2", { shape: [2, 2] as const, dtype: "float32" }],
       ]),
       weights: { ...g.weights!, get: () => g.weights!.get("w") },
     } satisfies ModelGraph;
     const { rerender } = render(
-      <WeightPanel target={{ name: "w", shape: [4], dtype: "float32" }} graph={graphWithTwo} />,
+      <WeightPanel target={{ name: "w", shape: [2, 2], dtype: "float32" }} graph={graphWithTwo} />,
     );
-    await act(async () => fireEvent.click(screen.getByTestId("viz-dist")));
-    expect(screen.queryByTestId("histogram")).not.toBeNull();
+    await act(async () =>
+      fireEvent.change(screen.getByLabelText("Weight inspector"), {
+        target: { value: "distribution" },
+      }),
+    );
+    expect(screen.queryByTestId("distribution-inspector")).not.toBeNull();
     rerender(
-      <WeightPanel target={{ name: "w2", shape: [4], dtype: "float32" }} graph={graphWithTwo} />,
+      <WeightPanel target={{ name: "w2", shape: [2, 2], dtype: "float32" }} graph={graphWithTwo} />,
     );
-    expect(screen.queryByTestId("heatmap")).not.toBeNull();
-    expect(screen.queryByTestId("histogram")).toBeNull();
+    expect(screen.queryByTestId("distribution-inspector")).not.toBeNull();
+    expect(screen.queryByTestId("matrix-inspector")).toBeNull();
   });
 });
 
@@ -229,7 +233,6 @@ describe("WeightPanel large model", () => {
     );
     await act(async () => {});
     await act(async () => fireEvent.click(screen.getByTestId("show-weights-switch")));
-    expect(screen.queryByTestId("values-grid")).not.toBeNull();
-    expect(screen.queryByTestId("heatmap")).not.toBeNull();
+    expect(screen.queryByTestId("distribution-inspector")).not.toBeNull();
   });
 });

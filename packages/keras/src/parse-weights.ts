@@ -217,7 +217,11 @@ function matchWeightsWithPrefix(
       }
     }
     varPaths.sort((a, b) => a[0] - b[0]);
-    if (varPaths.length > 0) result.set(nodeNames[i], varPaths.map(([, p]) => p));
+    if (varPaths.length > 0)
+      result.set(
+        nodeNames[i],
+        varPaths.map(([, p]) => p),
+      );
   }
 
   return result;

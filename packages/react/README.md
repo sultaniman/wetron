@@ -27,31 +27,41 @@ const graph = await parseModel(bytes, file.name);
 />
 ```
 
-Pass `graph` to `NodePropertyPanel` if you want clicks on initializer tensors to open the built-in `WeightPanel` (stats, distribution histogram, heatmap, virtualized values grid). For models larger than 20 MiB the panel starts in a deferred state; the user opts in per tensor with a `Show weights` switch and the bytes are only decoded once.
+Pass `graph` to `NodePropertyPanel` to inspect initializer tensors. Rank-2 and higher tensors open in the matrix inspector; scalars and vectors open in the distribution inspector. For models larger than 20 MiB, the user must enable `Show weights` before bytes are exposed or decoded.
+
+Built-in inspectors appear when their inputs are supported:
+
+- Matrix/slice: rank 2+, with explicit display axes and fixed indices.
+- Distribution: histogram, percentiles, non-finite counts, linear/log scale.
+- Per-axis profile: mean, standard deviation, L1/L2, maximum absolute value, zero ratio.
+- Sparsity: exact or near-zero ratios and source-traceable blocks.
+- Kernel gallery: rank 3–5 after selecting `OIHW`, `OHWI`, `HWIO`, or `IHWO` explicitly.
+- Quantization: encoded `Q4_0` block diagnostics.
+- Diagnostics: non-finite values, constant slices, and norm outliers.
+- Values: the flattened virtualized value grid.
+
+Only the selected inspector is mounted. The compatibility `WeightHeatmap` export remains available but is not part of the default composition.
 
 ### Custom weight inspectors
 
 Pass a React node through `weightInspector` to replace the built-in visualization and values grid. The panel header, metadata, loading switch, and statistical summary remain fixed.
 
 ```tsx
+import { computeWeightDistribution } from "@wetron/core/weight-distribution";
 import { NodePropertyPanel, useWeightInspection } from "@wetron/react";
 
 function TensorCount() {
   const inspection = useWeightInspection();
+  if (inspection.status !== "ready") return <div>{inspection.status}</div>;
+  const distribution = computeWeightDistribution(inspection.values, 24);
   return (
     <div>
-      {inspection.tensor.name}: {inspection.status === "ready"
-        ? `${inspection.values.length} values`
-        : inspection.status}
+      {inspection.tensor.name}: median {distribution.percentiles.p50}
     </div>
   );
 }
 
-<NodePropertyPanel
-  target={target}
-  graph={graph}
-  weightInspector={<TensorCount />}
-/>
+<NodePropertyPanel target={target} graph={graph} weightInspector={<TensorCount />} />;
 ```
 
 `useWeightInspection()` reads the nearest `WeightPanel` and throws outside one. Deferred, external, and unavailable inspections expose `bytes`, `values`, and `stats` as `null`; unsupported inspections expose bytes only. The panel's `Show weights` switch controls the deferred gate.
