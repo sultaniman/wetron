@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@base-ui/react": "^1.4.1",
+    "@base-ui/react": "^1.7.0",
     "@wetron/core": "workspace:*",
     "@wetron/react": "workspace:*",
     "@xyflow/react": "latest",
@@ -18,7 +18,7 @@
     "react-dom": "latest"
   },
   "devDependencies": {
-    "@playwright/test": "^1.59.1",
+    "@playwright/test": "^1.62.1",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@vitejs/plugin-react": "latest",

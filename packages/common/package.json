@@ -51,6 +51,6 @@
   },
   "dependencies": {
     "flatbuffers": "^25.9.23",
-    "protobufjs": "^8.0.3"
+    "protobufjs": "^8.7.2"
   }
 }

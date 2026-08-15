@@ -35,6 +35,6 @@
   "dependencies": {
     "@wetron/common": "workspace:*",
     "@wetron/keras": "workspace:*",
-    "protobufjs": "^8.0.3"
+    "protobufjs": "^8.7.2"
   }
 }

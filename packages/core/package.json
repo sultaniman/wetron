@@ -60,6 +60,51 @@
       "source": "./src/heatmap-color.ts",
       "types": "./dist/heatmap-color.d.ts",
       "import": "./dist/heatmap-color.js"
+    },
+    "./tensor-index": {
+      "source": "./src/tensor-index.ts",
+      "types": "./dist/tensor-index.d.ts",
+      "import": "./dist/tensor-index.js"
+    },
+    "./tensor-slice": {
+      "source": "./src/tensor-slice.ts",
+      "types": "./dist/tensor-slice.d.ts",
+      "import": "./dist/tensor-slice.js"
+    },
+    "./weight-distribution": {
+      "source": "./src/weight-distribution.ts",
+      "types": "./dist/weight-distribution.d.ts",
+      "import": "./dist/weight-distribution.js"
+    },
+    "./weight-axis-stats": {
+      "source": "./src/weight-axis-stats.ts",
+      "types": "./dist/weight-axis-stats.d.ts",
+      "import": "./dist/weight-axis-stats.js"
+    },
+    "./weight-sparsity": {
+      "source": "./src/weight-sparsity.ts",
+      "types": "./dist/weight-sparsity.d.ts",
+      "import": "./dist/weight-sparsity.js"
+    },
+    "./weight-kernel": {
+      "source": "./src/weight-kernel.ts",
+      "types": "./dist/weight-kernel.d.ts",
+      "import": "./dist/weight-kernel.js"
+    },
+    "./weight-quantization": {
+      "source": "./src/weight-quantization.ts",
+      "types": "./dist/weight-quantization.d.ts",
+      "import": "./dist/weight-quantization.js"
+    },
+    "./weight-diagnostics": {
+      "source": "./src/weight-diagnostics.ts",
+      "types": "./dist/weight-diagnostics.d.ts",
+      "import": "./dist/weight-diagnostics.js"
+    },
+    "./inspector-hints": {
+      "source": "./src/inspector-hints.ts",
+      "types": "./dist/inspector-hints.d.ts",
+      "import": "./dist/inspector-hints.js"
     }
   },
   "dependencies": {
@@ -72,7 +117,7 @@
     "@wetron/tflite": "workspace:*",
     "@wetron/torchscript": "workspace:*",
     "dagre": "^0.8.5",
-    "fflate": "^0.8.2",
-    "protobufjs": "^8.0.3"
+    "fflate": "^0.8.3",
+    "protobufjs": "^8.7.2"
   }
 }
