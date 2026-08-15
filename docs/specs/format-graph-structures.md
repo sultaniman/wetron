@@ -6,15 +6,15 @@ folds, filters, or punts.
 
 ## TL;DR
 
-| Format                 | Graph density                                           | Wetron's plumbing handling                                                                                  | Function-body / subgraphs                 |
-| ---------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| ONNX                   | Clean - initializers formally separated from nodes      | `Constant` folded into `initializers`                                                                       | `If`/`Loop`/`Scan` body **hidden**        |
-| TFLite                 | Clean - weights live in `buffers[]` indexed by tensor   | None needed                                                                                                 | only `subgraphs[0]` parsed                |
-| Keras (`.keras`)       | Clean - layer level; weights in a separate file         | n/a                                                                                                         | n/a                                       |
-| Keras metadata (`.pb`) | Clean - wraps the same Keras config                     | n/a                                                                                                         | n/a                                       |
+| Format                 | Graph density                                           | Wetron's plumbing handling                                                                                  | Function-body / subgraphs                                               |
+| ---------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| ONNX                   | Clean - initializers formally separated from nodes      | `Constant` folded into `initializers`                                                                       | `If`/`Loop`/`Scan` body **hidden**                                      |
+| TFLite                 | Clean - weights live in `buffers[]` indexed by tensor   | None needed                                                                                                 | only `subgraphs[0]` parsed                                              |
+| Keras (`.keras`)       | Clean - layer level; weights in a separate file         | n/a                                                                                                         | n/a                                                                     |
+| Keras metadata (`.pb`) | Clean - wraps the same Keras config                     | n/a                                                                                                         | n/a                                                                     |
 | TF SavedModel (`.pb`)  | **Wide by default** - every layer expands into many ops | `VarHandleOp` folded into `initializers`; `ReadVariableOp`/`AssignVariableOp`/`VarIsInitializedOp` filtered | `StatefulPartitionedCall` body **inlined recursively** with arg binding |
-| ExecuTorch (`.pte`)    | Linear chain                                            | n/a                                                                                                         | only `execution_plans[0]` parsed          |
-| TorchScript Mobile     | Linear chain (forced)                                   | n/a                                                                                                         | methods **concatenated**                  |
+| ExecuTorch (`.pte`)    | Linear chain                                            | n/a                                                                                                         | only `execution_plans[0]` parsed                                        |
+| TorchScript Mobile     | Linear chain (forced)                                   | n/a                                                                                                         | methods **concatenated**                                                |
 
 The right column is the unsolved-problem column; the rest is mostly handled.
 

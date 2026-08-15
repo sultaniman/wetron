@@ -26,23 +26,24 @@ Canonical JSON with sorted keys, no whitespace, LF newlines, lowercase-hex hashe
   "reportVersion": "1",
   "wetronVersion": "0.0.11",
   "createdAt": "2026-05-08T14:32:11Z",
-  "mode": "identity",                      // "identity" | "identity+stats"
-  "scope": "global",                       // "global" | { "node": "<name>" }
+  "mode": "identity", // "identity" | "identity+stats"
+  "scope": "global", // "global" | { "node": "<name>" }
   "file": {
     "name": "mobilenet_v2.tflite",
     "bytes": 14512392,
-    "sha256": "ab12…"
+    "sha256": "ab12…",
   },
   "format": {
     "name": "tflite",
     "version": 3,
-    "producer": "tf2onnx 1.16"             // best-effort, may be null
+    "producer": "tf2onnx 1.16", // best-effort, may be null
   },
-  "graph": {                                // present only when scope = "global"
+  "graph": {
+    // present only when scope = "global"
     "nodes": 204,
     "inputs": 1,
     "outputs": 6,
-    "opTypeHistogram": { "Conv2D": 47, "Relu": 12 }
+    "opTypeHistogram": { "Conv2D": 47, "Relu": 12 },
   },
   "tensors": [
     {
@@ -51,9 +52,9 @@ Canonical JSON with sorted keys, no whitespace, LF newlines, lowercase-hex hashe
       "dtype": "uint8",
       "bytes": 3456,
       "sha256": "9f4c…",
-      "stats": null                        // populated only when mode = "identity+stats"
-    }
-  ]
+      "stats": null, // populated only when mode = "identity+stats"
+    },
+  ],
 }
 ```
 
@@ -124,7 +125,7 @@ A field outside the verification predicate (filename, timestamp, producer, wetro
 
 ### Verification panel
 
-The verification result is a structured panel - the same UI that the user sees in-app *is* the human-readable report, and that panel can be printed to PDF.
+The verification result is a structured panel - the same UI that the user sees in-app _is_ the human-readable report, and that panel can be printed to PDF.
 
 The panel has four sections, top to bottom:
 
@@ -162,13 +163,13 @@ This approach adds no new dependencies - just print CSS - and produces a PDF who
 
 ## UI surfaces
 
-| Surface         | Action                  | Trigger                                                          |
-| --------------- | ----------------------- | ---------------------------------------------------------------- |
-| Empty drop-zone | Open model              | Unchanged. Only entry point that accepts drag-and-drop.          |
-| Toolbar         | Open model              | Always visible. Opens a file picker, replaces the loaded model.  |
-| Toolbar         | Export report ▾         | Visible when a model is loaded. Mode toggle inside the dropdown. |
-| Toolbar         | Verify against report…  | Visible when a model is loaded; opens a file picker for `.json`. |
-| Property panel  | Export node report      | Visible when the selected node has weight tensors.               |
+| Surface            | Action                     | Trigger                                                                    |
+| ------------------ | -------------------------- | -------------------------------------------------------------------------- |
+| Empty drop-zone    | Open model                 | Unchanged. Only entry point that accepts drag-and-drop.                    |
+| Toolbar            | Open model                 | Always visible. Opens a file picker, replaces the loaded model.            |
+| Toolbar            | Export report ▾            | Visible when a model is loaded. Mode toggle inside the dropdown.           |
+| Toolbar            | Verify against report…     | Visible when a model is loaded; opens a file picker for `.json`.           |
+| Property panel     | Export node report         | Visible when the selected node has weight tensors.                         |
 | Verification panel | Comparator UI + Export PDF | Replaces the property panel area while a verification result is on screen. |
 
 Both export buttons offer a mode toggle (`identity` / `identity+stats`) before download.

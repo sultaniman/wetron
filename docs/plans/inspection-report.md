@@ -17,6 +17,7 @@ The core module is the load-bearing piece. UI surfaces in later phases call into
 ### Task 1.1: Hash utility
 
 **Files:**
+
 - Create: `packages/core/src/report/hash.ts`
 - Create: `packages/core/test/report/hash.test.ts`
 
@@ -80,6 +81,7 @@ git commit -m "add sha256 hex helper for inspection report"
 ### Task 1.2: Report types
 
 **Files:**
+
 - Create: `packages/core/src/report/types.ts`
 
 - [ ] **Step 1: Write the type module**
@@ -141,7 +143,11 @@ export type TensorVerdict =
 
 export type Verdict =
   | { readonly kind: "match"; readonly tensors: readonly TensorVerdict[] }
-  | { readonly kind: "mismatch"; readonly tensors: readonly TensorVerdict[]; readonly reasons: readonly string[] }
+  | {
+      readonly kind: "mismatch";
+      readonly tensors: readonly TensorVerdict[];
+      readonly reasons: readonly string[];
+    }
   | { readonly kind: "incompatible"; readonly reasons: readonly string[] };
 ```
 
@@ -157,6 +163,7 @@ git commit -m "add inspection report types"
 ### Task 1.3: NFD normalisation helper
 
 **Files:**
+
 - Create: `packages/core/src/report/normalize.ts`
 - Create: `packages/core/test/report/normalize.test.ts`
 
@@ -186,8 +193,8 @@ test("ligatures are NOT folded (NFD, not NFKD)", () => {
 });
 
 test("two strings that are visually equivalent normalise to the same value", () => {
-  const composed = "café";                    // U+00E9
-  const decomposed = "café";            // U+0065 + U+0301
+  const composed = "café"; // U+00E9
+  const decomposed = "café"; // U+0065 + U+0301
   expect(normalizeName(composed)).toBe(normalizeName(decomposed));
 });
 ```
@@ -223,6 +230,7 @@ git commit -m "add nfd name normalisation helper"
 ### Task 1.4: Canonical JSON serialisation
 
 **Files:**
+
 - Create: `packages/core/src/report/serialize.ts`
 - Create: `packages/core/test/report/serialize.test.ts`
 
@@ -278,7 +286,9 @@ function stringify(value: unknown): string {
   }
   if (typeof value === "object") {
     const keys = Object.keys(value as object).sort();
-    const entries = keys.map((k) => JSON.stringify(k) + ":" + stringify((value as Record<string, unknown>)[k]));
+    const entries = keys.map(
+      (k) => JSON.stringify(k) + ":" + stringify((value as Record<string, unknown>)[k]),
+    );
     return "{" + entries.join(",") + "}";
   }
   throw new TypeError(`canonicalStringify: unsupported value type ${typeof value}`);
@@ -302,6 +312,7 @@ git commit -m "add canonical json serialiser for reports"
 ### Task 1.5: Build global report
 
 **Files:**
+
 - Create: `packages/core/src/report/build.ts`
 - Create: `packages/core/test/report/build-global.test.ts`
 
@@ -396,7 +407,8 @@ test("tensors are sorted by NFD-normalised name", async () => {
     ]),
     weights: {
       totalBytes: 12,
-      get: (n) => (n === "zebra" || n === "alpha" || n === "mango" ? new Uint8Array([0, 0, 0, 0]) : undefined),
+      get: (n) =>
+        n === "zebra" || n === "alpha" || n === "mango" ? new Uint8Array([0, 0, 0, 0]) : undefined,
     },
   };
   const r = await buildGlobalReport({
@@ -430,7 +442,11 @@ import type { Report, ReportMode, ReportTensor } from "./types.ts";
 export interface BuildOptions {
   readonly graph: ModelGraph;
   readonly file: { readonly name: string; readonly bytes: Uint8Array };
-  readonly format: { readonly name: string; readonly version: number | null; readonly producer: string | null };
+  readonly format: {
+    readonly name: string;
+    readonly version: number | null;
+    readonly producer: string | null;
+  };
   readonly mode: ReportMode;
   readonly wetronVersion: string;
   readonly now?: () => string;
@@ -522,6 +538,7 @@ git commit -m "build global inspection report"
 ### Task 1.6: Build node-scoped report
 
 **Files:**
+
 - Modify: `packages/core/src/report/build.ts`
 - Create: `packages/core/test/report/build-node.test.ts`
 
@@ -544,8 +561,20 @@ const graph: ModelGraph = {
   inputs: [],
   outputs: [],
   nodes: [
-    { name: "Conv2D_42", opType: "Conv2D", inputs: ["Conv2D_42/kernel", "Conv2D_42/bias"], outputs: ["o"], attributes: {} },
-    { name: "Conv2D_99", opType: "Conv2D", inputs: ["Conv2D_99/kernel"], outputs: ["p"], attributes: {} },
+    {
+      name: "Conv2D_42",
+      opType: "Conv2D",
+      inputs: ["Conv2D_42/kernel", "Conv2D_42/bias"],
+      outputs: ["o"],
+      attributes: {},
+    },
+    {
+      name: "Conv2D_99",
+      opType: "Conv2D",
+      inputs: ["Conv2D_99/kernel"],
+      outputs: ["p"],
+      attributes: {},
+    },
   ],
   initializers: new Map([
     ["Conv2D_42/kernel", { shape: [3, 3, 16, 16], dtype: "float32" }],
@@ -636,9 +665,7 @@ export async function buildNodeReport(opts: BuildNodeOptions): Promise<Report> {
 
   const scopedGraph: ModelGraph = {
     ...opts.graph,
-    initializers: new Map(
-      Array.from(opts.graph.initializers).filter(([n]) => scopedNames.has(n)),
-    ),
+    initializers: new Map(Array.from(opts.graph.initializers).filter(([n]) => scopedNames.has(n))),
   };
   const tensors = await tensorEntries(scopedGraph, opts.mode);
 
@@ -677,6 +704,7 @@ git commit -m "build node-scoped inspection report"
 ### Task 1.7: Parse and validate report
 
 **Files:**
+
 - Create: `packages/core/src/report/parse.ts`
 - Create: `packages/core/test/report/parse.test.ts`
 
@@ -762,7 +790,14 @@ export function parseReport(json: string): ParseResult {
   if (r.reportVersion !== "1") {
     return { kind: "error", message: `unsupported reportVersion: ${String(r.reportVersion)}` };
   }
-  if (r.scope !== "global" && !(typeof r.scope === "object" && r.scope !== null && typeof (r.scope as { node?: unknown }).node === "string")) {
+  if (
+    r.scope !== "global" &&
+    !(
+      typeof r.scope === "object" &&
+      r.scope !== null &&
+      typeof (r.scope as { node?: unknown }).node === "string"
+    )
+  ) {
     return { kind: "error", message: "scope must be 'global' or { node: string }" };
   }
   if (!Array.isArray(r.tensors)) {
@@ -794,6 +829,7 @@ git commit -m "parse and validate inspection report json"
 ### Task 1.8: Verify two reports
 
 **Files:**
+
 - Create: `packages/core/src/report/verify.ts`
 - Create: `packages/core/test/report/verify.test.ts`
 
@@ -816,7 +852,14 @@ function fakeReport(over: Partial<Report> = {}): Report {
     format: { name: "tflite", version: 3, producer: null },
     graph: { nodes: 1, inputs: 0, outputs: 0, opTypeHistogram: { Conv2D: 1 } },
     tensors: [
-      { name: "k", shape: [2, 2], dtype: "float32", bytes: 16, sha256: "9f".repeat(32), stats: null },
+      {
+        name: "k",
+        shape: [2, 2],
+        dtype: "float32",
+        bytes: 16,
+        sha256: "9f".repeat(32),
+        stats: null,
+      },
     ],
     ...over,
   };
@@ -839,7 +882,16 @@ test("file sha mismatch produces an incompatible verdict", () => {
 test("tensor sha mismatch produces a mismatch verdict", () => {
   const expected = fakeReport();
   const observed = fakeReport({
-    tensors: [{ name: "k", shape: [2, 2], dtype: "float32", bytes: 16, sha256: "00".repeat(32), stats: null }],
+    tensors: [
+      {
+        name: "k",
+        shape: [2, 2],
+        dtype: "float32",
+        bytes: 16,
+        sha256: "00".repeat(32),
+        stats: null,
+      },
+    ],
   });
   const v = verifyReports(expected, observed);
   expect(v.kind).toBe("mismatch");
@@ -927,10 +979,16 @@ export function verifyReports(expected: Report, observed: Report): Verdict {
   if (!scopesMatch(expected.scope, observed.scope)) {
     reasons.push("scope mismatch");
   }
-  if (expected.file.sha256 !== observed.file.sha256 || expected.file.bytes !== observed.file.bytes) {
+  if (
+    expected.file.sha256 !== observed.file.sha256 ||
+    expected.file.bytes !== observed.file.bytes
+  ) {
     reasons.push("file identity mismatch");
   }
-  if (expected.format.name !== observed.format.name || expected.format.version !== observed.format.version) {
+  if (
+    expected.format.name !== observed.format.name ||
+    expected.format.version !== observed.format.version
+  ) {
     reasons.push("format mismatch");
   }
 
@@ -986,6 +1044,7 @@ git commit -m "verify two inspection reports"
 ### Task 1.9: Wire `report` into the public `@wetron/core` API
 
 **Files:**
+
 - Create: `packages/core/src/report/index.ts`
 - Modify: `packages/core/src/index.ts`
 - Modify: `packages/core/package.json`
@@ -1070,6 +1129,7 @@ git commit -m "export inspection report module from @wetron/core"
 ### Task 2.1: VerificationPanel component shell
 
 **Files:**
+
 - Create: `packages/react/src/verification-panel/verification-panel.tsx`
 - Create: `packages/react/src/verification-panel/verification-panel.module.css`
 - Create: `packages/react/src/verification-panel/index.ts`
@@ -1107,7 +1167,28 @@ test("VerificationPanel renders a MISMATCH banner", () => {
   const verdict: Verdict = {
     kind: "mismatch",
     reasons: [],
-    tensors: [{ status: "mismatch", name: "k", expected: { name: "k", shape: [], dtype: "float32", bytes: 1, sha256: "00".repeat(32), stats: null }, observed: { name: "k", shape: [], dtype: "float32", bytes: 1, sha256: "ff".repeat(32), stats: null } }],
+    tensors: [
+      {
+        status: "mismatch",
+        name: "k",
+        expected: {
+          name: "k",
+          shape: [],
+          dtype: "float32",
+          bytes: 1,
+          sha256: "00".repeat(32),
+          stats: null,
+        },
+        observed: {
+          name: "k",
+          shape: [],
+          dtype: "float32",
+          bytes: 1,
+          sha256: "ff".repeat(32),
+          stats: null,
+        },
+      },
+    ],
   };
   render(<VerificationPanel report={fakeReport} verdict={verdict} onClose={() => {}} />);
   expect(screen.getByText(/MISMATCH/)).toBeTruthy();
@@ -1144,22 +1225,31 @@ export function VerificationPanel({ report, verdict, onClose }: VerificationPane
 
   return (
     <section className={styles.panel} data-testid="verification-panel">
-      <header className={`${styles.banner} ${tone === "success" ? styles.bannerOk : styles.bannerBad}`}>
+      <header
+        className={`${styles.banner} ${tone === "success" ? styles.bannerOk : styles.bannerBad}`}
+      >
         <span className={styles.mark}>{tone === "success" ? "✓" : "✗"}</span>
         <div className={styles.bannerText}>
           <div className={styles.bannerTitle}>{verdictText}</div>
           <div className={styles.bannerSub}>
-            file sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)} · mode {report.mode} · {scopeText}
+            file sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)} · mode{" "}
+            {report.mode} · {scopeText}
           </div>
         </div>
-        <button className={styles.export} onClick={() => window.print()}>Export PDF</button>
-        <button className={styles.close} aria-label="Close" onClick={onClose}>×</button>
+        <button className={styles.export} onClick={() => window.print()}>
+          Export PDF
+        </button>
+        <button className={styles.close} aria-label="Close" onClick={onClose}>
+          ×
+        </button>
       </header>
       <div className={styles.fileBlock}>
         <span className={styles.fileLabel}>File</span>
         <span className={styles.fileName}>{report.file.name}</span>
         <span className={styles.fileBytes}>{report.file.bytes.toLocaleString()} bytes</span>
-        <span className={styles.fileSha}>sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)}</span>
+        <span className={styles.fileSha}>
+          sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)}
+        </span>
       </div>
     </section>
   );
@@ -1174,22 +1264,86 @@ export type { VerificationPanelProps } from "./verification-panel.tsx";
 
 ```css
 /* packages/react/src/verification-panel/verification-panel.module.css */
-.panel { display: flex; flex-direction: column; }
-.banner { display: flex; align-items: center; gap: 0.875rem; padding: 0.875rem 1rem; }
-.bannerOk { background: rgba(34,197,94,0.12); }
-.bannerBad { background: rgba(239,68,68,0.12); }
-.mark { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: white; }
-.bannerOk .mark { background: rgb(34,197,94); }
-.bannerBad .mark { background: rgb(239,68,68); }
-.bannerText { flex: 1; min-width: 0; }
-.bannerTitle { font-weight: 600; font-size: 0.9375rem; }
-.bannerSub { font-size: 0.75rem; opacity: 0.7; margin-top: 0.125rem; }
-.export, .close { background: transparent; border: 1px solid var(--w-panel-border, rgba(255,255,255,0.14)); color: inherit; padding: 0.3125rem 0.625rem; border-radius: 6px; font-size: 0.8125rem; cursor: pointer; }
-.close { padding: 0.3125rem 0.5rem; }
-.fileBlock { display: grid; grid-template-columns: auto 1fr auto auto; gap: 1rem; padding: 0.75rem 1rem; align-items: baseline; border-top: 1px solid var(--w-panel-border, rgba(255,255,255,0.08)); }
-.fileLabel { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
-.fileName, .fileBytes, .fileSha { font-family: ui-monospace, Menlo, monospace; font-size: 0.8125rem; }
-.fileBytes { opacity: 0.7; }
+.panel {
+  display: flex;
+  flex-direction: column;
+}
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+}
+.bannerOk {
+  background: rgba(34, 197, 94, 0.12);
+}
+.bannerBad {
+  background: rgba(239, 68, 68, 0.12);
+}
+.mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: white;
+}
+.bannerOk .mark {
+  background: rgb(34, 197, 94);
+}
+.bannerBad .mark {
+  background: rgb(239, 68, 68);
+}
+.bannerText {
+  flex: 1;
+  min-width: 0;
+}
+.bannerTitle {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+.bannerSub {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 0.125rem;
+}
+.export,
+.close {
+  background: transparent;
+  border: 1px solid var(--w-panel-border, rgba(255, 255, 255, 0.14));
+  color: inherit;
+  padding: 0.3125rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.close {
+  padding: 0.3125rem 0.5rem;
+}
+.fileBlock {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  align-items: baseline;
+  border-top: 1px solid var(--w-panel-border, rgba(255, 255, 255, 0.08));
+}
+.fileLabel {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+.fileName,
+.fileBytes,
+.fileSha {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.8125rem;
+}
+.fileBytes {
+  opacity: 0.7;
+}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -1209,6 +1363,7 @@ git commit -m "add react verification panel shell"
 ### Task 2.2: Per-tensor table inside the verification panel
 
 **Files:**
+
 - Modify: `packages/react/src/verification-panel/verification-panel.tsx`
 - Modify: `packages/react/src/verification-panel/verification-panel.module.css`
 - Modify: `packages/react/test/verification-panel.test.tsx`
@@ -1225,7 +1380,26 @@ test("table renders one row per tensor verdict", () => {
     tensors: [
       { status: "match", name: "a" },
       { status: "match", name: "b" },
-      { status: "mismatch", name: "c", expected: { name: "c", shape: [1], dtype: "float32", bytes: 4, sha256: "00".repeat(32), stats: null }, observed: { name: "c", shape: [1], dtype: "float32", bytes: 4, sha256: "ff".repeat(32), stats: null } },
+      {
+        status: "mismatch",
+        name: "c",
+        expected: {
+          name: "c",
+          shape: [1],
+          dtype: "float32",
+          bytes: 4,
+          sha256: "00".repeat(32),
+          stats: null,
+        },
+        observed: {
+          name: "c",
+          shape: [1],
+          dtype: "float32",
+          bytes: 4,
+          sha256: "ff".repeat(32),
+          stats: null,
+        },
+      },
     ],
   };
   render(<VerificationPanel report={fakeReport} verdict={verdict} onClose={() => {}} />);
@@ -1243,48 +1417,82 @@ Expected: FAIL - no rows rendered.
 Append a `<table>` block inside the `<section>` in `verification-panel.tsx`, after the file block:
 
 ```tsx
-{verdict.kind !== "incompatible" && (
-  <table className={styles.tensors}>
-    <thead>
-      <tr>
-        <th>status</th>
-        <th>tensor</th>
-        <th>shape</th>
-        <th>dtype</th>
-        <th>sha256</th>
-      </tr>
-    </thead>
-    <tbody>
-      {verdict.tensors.map((t) => (
-        <tr key={t.name} className={t.status !== "match" ? styles.rowBad : undefined}>
-          <td>{t.status === "match" ? "✓ match" : t.status}</td>
-          <td className={styles.tensorName}>{t.name}</td>
-          <td>{t.status === "extra" ? t.observed.shape.join(" × ") : t.status === "match" ? "" : t.expected.shape.join(" × ")}</td>
-          <td>{t.status === "extra" ? t.observed.dtype : t.status === "match" ? "" : t.expected.dtype}</td>
-          <td className={styles.hash}>
-            {t.status === "match"
-              ? ""
-              : t.status === "missing"
-                ? `expected ${t.expected.sha256.slice(0, 6)}…${t.expected.sha256.slice(-4)}`
-                : t.status === "extra"
-                  ? `observed ${t.observed.sha256.slice(0, 6)}…${t.observed.sha256.slice(-4)}`
-                  : `${t.expected.sha256.slice(0, 6)}… -> ${t.observed.sha256.slice(0, 6)}…`}
-          </td>
+{
+  verdict.kind !== "incompatible" && (
+    <table className={styles.tensors}>
+      <thead>
+        <tr>
+          <th>status</th>
+          <th>tensor</th>
+          <th>shape</th>
+          <th>dtype</th>
+          <th>sha256</th>
         </tr>
-      ))}
-    </tbody>
-  </table>
-)}
+      </thead>
+      <tbody>
+        {verdict.tensors.map((t) => (
+          <tr key={t.name} className={t.status !== "match" ? styles.rowBad : undefined}>
+            <td>{t.status === "match" ? "✓ match" : t.status}</td>
+            <td className={styles.tensorName}>{t.name}</td>
+            <td>
+              {t.status === "extra"
+                ? t.observed.shape.join(" × ")
+                : t.status === "match"
+                  ? ""
+                  : t.expected.shape.join(" × ")}
+            </td>
+            <td>
+              {t.status === "extra"
+                ? t.observed.dtype
+                : t.status === "match"
+                  ? ""
+                  : t.expected.dtype}
+            </td>
+            <td className={styles.hash}>
+              {t.status === "match"
+                ? ""
+                : t.status === "missing"
+                  ? `expected ${t.expected.sha256.slice(0, 6)}…${t.expected.sha256.slice(-4)}`
+                  : t.status === "extra"
+                    ? `observed ${t.observed.sha256.slice(0, 6)}…${t.observed.sha256.slice(-4)}`
+                    : `${t.expected.sha256.slice(0, 6)}… -> ${t.observed.sha256.slice(0, 6)}…`}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 ```
 
 Add CSS:
 
 ```css
-.tensors { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
-.tensors th, .tensors td { padding: 0.625rem 1rem; text-align: left; border-bottom: 1px solid var(--w-panel-border, rgba(255,255,255,0.04)); }
-.tensors th { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
-.tensorName, .hash { font-family: ui-monospace, Menlo, monospace; font-size: 0.75rem; }
-.rowBad { background: rgba(239,68,68,0.04); }
+.tensors {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+.tensors th,
+.tensors td {
+  padding: 0.625rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--w-panel-border, rgba(255, 255, 255, 0.04));
+}
+.tensors th {
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+.tensorName,
+.hash {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.75rem;
+}
+.rowBad {
+  background: rgba(239, 68, 68, 0.04);
+}
 ```
 
 - [ ] **Step 4: Run tests to verify all pass**
@@ -1304,6 +1512,7 @@ git commit -m "render per-tensor verdicts in verification panel"
 ### Task 2.3: Print stylesheet for PDF export
 
 **Files:**
+
 - Modify: `packages/react/src/verification-panel/verification-panel.module.css`
 
 - [ ] **Step 1: Append print rules**
@@ -1313,16 +1522,45 @@ Append to `verification-panel.module.css`:
 ```css
 @media print {
   /* Print everything as plain black/white; the panel is the document. */
-  :global(body *) { visibility: hidden !important; }
-  .panel, .panel * { visibility: visible !important; }
-  .panel { position: absolute; top: 0; left: 0; width: 100%; }
-  .export, .close { display: none !important; }
-  .bannerOk { background: #e6f7ec !important; color: #064e2c; }
-  .bannerBad { background: #fde7e7 !important; color: #7a1414; }
-  .mark { color: white !important; }
-  .tensors th { background: #f6f6f6 !important; color: #333 !important; }
-  .tensors td, .tensors th { color: #111 !important; }
-  .rowBad { background: #fef2f2 !important; }
+  :global(body *) {
+    visibility: hidden !important;
+  }
+  .panel,
+  .panel * {
+    visibility: visible !important;
+  }
+  .panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .export,
+  .close {
+    display: none !important;
+  }
+  .bannerOk {
+    background: #e6f7ec !important;
+    color: #064e2c;
+  }
+  .bannerBad {
+    background: #fde7e7 !important;
+    color: #7a1414;
+  }
+  .mark {
+    color: white !important;
+  }
+  .tensors th {
+    background: #f6f6f6 !important;
+    color: #333 !important;
+  }
+  .tensors td,
+  .tensors th {
+    color: #111 !important;
+  }
+  .rowBad {
+    background: #fef2f2 !important;
+  }
 }
 ```
 
@@ -1343,6 +1581,7 @@ git commit -m "add print stylesheet for verification panel"
 ### Task 2.4: Toolbar "Export report" button with mode dropdown
 
 **Files:**
+
 - Create: `packages/react/src/verification-panel/export-report-button.tsx`
 - Modify: `packages/react/src/verification-panel/index.ts`
 - Create: `packages/react/test/export-report-button.test.tsx`
@@ -1390,17 +1629,60 @@ export function ExportReportButton({ onExport, disabled }: ExportReportButtonPro
 
   return (
     <span style={{ position: "relative", display: "inline-block" }}>
-      <button onClick={() => setOpen((o) => !o)} disabled={disabled}>Export report ▾</button>
+      <button onClick={() => setOpen((o) => !o)} disabled={disabled}>
+        Export report ▾
+      </button>
       {open && (
-        <div role="dialog" style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, padding: "0.5rem", background: "var(--w-panel-bg, #1c2230)", border: "1px solid var(--w-panel-border, rgba(255,255,255,0.14))", borderRadius: 6, minWidth: "12rem" }}>
-          <div style={{ marginBottom: "0.375rem", fontSize: "0.625rem", textTransform: "uppercase", opacity: 0.6 }}>Mode</div>
+        <div
+          role="dialog"
+          style={{
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            right: 0,
+            padding: "0.5rem",
+            background: "var(--w-panel-bg, #1c2230)",
+            border: "1px solid var(--w-panel-border, rgba(255,255,255,0.14))",
+            borderRadius: 6,
+            minWidth: "12rem",
+          }}
+        >
+          <div
+            style={{
+              marginBottom: "0.375rem",
+              fontSize: "0.625rem",
+              textTransform: "uppercase",
+              opacity: 0.6,
+            }}
+          >
+            Mode
+          </div>
           <label style={{ display: "block", fontSize: "0.75rem", marginBottom: "0.25rem" }}>
-            <input type="radio" name="mode" checked={mode === "identity"} onChange={() => setMode("identity")} /> identity
+            <input
+              type="radio"
+              name="mode"
+              checked={mode === "identity"}
+              onChange={() => setMode("identity")}
+            />{" "}
+            identity
           </label>
           <label style={{ display: "block", fontSize: "0.75rem", marginBottom: "0.5rem" }}>
-            <input type="radio" name="mode" checked={mode === "identity+stats"} onChange={() => setMode("identity+stats")} /> identity+stats
+            <input
+              type="radio"
+              name="mode"
+              checked={mode === "identity+stats"}
+              onChange={() => setMode("identity+stats")}
+            />{" "}
+            identity+stats
           </label>
-          <button onClick={() => { onExport(mode); setOpen(false); }} style={{ width: "100%" }}>Download report.json</button>
+          <button
+            onClick={() => {
+              onExport(mode);
+              setOpen(false);
+            }}
+            style={{ width: "100%" }}
+          >
+            Download report.json
+          </button>
         </div>
       )}
     </span>
@@ -1432,6 +1714,7 @@ git commit -m "add react export-report toolbar button"
 ### Task 2.5: Property-panel "Export node report" button
 
 **Files:**
+
 - Create: `packages/react/src/verification-panel/export-node-button.tsx`
 - Modify: `packages/react/src/verification-panel/index.ts`
 - Create: `packages/react/test/export-node-button.test.tsx`
@@ -1446,7 +1729,14 @@ import { ExportNodeReportButton } from "../src/verification-panel/index.ts";
 
 test("export-node fires onExport with the node name and selected mode", () => {
   let captured: { mode: string; node: string } | null = null;
-  render(<ExportNodeReportButton nodeName="Conv2D_42" onExport={(mode) => { captured = { mode, node: "Conv2D_42" }; }} />);
+  render(
+    <ExportNodeReportButton
+      nodeName="Conv2D_42"
+      onExport={(mode) => {
+        captured = { mode, node: "Conv2D_42" };
+      }}
+    />,
+  );
   fireEvent.click(screen.getByText(/Export node report/));
   expect(captured).toEqual({ mode: "identity", node: "Conv2D_42" });
 });
@@ -1503,6 +1793,7 @@ git commit -m "add react export-node-report button"
 ### Task 2.6: Toolbar "Verify against report…" file picker
 
 **Files:**
+
 - Create: `packages/react/src/verification-panel/verify-button.tsx`
 - Modify: `packages/react/src/verification-panel/index.ts`
 - Create: `packages/react/test/verify-button.test.tsx`
@@ -1518,7 +1809,9 @@ import { VerifyButton } from "../src/verification-panel/index.ts";
 test("clicking VerifyButton triggers a hidden file input click", () => {
   let clicked = false;
   const proto = HTMLInputElement.prototype.click;
-  HTMLInputElement.prototype.click = function () { clicked = true; };
+  HTMLInputElement.prototype.click = function () {
+    clicked = true;
+  };
   try {
     render(<VerifyButton onPick={() => {}} disabled={false} />);
     fireEvent.click(screen.getByText(/Verify against report/));
@@ -1597,6 +1890,7 @@ git commit -m "add react verify-against-report button"
 ### Task 2.7: Graph node verification badges
 
 **Files:**
+
 - Modify: `packages/react/src/nodes/graph-node.tsx`
 - Create: `packages/react/src/verification-panel/node-status.ts`
 - Create: `packages/react/test/node-status.test.ts`
@@ -1616,7 +1910,12 @@ test("nodes whose tensors all match get status 'match'", () => {
     tensors: [
       { status: "match", name: "Conv2D_42/kernel" },
       { status: "match", name: "Conv2D_42/bias" },
-      { status: "mismatch", name: "Conv2D_99/kernel", expected: {} as never, observed: {} as never },
+      {
+        status: "mismatch",
+        name: "Conv2D_99/kernel",
+        expected: {} as never,
+        observed: {} as never,
+      },
     ],
   };
   const nodeInputs = new Map([
@@ -1674,28 +1973,30 @@ export function computeNodeStatuses(
 Accept a new optional prop `verificationStatus?: "match" | "bad"` on the node-data type and render in the top-right corner:
 
 ```tsx
-{verificationStatus && (
-  <span
-    aria-label={verificationStatus === "match" ? "verified" : "verification failed"}
-    style={{
-      position: "absolute",
-      top: -8,
-      right: -8,
-      width: 18,
-      height: 18,
-      borderRadius: 9,
-      display: "grid",
-      placeItems: "center",
-      fontSize: 11,
-      fontWeight: 700,
-      color: "#fff",
-      boxShadow: "0 0 0 2px var(--w-bg-grid, #0d1017)",
-      background: verificationStatus === "match" ? "rgb(34,197,94)" : "rgb(239,68,68)",
-    }}
-  >
-    {verificationStatus === "match" ? "✓" : "✗"}
-  </span>
-)}
+{
+  verificationStatus && (
+    <span
+      aria-label={verificationStatus === "match" ? "verified" : "verification failed"}
+      style={{
+        position: "absolute",
+        top: -8,
+        right: -8,
+        width: 18,
+        height: 18,
+        borderRadius: 9,
+        display: "grid",
+        placeItems: "center",
+        fontSize: 11,
+        fontWeight: 700,
+        color: "#fff",
+        boxShadow: "0 0 0 2px var(--w-bg-grid, #0d1017)",
+        background: verificationStatus === "match" ? "rgb(34,197,94)" : "rgb(239,68,68)",
+      }}
+    >
+      {verificationStatus === "match" ? "✓" : "✗"}
+    </span>
+  );
+}
 ```
 
 Update the node-data TypeScript type to include `verificationStatus`. The plumbing from `ModelGraphView` to the node uses the existing data field already in `transform.ts`; the host wires this in Phase 4 by attaching the verdict to the data.
@@ -1721,6 +2022,7 @@ Phase 3 mirrors Phase 2 in `@wetron/svelte`. Same boundaries, same type names, s
 ### Task 3.1: VerificationPanel.svelte
 
 **Files:**
+
 - Create: `packages/svelte/src/verification-panel/verification-panel.svelte`
 - Create: `packages/svelte/src/verification-panel/index.ts`
 - Create: `packages/svelte/test/verification-panel.test.ts`
@@ -1869,6 +2171,7 @@ git commit -m "add svelte verification panel"
 ### Task 3.2: Svelte ExportReportButton, ExportNodeReportButton, VerifyButton
 
 **Files:**
+
 - Create: `packages/svelte/src/verification-panel/export-report-button.svelte`
 - Create: `packages/svelte/src/verification-panel/export-node-button.svelte`
 - Create: `packages/svelte/src/verification-panel/verify-button.svelte`
@@ -1968,6 +2271,7 @@ git commit -m "add svelte report toolbar and verify components"
 ### Task 3.3: Svelte node-status helper + badge
 
 **Files:**
+
 - Create: `packages/svelte/src/verification-panel/node-status.ts` (re-export from React's helper if it's pure TS - preferred - otherwise duplicate)
 - Modify: `packages/svelte/src/nodes/graph-node.svelte`
 
@@ -2031,6 +2335,7 @@ git commit -m "share node-status helper from core; add svelte badge"
 ### Task 4.1: Wire React demo (`apps/demo`)
 
 **Files:**
+
 - Modify: `apps/demo/src/App.tsx`
 
 - [ ] **Step 1: Add toolbar buttons + verification state**
@@ -2132,6 +2437,7 @@ git commit -m "wire react demo to inspection report flow"
 ### Task 4.2: Wire Svelte demo (`apps/demo-svelte`)
 
 **Files:**
+
 - Modify: `apps/demo-svelte/src/App.svelte`
 
 Mirror Task 4.1 in Svelte. Use the same imports from `@wetron/core` and the Svelte components from `@wetron/svelte`. State via `$state`. File picker via `<VerifyButton onPick={...} />`.
@@ -2159,12 +2465,13 @@ git commit -m "wire svelte demo to inspection report flow"
 ### Task 5.1: API reference page in Hugo
 
 **Files:**
+
 - Create: `docs/content/docs/api/inspection-report.md`
 - Modify: `docs/content/docs/api/_index.md` (if it lists pages explicitly)
 
 - [ ] **Step 1: Author the page**
 
-```markdown
+````markdown
 ---
 title: "Inspection report"
 description: "Build, parse, and verify reproducible JSON reports of a model file's identity and per-tensor SHA-256 hashes."
@@ -2179,6 +2486,7 @@ weight: 40
 ```ts
 function buildGlobalReport(opts: BuildOptions): Promise<Report>;
 ```
+````
 
 Hashes the file (SHA-256), enumerates initializer tensors, hashes each one, and emits a canonical `Report`. Mode `"identity"` returns hash-only entries. Mode `"identity+stats"` additionally decodes each tensor and attaches its `WeightStats`.
 
@@ -2218,7 +2526,8 @@ Sorted-keys, no-whitespace JSON serialiser. Two reports for the same file produc
 
 - [docs/specs/inspection-report-design.md](https://codeberg.org/askar/wetron/src/branch/main/docs/specs/inspection-report-design.md) - the design spec.
 - [Weights](./weights/) - `WeightStats` shape used in `identity+stats` mode.
-```
+
+````
 
 - [ ] **Step 2: Build the docs site**
 
@@ -2230,13 +2539,14 @@ Expected: builds clean, no warnings about missing pages.
 ```bash
 git add docs/content/docs/api/inspection-report.md
 git commit -m "add inspection report api docs"
-```
+````
 
 ---
 
 ### Task 5.2: Cross-link from existing docs
 
 **Files:**
+
 - Modify: `docs/content/docs/rendering/react.md`
 - Modify: `docs/content/docs/rendering/svelte.md`
 

@@ -8,7 +8,7 @@ Fix the UX of the just-shipped `WeightPanel` so that an initializer view stays v
 
 1. Panel widens beyond its 280 px design when long values like `140.000` push 4-column cells outward.
 2. Integer dtypes render with redundant decimals (`140.000` for a `uint8`).
-3. The values grid has no `max-height`; clicking *Load all* on a 512-element tensor produces a 100+ row table that consumes the viewport.
+3. The values grid has no `max-height`; clicking _Load all_ on a 512-element tensor produces a 100+ row table that consumes the viewport.
 4. The `Load all <N> ->` link and the `<count> · first <N>` meta line are redundant once virtualization makes the full tensor accessible.
 5. `OpPanel` inputs/outputs sections grow tall on nodes with many inputs (e.g., `Concat` with 64 inputs), reproducing the same panel-stretching problem.
 
@@ -22,18 +22,18 @@ Fix the UX of the just-shipped `WeightPanel` so that an initializer view stays v
 
 Replace the current `formatVal(v: number): string` in `weight-panel.tsx` with a dtype-aware version:
 
-| Dtype family | Output |
-| --- | --- |
-| Integer (`int8`/`uint8`/`int16`/`uint16`/`int32`/`uint32`/`int64`/`uint64`/`bool`) | plain integer (`140`, `-1`, `255`) |
-| Float, normal range `0.001 ≤ \|v\| < 1000` | 3 decimals, leading zero stripped (`-.184`, `.045`, `25.310`) |
-| Float, very small or very large (`\|v\| ≥ 1000` or `0 < \|v\| < 0.001`) | scientific, 2 sig figs (`1.5e-4`, `2.5e+7`) |
-| Special | `NaN`, `+Inf`, `-Inf`, `0` |
+| Dtype family                                                                       | Output                                                        |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Integer (`int8`/`uint8`/`int16`/`uint16`/`int32`/`uint32`/`int64`/`uint64`/`bool`) | plain integer (`140`, `-1`, `255`)                            |
+| Float, normal range `0.001 ≤ \|v\| < 1000`                                         | 3 decimals, leading zero stripped (`-.184`, `.045`, `25.310`) |
+| Float, very small or very large (`\|v\| ≥ 1000` or `0 < \|v\| < 0.001`)            | scientific, 2 sig figs (`1.5e-4`, `2.5e+7`)                   |
+| Special                                                                            | `NaN`, `+Inf`, `-Inf`, `0`                                    |
 
 Signature change: `formatVal(v: number, dtype: string): string` (or pass `isInteger: boolean` from the caller). The dtype family is small, so a `dtype.startsWith("int") || dtype.startsWith("uint") || dtype === "bool"` check is fine.
 
 ## Meta line
 
-Replace the current `{loaded.total} · first {loaded.preview.length}` with a single localized count and the literal word *values*:
+Replace the current `{loaded.total} · first {loaded.preview.length}` with a single localized count and the literal word _values_:
 
 ```tsx
 <span className={css.valuesMeta}>{count.toLocaleString()} values</span>
@@ -90,10 +90,7 @@ export function VirtualValues({
 
   return (
     <div ref={parentRef} className={css.valuesScroll}>
-      <div
-        className={css.gridVals}
-        style={{ height: v.getTotalSize(), position: "relative" }}
-      >
+      <div className={css.gridVals} style={{ height: v.getTotalSize(), position: "relative" }}>
         {v.getVirtualItems().map((row) => (
           <div
             key={row.index}

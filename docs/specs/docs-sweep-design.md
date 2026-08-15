@@ -50,7 +50,7 @@ Format: type signatures + 1-line behavioural notes. No tutorials, no prose parag
 ### B4. Capability matrix in `formats/_index.md`
 
 | Format | Weights inlined | External weights | Subgraph inlining | Multi-subgraph | File-size detected |
-|---|---|---|---|---|---|
+| ------ | --------------- | ---------------- | ----------------- | -------------- | ------------------ |
 
 One row per format. Cell values: `✓` / `-` / short footnote ref. Each cell mechanically verifiable from the parser source. Values are filled in during implementation against the current code, not invented up front.
 

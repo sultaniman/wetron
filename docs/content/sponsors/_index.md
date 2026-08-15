@@ -16,7 +16,7 @@ It's published as a family of scoped npm packages (`@wetron/core`, `@wetron/onnx
 
 ## Why sponsorship matters
 
-Most ML tooling money flows through training and inference frameworks. Inspection, transparency, and documentation tooling - the layer that lets someone *understand* a model after it's built - has very little public funding behind it. The EU AI Act and similar regulation are creating a real need for transparency tooling that organizations can self-host and embed, not a hosted service they have to upload to.
+Most ML tooling money flows through training and inference frameworks. Inspection, transparency, and documentation tooling - the layer that lets someone _understand_ a model after it's built - has very little public funding behind it. The EU AI Act and similar regulation are creating a real need for transparency tooling that organizations can self-host and embed, not a hosted service they have to upload to.
 
 Sponsorship goes directly to the work that keeps this project alive:
 
@@ -33,13 +33,13 @@ For larger or custom arrangements (embedding wetron in a commercial product, pri
 
 ## What sponsors get
 
-| Tier | Per month | What you get |
-| --- | --- | --- |
-| Backer | €5 | Name listed on this page |
-| Supporter | €20 | Name + link on this page |
-| Sustainer | €100 | Logo on this page; quarterly progress note |
-| Embedder | €500 | Logo on this page; priority on issues affecting your integration |
-| Patron | €2,000 | All of the above + a half-day per quarter of direct integration support |
+| Tier      | Per month | What you get                                                            |
+| --------- | --------- | ----------------------------------------------------------------------- |
+| Backer    | €5        | Name listed on this page                                                |
+| Supporter | €20       | Name + link on this page                                                |
+| Sustainer | €100      | Logo on this page; quarterly progress note                              |
+| Embedder  | €500      | Logo on this page; priority on issues affecting your integration        |
+| Patron    | €2,000    | All of the above + a half-day per quarter of direct integration support |
 
 What sponsors do **not** get:
 

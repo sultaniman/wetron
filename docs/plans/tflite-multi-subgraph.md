@@ -18,27 +18,28 @@
 ## Why this needs a plan instead of just edits
 
 - The TFLite parser is hand-rolled FlatBuffer reading. Splitting per-subgraph work into a helper without breaking the existing single-subgraph flow needs deliberate ordering.
-- Tensors are referenced by index *within a subgraph*. Two subgraphs can have tensors with colliding `name` fields - the inliner must prefix every tensor reference, not just node names.
+- Tensors are referenced by index _within a subgraph_. Two subgraphs can have tensors with colliding `name` fields - the inliner must prefix every tensor reference, not just node names.
 - We have no test fixture: none of the eight committed `.tflite` models has an `IF` or `WHILE` op. Task 3 generates one with a Python script (mirroring `scripts/export_savedmodel_with_variables.py`) so subsequent integration tests have something real to assert against.
 - `BuiltinOptions` is a FlatBuffer union - to find which option type an op carries, you read `Operator.builtin_options_type` (uint8) and `Operator.builtin_options` (table offset). The plan only decodes the two option types we need; the rest stays a known gap.
 
 ## File structure
 
-| Path                                                | Action  | Responsibility                                                                                  |
-| --------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
-| `packages/tflite/src/parse.ts`                      | modify  | Extract `parseSubgraphAt` helper; add `controlFlowSites` to its context; wire the inliner pass. |
-| `packages/tflite/src/builtin-options.ts`            | create  | `readIfOptions`, `readWhileOptions` - pure FlatBuffer offset reads.                             |
-| `packages/tflite/test/builtin-options.test.ts`      | create  | Unit tests against hand-crafted `Builder`-encoded option bytes.                                 |
-| `packages/tflite/test/parse.test.ts`                | modify  | Add IF-fixture integration test asserting branch nodes are visible with prefixed names.         |
-| `scripts/export_tflite_multisubgraph.py`            | create  | Python script that emits a small `.tflite` model with an `IF` op via `tf.lite.TFLiteConverter`. |
-| `test-models/tflite_if_branching.tflite`            | create  | Generated fixture (committed binary, ~1–2 KB).                                                  |
-| `docs/specs/format-graph-structures.md`             | modify  | Flip TFLite row in the function-body-inlining table from "not yet" to "inlined".                |
+| Path                                           | Action | Responsibility                                                                                  |
+| ---------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| `packages/tflite/src/parse.ts`                 | modify | Extract `parseSubgraphAt` helper; add `controlFlowSites` to its context; wire the inliner pass. |
+| `packages/tflite/src/builtin-options.ts`       | create | `readIfOptions`, `readWhileOptions` - pure FlatBuffer offset reads.                             |
+| `packages/tflite/test/builtin-options.test.ts` | create | Unit tests against hand-crafted `Builder`-encoded option bytes.                                 |
+| `packages/tflite/test/parse.test.ts`           | modify | Add IF-fixture integration test asserting branch nodes are visible with prefixed names.         |
+| `scripts/export_tflite_multisubgraph.py`       | create | Python script that emits a small `.tflite` model with an `IF` op via `tf.lite.TFLiteConverter`. |
+| `test-models/tflite_if_branching.tflite`       | create | Generated fixture (committed binary, ~1–2 KB).                                                  |
+| `docs/specs/format-graph-structures.md`        | modify | Flip TFLite row in the function-body-inlining table from "not yet" to "inlined".                |
 
 ---
 
 ## Task 1: Extract per-subgraph parser into a private helper (no behavior change)
 
 **Files:**
+
 - Modify: `packages/tflite/src/parse.ts:111-260` (currently the body of `parseTflite`)
 
 The existing code does model-level setup (opcodes, buffers) and then per-subgraph work for `subgraphs[0]` inline. Pull the per-subgraph block into `parseSubgraphAt(bb, model, idx, ctx)`. The model-level state (`bufferBytes`, `bufferHasData`, `opcodeNames`) is shared across subgraphs - pass it through `ctx`. Tests must keep passing after this task with no semantic changes.
@@ -91,7 +92,7 @@ The boxed `totalWeightBytes` lets the helper accumulate while the caller assembl
 Cut lines 135–239 of the current `parseTflite` into the helper body. Apply these textual transforms in the moved block:
 
 - `subgraph` -> `vecTable(bb, model, 2, subgraphIdx)`
-- Each tensor's `name` field becomes `ctx.prefix + name` *only* when emitted into `ctx.tensorShapes`, `ctx.initializers`, or used as a node's input/output. Within-subgraph indexing (e.g., `tensors[idx].name`) stays raw until the moment of emission.
+- Each tensor's `name` field becomes `ctx.prefix + name` _only_ when emitted into `ctx.tensorShapes`, `ctx.initializers`, or used as a node's input/output. Within-subgraph indexing (e.g., `tensors[idx].name`) stays raw until the moment of emission.
 - For each tensor name `t.name` resolved into an op input/output, apply `ctx.argMap.get(t.name) ?? (ctx.prefix + t.name)`. Outer-scope captures hit the `argMap`; everything else gets prefixed.
 - Replace the operator-emit block's `nodes.push({...})` with `ctx.nodes.push({...})`. Use `${ctx.prefix}op_${i}` for the node name.
 - Replace `warnings.push(...)` with `ctx.warnings.push(...)`.
@@ -157,6 +158,7 @@ git commit -m "extract tflite per-subgraph parser into helper, no behavior chang
 ## Task 2: Decode `IfOptions` and `WhileOptions`
 
 **Files:**
+
 - Create: `packages/tflite/src/builtin-options.ts`
 - Create: `packages/tflite/test/builtin-options.test.ts`
 
@@ -267,6 +269,7 @@ git commit -m "decode tflite IfOptions and WhileOptions"
 ## Task 3: Generate a TFLite multi-subgraph test fixture
 
 **Files:**
+
 - Create: `scripts/export_tflite_multisubgraph.py`
 - Create: `test-models/tflite_if_branching.tflite`
 
@@ -357,6 +360,7 @@ git commit -m "add tflite multi-subgraph fixture script and generated .tflite"
 ## Task 4: Inline IF / WHILE body subgraphs
 
 **Files:**
+
 - Modify: `packages/tflite/src/parse.ts` (fill in the `// TODO control flow` from Task 1, drain `controlFlowSites` after the main parse)
 - Modify: `packages/tflite/test/parse.test.ts` (add the IF-fixture integration test)
 
@@ -443,7 +447,7 @@ for (const site of ctx.controlFlowSites) {
 }
 ```
 
-The recursion happens automatically: `parseSubgraphAt` records nested control-flow sites into the *same* `ctx.controlFlowSites` array. To handle that without infinite recursion, drain in a while-loop instead of a for-of:
+The recursion happens automatically: `parseSubgraphAt` records nested control-flow sites into the _same_ `ctx.controlFlowSites` array. To handle that without infinite recursion, drain in a while-loop instead of a for-of:
 
 ```ts
 while (ctx.controlFlowSites.length > 0) {
@@ -505,6 +509,7 @@ git commit -m "inline tflite IF and WHILE body subgraphs"
 ## Task 5: Update the format-graph-structures doc
 
 **Files:**
+
 - Modify: `docs/specs/format-graph-structures.md`
 
 - [ ] **Step 1: Flip the TFLite row in the function-body-inlining table**
@@ -559,7 +564,7 @@ git commit -m "doc: tflite multi-subgraph inlining done"
 
 2. **Open prerequisites the plan does not solve**:
    - Full TFLite `BuiltinOptions` decoding (`Conv2DOptions`, `PoolingOptions`, `FusedActivation`, …) is still empty `attributes: {}` for non-IF/WHILE ops. Out of scope here; tracked in `format-graph-structures.md` open work.
-   - Output binding (rewriting consumers of `IF:0` to read directly from the chosen branch's terminal node) is *not* implemented. The IF op stays in place producing its declared outputs; the body forms a sub-cluster near it. This matches what the SavedModel inliner does today and is a deliberate "minimum viable" scope.
+   - Output binding (rewriting consumers of `IF:0` to read directly from the chosen branch's terminal node) is _not_ implemented. The IF op stays in place producing its declared outputs; the body forms a sub-cluster near it. This matches what the SavedModel inliner does today and is a deliberate "minimum viable" scope.
 
 3. **Type consistency**:
    - `SubgraphCtx.controlFlowSites` defined in Task 1 step 2; populated in Task 4 step 2; drained in Task 4 step 3. Same name throughout.

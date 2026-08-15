@@ -37,14 +37,14 @@ export interface ModelGraph {
 
 ## Parser changes
 
-| Package | Action |
-| --- | --- |
-| `@wetron/onnx` | Build `weights.get(name)` over the protobuf-decoded initializer's `raw_data` (with fallback to typed arrays `float_data`, `int32_data`, etc.). `totalBytes` summed from initializer sizes. |
-| `@wetron/tflite` | `weights.get(name)` returns the slice from the flatbuffer `buffers` table indexed by `tensor.bufferIdx`. `totalBytes` summed from buffer lengths of constant tensors. |
-| `@wetron/keras` | `fileSizeBytes` only. `weights` left undefined. |
-| `@wetron/savedmodel` | Same. |
-| `@wetron/torchscript` | Same. |
-| `@wetron/executorch` | Same. |
+| Package               | Action                                                                                                                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@wetron/onnx`        | Build `weights.get(name)` over the protobuf-decoded initializer's `raw_data` (with fallback to typed arrays `float_data`, `int32_data`, etc.). `totalBytes` summed from initializer sizes. |
+| `@wetron/tflite`      | `weights.get(name)` returns the slice from the flatbuffer `buffers` table indexed by `tensor.bufferIdx`. `totalBytes` summed from buffer lengths of constant tensors.                      |
+| `@wetron/keras`       | `fileSizeBytes` only. `weights` left undefined.                                                                                                                                            |
+| `@wetron/savedmodel`  | Same.                                                                                                                                                                                      |
+| `@wetron/torchscript` | Same.                                                                                                                                                                                      |
+| `@wetron/executorch`  | Same.                                                                                                                                                                                      |
 
 `fileSizeBytes` is `bytes.byteLength` at parse entry - passed in or read at the top of each `parse*` function.
 
@@ -86,8 +86,8 @@ export interface WeightStats {
   readonly mean: number;
   readonly std: number;
   readonly zeros: number;
-  readonly histogram: readonly number[];   // length 12
-  readonly heatmap: readonly number[];     // length 128 (16×8)
+  readonly histogram: readonly number[]; // length 12
+  readonly heatmap: readonly number[]; // length 128 (16×8)
 }
 
 export function computeStats(values: Float64Array | Int32Array): WeightStats;

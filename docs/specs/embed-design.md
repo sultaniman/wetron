@@ -96,9 +96,9 @@ packages/embed/
   "type": "module",
   "exports": {
     ".": "./dist/wetron-embed.js",
-    "./element": "./dist/element.js"
+    "./element": "./dist/element.js",
   },
-  "sideEffects": ["./dist/wetron-embed.js"]
+  "sideEffects": ["./dist/wetron-embed.js"],
 }
 ```
 
@@ -112,18 +112,18 @@ packages/embed/
 
 All attributes are observed via `static observedAttributes`. `attributeChangedCallback` routes each to either a re-load or a renderer-prop update (see Lifecycle).
 
-| Attribute           | Type        | Default      | Behavior                                                                            |
-| ------------------- | ----------- | ------------ | ----------------------------------------------------------------------------------- |
-| `src`               | URL         | -            | Fetched on connect and on change. Triggers parse.                                   |
-| `format`            | enum string | auto-detect  | `onnx` \| `tflite` \| `keras` \| `torchscript` \| `executorch` \| `savedmodel`. Overrides magic-byte detection. |
-| `color-mode`        | enum string | `system`     | `system` \| `light` \| `dark`. `system` listens to `prefers-color-scheme`.          |
-| `rankdir`           | enum string | `TB`         | `TB` \| `LR`. Forwarded to the Svelte renderer. Requires parity work shipped.       |
-| `height`            | CSS length  | `400px`      | Width always fills parent.                                                          |
-| `no-minimap`        | boolean     | absent       | When present, hides the minimap.                                                    |
-| `no-property-panel` | boolean     | absent       | When present, hides the node property panel.                                        |
-| `no-fit-view`       | boolean     | absent       | When present, hides the fit-view button.                                            |
-| `no-export`         | boolean     | absent       | When present, hides PNG/SVG export controls.                                        |
-| `state`             | enum string | `idle`       | **Reflected by the element**, not set by host. `idle` \| `loading` \| `ready` \| `error`. Useful for CSS hooks. |
+| Attribute           | Type        | Default     | Behavior                                                                                                        |
+| ------------------- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------- |
+| `src`               | URL         | -           | Fetched on connect and on change. Triggers parse.                                                               |
+| `format`            | enum string | auto-detect | `onnx` \| `tflite` \| `keras` \| `torchscript` \| `executorch` \| `savedmodel`. Overrides magic-byte detection. |
+| `color-mode`        | enum string | `system`    | `system` \| `light` \| `dark`. `system` listens to `prefers-color-scheme`.                                      |
+| `rankdir`           | enum string | `TB`        | `TB` \| `LR`. Forwarded to the Svelte renderer. Requires parity work shipped.                                   |
+| `height`            | CSS length  | `400px`     | Width always fills parent.                                                                                      |
+| `no-minimap`        | boolean     | absent      | When present, hides the minimap.                                                                                |
+| `no-property-panel` | boolean     | absent      | When present, hides the node property panel.                                                                    |
+| `no-fit-view`       | boolean     | absent      | When present, hides the fit-view button.                                                                        |
+| `no-export`         | boolean     | absent      | When present, hides PNG/SVG export controls.                                                                    |
+| `state`             | enum string | `idle`      | **Reflected by the element**, not set by host. `idle` \| `loading` \| `ready` \| `error`. Useful for CSS hooks. |
 
 Boolean controls use `no-X` (not `show-X`) so the default state of "everything visible" matches an empty tag.
 
@@ -131,9 +131,9 @@ Boolean controls use `no-X` (not `show-X`) so the default state of "everything v
 
 ```ts
 class WetronViewerElement extends HTMLElement {
-  readonly graph: ModelGraph | null;     // null until parsed
-  readonly ready: Promise<ModelGraph>;   // resolves on load, rejects on error
-  readonly state: 'idle' | 'loading' | 'ready' | 'error';
+  readonly graph: ModelGraph | null; // null until parsed
+  readonly ready: Promise<ModelGraph>; // resolves on load, rejects on error
+  readonly state: "idle" | "loading" | "ready" | "error";
   readonly error: ParseError | Error | null;
 }
 ```
@@ -155,12 +155,12 @@ All methods are safe to call before `ready` resolves; they queue or no-op.
 
 ### Events (CustomEvent, `bubbles: true`, `composed: true`)
 
-| Event                | `detail`                                                       | Fires when                  |
-| -------------------- | -------------------------------------------------------------- | --------------------------- |
-| `wetron-load`        | `{ graph: ModelGraph }`                                        | Parse succeeds.             |
-| `wetron-error`       | `{ format: string \| null, context: string, error: Error }`    | Fetch or parse fails.       |
-| `wetron-node-select` | `{ nodeId: string, node: ModelNode }`                          | User clicks a node.         |
-| `wetron-navigate`    | `{ direction: 'into' \| 'back', subGraphId?: string }`         | Sub-graph drilling happens. |
+| Event                | `detail`                                                    | Fires when                  |
+| -------------------- | ----------------------------------------------------------- | --------------------------- |
+| `wetron-load`        | `{ graph: ModelGraph }`                                     | Parse succeeds.             |
+| `wetron-error`       | `{ format: string \| null, context: string, error: Error }` | Fetch or parse fails.       |
+| `wetron-node-select` | `{ nodeId: string, node: ModelNode }`                       | User clicks a node.         |
+| `wetron-navigate`    | `{ direction: 'into' \| 'back', subGraphId?: string }`      | Sub-graph drilling happens. |
 
 `composed: true` so events cross the Shadow DOM boundary and hosts can listen from outside.
 
@@ -181,7 +181,7 @@ Defaults to a one-line built-in error message when no slot is provided.
 ```ts
 declare global {
   interface HTMLElementTagNameMap {
-    'wetron-viewer': WetronViewerElement;
+    "wetron-viewer": WetronViewerElement;
   }
 }
 ```
@@ -220,8 +220,8 @@ Load sequence:
 
 ```ts
 // Module scope, runs once when bundle loads.
-if (!customElements.get('wetron-viewer')) {
-  customElements.define('wetron-viewer', WetronViewerElement);
+if (!customElements.get("wetron-viewer")) {
+  customElements.define("wetron-viewer", WetronViewerElement);
 }
 ```
 
@@ -249,11 +249,11 @@ The custom-property list comes straight from `@wetron/tokens` - no new theming s
 
 ### Error model
 
-| Class      | Trigger                              | `wetron-error.detail`                        |
-| ---------- | ------------------------------------ | -------------------------------------------- |
-| Network    | `fetch` rejects or non-2xx response  | `{ format: null, context: 'fetch', error }`  |
-| Detection  | `detectFormat` returns `"unknown"`   | `{ format: null, context: 'detect', error: ParseError }` |
-| Parse      | parser throws `ParseError`           | `{ format, context, error: ParseError }`     |
+| Class     | Trigger                             | `wetron-error.detail`                                    |
+| --------- | ----------------------------------- | -------------------------------------------------------- |
+| Network   | `fetch` rejects or non-2xx response | `{ format: null, context: 'fetch', error }`              |
+| Detection | `detectFormat` returns `"unknown"`  | `{ format: null, context: 'detect', error: ParseError }` |
+| Parse     | parser throws `ParseError`          | `{ format, context, error: ParseError }`                 |
 
 In all three cases the element:
 
@@ -310,10 +310,10 @@ CI step measures `dist/wetron-embed.js` and `dist/wetron-embed.js.br` (brotli) a
 
 Three integration tests in `packages/embed/test/element.test.ts` (vitest + happy-dom). No unit tests; the element is small enough that behavior tests cover it.
 
-| Test            | What it locks in                                                                                                                                            |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Happy path      | `<wetron-viewer src="...">` with a real fixture renders, dispatches `wetron-load` with the parsed graph, reflects `state="ready"`.                          |
-| Error contract  | A bad fixture or wrong `format` dispatches `wetron-error` with `{ format, context, error }`, reflects `state="error"`.                                      |
+| Test              | What it locks in                                                                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Happy path        | `<wetron-viewer src="...">` with a real fixture renders, dispatches `wetron-load` with the parsed graph, reflects `state="ready"`.                            |
+| Error contract    | A bad fixture or wrong `format` dispatches `wetron-error` with `{ format, context, error }`, reflects `state="error"`.                                        |
 | Live `src` change | Mount with `src=A`, await `wetron-load`, change `src=B`, await `wetron-load` again, assert second graph differs. Verifies `attributeChangedCallback` routing. |
 
 Explicitly not tested in v1:
