@@ -38,7 +38,12 @@ for (const path of files) {
     console.log(`  shared (>1 consumer):  ${shared.length}`);
     console.log(`  standalone VarHandleOps (multi-consumer kept as nodes): ${standaloneVH.length}`);
     if (shared.length > 0)
-      console.log(`    sample shared: ${shared.slice(0, 3).map(([n, c]) => `${n}(${c})`).join(", ")}`);
+      console.log(
+        `    sample shared: ${shared
+          .slice(0, 3)
+          .map(([n, c]) => `${n}(${c})`)
+          .join(", ")}`,
+      );
   } catch (e) {
     console.log(`\n!! ${path}: ${(e as Error).message}`);
   }

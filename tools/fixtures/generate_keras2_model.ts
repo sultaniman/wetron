@@ -29,10 +29,7 @@ function add(
     class_name,
     name,
     config: { name, dtype: "float32", trainable: true, ...config },
-    inbound_nodes:
-      parent === null
-        ? []
-        : [{ inputs: [parent, 0, 0, {}] }],
+    inbound_nodes: parent === null ? [] : [{ inputs: [parent, 0, 0, {}] }],
   });
 }
 

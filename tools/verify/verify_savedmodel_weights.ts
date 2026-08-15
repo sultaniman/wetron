@@ -83,7 +83,9 @@ console.log(`  total checkpoint bytes:                   ${ckptTotalBytes}`);
 // --- 3. Attach checkpoint --------------------------------------------------
 const graph = attachCheckpointToGraph(rawGraph, { weights, metas, fullNameToKey });
 console.log(`\n--- after attachCheckpointToGraph ---`);
-console.log(`  initializers:           ${graph.initializers.size}  (was ${rawGraph.initializers.size})`);
+console.log(
+  `  initializers:           ${graph.initializers.size}  (was ${rawGraph.initializers.size})`,
+);
 console.log(`  graph.weights.totalBytes: ${graph.weights?.totalBytes}`);
 
 // Every VarHandleOp that maps to a checkpoint variable should now be in initializers.
@@ -99,7 +101,9 @@ const { nodes } = modelGraphToFlow(graph);
 const graphNodes = nodes.filter((n) => n.type === "graphNode");
 const ioNodes = nodes.filter((n) => n.type === "ioNode");
 console.log(`\n--- after modelGraphToFlow ---`);
-console.log(`  total flow nodes: ${nodes.length} (graphNode=${graphNodes.length}, ioNode=${ioNodes.length})`);
+console.log(
+  `  total flow nodes: ${nodes.length} (graphNode=${graphNodes.length}, ioNode=${ioNodes.length})`,
+);
 
 // VarHandleOps that ARE initializers must NOT appear as standalone graph nodes.
 let vhAsStandalone = 0;

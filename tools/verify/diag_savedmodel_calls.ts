@@ -21,7 +21,9 @@ for (const n of g.nodes) {
     if (leaves.length < 5) leaves.push(n.name);
   }
 }
-console.log(`\nVarHandleOps: shadow=${shadowVH} (e.g. ${shadows.join(", ")}), leaf=${leafVH} (e.g. ${leaves.join(", ")})`);
+console.log(
+  `\nVarHandleOps: shadow=${shadowVH} (e.g. ${shadows.join(", ")}), leaf=${leafVH} (e.g. ${leaves.join(", ")})`,
+);
 
 // 2. Op-type histogram for visible nodes
 const opCounts = new Map<string, number>();
@@ -31,10 +33,14 @@ for (const [op, c] of [...opCounts.entries()].sort((a, b) => b[1] - a[1]).slice(
   console.log(`  ${c.toString().padStart(4)}  ${op}`);
 
 // 3. StatefulPartitionedCall node details
-const spcs = g.nodes.filter((n) => n.opType === "StatefulPartitionedCall" || n.opType === "PartitionedCall");
+const spcs = g.nodes.filter(
+  (n) => n.opType === "StatefulPartitionedCall" || n.opType === "PartitionedCall",
+);
 console.log(`\nStatefulPartitionedCall / PartitionedCall nodes: ${spcs.length}`);
 for (const n of spcs) {
-  console.log(`  [${n.opType}] name="${n.name}" inputs=${n.inputs.length} outputs=${n.outputs.length}`);
+  console.log(
+    `  [${n.opType}] name="${n.name}" inputs=${n.inputs.length} outputs=${n.outputs.length}`,
+  );
   console.log(`    first 5 inputs: ${n.inputs.slice(0, 5).join(", ")}`);
 }
 

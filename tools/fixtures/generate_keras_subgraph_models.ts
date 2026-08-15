@@ -63,10 +63,7 @@ const WEIGHT_SPECS: Record<string, (cfg: Record<string, unknown>) => number[][]>
   Dense: (cfg) => {
     const units = cfg["units"] as number;
     const inUnits = (cfg["_in_units"] as number) ?? 128;
-    return [
-      [inUnits, units],
-      [units],
-    ];
+    return [[inUnits, units], [units]];
   },
   BatchNormalization: (cfg) => {
     const axis = (cfg["_channels"] as number) ?? 32;
@@ -134,7 +131,10 @@ function buildSubFunctional(
 }
 
 function kerasSnakeCase(s: string): string {
-  return s.replace(/(.)([A-Z][a-z]+)/g, "$1_$2").replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+  return s
+    .replace(/(.)([A-Z][a-z]+)/g, "$1_$2")
+    .replace(/([a-z])([A-Z])/g, "$1_$2")
+    .toLowerCase();
 }
 
 async function writeH5(
@@ -226,30 +226,61 @@ function buildRootFunctional(
 }
 
 async function generate(format: Format, outName: string): Promise<void> {
-  const featureExtractor = buildSubFunctional(format, "feature_extractor", [null as unknown as number, 32, 32, 3], [
-    { cls: "Conv2D", name: "fe_conv1", cfg: { filters: 32, kernel_size: [3, 3], padding: "same", _in_channels: 3 } },
-    { cls: "BatchNormalization", name: "fe_bn1", cfg: { axis: -1, momentum: 0.99, epsilon: 0.001, _channels: 32 } },
-    { cls: "Activation", name: "fe_relu1", cfg: { activation: "relu" } },
-    { cls: "Conv2D", name: "fe_conv2", cfg: { filters: 64, kernel_size: [3, 3], padding: "same", _in_channels: 32 } },
-    { cls: "BatchNormalization", name: "fe_bn2", cfg: { axis: -1, _channels: 64 } },
-    { cls: "Activation", name: "fe_relu2", cfg: { activation: "relu" } },
-    { cls: "MaxPooling2D", name: "fe_pool", cfg: { pool_size: [2, 2] } },
-    { cls: "Conv2D", name: "fe_conv3", cfg: { filters: 128, kernel_size: [3, 3], padding: "same", _in_channels: 64 } },
-    { cls: "BatchNormalization", name: "fe_bn3", cfg: { axis: -1, _channels: 128 } },
-    { cls: "Activation", name: "fe_relu3", cfg: { activation: "relu" } },
-    { cls: "GlobalAveragePooling2D", name: "fe_gap" },
-  ]);
+  const featureExtractor = buildSubFunctional(
+    format,
+    "feature_extractor",
+    [null as unknown as number, 32, 32, 3],
+    [
+      {
+        cls: "Conv2D",
+        name: "fe_conv1",
+        cfg: { filters: 32, kernel_size: [3, 3], padding: "same", _in_channels: 3 },
+      },
+      {
+        cls: "BatchNormalization",
+        name: "fe_bn1",
+        cfg: { axis: -1, momentum: 0.99, epsilon: 0.001, _channels: 32 },
+      },
+      { cls: "Activation", name: "fe_relu1", cfg: { activation: "relu" } },
+      {
+        cls: "Conv2D",
+        name: "fe_conv2",
+        cfg: { filters: 64, kernel_size: [3, 3], padding: "same", _in_channels: 32 },
+      },
+      { cls: "BatchNormalization", name: "fe_bn2", cfg: { axis: -1, _channels: 64 } },
+      { cls: "Activation", name: "fe_relu2", cfg: { activation: "relu" } },
+      { cls: "MaxPooling2D", name: "fe_pool", cfg: { pool_size: [2, 2] } },
+      {
+        cls: "Conv2D",
+        name: "fe_conv3",
+        cfg: { filters: 128, kernel_size: [3, 3], padding: "same", _in_channels: 64 },
+      },
+      { cls: "BatchNormalization", name: "fe_bn3", cfg: { axis: -1, _channels: 128 } },
+      { cls: "Activation", name: "fe_relu3", cfg: { activation: "relu" } },
+      { cls: "GlobalAveragePooling2D", name: "fe_gap" },
+    ],
+  );
 
-  const classifier = buildSubFunctional(format, "classifier", [null as unknown as number, 128], [
-    { cls: "Dense", name: "cl_dense1", cfg: { units: 64, activation: "relu", _in_units: 128 } },
-    { cls: "Dropout", name: "cl_drop1", cfg: { rate: 0.5 } },
-    { cls: "Dense", name: "cl_dense2", cfg: { units: 10, activation: "softmax", _in_units: 64 } },
-  ]);
+  const classifier = buildSubFunctional(
+    format,
+    "classifier",
+    [null as unknown as number, 128],
+    [
+      { cls: "Dense", name: "cl_dense1", cfg: { units: 64, activation: "relu", _in_units: 128 } },
+      { cls: "Dropout", name: "cl_drop1", cfg: { rate: 0.5 } },
+      { cls: "Dense", name: "cl_dense2", cfg: { units: 10, activation: "softmax", _in_units: 64 } },
+    ],
+  );
 
-  const regression = buildSubFunctional(format, "regression", [null as unknown as number, 128], [
-    { cls: "Dense", name: "rg_dense1", cfg: { units: 32, activation: "relu", _in_units: 128 } },
-    { cls: "Dense", name: "rg_dense2", cfg: { units: 1, _in_units: 32 } },
-  ]);
+  const regression = buildSubFunctional(
+    format,
+    "regression",
+    [null as unknown as number, 128],
+    [
+      { cls: "Dense", name: "rg_dense1", cfg: { units: 32, activation: "relu", _in_units: 128 } },
+      { cls: "Dense", name: "rg_dense2", cfg: { units: 1, _in_units: 32 } },
+    ],
+  );
 
   const root = buildRootFunctional(format, "branched_net", [
     { name: "feature_extractor", config: featureExtractor.config },
@@ -283,9 +314,7 @@ async function generate(format: Format, outName: string): Promise<void> {
 
   const dest = resolve(here, "..", "test-models", outName);
   writeFileSync(dest, zipped);
-  console.log(
-    `wrote ${dest} — h5=${h5Bytes.length}b, zip=${zipped.length}b`,
-  );
+  console.log(`wrote ${dest} — h5=${h5Bytes.length}b, zip=${zipped.length}b`);
 }
 
 await generate("keras3", "keras3_with_subgraphs.keras");

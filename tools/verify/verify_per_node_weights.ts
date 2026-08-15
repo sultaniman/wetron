@@ -15,7 +15,13 @@ async function check(path: string) {
   for (const n of nodes) {
     if (n.type !== "graphNode") continue;
     const wi = (n.data as any).weightInputs as
-      | Array<{ name: string; slot: number; label: string; shape: readonly number[]; dtype: string }>
+      | Array<{
+          name: string;
+          slot: number;
+          label: string;
+          shape: readonly number[];
+          dtype: string;
+        }>
       | undefined;
     if (!wi || wi.length === 0) continue;
     nodesWithWeights++;
@@ -53,7 +59,8 @@ async function check(path: string) {
     const wi = (n.data as any).weightInputs;
     if (!wi || wi.length === 0) continue;
     console.log(`  sample node "${(n.data as any).name || n.id}" (${(n.data as any).opType}):`);
-    for (const w of wi) console.log(`    [${w.slot}] ${w.label}: ${w.name}  ${w.dtype}[${w.shape.join(",")}]`);
+    for (const w of wi)
+      console.log(`    [${w.slot}] ${w.label}: ${w.name}  ${w.dtype}[${w.shape.join(",")}]`);
     printed++;
   }
 }
