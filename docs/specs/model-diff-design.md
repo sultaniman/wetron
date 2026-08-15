@@ -34,7 +34,7 @@ matched, identical     -> unchanged
 ## Data model
 
 ```ts
-type NodeChangeKind = "added" | "removed" | "changed" | "moved" | "unchanged";
+type NodeChangeKind = 'added' | 'removed' | 'changed' | 'moved' | 'unchanged';
 
 type NodeDiff = {
   readonly kind: NodeChangeKind;

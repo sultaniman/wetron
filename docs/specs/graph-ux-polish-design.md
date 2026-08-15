@@ -47,48 +47,29 @@ All existing `ModelGraph` literals in tests gain `initializers: new Map()`.
 ```ts
 const OP_INPUT_LABELS: Record<string, readonly string[]> = {
   // Convolution
-  Conv: ["X", "W", "B"],
-  ConvTranspose: ["X", "W", "B"],
+  Conv: ['X', 'W', 'B'],
+  ConvTranspose: ['X', 'W', 'B'],
   // Matrix multiply / linear
-  Gemm: ["A", "B", "C"],
-  MatMul: ["A", "B"],
+  Gemm: ['A', 'B', 'C'],
+  MatMul: ['A', 'B'],
   // Normalization
-  BatchNormalization: ["X", "scale", "B", "mean", "var"],
-  LayerNormalization: ["X", "Scale", "B"],
-  GroupNormalization: ["X", "scale", "bias"],
-  InstanceNormalization: ["input", "scale", "B"],
+  BatchNormalization: ['X', 'scale', 'B', 'mean', 'var'],
+  LayerNormalization: ['X', 'Scale', 'B'],
+  GroupNormalization: ['X', 'scale', 'bias'],
+  InstanceNormalization: ['input', 'scale', 'B'],
   // Recurrent
-  LSTM: ["X", "W", "R", "B", "sequence_lens", "initial_h", "initial_c", "P"],
-  GRU: ["X", "W", "R", "B", "sequence_lens", "initial_h"],
-  RNN: ["X", "W", "R", "B", "sequence_lens", "initial_h"],
+  LSTM: ['X', 'W', 'R', 'B', 'sequence_lens', 'initial_h', 'initial_c', 'P'],
+  GRU: ['X', 'W', 'R', 'B', 'sequence_lens', 'initial_h'],
+  RNN: ['X', 'W', 'R', 'B', 'sequence_lens', 'initial_h'],
   // Quantized
-  QLinearConv: [
-    "x",
-    "x_scale",
-    "x_zero_point",
-    "w",
-    "w_scale",
-    "w_zero_point",
-    "y_scale",
-    "y_zero_point",
-    "B",
-  ],
-  QLinearMatMul: [
-    "a",
-    "a_scale",
-    "a_zero_point",
-    "b",
-    "b_scale",
-    "b_zero_point",
-    "y_scale",
-    "y_zero_point",
-  ],
+  QLinearConv: ['x', 'x_scale', 'x_zero_point', 'w', 'w_scale', 'w_zero_point', 'y_scale', 'y_zero_point', 'B'],
+  QLinearMatMul: ['a', 'a_scale', 'a_zero_point', 'b', 'b_scale', 'b_zero_point', 'y_scale', 'y_zero_point'],
   // TFLite builtin op names
-  CONV_2D: ["input", "filter", "bias"],
-  DEPTHWISE_CONV_2D: ["input", "filter", "bias"],
-  FULLY_CONNECTED: ["input", "weights", "bias"],
-  TRANSPOSE_CONV: ["output_shape", "filter", "input", "bias"],
-  BATCH_MATMUL: ["input", "filter"],
+  CONV_2D: ['input', 'filter', 'bias'],
+  DEPTHWISE_CONV_2D: ['input', 'filter', 'bias'],
+  FULLY_CONNECTED: ['input', 'weights', 'bias'],
+  TRANSPOSE_CONV: ['output_shape', 'filter', 'input', 'bias'],
+  BATCH_MATMUL: ['input', 'filter'],
 };
 
 export function opInputLabels(opType: string): readonly string[] {
@@ -128,11 +109,11 @@ flowEdges.push({
   id: edgeId,
   source: srcId,
   target: fn.id,
-  type: "default",
+  type: 'default',
   data: {
     tensorName: inputName,
-    sourceOpType: nodeIdToOpType.get(srcId) ?? "",
-    sourceNodeName: nodeIdToName.get(srcId) ?? "",
+    sourceOpType: nodeIdToOpType.get(srcId) ?? '',
+    sourceNodeName: nodeIdToName.get(srcId) ?? '',
     targetOpType: fn.data.opType,
     targetNodeName: fn.data.name,
   },
@@ -168,7 +149,7 @@ export type GraphNodeData = {
 Populated in `modelGraphToFlow` when building `FlowNode` for graph nodes:
 
 ```ts
-import { opInputLabels } from "./op-inputs.ts";
+import { opInputLabels } from './op-inputs.ts';
 
 const labels = opInputLabels(node.opType);
 const weightInputs =
@@ -193,13 +174,13 @@ const weightInputs =
 The parser already reads `graph['initializer']` to build `initializerNames`. Extend to extract shape and dtype:
 
 ```ts
-const rawInitializers = (graph["initializer"] as Array<Record<string, unknown>> | null) ?? [];
-const initializerNames = new Set(rawInitializers.map((i) => String(i["name"] ?? "")));
+const rawInitializers = (graph['initializer'] as Array<Record<string, unknown>> | null) ?? [];
+const initializerNames = new Set(rawInitializers.map((i) => String(i['name'] ?? '')));
 const initializers = new Map(
   rawInitializers.map((init) => {
-    const name = String(init["name"] ?? "");
-    const dims = ((init["dims"] as unknown[] | null) ?? []).map(longToNumber);
-    const dtype = ONNX_DTYPE[init["dataType"] as number] ?? "unknown";
+    const name = String(init['name'] ?? '');
+    const dims = ((init['dims'] as unknown[] | null) ?? []).map(longToNumber);
+    const dtype = ONNX_DTYPE[init['dataType'] as number] ?? 'unknown';
     return [name, { shape: dims as readonly number[], dtype }] as const;
   }),
 );
@@ -248,7 +229,7 @@ for (let i = 0; i < numTensors; i++) {
 ```ts
 export type PanelTarget =
   | GraphNode
-  | { graphValue: GraphValue; direction: "input" | "output" }
+  | { graphValue: GraphValue; direction: 'input' | 'output' }
   | {
       edge: {
         tensorName: string;
@@ -273,7 +254,7 @@ function EdgePanel({ edge, onBack }: { edge: EdgeData; onBack?: () => void }) {
     <>
       <div className={css.header}>
         {onBack && <BackButton onBack={onBack} />}
-        <div className={css.iconBox} style={{ "--icon-box-bg": "#f3e5f5" } as React.CSSProperties}>
+        <div className={css.iconBox} style={{ '--icon-box-bg': '#f3e5f5' } as React.CSSProperties}>
           <ArrowsLeftRight size={15} color="#9c27b0" />
         </div>
         <div className={css.nodeTitle}>Connection</div>
@@ -370,7 +351,7 @@ In `OpPanel`, filter out empty-string inputs before rendering:
 
 ```ts
 export const EDGE_THEME = {
-  selectedStroke: "#e53935",
+  selectedStroke: '#e53935',
   selectedStrokeWidth: 2,
 } as const;
 ```
@@ -458,7 +439,7 @@ Replace `{data.name || null}` with weight rows:
     ? data.weightInputs.map((w, i) => (
         <div key={i} className={css.weightRow}>
           <span className={css.weightLabel}>{w.label}</span>
-          <span className={css.weightShape}>〈{w.shape.join("×")}〉</span>
+          <span className={css.weightShape}>〈{w.shape.join('×')}〉</span>
         </div>
       ))
     : null;

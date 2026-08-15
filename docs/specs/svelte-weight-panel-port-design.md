@@ -99,7 +99,7 @@ Direct port. Uses `pickColormap` and `colorForCell` from `@wetron/core/heatmap-c
 type Props = {
   values: Float64Array | Int32Array | BigInt64Array;
   format: (v: number) => string;
-  align?: "center" | "right";
+  align?: 'center' | 'right';
 };
 ```
 

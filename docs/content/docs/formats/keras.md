@@ -1,12 +1,12 @@
 ---
-title: "Keras"
-description: "Keras 3 model parser for Wetron - parses .keras ZIP archives containing config.json for Sequential and Functional model topologies."
-lead: "Parses `.keras` ZIP archives containing a `config.json`."
+title: 'Keras'
+description: 'Keras 3 model parser for Wetron - parses .keras ZIP archives containing config.json for Sequential and Functional model topologies.'
+lead: 'Parses `.keras` ZIP archives containing a `config.json`.'
 weight: 30
 ---
 
 ```ts
-import { parseKeras } from "@wetron/keras";
+import { parseKeras } from '@wetron/keras';
 
 const graph = parseKeras(bytes); // synchronous, returns ModelGraph
 ```

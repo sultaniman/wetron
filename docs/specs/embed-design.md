@@ -133,7 +133,7 @@ Boolean controls use `no-X` (not `show-X`) so the default state of "everything v
 class WetronViewerElement extends HTMLElement {
   readonly graph: ModelGraph | null; // null until parsed
   readonly ready: Promise<ModelGraph>; // resolves on load, rejects on error
-  readonly state: "idle" | "loading" | "ready" | "error";
+  readonly state: 'idle' | 'loading' | 'ready' | 'error';
   readonly error: ParseError | Error | null;
 }
 ```
@@ -181,7 +181,7 @@ Defaults to a one-line built-in error message when no slot is provided.
 ```ts
 declare global {
   interface HTMLElementTagNameMap {
-    "wetron-viewer": WetronViewerElement;
+    'wetron-viewer': WetronViewerElement;
   }
 }
 ```
@@ -220,8 +220,8 @@ Load sequence:
 
 ```ts
 // Module scope, runs once when bundle loads.
-if (!customElements.get("wetron-viewer")) {
-  customElements.define("wetron-viewer", WetronViewerElement);
+if (!customElements.get('wetron-viewer')) {
+  customElements.define('wetron-viewer', WetronViewerElement);
 }
 ```
 

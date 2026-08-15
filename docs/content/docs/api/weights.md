@@ -18,16 +18,16 @@ import type { WeightSource, WeightStats } from '@wetron/core';
 
 ```ts
 type ModelWeights =
-    | { readonly kind: 'available'; readonly source: WeightSource }
-    | { readonly kind: 'external'; readonly format: 'savedmodel' | 'onnx' };
+  | { readonly kind: 'available'; readonly source: WeightSource }
+  | { readonly kind: 'external'; readonly format: 'savedmodel' | 'onnx' };
 ```
 
 ## WeightSource
 
 ```ts
 interface WeightSource {
-    readonly totalBytes: number;
-    get(name: string): Uint8Array | undefined;
+  readonly totalBytes: number;
+  get(name: string): Uint8Array | undefined;
 }
 ```
 
@@ -47,9 +47,9 @@ interface WeightSource {
 
 ```ts
 function decodeWeight(
-    bytes: Uint8Array,
-    dtype: string,
-    shape: readonly number[],
+  bytes: Uint8Array,
+  dtype: string,
+  shape: readonly number[],
 ): Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array | null;
 ```
 
@@ -68,9 +68,9 @@ Other GGML quantization formats return `null` until a decoder is implemented. Th
 
 ```ts
 function decodeFirstN(
-    bytes: Uint8Array,
-    dtype: string,
-    n: number,
+  bytes: Uint8Array,
+  dtype: string,
+  n: number,
 ): Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint64Array | null;
 ```
 
@@ -86,15 +86,15 @@ Pass decoded values through `numericView()` first. Number-backed arrays retain t
 
 ```ts
 interface WeightStats {
-    readonly count: number;
-    readonly min: number;
-    readonly max: number;
-    readonly mean: number;
-    readonly std: number;
-    readonly zeros: number;
-    readonly histogram: readonly number[]; // length 12, fixed-width bins between min and max
-    readonly heatmap: readonly number[]; // length 128, 16 cols x 8 rows, mean of consecutive chunks
-    readonly chunkSize: number; // values averaged per heatmap cell
+  readonly count: number;
+  readonly min: number;
+  readonly max: number;
+  readonly mean: number;
+  readonly std: number;
+  readonly zeros: number;
+  readonly histogram: readonly number[]; // length 12, fixed-width bins between min and max
+  readonly heatmap: readonly number[]; // length 128, 16 cols x 8 rows, mean of consecutive chunks
+  readonly chunkSize: number; // values averaged per heatmap cell
 }
 ```
 
@@ -113,17 +113,17 @@ async function loadSavedModelWeights(indexFile: File, dataFile: File): Promise<L
 async function loadSavedModelWeightsFromUrls(indexUrl: string, ...dataUrls: string[]): Promise<LoadedCheckpoint>;
 
 interface LoadedCheckpoint {
-    readonly weights: WeightSource;
-    readonly metas: ReadonlyMap<string, CheckpointMeta>;
-    readonly fullNameToKey: ReadonlyMap<string, string>;
+  readonly weights: WeightSource;
+  readonly metas: ReadonlyMap<string, CheckpointMeta>;
+  readonly fullNameToKey: ReadonlyMap<string, string>;
 }
 
 interface CheckpointMeta {
-    readonly dtype: string;
-    readonly shape: readonly number[];
-    readonly shardId: number;
-    readonly offset: number;
-    readonly size: number;
+  readonly dtype: string;
+  readonly shape: readonly number[];
+  readonly shardId: number;
+  readonly offset: number;
+  readonly size: number;
 }
 
 function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpoint): ModelGraph;
@@ -160,10 +160,10 @@ import { decodeFirstN, computeStats } from '@wetron/core';
 const graph = await parseModel(bytes, file.name);
 const weightBytes = graph.weights?.kind === 'available' ? graph.weights.source.get('conv1.weight') : undefined;
 if (weightBytes) {
-    const preview = decodeFirstN(weightBytes, 'float32', 4096);
-    if (preview && preview instanceof Float64Array) {
-        const stats = computeStats(numericView(preview));
-        console.log(stats.min, stats.max, stats.mean, stats.std);
-    }
+  const preview = decodeFirstN(weightBytes, 'float32', 4096);
+  if (preview && preview instanceof Float64Array) {
+    const stats = computeStats(numericView(preview));
+    console.log(stats.min, stats.max, stats.mean, stats.std);
+  }
 }
 ```

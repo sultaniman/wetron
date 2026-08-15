@@ -61,7 +61,7 @@ export type FlowEdge = {
 ```ts
 export type PanelTarget =
   | GraphNode
-  | { graphValue: GraphValue; direction: "input" | "output" }
+  | { graphValue: GraphValue; direction: 'input' | 'output' }
   | { edge: { tensorName: string; sourceOpType: string; targetOpType: string } }
   | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```

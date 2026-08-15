@@ -79,7 +79,7 @@ Category colors are moved from pure JS (`CATEGORY_THEME` object -> hex string ->
 Add all 16 categories under each `[data-theme]` block:
 
 ```css
-[data-theme="light"] {
+[data-theme='light'] {
   --wetron-category-input: #2e7d32;
   --wetron-category-output: #1565c0;
   --wetron-category-conv: #3949ab;
@@ -98,7 +98,7 @@ Add all 16 categories under each `[data-theme]` block:
   --wetron-category-unknown: #757575;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --wetron-category-input: #4caf50;
   --wetron-category-output: #42a5f5;
   --wetron-category-conv: #7986cb;
@@ -122,7 +122,7 @@ Add all 16 categories under each `[data-theme]` block:
 
 ```ts
 // before
-const color = CATEGORY_THEME[cat][isDark ? "dark" : "light"];
+const color = CATEGORY_THEME[cat][isDark ? 'dark' : 'light'];
 
 // after
 const color = `var(--wetron-category-${cat})`;
@@ -134,11 +134,11 @@ const color = `var(--wetron-category-${cat})`;
 
 ```css
 /* Target the wetron container's [data-theme] child */
-.my-graph-wrapper [data-theme="light"] {
+.my-graph-wrapper [data-theme='light'] {
   --wetron-category-conv: #ff6b35;
   --wetron-category-activation: #e67e22;
 }
-.my-graph-wrapper [data-theme="dark"] {
+.my-graph-wrapper [data-theme='dark'] {
   --wetron-category-conv: #ff8c60;
   --wetron-category-activation: #f39c12;
 }

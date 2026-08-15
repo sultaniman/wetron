@@ -1,7 +1,7 @@
 ---
-title: "Installation"
-description: "How to install Wetron packages for React or Svelte - a single install covers all parsers since @wetron/core lists them as dependencies."
-lead: "A single install covers everything - parsers are dependencies of @wetron/core."
+title: 'Installation'
+description: 'How to install Wetron packages for React or Svelte - a single install covers all parsers since @wetron/core lists them as dependencies.'
+lead: 'A single install covers everything - parsers are dependencies of @wetron/core.'
 weight: 20
 ---
 
@@ -22,7 +22,7 @@ pnpm add react react-dom @xyflow/react @phosphor-icons/react @base-ui/react
 Import the stylesheet once in your entry point:
 
 ```ts
-import "@wetron/react/styles.css";
+import '@wetron/react/styles.css';
 ```
 
 ## Svelte

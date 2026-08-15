@@ -17,12 +17,12 @@ import '@wetron/react/styles.css';
 import { ModelGraphView } from '@wetron/react';
 
 <ModelGraphView
-    graph={graph} // ModelGraph - required
-    onTargetClick={setSelected} // (target: PanelTarget) => void
-    colorMode="system" // "light" | "dark" | "system" (default: "system")
-    onWarnings={(w) => console.warn(w)} // called when graph has parse warnings
-    selectedEdgeTensorName={null} // highlights the matching edge
-    searchQuery="" // dims nodes that don't match the query
+  graph={graph} // ModelGraph - required
+  onTargetClick={setSelected} // (target: PanelTarget) => void
+  colorMode="system" // "light" | "dark" | "system" (default: "system")
+  onWarnings={(w) => console.warn(w)} // called when graph has parse warnings
+  selectedEdgeTensorName={null} // highlights the matching edge
+  searchQuery="" // dims nodes that don't match the query
 />;
 ```
 
@@ -47,14 +47,14 @@ Renders the full interactive graph. Nodes are coloured by operator category. Cli
 import { NodePropertyPanel } from '@wetron/react';
 
 <NodePropertyPanel
-    target={selected} // PanelTarget | null - null renders nothing
-    graph={graph} // ModelGraph - enables the weight panel for initializer tensors
-    colorMode="system"
-    opsets={graph?.opsets} // ReadonlyMap<string, number> - ONNX domain versions
-    tensorShapes={graph?.tensorShapes} // shape info for edge panels
-    onTensorClick={(name) => {}} // called when a tensor name chip is clicked
-    onBack={() => {}} // shows a back arrow when provided
-    onClose={() => setSelected(null)} // shows a close button when provided
+  target={selected} // PanelTarget | null - null renders nothing
+  graph={graph} // ModelGraph - enables the weight panel for initializer tensors
+  colorMode="system"
+  opsets={graph?.opsets} // ReadonlyMap<string, number> - ONNX domain versions
+  tensorShapes={graph?.tensorShapes} // shape info for edge panels
+  onTensorClick={(name) => {}} // called when a tensor name chip is clicked
+  onBack={() => {}} // shows a back arrow when provided
+  onClose={() => setSelected(null)} // shows a close button when provided
 />;
 ```
 
@@ -87,16 +87,16 @@ The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally;
 
 ```ts
 type PanelTarget =
-    | GraphNode
-    | { graphValue: GraphValue; direction: 'input' | 'output' }
-    | {
-          edge: {
-              tensorName: string;
-              from: { opType: string; name: string };
-              to: Array<{ opType: string; name: string }>;
-          };
-      }
-    | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
+  | GraphNode
+  | { graphValue: GraphValue; direction: 'input' | 'output' }
+  | {
+      edge: {
+        tensorName: string;
+        from: { opType: string; name: string };
+        to: Array<{ opType: string; name: string }>;
+      };
+    }
+  | { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } };
 ```
 
 Use `isGraphNode(target)` from `@wetron/react` to narrow to `GraphNode`.
@@ -109,11 +109,11 @@ Pass a `ref` to `ModelGraphView` to get imperative control:
 const ref = useRef<ModelGraphViewHandle>(null);
 
 type ModelGraphViewHandle = {
-    fitAll: () => Promise<void>;
-    getViewport: () => { x: number; y: number; zoom: number };
-    setViewport: (vp: { x: number; y: number; zoom: number }) => void;
-    getNodesBounds: () => { x: number; y: number; width: number; height: number };
-    getViewportElement: () => HTMLElement | null;
+  fitAll: () => Promise<void>;
+  getViewport: () => { x: number; y: number; zoom: number };
+  setViewport: (vp: { x: number; y: number; zoom: number }) => void;
+  getNodesBounds: () => { x: number; y: number; width: number; height: number };
+  getViewportElement: () => HTMLElement | null;
 };
 ```
 

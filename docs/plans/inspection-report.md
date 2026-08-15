@@ -25,21 +25,21 @@ The core module is the load-bearing piece. UI surfaces in later phases call into
 
 ```ts
 // packages/core/test/report/hash.test.ts
-import { test, expect } from "vitest";
-import { sha256Hex } from "../../src/report/hash.ts";
+import { test, expect } from 'vitest';
+import { sha256Hex } from '../../src/report/hash.ts';
 
-test("sha256Hex of empty input is the known digest", async () => {
+test('sha256Hex of empty input is the known digest', async () => {
   const got = await sha256Hex(new Uint8Array());
-  expect(got).toBe("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+  expect(got).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
 });
 
 test("sha256Hex of 'abc' is the known digest", async () => {
-  const got = await sha256Hex(new TextEncoder().encode("abc"));
-  expect(got).toBe("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+  const got = await sha256Hex(new TextEncoder().encode('abc'));
+  expect(got).toBe('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
 });
 
-test("sha256Hex returns lowercase hex only", async () => {
-  const got = await sha256Hex(new TextEncoder().encode("WETRON"));
+test('sha256Hex returns lowercase hex only', async () => {
+  const got = await sha256Hex(new TextEncoder().encode('WETRON'));
   expect(got).toMatch(/^[0-9a-f]{64}$/);
 });
 ```
@@ -54,11 +54,11 @@ Expected: FAIL - `sha256Hex` is not defined.
 ```ts
 // packages/core/src/report/hash.ts
 export async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
   const view = new Uint8Array(digest);
-  let out = "";
+  let out = '';
   for (let i = 0; i < view.length; i++) {
-    out += view[i].toString(16).padStart(2, "0");
+    out += view[i].toString(16).padStart(2, '0');
   }
   return out;
 }
@@ -90,11 +90,11 @@ This file has no runtime code so there is no failing-test step. The types are ex
 
 ```ts
 // packages/core/src/report/types.ts
-import type { WeightStats } from "../weight-stats.ts";
+import type { WeightStats } from '../weight-stats.ts';
 
-export type ReportMode = "identity" | "identity+stats";
+export type ReportMode = 'identity' | 'identity+stats';
 
-export type ReportScope = "global" | { readonly node: string };
+export type ReportScope = 'global' | { readonly node: string };
 
 export interface ReportTensor {
   readonly name: string;
@@ -106,7 +106,7 @@ export interface ReportTensor {
 }
 
 export interface Report {
-  readonly reportVersion: "1";
+  readonly reportVersion: '1';
   readonly wetronVersion: string;
   readonly createdAt: string;
   readonly mode: ReportMode;
@@ -131,24 +131,24 @@ export interface Report {
 }
 
 export type TensorVerdict =
-  | { readonly status: "match"; readonly name: string }
+  | { readonly status: 'match'; readonly name: string }
   | {
-      readonly status: "mismatch";
+      readonly status: 'mismatch';
       readonly name: string;
       readonly expected: ReportTensor;
       readonly observed: ReportTensor;
     }
-  | { readonly status: "missing"; readonly name: string; readonly expected: ReportTensor }
-  | { readonly status: "extra"; readonly name: string; readonly observed: ReportTensor };
+  | { readonly status: 'missing'; readonly name: string; readonly expected: ReportTensor }
+  | { readonly status: 'extra'; readonly name: string; readonly observed: ReportTensor };
 
 export type Verdict =
-  | { readonly kind: "match"; readonly tensors: readonly TensorVerdict[] }
+  | { readonly kind: 'match'; readonly tensors: readonly TensorVerdict[] }
   | {
-      readonly kind: "mismatch";
+      readonly kind: 'mismatch';
       readonly tensors: readonly TensorVerdict[];
       readonly reasons: readonly string[];
     }
-  | { readonly kind: "incompatible"; readonly reasons: readonly string[] };
+  | { readonly kind: 'incompatible'; readonly reasons: readonly string[] };
 ```
 
 - [ ] **Step 2: Commit**
@@ -171,30 +171,30 @@ git commit -m "add inspection report types"
 
 ```ts
 // packages/core/test/report/normalize.test.ts
-import { test, expect } from "vitest";
-import { normalizeName } from "../../src/report/normalize.ts";
+import { test, expect } from 'vitest';
+import { normalizeName } from '../../src/report/normalize.ts';
 
-test("ASCII names pass through unchanged", () => {
-  expect(normalizeName("Conv2D_42/kernel")).toBe("Conv2D_42/kernel");
+test('ASCII names pass through unchanged', () => {
+  expect(normalizeName('Conv2D_42/kernel')).toBe('Conv2D_42/kernel');
 });
 
-test("precomposed accents decompose to base + combining", () => {
+test('precomposed accents decompose to base + combining', () => {
   // "é" U+00E9 -> "e" U+0065 + U+0301
-  const composed = "résumé";
+  const composed = 'résumé';
   const decomposed = normalizeName(composed);
   expect(decomposed).not.toBe(composed);
-  expect(decomposed.normalize("NFC")).toBe(composed);
+  expect(decomposed.normalize('NFC')).toBe(composed);
 });
 
-test("ligatures are NOT folded (NFD, not NFKD)", () => {
+test('ligatures are NOT folded (NFD, not NFKD)', () => {
   // "ﬁ" U+FB01 stays as a ligature under NFD
-  const ligature = "Convﬁlter";
+  const ligature = 'Convﬁlter';
   expect(normalizeName(ligature)).toBe(ligature);
 });
 
-test("two strings that are visually equivalent normalise to the same value", () => {
-  const composed = "café"; // U+00E9
-  const decomposed = "café"; // U+0065 + U+0301
+test('two strings that are visually equivalent normalise to the same value', () => {
+  const composed = 'café'; // U+00E9
+  const decomposed = 'café'; // U+0065 + U+0301
   expect(normalizeName(composed)).toBe(normalizeName(decomposed));
 });
 ```
@@ -209,7 +209,7 @@ Expected: FAIL - `normalizeName` is not defined.
 ```ts
 // packages/core/src/report/normalize.ts
 export function normalizeName(name: string): string {
-  return name.normalize("NFD");
+  return name.normalize('NFD');
 }
 ```
 
@@ -238,28 +238,28 @@ git commit -m "add nfd name normalisation helper"
 
 ```ts
 // packages/core/test/report/serialize.test.ts
-import { test, expect } from "vitest";
-import { canonicalStringify } from "../../src/report/serialize.ts";
+import { test, expect } from 'vitest';
+import { canonicalStringify } from '../../src/report/serialize.ts';
 
-test("object keys are sorted at every nesting level", () => {
+test('object keys are sorted at every nesting level', () => {
   const a = canonicalStringify({ b: 1, a: { z: 1, x: 2 }, c: 3 });
   const b = canonicalStringify({ a: { x: 2, z: 1 }, c: 3, b: 1 });
   expect(a).toBe(b);
   expect(a).toBe('{"a":{"x":2,"z":1},"b":1,"c":3}');
 });
 
-test("arrays preserve insertion order", () => {
-  expect(canonicalStringify([3, 1, 2])).toBe("[3,1,2]");
+test('arrays preserve insertion order', () => {
+  expect(canonicalStringify([3, 1, 2])).toBe('[3,1,2]');
 });
 
-test("no whitespace is emitted", () => {
+test('no whitespace is emitted', () => {
   const out = canonicalStringify({ a: { b: [1, 2] } });
-  expect(out.includes(" ")).toBe(false);
-  expect(out.includes("\n")).toBe(false);
-  expect(out.includes("\t")).toBe(false);
+  expect(out.includes(' ')).toBe(false);
+  expect(out.includes('\n')).toBe(false);
+  expect(out.includes('\t')).toBe(false);
 });
 
-test("null is preserved", () => {
+test('null is preserved', () => {
   expect(canonicalStringify({ a: null })).toBe('{"a":null}');
 });
 ```
@@ -278,18 +278,16 @@ export function canonicalStringify(value: unknown): string {
 }
 
 function stringify(value: unknown): string {
-  if (value === null) return "null";
-  if (typeof value === "boolean" || typeof value === "number") return JSON.stringify(value);
-  if (typeof value === "string") return JSON.stringify(value);
+  if (value === null) return 'null';
+  if (typeof value === 'boolean' || typeof value === 'number') return JSON.stringify(value);
+  if (typeof value === 'string') return JSON.stringify(value);
   if (Array.isArray(value)) {
-    return "[" + value.map(stringify).join(",") + "]";
+    return '[' + value.map(stringify).join(',') + ']';
   }
-  if (typeof value === "object") {
+  if (typeof value === 'object') {
     const keys = Object.keys(value as object).sort();
-    const entries = keys.map(
-      (k) => JSON.stringify(k) + ":" + stringify((value as Record<string, unknown>)[k]),
-    );
-    return "{" + entries.join(",") + "}";
+    const entries = keys.map((k) => JSON.stringify(k) + ':' + stringify((value as Record<string, unknown>)[k]));
+    return '{' + entries.join(',') + '}';
   }
   throw new TypeError(`canonicalStringify: unsupported value type ${typeof value}`);
 }
@@ -320,11 +318,11 @@ git commit -m "add canonical json serialiser for reports"
 
 ```ts
 // packages/core/test/report/build-global.test.ts
-import { test, expect } from "vitest";
-import { buildGlobalReport } from "../../src/report/build.ts";
-import type { ModelGraph, WeightSource } from "../../src/ir.ts";
+import { test, expect } from 'vitest';
+import { buildGlobalReport } from '../../src/report/build.ts';
+import type { ModelGraph, WeightSource } from '../../src/ir.ts';
 
-const FAKE_VERSION = "0.0.0-test";
+const FAKE_VERSION = '0.0.0-test';
 
 function makeWeights(map: Record<string, Uint8Array>): WeightSource {
   let total = 0;
@@ -337,89 +335,88 @@ function makeWeights(map: Record<string, Uint8Array>): WeightSource {
 
 function makeGraph(): ModelGraph {
   return {
-    name: "m",
+    name: 'm',
     inputs: [],
     outputs: [],
     nodes: [
-      { name: "n1", opType: "Conv2D", inputs: ["w1"], outputs: ["o"], attributes: {} },
-      { name: "n2", opType: "Relu", inputs: ["o"], outputs: ["p"], attributes: {} },
+      { name: 'n1', opType: 'Conv2D', inputs: ['w1'], outputs: ['o'], attributes: {} },
+      { name: 'n2', opType: 'Relu', inputs: ['o'], outputs: ['p'], attributes: {} },
     ],
-    initializers: new Map([["w1", { shape: [2, 2], dtype: "float32" }]]),
+    initializers: new Map([['w1', { shape: [2, 2], dtype: 'float32' }]]),
     tensorShapes: new Map(),
     fileSizeBytes: 32,
     weights: makeWeights({ w1: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]) }),
   };
 }
 
-test("buildGlobalReport produces the expected shape", async () => {
+test('buildGlobalReport produces the expected shape', async () => {
   const fileBytes = new Uint8Array([0xab, 0x12, 0xc3]);
   const r = await buildGlobalReport({
     graph: makeGraph(),
-    file: { name: "a.tflite", bytes: fileBytes },
-    format: { name: "tflite", version: 3, producer: null },
-    mode: "identity",
+    file: { name: 'a.tflite', bytes: fileBytes },
+    format: { name: 'tflite', version: 3, producer: null },
+    mode: 'identity',
     wetronVersion: FAKE_VERSION,
-    now: () => "2026-05-08T00:00:00Z",
+    now: () => '2026-05-08T00:00:00Z',
   });
-  expect(r.reportVersion).toBe("1");
+  expect(r.reportVersion).toBe('1');
   expect(r.wetronVersion).toBe(FAKE_VERSION);
-  expect(r.createdAt).toBe("2026-05-08T00:00:00Z");
-  expect(r.scope).toBe("global");
-  expect(r.mode).toBe("identity");
-  expect(r.file.name).toBe("a.tflite");
+  expect(r.createdAt).toBe('2026-05-08T00:00:00Z');
+  expect(r.scope).toBe('global');
+  expect(r.mode).toBe('identity');
+  expect(r.file.name).toBe('a.tflite');
   expect(r.file.bytes).toBe(3);
   expect(r.file.sha256).toMatch(/^[0-9a-f]{64}$/);
-  expect(r.format).toEqual({ name: "tflite", version: 3, producer: null });
+  expect(r.format).toEqual({ name: 'tflite', version: 3, producer: null });
   expect(r.graph?.nodes).toBe(2);
   expect(r.graph?.opTypeHistogram).toEqual({ Conv2D: 1, Relu: 1 });
   expect(r.tensors.length).toBe(1);
-  expect(r.tensors[0].name).toBe("w1");
+  expect(r.tensors[0].name).toBe('w1');
   expect(r.tensors[0].shape).toEqual([2, 2]);
-  expect(r.tensors[0].dtype).toBe("float32");
+  expect(r.tensors[0].dtype).toBe('float32');
   expect(r.tensors[0].bytes).toBe(8);
   expect(r.tensors[0].sha256).toMatch(/^[0-9a-f]{64}$/);
   expect(r.tensors[0].stats).toBeNull();
 });
 
-test("identity+stats mode populates stats", async () => {
+test('identity+stats mode populates stats', async () => {
   const fileBytes = new Uint8Array([0xab]);
   const r = await buildGlobalReport({
     graph: makeGraph(),
-    file: { name: "a.tflite", bytes: fileBytes },
-    format: { name: "tflite", version: 3, producer: null },
-    mode: "identity+stats",
+    file: { name: 'a.tflite', bytes: fileBytes },
+    format: { name: 'tflite', version: 3, producer: null },
+    mode: 'identity+stats',
     wetronVersion: FAKE_VERSION,
-    now: () => "2026-05-08T00:00:00Z",
+    now: () => '2026-05-08T00:00:00Z',
   });
-  expect(r.mode).toBe("identity+stats");
+  expect(r.mode).toBe('identity+stats');
   expect(r.tensors[0].stats).not.toBeNull();
-  expect(typeof r.tensors[0].stats?.mean).toBe("number");
+  expect(typeof r.tensors[0].stats?.mean).toBe('number');
 });
 
-test("tensors are sorted by NFD-normalised name", async () => {
+test('tensors are sorted by NFD-normalised name', async () => {
   const fileBytes = new Uint8Array([1]);
   const graph: ModelGraph = {
     ...makeGraph(),
     initializers: new Map([
-      ["zebra", { shape: [1], dtype: "float32" }],
-      ["alpha", { shape: [1], dtype: "float32" }],
-      ["mango", { shape: [1], dtype: "float32" }],
+      ['zebra', { shape: [1], dtype: 'float32' }],
+      ['alpha', { shape: [1], dtype: 'float32' }],
+      ['mango', { shape: [1], dtype: 'float32' }],
     ]),
     weights: {
       totalBytes: 12,
-      get: (n) =>
-        n === "zebra" || n === "alpha" || n === "mango" ? new Uint8Array([0, 0, 0, 0]) : undefined,
+      get: (n) => (n === 'zebra' || n === 'alpha' || n === 'mango' ? new Uint8Array([0, 0, 0, 0]) : undefined),
     },
   };
   const r = await buildGlobalReport({
     graph,
-    file: { name: "a", bytes: fileBytes },
-    format: { name: "x", version: null, producer: null },
-    mode: "identity",
+    file: { name: 'a', bytes: fileBytes },
+    format: { name: 'x', version: null, producer: null },
+    mode: 'identity',
     wetronVersion: FAKE_VERSION,
-    now: () => "2026-05-08T00:00:00Z",
+    now: () => '2026-05-08T00:00:00Z',
   });
-  expect(r.tensors.map((t) => t.name)).toEqual(["alpha", "mango", "zebra"]);
+  expect(r.tensors.map((t) => t.name)).toEqual(['alpha', 'mango', 'zebra']);
 });
 ```
 
@@ -432,12 +429,12 @@ Expected: FAIL - `buildGlobalReport` is not defined.
 
 ```ts
 // packages/core/src/report/build.ts
-import type { ModelGraph } from "../ir.ts";
-import { decodeWeight } from "../weight-decoder.ts";
-import { computeStats } from "../weight-stats.ts";
-import { sha256Hex } from "./hash.ts";
-import { normalizeName } from "./normalize.ts";
-import type { Report, ReportMode, ReportTensor } from "./types.ts";
+import type { ModelGraph } from '../ir.ts';
+import { decodeWeight } from '../weight-decoder.ts';
+import { computeStats } from '../weight-stats.ts';
+import { sha256Hex } from './hash.ts';
+import { normalizeName } from './normalize.ts';
+import type { Report, ReportMode, ReportTensor } from './types.ts';
 
 export interface BuildOptions {
   readonly graph: ModelGraph;
@@ -463,8 +460,8 @@ async function tensorEntries(graph: ModelGraph, mode: ReportMode): Promise<Repor
     const bytes = graph.weights.get(name);
     if (!bytes) continue;
     const sha = await sha256Hex(bytes);
-    let stats: ReportTensor["stats"] = null;
-    if (mode === "identity+stats") {
+    let stats: ReportTensor['stats'] = null;
+    if (mode === 'identity+stats') {
       const decoded = decodeWeight(bytes, meta.dtype, meta.shape);
       if (decoded && !(decoded instanceof BigInt64Array)) {
         stats = computeStats(decoded);
@@ -499,11 +496,11 @@ export async function buildGlobalReport(opts: BuildOptions): Promise<Report> {
   const fileSha = await sha256Hex(opts.file.bytes);
   const tensors = await tensorEntries(opts.graph, opts.mode);
   return {
-    reportVersion: "1",
+    reportVersion: '1',
     wetronVersion: opts.wetronVersion,
     createdAt: (opts.now ?? nowIso)(),
     mode: opts.mode,
-    scope: "global",
+    scope: 'global',
     file: {
       name: opts.file.name,
       bytes: opts.file.bytes.length,
@@ -546,9 +543,9 @@ git commit -m "build global inspection report"
 
 ```ts
 // packages/core/test/report/build-node.test.ts
-import { test, expect } from "vitest";
-import { buildNodeReport } from "../../src/report/build.ts";
-import type { ModelGraph, WeightSource } from "../../src/ir.ts";
+import { test, expect } from 'vitest';
+import { buildNodeReport } from '../../src/report/build.ts';
+import type { ModelGraph, WeightSource } from '../../src/ir.ts';
 
 function weights(map: Record<string, Uint8Array>): WeightSource {
   let t = 0;
@@ -557,80 +554,80 @@ function weights(map: Record<string, Uint8Array>): WeightSource {
 }
 
 const graph: ModelGraph = {
-  name: "m",
+  name: 'm',
   inputs: [],
   outputs: [],
   nodes: [
     {
-      name: "Conv2D_42",
-      opType: "Conv2D",
-      inputs: ["Conv2D_42/kernel", "Conv2D_42/bias"],
-      outputs: ["o"],
+      name: 'Conv2D_42',
+      opType: 'Conv2D',
+      inputs: ['Conv2D_42/kernel', 'Conv2D_42/bias'],
+      outputs: ['o'],
       attributes: {},
     },
     {
-      name: "Conv2D_99",
-      opType: "Conv2D",
-      inputs: ["Conv2D_99/kernel"],
-      outputs: ["p"],
+      name: 'Conv2D_99',
+      opType: 'Conv2D',
+      inputs: ['Conv2D_99/kernel'],
+      outputs: ['p'],
       attributes: {},
     },
   ],
   initializers: new Map([
-    ["Conv2D_42/kernel", { shape: [3, 3, 16, 16], dtype: "float32" }],
-    ["Conv2D_42/bias", { shape: [16], dtype: "float32" }],
-    ["Conv2D_99/kernel", { shape: [1, 1, 16, 16], dtype: "float32" }],
+    ['Conv2D_42/kernel', { shape: [3, 3, 16, 16], dtype: 'float32' }],
+    ['Conv2D_42/bias', { shape: [16], dtype: 'float32' }],
+    ['Conv2D_99/kernel', { shape: [1, 1, 16, 16], dtype: 'float32' }],
   ]),
   tensorShapes: new Map(),
   fileSizeBytes: 16,
   weights: weights({
-    "Conv2D_42/kernel": new Uint8Array(9216),
-    "Conv2D_42/bias": new Uint8Array(64),
-    "Conv2D_99/kernel": new Uint8Array(1024),
+    'Conv2D_42/kernel': new Uint8Array(9216),
+    'Conv2D_42/bias': new Uint8Array(64),
+    'Conv2D_99/kernel': new Uint8Array(1024),
   }),
 };
 
-test("buildNodeReport scopes tensors to one node", async () => {
+test('buildNodeReport scopes tensors to one node', async () => {
   const r = await buildNodeReport({
     graph,
-    nodeName: "Conv2D_42",
-    file: { name: "a", bytes: new Uint8Array([1]) },
-    format: { name: "x", version: null, producer: null },
-    mode: "identity",
-    wetronVersion: "0.0.0-test",
-    now: () => "2026-05-08T00:00:00Z",
+    nodeName: 'Conv2D_42',
+    file: { name: 'a', bytes: new Uint8Array([1]) },
+    format: { name: 'x', version: null, producer: null },
+    mode: 'identity',
+    wetronVersion: '0.0.0-test',
+    now: () => '2026-05-08T00:00:00Z',
   });
-  expect(r.scope).toEqual({ node: "Conv2D_42" });
+  expect(r.scope).toEqual({ node: 'Conv2D_42' });
   expect(r.graph).toBeUndefined();
-  expect(r.tensors.map((t) => t.name).sort()).toEqual(["Conv2D_42/bias", "Conv2D_42/kernel"]);
+  expect(r.tensors.map((t) => t.name).sort()).toEqual(['Conv2D_42/bias', 'Conv2D_42/kernel']);
 });
 
-test("buildNodeReport throws when the node is unknown", async () => {
+test('buildNodeReport throws when the node is unknown', async () => {
   await expect(
     buildNodeReport({
       graph,
-      nodeName: "Nope",
-      file: { name: "a", bytes: new Uint8Array([1]) },
-      format: { name: "x", version: null, producer: null },
-      mode: "identity",
-      wetronVersion: "0.0.0-test",
+      nodeName: 'Nope',
+      file: { name: 'a', bytes: new Uint8Array([1]) },
+      format: { name: 'x', version: null, producer: null },
+      mode: 'identity',
+      wetronVersion: '0.0.0-test',
     }),
   ).rejects.toThrow(/unknown node/);
 });
 
-test("buildNodeReport throws when the node has no weight inputs", async () => {
+test('buildNodeReport throws when the node has no weight inputs', async () => {
   const reluGraph: ModelGraph = {
     ...graph,
-    nodes: [{ name: "r", opType: "Relu", inputs: ["activations"], outputs: ["o"], attributes: {} }],
+    nodes: [{ name: 'r', opType: 'Relu', inputs: ['activations'], outputs: ['o'], attributes: {} }],
   };
   await expect(
     buildNodeReport({
       graph: reluGraph,
-      nodeName: "r",
-      file: { name: "a", bytes: new Uint8Array([1]) },
-      format: { name: "x", version: null, producer: null },
-      mode: "identity",
-      wetronVersion: "0.0.0-test",
+      nodeName: 'r',
+      file: { name: 'a', bytes: new Uint8Array([1]) },
+      format: { name: 'x', version: null, producer: null },
+      mode: 'identity',
+      wetronVersion: '0.0.0-test',
     }),
   ).rejects.toThrow(/no weight tensors/);
 });
@@ -646,7 +643,7 @@ Expected: FAIL - `buildNodeReport` is not exported.
 Append to `packages/core/src/report/build.ts`:
 
 ```ts
-export interface BuildNodeOptions extends Omit<BuildOptions, "graph"> {
+export interface BuildNodeOptions extends Omit<BuildOptions, 'graph'> {
   readonly graph: ModelGraph;
   readonly nodeName: string;
 }
@@ -671,7 +668,7 @@ export async function buildNodeReport(opts: BuildNodeOptions): Promise<Report> {
 
   const fileSha = await sha256Hex(opts.file.bytes);
   return {
-    reportVersion: "1",
+    reportVersion: '1',
     wetronVersion: opts.wetronVersion,
     createdAt: (opts.now ?? nowIso)(),
     mode: opts.mode,
@@ -712,52 +709,52 @@ git commit -m "build node-scoped inspection report"
 
 ```ts
 // packages/core/test/report/parse.test.ts
-import { test, expect } from "vitest";
-import { parseReport } from "../../src/report/parse.ts";
+import { test, expect } from 'vitest';
+import { parseReport } from '../../src/report/parse.ts';
 
-test("parseReport accepts a valid v1 report", () => {
+test('parseReport accepts a valid v1 report', () => {
   const json = JSON.stringify({
-    reportVersion: "1",
-    wetronVersion: "0.0.11",
-    createdAt: "2026-05-08T00:00:00Z",
-    mode: "identity",
-    scope: "global",
-    file: { name: "a", bytes: 3, sha256: "ab".repeat(32) },
-    format: { name: "tflite", version: 3, producer: null },
+    reportVersion: '1',
+    wetronVersion: '0.0.11',
+    createdAt: '2026-05-08T00:00:00Z',
+    mode: 'identity',
+    scope: 'global',
+    file: { name: 'a', bytes: 3, sha256: 'ab'.repeat(32) },
+    format: { name: 'tflite', version: 3, producer: null },
     graph: { nodes: 1, inputs: 0, outputs: 0, opTypeHistogram: { Conv2D: 1 } },
     tensors: [],
   });
   const r = parseReport(json);
-  if (r.kind === "error") throw new Error(r.message);
-  expect(r.report.reportVersion).toBe("1");
+  if (r.kind === 'error') throw new Error(r.message);
+  expect(r.report.reportVersion).toBe('1');
 });
 
-test("parseReport rejects unknown reportVersion", () => {
-  const json = JSON.stringify({ reportVersion: "9", scope: "global", tensors: [] });
+test('parseReport rejects unknown reportVersion', () => {
+  const json = JSON.stringify({ reportVersion: '9', scope: 'global', tensors: [] });
   const r = parseReport(json);
-  expect(r.kind).toBe("error");
-  if (r.kind === "error") expect(r.message).toMatch(/reportVersion/);
+  expect(r.kind).toBe('error');
+  if (r.kind === 'error') expect(r.message).toMatch(/reportVersion/);
 });
 
-test("parseReport rejects malformed JSON", () => {
-  const r = parseReport("{not json");
-  expect(r.kind).toBe("error");
+test('parseReport rejects malformed JSON', () => {
+  const r = parseReport('{not json');
+  expect(r.kind).toBe('error');
 });
 
-test("parseReport accepts node scope", () => {
+test('parseReport accepts node scope', () => {
   const json = JSON.stringify({
-    reportVersion: "1",
-    wetronVersion: "0.0.11",
-    createdAt: "2026-05-08T00:00:00Z",
-    mode: "identity",
-    scope: { node: "Conv2D_42" },
-    file: { name: "a", bytes: 3, sha256: "ab".repeat(32) },
-    format: { name: "tflite", version: 3, producer: null },
+    reportVersion: '1',
+    wetronVersion: '0.0.11',
+    createdAt: '2026-05-08T00:00:00Z',
+    mode: 'identity',
+    scope: { node: 'Conv2D_42' },
+    file: { name: 'a', bytes: 3, sha256: 'ab'.repeat(32) },
+    format: { name: 'tflite', version: 3, producer: null },
     tensors: [],
   });
   const r = parseReport(json);
-  if (r.kind === "error") throw new Error(r.message);
-  expect(r.report.scope).toEqual({ node: "Conv2D_42" });
+  if (r.kind === 'error') throw new Error(r.message);
+  expect(r.report.scope).toEqual({ node: 'Conv2D_42' });
 });
 ```
 
@@ -770,45 +767,40 @@ Expected: FAIL - `parseReport` is not defined.
 
 ```ts
 // packages/core/src/report/parse.ts
-import type { Report } from "./types.ts";
+import type { Report } from './types.ts';
 
 export type ParseResult =
-  | { readonly kind: "ok"; readonly report: Report }
-  | { readonly kind: "error"; readonly message: string };
+  { readonly kind: 'ok'; readonly report: Report } | { readonly kind: 'error'; readonly message: string };
 
 export function parseReport(json: string): ParseResult {
   let parsed: unknown;
   try {
     parsed = JSON.parse(json);
   } catch (e) {
-    return { kind: "error", message: `invalid JSON: ${(e as Error).message}` };
+    return { kind: 'error', message: `invalid JSON: ${(e as Error).message}` };
   }
-  if (typeof parsed !== "object" || parsed === null) {
-    return { kind: "error", message: "report must be an object" };
+  if (typeof parsed !== 'object' || parsed === null) {
+    return { kind: 'error', message: 'report must be an object' };
   }
   const r = parsed as Record<string, unknown>;
-  if (r.reportVersion !== "1") {
-    return { kind: "error", message: `unsupported reportVersion: ${String(r.reportVersion)}` };
+  if (r.reportVersion !== '1') {
+    return { kind: 'error', message: `unsupported reportVersion: ${String(r.reportVersion)}` };
   }
   if (
-    r.scope !== "global" &&
-    !(
-      typeof r.scope === "object" &&
-      r.scope !== null &&
-      typeof (r.scope as { node?: unknown }).node === "string"
-    )
+    r.scope !== 'global' &&
+    !(typeof r.scope === 'object' && r.scope !== null && typeof (r.scope as { node?: unknown }).node === 'string')
   ) {
-    return { kind: "error", message: "scope must be 'global' or { node: string }" };
+    return { kind: 'error', message: "scope must be 'global' or { node: string }" };
   }
   if (!Array.isArray(r.tensors)) {
-    return { kind: "error", message: "tensors must be an array" };
+    return { kind: 'error', message: 'tensors must be an array' };
   }
-  if (typeof r.file !== "object" || r.file === null) {
-    return { kind: "error", message: "file block missing" };
+  if (typeof r.file !== 'object' || r.file === null) {
+    return { kind: 'error', message: 'file block missing' };
   }
   // Trust the rest - runtime validation is defensive against a malicious JSON,
   // but the verifier compares fields directly so type-narrowing here is enough.
-  return { kind: "ok", report: parsed as Report };
+  return { kind: 'ok', report: parsed as Report };
 }
 ```
 
@@ -837,27 +829,27 @@ git commit -m "parse and validate inspection report json"
 
 ```ts
 // packages/core/test/report/verify.test.ts
-import { test, expect } from "vitest";
-import { verifyReports } from "../../src/report/verify.ts";
-import type { Report } from "../../src/report/types.ts";
+import { test, expect } from 'vitest';
+import { verifyReports } from '../../src/report/verify.ts';
+import type { Report } from '../../src/report/types.ts';
 
 function fakeReport(over: Partial<Report> = {}): Report {
   return {
-    reportVersion: "1",
-    wetronVersion: "0.0.11",
-    createdAt: "2026-05-08T00:00:00Z",
-    mode: "identity",
-    scope: "global",
-    file: { name: "a", bytes: 100, sha256: "ab".repeat(32) },
-    format: { name: "tflite", version: 3, producer: null },
+    reportVersion: '1',
+    wetronVersion: '0.0.11',
+    createdAt: '2026-05-08T00:00:00Z',
+    mode: 'identity',
+    scope: 'global',
+    file: { name: 'a', bytes: 100, sha256: 'ab'.repeat(32) },
+    format: { name: 'tflite', version: 3, producer: null },
     graph: { nodes: 1, inputs: 0, outputs: 0, opTypeHistogram: { Conv2D: 1 } },
     tensors: [
       {
-        name: "k",
+        name: 'k',
         shape: [2, 2],
-        dtype: "float32",
+        dtype: 'float32',
         bytes: 16,
-        sha256: "9f".repeat(32),
+        sha256: '9f'.repeat(32),
         stats: null,
       },
     ],
@@ -865,38 +857,38 @@ function fakeReport(over: Partial<Report> = {}): Report {
   };
 }
 
-test("identical reports produce a match verdict", () => {
+test('identical reports produce a match verdict', () => {
   const v = verifyReports(fakeReport(), fakeReport());
-  expect(v.kind).toBe("match");
-  expect(v.tensors.every((t) => t.status === "match")).toBe(true);
+  expect(v.kind).toBe('match');
+  expect(v.tensors.every((t) => t.status === 'match')).toBe(true);
 });
 
-test("file sha mismatch produces an incompatible verdict", () => {
+test('file sha mismatch produces an incompatible verdict', () => {
   const expected = fakeReport();
-  const observed = fakeReport({ file: { name: "a", bytes: 100, sha256: "ff".repeat(32) } });
+  const observed = fakeReport({ file: { name: 'a', bytes: 100, sha256: 'ff'.repeat(32) } });
   const v = verifyReports(expected, observed);
-  expect(v.kind).toBe("incompatible");
-  if (v.kind === "incompatible") expect(v.reasons.some((r) => r.includes("file"))).toBe(true);
+  expect(v.kind).toBe('incompatible');
+  if (v.kind === 'incompatible') expect(v.reasons.some((r) => r.includes('file'))).toBe(true);
 });
 
-test("tensor sha mismatch produces a mismatch verdict", () => {
+test('tensor sha mismatch produces a mismatch verdict', () => {
   const expected = fakeReport();
   const observed = fakeReport({
     tensors: [
       {
-        name: "k",
+        name: 'k',
         shape: [2, 2],
-        dtype: "float32",
+        dtype: 'float32',
         bytes: 16,
-        sha256: "00".repeat(32),
+        sha256: '00'.repeat(32),
         stats: null,
       },
     ],
   });
   const v = verifyReports(expected, observed);
-  expect(v.kind).toBe("mismatch");
-  if (v.kind === "mismatch") {
-    expect(v.tensors[0].status).toBe("mismatch");
+  expect(v.kind).toBe('mismatch');
+  if (v.kind === 'mismatch') {
+    expect(v.tensors[0].status).toBe('mismatch');
   }
 });
 
@@ -904,9 +896,9 @@ test("missing tensor in observed yields status 'missing'", () => {
   const expected = fakeReport();
   const observed = fakeReport({ tensors: [] });
   const v = verifyReports(expected, observed);
-  expect(v.kind).toBe("mismatch");
-  if (v.kind === "mismatch") {
-    expect(v.tensors[0].status).toBe("missing");
+  expect(v.kind).toBe('mismatch');
+  if (v.kind === 'mismatch') {
+    expect(v.tensors[0].status).toBe('missing');
   }
 });
 
@@ -914,24 +906,24 @@ test("extra tensor in observed yields status 'extra'", () => {
   const expected = fakeReport({ tensors: [] });
   const observed = fakeReport();
   const v = verifyReports(expected, observed);
-  expect(v.kind).toBe("mismatch");
-  if (v.kind === "mismatch") {
-    expect(v.tensors[0].status).toBe("extra");
+  expect(v.kind).toBe('mismatch');
+  if (v.kind === 'mismatch') {
+    expect(v.tensors[0].status).toBe('extra');
   }
 });
 
-test("scope mismatch produces an incompatible verdict", () => {
+test('scope mismatch produces an incompatible verdict', () => {
   const expected = fakeReport();
-  const observed = fakeReport({ scope: { node: "Conv2D_42" } });
+  const observed = fakeReport({ scope: { node: 'Conv2D_42' } });
   const v = verifyReports(expected, observed);
-  expect(v.kind).toBe("incompatible");
+  expect(v.kind).toBe('incompatible');
 });
 
-test("cross-mode verification compares only identity fields", () => {
-  const expected = fakeReport({ mode: "identity" });
-  const observed = fakeReport({ mode: "identity+stats" });
+test('cross-mode verification compares only identity fields', () => {
+  const expected = fakeReport({ mode: 'identity' });
+  const observed = fakeReport({ mode: 'identity+stats' });
   const v = verifyReports(expected, observed);
-  expect(v.kind).toBe("match");
+  expect(v.kind).toBe('match');
 });
 ```
 
@@ -944,12 +936,12 @@ Expected: FAIL - `verifyReports` is not defined.
 
 ```ts
 // packages/core/src/report/verify.ts
-import { normalizeName } from "./normalize.ts";
-import type { Report, ReportTensor, TensorVerdict, Verdict } from "./types.ts";
+import { normalizeName } from './normalize.ts';
+import type { Report, ReportTensor, TensorVerdict, Verdict } from './types.ts';
 
-function scopesMatch(a: Report["scope"], b: Report["scope"]): boolean {
-  if (a === "global") return b === "global";
-  if (b === "global") return false;
+function scopesMatch(a: Report['scope'], b: Report['scope']): boolean {
+  if (a === 'global') return b === 'global';
+  if (b === 'global') return false;
   return a.node === b.node;
 }
 
@@ -977,23 +969,17 @@ export function verifyReports(expected: Report, observed: Report): Verdict {
     reasons.push(`reportVersion mismatch: ${expected.reportVersion} vs ${observed.reportVersion}`);
   }
   if (!scopesMatch(expected.scope, observed.scope)) {
-    reasons.push("scope mismatch");
+    reasons.push('scope mismatch');
   }
-  if (
-    expected.file.sha256 !== observed.file.sha256 ||
-    expected.file.bytes !== observed.file.bytes
-  ) {
-    reasons.push("file identity mismatch");
+  if (expected.file.sha256 !== observed.file.sha256 || expected.file.bytes !== observed.file.bytes) {
+    reasons.push('file identity mismatch');
   }
-  if (
-    expected.format.name !== observed.format.name ||
-    expected.format.version !== observed.format.version
-  ) {
-    reasons.push("format mismatch");
+  if (expected.format.name !== observed.format.name || expected.format.version !== observed.format.version) {
+    reasons.push('format mismatch');
   }
 
   if (reasons.length > 0) {
-    return { kind: "incompatible", reasons };
+    return { kind: 'incompatible', reasons };
   }
 
   const expectedByName = indexByName(expected.tensors);
@@ -1005,25 +991,25 @@ export function verifyReports(expected: Report, observed: Report): Verdict {
   for (const [key, exp] of expectedByName) {
     const obs = observedByName.get(key);
     if (!obs) {
-      tensorVerdicts.push({ status: "missing", name: exp.name, expected: exp });
+      tensorVerdicts.push({ status: 'missing', name: exp.name, expected: exp });
     } else if (tensorsEqual(exp, obs)) {
-      tensorVerdicts.push({ status: "match", name: exp.name });
+      tensorVerdicts.push({ status: 'match', name: exp.name });
     } else {
-      tensorVerdicts.push({ status: "mismatch", name: exp.name, expected: exp, observed: obs });
+      tensorVerdicts.push({ status: 'mismatch', name: exp.name, expected: exp, observed: obs });
     }
     seen.add(key);
   }
   for (const [key, obs] of observedByName) {
     if (!seen.has(key)) {
-      tensorVerdicts.push({ status: "extra", name: obs.name, observed: obs });
+      tensorVerdicts.push({ status: 'extra', name: obs.name, observed: obs });
     }
   }
 
-  const anyBad = tensorVerdicts.some((t) => t.status !== "match");
+  const anyBad = tensorVerdicts.some((t) => t.status !== 'match');
   if (anyBad) {
-    return { kind: "mismatch", tensors: tensorVerdicts, reasons: [] };
+    return { kind: 'mismatch', tensors: tensorVerdicts, reasons: [] };
   }
-  return { kind: "match", tensors: tensorVerdicts };
+  return { kind: 'match', tensors: tensorVerdicts };
 }
 ```
 
@@ -1053,22 +1039,15 @@ git commit -m "verify two inspection reports"
 
 ```ts
 // packages/core/src/report/index.ts
-export { sha256Hex } from "./hash.ts";
-export { canonicalStringify } from "./serialize.ts";
-export { normalizeName } from "./normalize.ts";
-export { buildGlobalReport, buildNodeReport } from "./build.ts";
-export type { BuildOptions, BuildNodeOptions } from "./build.ts";
-export { parseReport } from "./parse.ts";
-export type { ParseResult } from "./parse.ts";
-export { verifyReports } from "./verify.ts";
-export type {
-  Report,
-  ReportMode,
-  ReportScope,
-  ReportTensor,
-  TensorVerdict,
-  Verdict,
-} from "./types.ts";
+export { sha256Hex } from './hash.ts';
+export { canonicalStringify } from './serialize.ts';
+export { normalizeName } from './normalize.ts';
+export { buildGlobalReport, buildNodeReport } from './build.ts';
+export type { BuildOptions, BuildNodeOptions } from './build.ts';
+export { parseReport } from './parse.ts';
+export type { ParseResult } from './parse.ts';
+export { verifyReports } from './verify.ts';
+export type { Report, ReportMode, ReportScope, ReportTensor, TensorVerdict, Verdict } from './types.ts';
 ```
 
 - [ ] **Step 2: Re-export from the package root**
@@ -1084,7 +1063,7 @@ export {
   buildNodeReport,
   parseReport,
   verifyReports,
-} from "./report/index.ts";
+} from './report/index.ts';
 export type {
   Report,
   ReportMode,
@@ -1095,7 +1074,7 @@ export type {
   BuildOptions,
   BuildNodeOptions,
   ParseResult,
-} from "./report/index.ts";
+} from './report/index.ts';
 ```
 
 - [ ] **Step 3: Add subpath export**
@@ -1139,52 +1118,52 @@ git commit -m "export inspection report module from @wetron/core"
 
 ```tsx
 // packages/react/test/verification-panel.test.tsx
-import { test, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { VerificationPanel } from "../src/verification-panel/index.ts";
-import type { Report, Verdict } from "@wetron/core";
+import { test, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { VerificationPanel } from '../src/verification-panel/index.ts';
+import type { Report, Verdict } from '@wetron/core';
 
 const fakeReport: Report = {
-  reportVersion: "1",
-  wetronVersion: "0.0.11",
-  createdAt: "2026-05-08T00:00:00Z",
-  mode: "identity",
-  scope: "global",
-  file: { name: "a.tflite", bytes: 100, sha256: "ab".repeat(32) },
-  format: { name: "tflite", version: 3, producer: null },
+  reportVersion: '1',
+  wetronVersion: '0.0.11',
+  createdAt: '2026-05-08T00:00:00Z',
+  mode: 'identity',
+  scope: 'global',
+  file: { name: 'a.tflite', bytes: 100, sha256: 'ab'.repeat(32) },
+  format: { name: 'tflite', version: 3, producer: null },
   graph: { nodes: 1, inputs: 0, outputs: 0, opTypeHistogram: { Conv2D: 1 } },
   tensors: [],
 };
 
-const matchVerdict: Verdict = { kind: "match", tensors: [] };
+const matchVerdict: Verdict = { kind: 'match', tensors: [] };
 
-test("VerificationPanel renders a MATCH banner", () => {
+test('VerificationPanel renders a MATCH banner', () => {
   render(<VerificationPanel report={fakeReport} verdict={matchVerdict} onClose={() => {}} />);
   expect(screen.getByText(/MATCH/)).toBeTruthy();
 });
 
-test("VerificationPanel renders a MISMATCH banner", () => {
+test('VerificationPanel renders a MISMATCH banner', () => {
   const verdict: Verdict = {
-    kind: "mismatch",
+    kind: 'mismatch',
     reasons: [],
     tensors: [
       {
-        status: "mismatch",
-        name: "k",
+        status: 'mismatch',
+        name: 'k',
         expected: {
-          name: "k",
+          name: 'k',
           shape: [],
-          dtype: "float32",
+          dtype: 'float32',
           bytes: 1,
-          sha256: "00".repeat(32),
+          sha256: '00'.repeat(32),
           stats: null,
         },
         observed: {
-          name: "k",
+          name: 'k',
           shape: [],
-          dtype: "float32",
+          dtype: 'float32',
           bytes: 1,
-          sha256: "ff".repeat(32),
+          sha256: 'ff'.repeat(32),
           stats: null,
         },
       },
@@ -1204,8 +1183,8 @@ Expected: FAIL - `VerificationPanel` does not exist.
 
 ```tsx
 // packages/react/src/verification-panel/verification-panel.tsx
-import type { Report, Verdict } from "@wetron/core";
-import styles from "./verification-panel.module.css";
+import type { Report, Verdict } from '@wetron/core';
+import styles from './verification-panel.module.css';
 
 export interface VerificationPanelProps {
   readonly report: Report;
@@ -1215,25 +1194,23 @@ export interface VerificationPanelProps {
 
 export function VerificationPanel({ report, verdict, onClose }: VerificationPanelProps) {
   const verdictText =
-    verdict.kind === "match"
+    verdict.kind === 'match'
       ? `MATCH ✓ - all ${verdict.tensors.length} tensors verified`
-      : verdict.kind === "mismatch"
-        ? `MISMATCH ✗ - ${verdict.tensors.filter((t) => t.status !== "match").length} of ${verdict.tensors.length} tensors differ`
-        : `INCOMPATIBLE - ${verdict.reasons.join(", ")}`;
-  const tone = verdict.kind === "match" ? "success" : "danger";
-  const scopeText = report.scope === "global" ? "global scope" : `node "${report.scope.node}"`;
+      : verdict.kind === 'mismatch'
+        ? `MISMATCH ✗ - ${verdict.tensors.filter((t) => t.status !== 'match').length} of ${verdict.tensors.length} tensors differ`
+        : `INCOMPATIBLE - ${verdict.reasons.join(', ')}`;
+  const tone = verdict.kind === 'match' ? 'success' : 'danger';
+  const scopeText = report.scope === 'global' ? 'global scope' : `node "${report.scope.node}"`;
 
   return (
     <section className={styles.panel} data-testid="verification-panel">
-      <header
-        className={`${styles.banner} ${tone === "success" ? styles.bannerOk : styles.bannerBad}`}
-      >
-        <span className={styles.mark}>{tone === "success" ? "✓" : "✗"}</span>
+      <header className={`${styles.banner} ${tone === 'success' ? styles.bannerOk : styles.bannerBad}`}>
+        <span className={styles.mark}>{tone === 'success' ? '✓' : '✗'}</span>
         <div className={styles.bannerText}>
           <div className={styles.bannerTitle}>{verdictText}</div>
           <div className={styles.bannerSub}>
-            file sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)} · mode{" "}
-            {report.mode} · {scopeText}
+            file sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)} · mode {report.mode} ·{' '}
+            {scopeText}
           </div>
         </div>
         <button className={styles.export} onClick={() => window.print()}>
@@ -1258,8 +1235,8 @@ export function VerificationPanel({ report, verdict, onClose }: VerificationPane
 
 ```ts
 // packages/react/src/verification-panel/index.ts
-export { VerificationPanel } from "./verification-panel.tsx";
-export type { VerificationPanelProps } from "./verification-panel.tsx";
+export { VerificationPanel } from './verification-panel.tsx';
+export type { VerificationPanelProps } from './verification-panel.tsx';
 ```
 
 ```css
@@ -1373,37 +1350,37 @@ git commit -m "add react verification panel shell"
 Append to `packages/react/test/verification-panel.test.tsx`:
 
 ```tsx
-test("table renders one row per tensor verdict", () => {
+test('table renders one row per tensor verdict', () => {
   const verdict: Verdict = {
-    kind: "mismatch",
+    kind: 'mismatch',
     reasons: [],
     tensors: [
-      { status: "match", name: "a" },
-      { status: "match", name: "b" },
+      { status: 'match', name: 'a' },
+      { status: 'match', name: 'b' },
       {
-        status: "mismatch",
-        name: "c",
+        status: 'mismatch',
+        name: 'c',
         expected: {
-          name: "c",
+          name: 'c',
           shape: [1],
-          dtype: "float32",
+          dtype: 'float32',
           bytes: 4,
-          sha256: "00".repeat(32),
+          sha256: '00'.repeat(32),
           stats: null,
         },
         observed: {
-          name: "c",
+          name: 'c',
           shape: [1],
-          dtype: "float32",
+          dtype: 'float32',
           bytes: 4,
-          sha256: "ff".repeat(32),
+          sha256: 'ff'.repeat(32),
           stats: null,
         },
       },
     ],
   };
   render(<VerificationPanel report={fakeReport} verdict={verdict} onClose={() => {}} />);
-  expect(screen.getAllByRole("row").length).toBeGreaterThanOrEqual(4); // header + 3 data rows
+  expect(screen.getAllByRole('row').length).toBeGreaterThanOrEqual(4); // header + 3 data rows
 });
 ```
 
@@ -1418,7 +1395,7 @@ Append a `<table>` block inside the `<section>` in `verification-panel.tsx`, aft
 
 ```tsx
 {
-  verdict.kind !== "incompatible" && (
+  verdict.kind !== 'incompatible' && (
     <table className={styles.tensors}>
       <thead>
         <tr>
@@ -1431,29 +1408,23 @@ Append a `<table>` block inside the `<section>` in `verification-panel.tsx`, aft
       </thead>
       <tbody>
         {verdict.tensors.map((t) => (
-          <tr key={t.name} className={t.status !== "match" ? styles.rowBad : undefined}>
-            <td>{t.status === "match" ? "✓ match" : t.status}</td>
+          <tr key={t.name} className={t.status !== 'match' ? styles.rowBad : undefined}>
+            <td>{t.status === 'match' ? '✓ match' : t.status}</td>
             <td className={styles.tensorName}>{t.name}</td>
             <td>
-              {t.status === "extra"
-                ? t.observed.shape.join(" × ")
-                : t.status === "match"
-                  ? ""
-                  : t.expected.shape.join(" × ")}
+              {t.status === 'extra'
+                ? t.observed.shape.join(' × ')
+                : t.status === 'match'
+                  ? ''
+                  : t.expected.shape.join(' × ')}
             </td>
-            <td>
-              {t.status === "extra"
-                ? t.observed.dtype
-                : t.status === "match"
-                  ? ""
-                  : t.expected.dtype}
-            </td>
+            <td>{t.status === 'extra' ? t.observed.dtype : t.status === 'match' ? '' : t.expected.dtype}</td>
             <td className={styles.hash}>
-              {t.status === "match"
-                ? ""
-                : t.status === "missing"
+              {t.status === 'match'
+                ? ''
+                : t.status === 'missing'
                   ? `expected ${t.expected.sha256.slice(0, 6)}…${t.expected.sha256.slice(-4)}`
-                  : t.status === "extra"
+                  : t.status === 'extra'
                     ? `observed ${t.observed.sha256.slice(0, 6)}…${t.observed.sha256.slice(-4)}`
                     : `${t.expected.sha256.slice(0, 6)}… -> ${t.observed.sha256.slice(0, 6)}…`}
             </td>
@@ -1590,17 +1561,17 @@ git commit -m "add print stylesheet for verification panel"
 
 ```tsx
 // packages/react/test/export-report-button.test.tsx
-import { test, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { ExportReportButton } from "../src/verification-panel/index.ts";
+import { test, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ExportReportButton } from '../src/verification-panel/index.ts';
 
-test("clicking the button opens a mode picker", () => {
+test('clicking the button opens a mode picker', () => {
   render(<ExportReportButton onExport={() => {}} disabled={false} />);
   fireEvent.click(screen.getByText(/Export report/));
   expect(screen.getByText(/identity\+stats/)).toBeTruthy();
 });
 
-test("the button is disabled when no model is loaded", () => {
+test('the button is disabled when no model is loaded', () => {
   render(<ExportReportButton onExport={() => {}} disabled={true} />);
   expect((screen.getByText(/Export report/) as HTMLButtonElement).disabled).toBe(true);
 });
@@ -1615,8 +1586,8 @@ Expected: FAIL - `ExportReportButton` not exported.
 
 ```tsx
 // packages/react/src/verification-panel/export-report-button.tsx
-import { useState } from "react";
-import type { ReportMode } from "@wetron/core";
+import { useState } from 'react';
+import type { ReportMode } from '@wetron/core';
 
 export interface ExportReportButtonProps {
   readonly onExport: (mode: ReportMode) => void;
@@ -1625,10 +1596,10 @@ export interface ExportReportButtonProps {
 
 export function ExportReportButton({ onExport, disabled }: ExportReportButtonProps) {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<ReportMode>("identity");
+  const [mode, setMode] = useState<ReportMode>('identity');
 
   return (
-    <span style={{ position: "relative", display: "inline-block" }}>
+    <span style={{ position: 'relative', display: 'inline-block' }}>
       <button onClick={() => setOpen((o) => !o)} disabled={disabled}>
         Export report ▾
       </button>
@@ -1636,42 +1607,37 @@ export function ExportReportButton({ onExport, disabled }: ExportReportButtonPro
         <div
           role="dialog"
           style={{
-            position: "absolute",
-            top: "calc(100% + 4px)",
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
             right: 0,
-            padding: "0.5rem",
-            background: "var(--w-panel-bg, #1c2230)",
-            border: "1px solid var(--w-panel-border, rgba(255,255,255,0.14))",
+            padding: '0.5rem',
+            background: 'var(--w-panel-bg, #1c2230)',
+            border: '1px solid var(--w-panel-border, rgba(255,255,255,0.14))',
             borderRadius: 6,
-            minWidth: "12rem",
+            minWidth: '12rem',
           }}
         >
           <div
             style={{
-              marginBottom: "0.375rem",
-              fontSize: "0.625rem",
-              textTransform: "uppercase",
+              marginBottom: '0.375rem',
+              fontSize: '0.625rem',
+              textTransform: 'uppercase',
               opacity: 0.6,
             }}
           >
             Mode
           </div>
-          <label style={{ display: "block", fontSize: "0.75rem", marginBottom: "0.25rem" }}>
-            <input
-              type="radio"
-              name="mode"
-              checked={mode === "identity"}
-              onChange={() => setMode("identity")}
-            />{" "}
+          <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+            <input type="radio" name="mode" checked={mode === 'identity'} onChange={() => setMode('identity')} />{' '}
             identity
           </label>
-          <label style={{ display: "block", fontSize: "0.75rem", marginBottom: "0.5rem" }}>
+          <label style={{ display: 'block', fontSize: '0.75rem', marginBottom: '0.5rem' }}>
             <input
               type="radio"
               name="mode"
-              checked={mode === "identity+stats"}
-              onChange={() => setMode("identity+stats")}
-            />{" "}
+              checked={mode === 'identity+stats'}
+              onChange={() => setMode('identity+stats')}
+            />{' '}
             identity+stats
           </label>
           <button
@@ -1679,7 +1645,7 @@ export function ExportReportButton({ onExport, disabled }: ExportReportButtonPro
               onExport(mode);
               setOpen(false);
             }}
-            style={{ width: "100%" }}
+            style={{ width: '100%' }}
           >
             Download report.json
           </button>
@@ -1693,8 +1659,8 @@ export function ExportReportButton({ onExport, disabled }: ExportReportButtonPro
 Add to `packages/react/src/verification-panel/index.ts`:
 
 ```ts
-export { ExportReportButton } from "./export-report-button.tsx";
-export type { ExportReportButtonProps } from "./export-report-button.tsx";
+export { ExportReportButton } from './export-report-button.tsx';
+export type { ExportReportButtonProps } from './export-report-button.tsx';
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -1723,22 +1689,22 @@ git commit -m "add react export-report toolbar button"
 
 ```tsx
 // packages/react/test/export-node-button.test.tsx
-import { test, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { ExportNodeReportButton } from "../src/verification-panel/index.ts";
+import { test, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ExportNodeReportButton } from '../src/verification-panel/index.ts';
 
-test("export-node fires onExport with the node name and selected mode", () => {
+test('export-node fires onExport with the node name and selected mode', () => {
   let captured: { mode: string; node: string } | null = null;
   render(
     <ExportNodeReportButton
       nodeName="Conv2D_42"
       onExport={(mode) => {
-        captured = { mode, node: "Conv2D_42" };
+        captured = { mode, node: 'Conv2D_42' };
       }}
     />,
   );
   fireEvent.click(screen.getByText(/Export node report/));
-  expect(captured).toEqual({ mode: "identity", node: "Conv2D_42" });
+  expect(captured).toEqual({ mode: 'identity', node: 'Conv2D_42' });
 });
 ```
 
@@ -1751,8 +1717,8 @@ Expected: FAIL - component missing.
 
 ```tsx
 // packages/react/src/verification-panel/export-node-button.tsx
-import { useState } from "react";
-import type { ReportMode } from "@wetron/core";
+import { useState } from 'react';
+import type { ReportMode } from '@wetron/core';
 
 export interface ExportNodeReportButtonProps {
   readonly nodeName: string;
@@ -1760,7 +1726,7 @@ export interface ExportNodeReportButtonProps {
 }
 
 export function ExportNodeReportButton({ nodeName, onExport }: ExportNodeReportButtonProps) {
-  const [mode] = useState<ReportMode>("identity");
+  const [mode] = useState<ReportMode>('identity');
   return (
     <button onClick={() => onExport(mode)} aria-label={`Export node report for ${nodeName}`}>
       Export node report
@@ -1772,8 +1738,8 @@ export function ExportNodeReportButton({ nodeName, onExport }: ExportNodeReportB
 Append to `packages/react/src/verification-panel/index.ts`:
 
 ```ts
-export { ExportNodeReportButton } from "./export-node-button.tsx";
-export type { ExportNodeReportButtonProps } from "./export-node-button.tsx";
+export { ExportNodeReportButton } from './export-node-button.tsx';
+export type { ExportNodeReportButtonProps } from './export-node-button.tsx';
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -1802,11 +1768,11 @@ git commit -m "add react export-node-report button"
 
 ```tsx
 // packages/react/test/verify-button.test.tsx
-import { test, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { VerifyButton } from "../src/verification-panel/index.ts";
+import { test, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { VerifyButton } from '../src/verification-panel/index.ts';
 
-test("clicking VerifyButton triggers a hidden file input click", () => {
+test('clicking VerifyButton triggers a hidden file input click', () => {
   let clicked = false;
   const proto = HTMLInputElement.prototype.click;
   HTMLInputElement.prototype.click = function () {
@@ -1821,7 +1787,7 @@ test("clicking VerifyButton triggers a hidden file input click", () => {
   }
 });
 
-test("VerifyButton is disabled with no model loaded", () => {
+test('VerifyButton is disabled with no model loaded', () => {
   render(<VerifyButton onPick={() => {}} disabled={true} />);
   expect((screen.getByText(/Verify against report/) as HTMLButtonElement).disabled).toBe(true);
 });
@@ -1836,7 +1802,7 @@ Expected: FAIL - component missing.
 
 ```tsx
 // packages/react/src/verification-panel/verify-button.tsx
-import { useRef } from "react";
+import { useRef } from 'react';
 
 export interface VerifyButtonProps {
   readonly onPick: (file: File) => void;
@@ -1854,11 +1820,11 @@ export function VerifyButton({ onPick, disabled }: VerifyButtonProps) {
         ref={inputRef}
         type="file"
         accept="application/json,.json"
-        style={{ display: "none" }}
+        style={{ display: 'none' }}
         onChange={(e) => {
           const file = e.currentTarget.files?.[0];
           if (file) onPick(file);
-          e.currentTarget.value = "";
+          e.currentTarget.value = '';
         }}
       />
     </>
@@ -1869,8 +1835,8 @@ export function VerifyButton({ onPick, disabled }: VerifyButtonProps) {
 Append to `packages/react/src/verification-panel/index.ts`:
 
 ```ts
-export { VerifyButton } from "./verify-button.tsx";
-export type { VerifyButtonProps } from "./verify-button.tsx";
+export { VerifyButton } from './verify-button.tsx';
+export type { VerifyButtonProps } from './verify-button.tsx';
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -1899,39 +1865,39 @@ git commit -m "add react verify-against-report button"
 
 ```ts
 // packages/react/test/node-status.test.ts
-import { test, expect } from "vitest";
-import { computeNodeStatuses } from "../src/verification-panel/node-status.ts";
-import type { Verdict } from "@wetron/core";
+import { test, expect } from 'vitest';
+import { computeNodeStatuses } from '../src/verification-panel/node-status.ts';
+import type { Verdict } from '@wetron/core';
 
 test("nodes whose tensors all match get status 'match'", () => {
   const verdict: Verdict = {
-    kind: "mismatch",
+    kind: 'mismatch',
     reasons: [],
     tensors: [
-      { status: "match", name: "Conv2D_42/kernel" },
-      { status: "match", name: "Conv2D_42/bias" },
+      { status: 'match', name: 'Conv2D_42/kernel' },
+      { status: 'match', name: 'Conv2D_42/bias' },
       {
-        status: "mismatch",
-        name: "Conv2D_99/kernel",
+        status: 'mismatch',
+        name: 'Conv2D_99/kernel',
         expected: {} as never,
         observed: {} as never,
       },
     ],
   };
   const nodeInputs = new Map([
-    ["Conv2D_42", ["Conv2D_42/kernel", "Conv2D_42/bias"]],
-    ["Conv2D_99", ["Conv2D_99/kernel"]],
+    ['Conv2D_42', ['Conv2D_42/kernel', 'Conv2D_42/bias']],
+    ['Conv2D_99', ['Conv2D_99/kernel']],
   ]);
   const statuses = computeNodeStatuses(verdict, nodeInputs);
-  expect(statuses.get("Conv2D_42")).toBe("match");
-  expect(statuses.get("Conv2D_99")).toBe("bad");
+  expect(statuses.get('Conv2D_42')).toBe('match');
+  expect(statuses.get('Conv2D_99')).toBe('bad');
 });
 
-test("nodes with no weight tensors get no status", () => {
-  const verdict: Verdict = { kind: "match", tensors: [{ status: "match", name: "k" }] };
-  const nodeInputs = new Map([["Relu", ["activations"]]]);
+test('nodes with no weight tensors get no status', () => {
+  const verdict: Verdict = { kind: 'match', tensors: [{ status: 'match', name: 'k' }] };
+  const nodeInputs = new Map([['Relu', ['activations']]]);
   const statuses = computeNodeStatuses(verdict, nodeInputs);
-  expect(statuses.has("Relu")).toBe(false);
+  expect(statuses.has('Relu')).toBe(false);
 });
 ```
 
@@ -1944,25 +1910,25 @@ Expected: FAIL - helper missing.
 
 ```ts
 // packages/react/src/verification-panel/node-status.ts
-import type { Verdict } from "@wetron/core";
+import type { Verdict } from '@wetron/core';
 
-export type NodeStatus = "match" | "bad";
+export type NodeStatus = 'match' | 'bad';
 
 export function computeNodeStatuses(
   verdict: Verdict,
   nodeInputs: ReadonlyMap<string, readonly string[]>,
 ): Map<string, NodeStatus> {
-  const tensorStatus = new Map<string, "match" | "bad">();
-  if (verdict.kind === "incompatible") return new Map();
+  const tensorStatus = new Map<string, 'match' | 'bad'>();
+  if (verdict.kind === 'incompatible') return new Map();
   for (const t of verdict.tensors) {
-    tensorStatus.set(t.name, t.status === "match" ? "match" : "bad");
+    tensorStatus.set(t.name, t.status === 'match' ? 'match' : 'bad');
   }
   const out = new Map<string, NodeStatus>();
   for (const [node, inputs] of nodeInputs) {
     const covered = inputs.filter((n) => tensorStatus.has(n));
     if (covered.length === 0) continue;
-    const anyBad = covered.some((n) => tensorStatus.get(n) === "bad");
-    out.set(node, anyBad ? "bad" : "match");
+    const anyBad = covered.some((n) => tensorStatus.get(n) === 'bad');
+    out.set(node, anyBad ? 'bad' : 'match');
   }
   return out;
 }
@@ -1976,24 +1942,24 @@ Accept a new optional prop `verificationStatus?: "match" | "bad"` on the node-da
 {
   verificationStatus && (
     <span
-      aria-label={verificationStatus === "match" ? "verified" : "verification failed"}
+      aria-label={verificationStatus === 'match' ? 'verified' : 'verification failed'}
       style={{
-        position: "absolute",
+        position: 'absolute',
         top: -8,
         right: -8,
         width: 18,
         height: 18,
         borderRadius: 9,
-        display: "grid",
-        placeItems: "center",
+        display: 'grid',
+        placeItems: 'center',
         fontSize: 11,
         fontWeight: 700,
-        color: "#fff",
-        boxShadow: "0 0 0 2px var(--w-bg-grid, #0d1017)",
-        background: verificationStatus === "match" ? "rgb(34,197,94)" : "rgb(239,68,68)",
+        color: '#fff',
+        boxShadow: '0 0 0 2px var(--w-bg-grid, #0d1017)',
+        background: verificationStatus === 'match' ? 'rgb(34,197,94)' : 'rgb(239,68,68)',
       }}
     >
-      {verificationStatus === "match" ? "✓" : "✗"}
+      {verificationStatus === 'match' ? '✓' : '✗'}
     </span>
   );
 }
@@ -2031,24 +1997,24 @@ Phase 3 mirrors Phase 2 in `@wetron/svelte`. Same boundaries, same type names, s
 
 ```ts
 // packages/svelte/test/verification-panel.test.ts
-import { test, expect } from "vitest";
-import { render, screen } from "@testing-library/svelte";
-import VerificationPanel from "../src/verification-panel/verification-panel.svelte";
-import type { Report, Verdict } from "@wetron/core";
+import { test, expect } from 'vitest';
+import { render, screen } from '@testing-library/svelte';
+import VerificationPanel from '../src/verification-panel/verification-panel.svelte';
+import type { Report, Verdict } from '@wetron/core';
 
 const fakeReport: Report = {
-  reportVersion: "1",
-  wetronVersion: "0.0.11",
-  createdAt: "2026-05-08T00:00:00Z",
-  mode: "identity",
-  scope: "global",
-  file: { name: "a", bytes: 100, sha256: "ab".repeat(32) },
-  format: { name: "tflite", version: 3, producer: null },
+  reportVersion: '1',
+  wetronVersion: '0.0.11',
+  createdAt: '2026-05-08T00:00:00Z',
+  mode: 'identity',
+  scope: 'global',
+  file: { name: 'a', bytes: 100, sha256: 'ab'.repeat(32) },
+  format: { name: 'tflite', version: 3, producer: null },
   tensors: [],
 };
 
-test("renders MATCH banner", () => {
-  const verdict: Verdict = { kind: "match", tensors: [] };
+test('renders MATCH banner', () => {
+  const verdict: Verdict = { kind: 'match', tensors: [] };
   render(VerificationPanel, { props: { report: fakeReport, verdict, onClose: () => {} } });
   expect(screen.getByText(/MATCH/)).toBeTruthy();
 });
@@ -2064,27 +2030,29 @@ Expected: FAIL - component missing.
 ```svelte
 <!-- packages/svelte/src/verification-panel/verification-panel.svelte -->
 <script lang="ts">
-  import type { Report, Verdict } from "@wetron/core";
+  import type { Report, Verdict } from '@wetron/core';
 
   let { report, verdict, onClose }: { report: Report; verdict: Verdict; onClose: () => void } = $props();
 
   let verdictText = $derived(
-    verdict.kind === "match"
+    verdict.kind === 'match'
       ? `MATCH ✓ - all ${verdict.tensors.length} tensors verified`
-      : verdict.kind === "mismatch"
-        ? `MISMATCH ✗ - ${verdict.tensors.filter((t) => t.status !== "match").length} of ${verdict.tensors.length} tensors differ`
-        : `INCOMPATIBLE - ${verdict.reasons.join(", ")}`,
+      : verdict.kind === 'mismatch'
+        ? `MISMATCH ✗ - ${verdict.tensors.filter((t) => t.status !== 'match').length} of ${verdict.tensors.length} tensors differ`
+        : `INCOMPATIBLE - ${verdict.reasons.join(', ')}`,
   );
-  let tone = $derived(verdict.kind === "match" ? "ok" : "bad");
-  let scopeText = $derived(report.scope === "global" ? "global scope" : `node "${report.scope.node}"`);
+  let tone = $derived(verdict.kind === 'match' ? 'ok' : 'bad');
+  let scopeText = $derived(report.scope === 'global' ? 'global scope' : `node "${report.scope.node}"`);
 </script>
 
 <section class="panel" data-testid="verification-panel">
   <header class="banner banner-{tone}">
-    <span class="mark">{tone === "ok" ? "✓" : "✗"}</span>
+    <span class="mark">{tone === 'ok' ? '✓' : '✗'}</span>
     <div class="text">
       <div class="title">{verdictText}</div>
-      <div class="sub">file sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)} · mode {report.mode} · {scopeText}</div>
+      <div class="sub">
+        file sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)} · mode {report.mode} · {scopeText}
+      </div>
     </div>
     <button class="export" onclick={() => window.print()}>Export PDF</button>
     <button class="close" aria-label="Close" onclick={onClose}>×</button>
@@ -2095,19 +2063,33 @@ Expected: FAIL - component missing.
     <span class="file-bytes">{report.file.bytes.toLocaleString()} bytes</span>
     <span class="file-sha">sha256 {report.file.sha256.slice(0, 6)}…{report.file.sha256.slice(-4)}</span>
   </div>
-  {#if verdict.kind !== "incompatible"}
+  {#if verdict.kind !== 'incompatible'}
     <table>
       <thead>
         <tr><th>status</th><th>tensor</th><th>shape</th><th>dtype</th><th>sha256</th></tr>
       </thead>
       <tbody>
         {#each verdict.tensors as t (t.name)}
-          <tr class:bad={t.status !== "match"}>
-            <td>{t.status === "match" ? "✓ match" : t.status}</td>
+          <tr class:bad={t.status !== 'match'}>
+            <td>{t.status === 'match' ? '✓ match' : t.status}</td>
             <td class="tensor-name">{t.name}</td>
-            <td>{t.status === "extra" ? t.observed.shape.join(" × ") : t.status === "match" ? "" : t.expected.shape.join(" × ")}</td>
-            <td>{t.status === "extra" ? t.observed.dtype : t.status === "match" ? "" : t.expected.dtype}</td>
-            <td class="hash">{t.status === "match" ? "" : t.status === "missing" ? `expected ${t.expected.sha256.slice(0, 6)}…${t.expected.sha256.slice(-4)}` : t.status === "extra" ? `observed ${t.observed.sha256.slice(0, 6)}…${t.observed.sha256.slice(-4)}` : `${t.expected.sha256.slice(0, 6)}… -> ${t.observed.sha256.slice(0, 6)}…`}</td>
+            <td
+              >{t.status === 'extra'
+                ? t.observed.shape.join(' × ')
+                : t.status === 'match'
+                  ? ''
+                  : t.expected.shape.join(' × ')}</td
+            >
+            <td>{t.status === 'extra' ? t.observed.dtype : t.status === 'match' ? '' : t.expected.dtype}</td>
+            <td class="hash"
+              >{t.status === 'match'
+                ? ''
+                : t.status === 'missing'
+                  ? `expected ${t.expected.sha256.slice(0, 6)}…${t.expected.sha256.slice(-4)}`
+                  : t.status === 'extra'
+                    ? `observed ${t.observed.sha256.slice(0, 6)}…${t.observed.sha256.slice(-4)}`
+                    : `${t.expected.sha256.slice(0, 6)}… -> ${t.observed.sha256.slice(0, 6)}…`}</td
+            >
           </tr>
         {/each}
       </tbody>
@@ -2116,42 +2098,147 @@ Expected: FAIL - component missing.
 </section>
 
 <style>
-  .panel { display: flex; flex-direction: column; }
-  .banner { display: flex; align-items: center; gap: 0.875rem; padding: 0.875rem 1rem; }
-  .banner-ok { background: rgba(34,197,94,0.12); }
-  .banner-bad { background: rgba(239,68,68,0.12); }
-  .mark { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: white; }
-  .banner-ok .mark { background: rgb(34,197,94); }
-  .banner-bad .mark { background: rgb(239,68,68); }
-  .text { flex: 1; min-width: 0; }
-  .title { font-weight: 600; font-size: 0.9375rem; }
-  .sub { font-size: 0.75rem; opacity: 0.7; margin-top: 0.125rem; }
-  .export, .close { background: transparent; border: 1px solid var(--w-panel-border, rgba(255,255,255,0.14)); color: inherit; padding: 0.3125rem 0.625rem; border-radius: 6px; font-size: 0.8125rem; cursor: pointer; }
-  .close { padding: 0.3125rem 0.5rem; }
-  .file { display: grid; grid-template-columns: auto 1fr auto auto; gap: 1rem; padding: 0.75rem 1rem; align-items: baseline; border-top: 1px solid var(--w-panel-border, rgba(255,255,255,0.08)); }
-  .file-label { font-size: 0.625rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
-  .file-name, .file-bytes, .file-sha { font-family: ui-monospace, Menlo, monospace; font-size: 0.8125rem; }
-  .file-bytes { opacity: 0.7; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
-  th, td { padding: 0.625rem 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.04); }
-  th { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
-  .tensor-name, .hash { font-family: ui-monospace, Menlo, monospace; font-size: 0.75rem; }
-  tr.bad { background: rgba(239,68,68,0.04); }
+  .panel {
+    display: flex;
+    flex-direction: column;
+  }
+  .banner {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+  }
+  .banner-ok {
+    background: rgba(34, 197, 94, 0.12);
+  }
+  .banner-bad {
+    background: rgba(239, 68, 68, 0.12);
+  }
+  .mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: white;
+  }
+  .banner-ok .mark {
+    background: rgb(34, 197, 94);
+  }
+  .banner-bad .mark {
+    background: rgb(239, 68, 68);
+  }
+  .text {
+    flex: 1;
+    min-width: 0;
+  }
+  .title {
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+  .sub {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 0.125rem;
+  }
+  .export,
+  .close {
+    background: transparent;
+    border: 1px solid var(--w-panel-border, rgba(255, 255, 255, 0.14));
+    color: inherit;
+    padding: 0.3125rem 0.625rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+  .close {
+    padding: 0.3125rem 0.5rem;
+  }
+  .file {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    align-items: baseline;
+    border-top: 1px solid var(--w-panel-border, rgba(255, 255, 255, 0.08));
+  }
+  .file-label {
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+  }
+  .file-name,
+  .file-bytes,
+  .file-sha {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 0.8125rem;
+  }
+  .file-bytes {
+    opacity: 0.7;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+  th,
+  td {
+    padding: 0.625rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  th {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+  }
+  .tensor-name,
+  .hash {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 0.75rem;
+  }
+  tr.bad {
+    background: rgba(239, 68, 68, 0.04);
+  }
   @media print {
-    :global(body *) { visibility: hidden !important; }
-    .panel, .panel * { visibility: visible !important; }
-    .panel { position: absolute; top: 0; left: 0; width: 100%; }
-    .export, .close { display: none !important; }
-    .banner-ok { background: #e6f7ec !important; color: #064e2c; }
-    .banner-bad { background: #fde7e7 !important; color: #7a1414; }
-    .mark { color: white !important; }
+    :global(body *) {
+      visibility: hidden !important;
+    }
+    .panel,
+    .panel * {
+      visibility: visible !important;
+    }
+    .panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+    .export,
+    .close {
+      display: none !important;
+    }
+    .banner-ok {
+      background: #e6f7ec !important;
+      color: #064e2c;
+    }
+    .banner-bad {
+      background: #fde7e7 !important;
+      color: #7a1414;
+    }
+    .mark {
+      color: white !important;
+    }
   }
 </style>
 ```
 
 ```ts
 // packages/svelte/src/verification-panel/index.ts
-export { default as VerificationPanel } from "./verification-panel.svelte";
+export { default as VerificationPanel } from './verification-panel.svelte';
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -2182,11 +2269,11 @@ git commit -m "add svelte verification panel"
 
 ```ts
 // packages/svelte/test/export-report-button.test.ts
-import { test, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/svelte";
-import ExportReportButton from "../src/verification-panel/export-report-button.svelte";
+import { test, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/svelte';
+import ExportReportButton from '../src/verification-panel/export-report-button.svelte';
 
-test("clicking opens the mode picker", async () => {
+test('clicking opens the mode picker', async () => {
   render(ExportReportButton, { props: { onExport: () => {}, disabled: false } });
   await fireEvent.click(screen.getByText(/Export report/));
   expect(screen.getByText(/identity\+stats/)).toBeTruthy();
@@ -2203,20 +2290,38 @@ Expected: FAIL - component missing.
 ```svelte
 <!-- packages/svelte/src/verification-panel/export-report-button.svelte -->
 <script lang="ts">
-  import type { ReportMode } from "@wetron/core";
+  import type { ReportMode } from '@wetron/core';
   let { onExport, disabled }: { onExport: (mode: ReportMode) => void; disabled: boolean } = $props();
   let open = $state(false);
-  let mode = $state<ReportMode>("identity");
+  let mode = $state<ReportMode>('identity');
 </script>
 
 <span style="position: relative; display: inline-block;">
   <button onclick={() => (open = !open)} {disabled}>Export report ▾</button>
   {#if open}
-    <div role="dialog" style="position: absolute; top: calc(100% + 4px); right: 0; padding: 0.5rem; background: var(--w-panel-bg, #1c2230); border: 1px solid var(--w-panel-border, rgba(255,255,255,0.14)); border-radius: 6px; min-width: 12rem;">
+    <div
+      role="dialog"
+      style="position: absolute; top: calc(100% + 4px); right: 0; padding: 0.5rem; background: var(--w-panel-bg, #1c2230); border: 1px solid var(--w-panel-border, rgba(255,255,255,0.14)); border-radius: 6px; min-width: 12rem;"
+    >
       <div style="margin-bottom: 0.375rem; font-size: 0.625rem; text-transform: uppercase; opacity: 0.6;">Mode</div>
-      <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem;"><input type="radio" name="mode" checked={mode === "identity"} onchange={() => (mode = "identity")} /> identity</label>
-      <label style="display: block; font-size: 0.75rem; margin-bottom: 0.5rem;"><input type="radio" name="mode" checked={mode === "identity+stats"} onchange={() => (mode = "identity+stats")} /> identity+stats</label>
-      <button onclick={() => { onExport(mode); open = false; }} style="width: 100%;">Download report.json</button>
+      <label style="display: block; font-size: 0.75rem; margin-bottom: 0.25rem;"
+        ><input type="radio" name="mode" checked={mode === 'identity'} onchange={() => (mode = 'identity')} /> identity</label
+      >
+      <label style="display: block; font-size: 0.75rem; margin-bottom: 0.5rem;"
+        ><input
+          type="radio"
+          name="mode"
+          checked={mode === 'identity+stats'}
+          onchange={() => (mode = 'identity+stats')}
+        /> identity+stats</label
+      >
+      <button
+        onclick={() => {
+          onExport(mode);
+          open = false;
+        }}
+        style="width: 100%;">Download report.json</button
+      >
     </div>
   {/if}
 </span>
@@ -2225,10 +2330,13 @@ Expected: FAIL - component missing.
 ```svelte
 <!-- packages/svelte/src/verification-panel/export-node-button.svelte -->
 <script lang="ts">
-  import type { ReportMode } from "@wetron/core";
+  import type { ReportMode } from '@wetron/core';
   let { nodeName, onExport }: { nodeName: string; onExport: (mode: ReportMode) => void } = $props();
 </script>
-<button onclick={() => onExport("identity")} aria-label={`Export node report for ${nodeName}`}>Export node report</button>
+
+<button onclick={() => onExport('identity')} aria-label={`Export node report for ${nodeName}`}
+  >Export node report</button
+>
 ```
 
 ```svelte
@@ -2237,21 +2345,28 @@ Expected: FAIL - component missing.
   let { onPick, disabled }: { onPick: (file: File) => void; disabled: boolean } = $props();
   let inputEl: HTMLInputElement | undefined = $state();
 </script>
+
 <button onclick={() => inputEl?.click()} {disabled}>Verify against report…</button>
-<input bind:this={inputEl} type="file" accept="application/json,.json" style="display: none;" onchange={(e) => {
-  const t = e.currentTarget;
-  const file = t.files?.[0];
-  if (file) onPick(file);
-  t.value = "";
-}} />
+<input
+  bind:this={inputEl}
+  type="file"
+  accept="application/json,.json"
+  style="display: none;"
+  onchange={(e) => {
+    const t = e.currentTarget;
+    const file = t.files?.[0];
+    if (file) onPick(file);
+    t.value = '';
+  }}
+/>
 ```
 
 Append to `packages/svelte/src/verification-panel/index.ts`:
 
 ```ts
-export { default as ExportReportButton } from "./export-report-button.svelte";
-export { default as ExportNodeReportButton } from "./export-node-button.svelte";
-export { default as VerifyButton } from "./verify-button.svelte";
+export { default as ExportReportButton } from './export-report-button.svelte';
+export { default as ExportNodeReportButton } from './export-node-button.svelte';
+export { default as VerifyButton } from './verify-button.svelte';
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -2287,14 +2402,14 @@ Decision: the helper is pure TypeScript with no DOM, so move it from Phase 2.7 i
 Then in `packages/core/src/report/index.ts` add:
 
 ```ts
-export { computeNodeStatuses } from "./node-status.ts";
-export type { NodeStatus } from "./node-status.ts";
+export { computeNodeStatuses } from './node-status.ts';
+export type { NodeStatus } from './node-status.ts';
 ```
 
 In `packages/react/src/verification-panel/index.ts`, replace the local re-export with a re-export from core:
 
 ```ts
-export { computeNodeStatuses, type NodeStatus } from "@wetron/core";
+export { computeNodeStatuses, type NodeStatus } from '@wetron/core';
 ```
 
 Move the React test under `packages/core/test/report/node-status.test.ts`. Delete the React-side copy.
@@ -2311,10 +2426,13 @@ Accept a `verificationStatus?: "match" | "bad"` prop and render in the top-right
 ```svelte
 {#if verificationStatus}
   <span
-    aria-label={verificationStatus === "match" ? "verified" : "verification failed"}
-    style="position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; border-radius: 9px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; box-shadow: 0 0 0 2px var(--w-bg-grid, #0d1017); background: {verificationStatus === 'match' ? 'rgb(34,197,94)' : 'rgb(239,68,68)'};"
+    aria-label={verificationStatus === 'match' ? 'verified' : 'verification failed'}
+    style="position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; border-radius: 9px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; box-shadow: 0 0 0 2px var(--w-bg-grid, #0d1017); background: {verificationStatus ===
+    'match'
+      ? 'rgb(34,197,94)'
+      : 'rgb(239,68,68)'};"
   >
-    {verificationStatus === "match" ? "✓" : "✗"}
+    {verificationStatus === 'match' ? '✓' : '✗'}
   </span>
 {/if}
 ```
@@ -2389,9 +2507,9 @@ Helper:
 
 ```tsx
 function downloadJson(filename: string, body: string) {
-  const blob = new Blob([body], { type: "application/json" });
+  const blob = new Blob([body], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
+  const a = document.createElement('a');
   a.href = url;
   a.download = filename;
   a.click();
@@ -2473,9 +2591,9 @@ git commit -m "wire svelte demo to inspection report flow"
 
 ````markdown
 ---
-title: "Inspection report"
+title: 'Inspection report'
 description: "Build, parse, and verify reproducible JSON reports of a model file's identity and per-tensor SHA-256 hashes."
-lead: "Reproducible chain-of-custody reports for model files."
+lead: 'Reproducible chain-of-custody reports for model files.'
 weight: 40
 ---
 

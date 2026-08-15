@@ -64,9 +64,9 @@ packages/react/src/node-property-panel/virtual-values.tsx
 ```
 
 ```tsx
-import { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import css from "./node-property-panel.module.css";
+import { useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import css from './node-property-panel.module.css';
 
 const ROW_HEIGHT = 16;
 const COLS = 4;
@@ -90,20 +90,20 @@ export function VirtualValues({
 
   return (
     <div ref={parentRef} className={css.valuesScroll}>
-      <div className={css.gridVals} style={{ height: v.getTotalSize(), position: "relative" }}>
+      <div className={css.gridVals} style={{ height: v.getTotalSize(), position: 'relative' }}>
         {v.getVirtualItems().map((row) => (
           <div
             key={row.index}
             data-row-index={row.index}
             className={css.gridRow}
             style={{
-              position: "absolute",
+              position: 'absolute',
               top: row.start,
               left: 0,
               right: 0,
               height: ROW_HEIGHT,
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
               gap: 1,
             }}
           >
@@ -111,7 +111,7 @@ export function VirtualValues({
               const idx = row.index * COLS + c;
               if (idx >= values.length) return <span key={c} />;
               const raw = values[idx];
-              return <span key={c}>{format(typeof raw === "bigint" ? Number(raw) : raw)}</span>;
+              return <span key={c}>{format(typeof raw === 'bigint' ? Number(raw) : raw)}</span>;
             })}
           </div>
         ))}

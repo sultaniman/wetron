@@ -25,13 +25,13 @@ Add a `NodePropertyPanel` React component to `@wetron/react` that displays the p
 ## Component API
 
 ```tsx
-import type { GraphNode, GraphValue } from "@wetron/common/ir";
+import type { GraphNode, GraphValue } from '@wetron/common/ir';
 
 type PanelTarget = GraphNode | GraphValue;
 
 // Discriminator: GraphNode has 'opType', GraphValue does not
 function isGraphNode(t: PanelTarget): t is GraphNode {
-  return "opType" in t;
+  return 'opType' in t;
 }
 
 export function NodePropertyPanel({ target }: { target: PanelTarget | null }) {
@@ -96,10 +96,10 @@ Actually - the panel receives `GraphValue` only, with no graph context. The call
 **Revised API:**
 
 ```tsx
-type PanelTarget = GraphNode | { graphValue: GraphValue; direction: "input" | "output" };
+type PanelTarget = GraphNode | { graphValue: GraphValue; direction: 'input' | 'output' };
 
 function isGraphNode(t: PanelTarget): t is GraphNode {
-  return "opType" in t;
+  return 'opType' in t;
 }
 ```
 

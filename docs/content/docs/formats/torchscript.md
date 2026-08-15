@@ -1,7 +1,7 @@
 ---
-title: "TorchScript"
-description: "TorchScript parser for Wetron - handles both ZIP-based torch.jit.save files and FlatBuffers Mobile .ptl format, synchronously."
-lead: "Parses `.pt` files - ZIP-based (`torch.jit.save`) and FlatBuffers Mobile format."
+title: 'TorchScript'
+description: 'TorchScript parser for Wetron - handles both ZIP-based torch.jit.save files and FlatBuffers Mobile .ptl format, synchronously.'
+lead: 'Parses `.pt` files - ZIP-based (`torch.jit.save`) and FlatBuffers Mobile format.'
 weight: 40
 ---
 

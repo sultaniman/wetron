@@ -1,7 +1,7 @@
 ---
-title: "Introduction"
-description: "What Wetron is, how it works, and how the packages fit together - browser-native ML model graph parsing with no server required."
-lead: "Wetron is a browser-native library for parsing and visualising ML model graphs."
+title: 'Introduction'
+description: 'What Wetron is, how it works, and how the packages fit together - browser-native ML model graph parsing with no server required.'
+lead: 'Wetron is a browser-native library for parsing and visualising ML model graphs.'
 weight: 10
 ---
 

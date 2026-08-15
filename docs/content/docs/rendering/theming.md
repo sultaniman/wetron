@@ -1,19 +1,19 @@
 ---
-title: "Theming"
-description: "CSS custom properties for Wetron components - override node card, tooltip, and property panel tokens without rebuilding."
-lead: "All visual tokens are CSS custom properties - override any of them without rebuilding."
+title: 'Theming'
+description: 'CSS custom properties for Wetron components - override node card, tooltip, and property panel tokens without rebuilding.'
+lead: 'All visual tokens are CSS custom properties - override any of them without rebuilding.'
 weight: 30
 ---
 
 `ModelGraphView` wraps its output in `<div data-theme="light|dark">`. Target that attribute in your stylesheet:
 
 ```css
-[data-theme="light"] {
+[data-theme='light'] {
   --wetron-node-bg: #fafafa;
   --wetron-panel-bg: #f5f5f5;
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --wetron-node-bg: #111827;
   --wetron-node-border: #1f2937;
   --wetron-panel-bg: #111827;

@@ -29,8 +29,8 @@ import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from '@wetron/co
 import { ParseError } from '@wetron/common/ir';
 
 export function parse<Format>(bytes: Uint8Array): ModelGraph {
-    // ...
-    throw new ParseError('<format>', 'human-readable reason');
+  // ...
+  throw new ParseError('<format>', 'human-readable reason');
 }
 ```
 
@@ -50,7 +50,7 @@ Add magic byte detection to `packages/core/src/detect.ts`:
 ```ts
 // Example: detect "ET12" at offset 4
 if (bytes[4] === 0x45 && bytes[5] === 0x54 && bytes[6] === 0x31 && bytes[7] === 0x32) {
-    return 'myformat';
+  return 'myformat';
 }
 ```
 
@@ -76,11 +76,11 @@ import { readFileSync } from 'fs';
 import { parseMyFormat } from '../src/index.ts';
 
 test('parses test model', () => {
-    const bytes = new Uint8Array(readFileSync('../../test-models/model.ext'));
-    const graph = parseMyFormat(bytes);
-    expect(graph.nodes.length).toBe(42); // must match Netron's node count
-    expect(graph.inputs.length).toBeGreaterThan(0);
-    expect(graph.nodes.every((n) => n.opType)).toBe(true);
+  const bytes = new Uint8Array(readFileSync('../../test-models/model.ext'));
+  const graph = parseMyFormat(bytes);
+  expect(graph.nodes.length).toBe(42); // must match Netron's node count
+  expect(graph.inputs.length).toBeGreaterThan(0);
+  expect(graph.nodes.every((n) => n.opType)).toBe(true);
 });
 ```
 
@@ -90,19 +90,19 @@ Add a real model file to `test-models/`. Node count must match what Netron shows
 
 ```json
 {
-    "name": "@wetron/<format>",
-    "version": "0.0.1",
-    "type": "module",
-    "exports": {
-        ".": {
-            "source": "./src/index.ts",
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
-        }
-    },
-    "dependencies": {
-        "@wetron/core": "workspace:*"
+  "name": "@wetron/<format>",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
+  },
+  "dependencies": {
+    "@wetron/core": "workspace:*"
+  }
 }
 ```
 

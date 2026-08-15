@@ -68,7 +68,7 @@ type SubgraphCtx = {
 };
 
 type ControlFlowSite = {
-  opType: "IF" | "WHILE";
+  opType: 'IF' | 'WHILE';
   callName: string;
   callerInputs: string[];
   builtinOptsTable: number;
@@ -81,7 +81,7 @@ function parseSubgraphAt(
   ctx: SubgraphCtx,
 ): { name: string; inputs: GraphValue[]; outputs: GraphValue[] } {
   // body moves here in step 3
-  return { name: "", inputs: [], outputs: [] };
+  return { name: '', inputs: [], outputs: [] };
 }
 ```
 
@@ -106,7 +106,7 @@ Replace the inline per-subgraph code with:
 
 ```ts
 const ctx: SubgraphCtx = {
-  prefix: "",
+  prefix: '',
   argMap: new Map(),
   nodes: [],
   initializers: new Map(),
@@ -169,9 +169,9 @@ git commit -m "extract tflite per-subgraph parser into helper, no behavior chang
 `packages/tflite/test/builtin-options.test.ts`:
 
 ```ts
-import { test, expect } from "vitest";
-import { ByteBuffer, Builder } from "flatbuffers";
-import { readIfOptions, readWhileOptions } from "../src/builtin-options.ts";
+import { test, expect } from 'vitest';
+import { ByteBuffer, Builder } from 'flatbuffers';
+import { readIfOptions, readWhileOptions } from '../src/builtin-options.ts';
 
 function buildTwoIntOptions(a: number, b: number): { bb: ByteBuffer; table: number } {
   const fbb = new Builder();
@@ -184,17 +184,17 @@ function buildTwoIntOptions(a: number, b: number): { bb: ByteBuffer; table: numb
   return { bb, table: bb.__indirect(bb.position()) };
 }
 
-test("readIfOptions extracts then/else subgraph indices", () => {
+test('readIfOptions extracts then/else subgraph indices', () => {
   const { bb, table } = buildTwoIntOptions(2, 3);
   expect(readIfOptions(bb, table)).toEqual({ thenSubgraphIndex: 2, elseSubgraphIndex: 3 });
 });
 
-test("readWhileOptions extracts cond/body subgraph indices", () => {
+test('readWhileOptions extracts cond/body subgraph indices', () => {
   const { bb, table } = buildTwoIntOptions(4, 5);
   expect(readWhileOptions(bb, table)).toEqual({ condSubgraphIndex: 4, bodySubgraphIndex: 5 });
 });
 
-test("readIfOptions defaults missing fields to 0", () => {
+test('readIfOptions defaults missing fields to 0', () => {
   const fbb = new Builder();
   fbb.startObject(0);
   fbb.finish(fbb.endObject());
@@ -214,7 +214,7 @@ Expected: FAIL - `Cannot find module ../src/builtin-options.ts`.
 `packages/tflite/src/builtin-options.ts`:
 
 ```ts
-import type { ByteBuffer } from "flatbuffers";
+import type { ByteBuffer } from 'flatbuffers';
 
 function field(n: number): number {
   return 4 + n * 2;
@@ -387,11 +387,11 @@ const builtinOptsType = uint8_(bb, op, 6, 0);
 const builtinOptsOff = voff(bb, op, 7);
 const builtinOptsTable = builtinOptsOff ? bb.__indirect(op + builtinOptsOff) : 0;
 
-const isIf = opName === "IF" && builtinOptsTable !== 0 && builtinOptsType === 51;
-const isWhile = opName === "WHILE" && builtinOptsTable !== 0 && builtinOptsType === 64;
+const isIf = opName === 'IF' && builtinOptsTable !== 0 && builtinOptsType === 51;
+const isWhile = opName === 'WHILE' && builtinOptsTable !== 0 && builtinOptsType === 64;
 if (isIf || isWhile) {
   ctx.controlFlowSites.push({
-    opType: isIf ? "IF" : "WHILE",
+    opType: isIf ? 'IF' : 'WHILE',
     callName: `${ctx.prefix}op_${i}`,
     callerInputs: opInputs.slice(),
     builtinOptsTable,
@@ -406,14 +406,14 @@ The `BuiltinOptions` enum values (`IfOptions = 51`, `WhileOptions = 64`) come fr
 Right after the `parseSubgraphAt(bb, model, 0, ctx)` call:
 
 ```ts
-import { readIfOptions, readWhileOptions } from "./builtin-options.ts";
+import { readIfOptions, readWhileOptions } from './builtin-options.ts';
 
 function inlineSubgraph(idx: number, prefix: string, callerInputs: readonly string[]): void {
   if (idx <= 0) return; // 0 = main, negative = unset/invalid
   const numSubgraphs = vecLen(bb, model, 2);
   if (idx >= numSubgraphs) {
     ctx.warnings.push({
-      code: "subgraph_index_oob",
+      code: 'subgraph_index_oob',
       context: `subgraph index ${idx} out of bounds (max ${numSubgraphs - 1})`,
     });
     return;
@@ -432,7 +432,7 @@ function inlineSubgraph(idx: number, prefix: string, callerInputs: readonly stri
 }
 
 for (const site of ctx.controlFlowSites) {
-  if (site.opType === "IF") {
+  if (site.opType === 'IF') {
     const opts = readIfOptions(bb, site.builtinOptsTable);
     // IF caller inputs: [cond, x_0, x_1, ...]. Branches receive [x_0, x_1, ...].
     const branchInputs = site.callerInputs.slice(1);
@@ -463,12 +463,12 @@ Add a depth guard analogous to SavedModel's `depth > 6` to prevent runaway nesti
 `packages/tflite/test/parse.test.ts`:
 
 ```ts
-test("tflite_if_branching: IF body subgraphs inlined with prefixed names", async () => {
-  const url = new URL("../../../test-models/tflite_if_branching.tflite", import.meta.url);
+test('tflite_if_branching: IF body subgraphs inlined with prefixed names', async () => {
+  const url = new URL('../../../test-models/tflite_if_branching.tflite', import.meta.url);
   const bytes = new Uint8Array(await Bun.file(url).arrayBuffer());
   const graph = parseTflite(bytes);
 
-  const ifOps = graph.nodes.filter((n) => n.opType === "IF");
+  const ifOps = graph.nodes.filter((n) => n.opType === 'IF');
   expect(ifOps.length).toBe(1);
 
   const ifName = ifOps[0].name;
@@ -476,12 +476,12 @@ test("tflite_if_branching: IF body subgraphs inlined with prefixed names", async
   expect(branched.length).toBeGreaterThan(0);
 
   // The Python fixture uses tf.nn.relu in the then-branch and tf.nn.tanh in the else-branch.
-  expect(branched.some((n) => n.opType === "RELU")).toBe(true);
-  expect(branched.some((n) => n.opType === "TANH")).toBe(true);
+  expect(branched.some((n) => n.opType === 'RELU')).toBe(true);
+  expect(branched.some((n) => n.opType === 'TANH')).toBe(true);
 
   // Branch nodes' inputs should reference the IF op's caller-side input (not a
   // formal-param name internal to the subgraph) - proves arg binding worked.
-  const reluNode = branched.find((n) => n.opType === "RELU")!;
+  const reluNode = branched.find((n) => n.opType === 'RELU')!;
   const ifInputs = ifOps[0].inputs;
   expect(reluNode.inputs.some((i) => ifInputs.includes(i))).toBe(true);
 });

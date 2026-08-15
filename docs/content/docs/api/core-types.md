@@ -14,16 +14,16 @@ import { ParseError } from '@wetron/common/ir';
 
 ```ts
 interface ModelGraph {
-    readonly name: string;
-    readonly inputs: readonly GraphValue[];
-    readonly outputs: readonly GraphValue[];
-    readonly nodes: readonly GraphNode[];
-    readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
-    readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
-    readonly opsets?: ReadonlyMap<string, number>; // ONNX only - domain -> opset version ("" = ai.onnx)
-    readonly fileSizeBytes: number; // size of the source file - drives the >20MB weight-panel gate
-    readonly weights?: ModelWeights;
-    readonly warnings?: readonly ParseWarning[];
+  readonly name: string;
+  readonly inputs: readonly GraphValue[];
+  readonly outputs: readonly GraphValue[];
+  readonly nodes: readonly GraphNode[];
+  readonly initializers: ReadonlyMap<string, { shape: readonly number[]; dtype: string }>;
+  readonly tensorShapes: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
+  readonly opsets?: ReadonlyMap<string, number>; // ONNX only - domain -> opset version ("" = ai.onnx)
+  readonly fileSizeBytes: number; // size of the source file - drives the >20MB weight-panel gate
+  readonly weights?: ModelWeights;
+  readonly warnings?: readonly ParseWarning[];
 }
 ```
 
@@ -31,16 +31,16 @@ interface ModelGraph {
 
 ```ts
 type ModelWeights =
-    | { readonly kind: 'available'; readonly source: WeightSource }
-    | { readonly kind: 'external'; readonly format: 'savedmodel' | 'onnx' };
+  | { readonly kind: 'available'; readonly source: WeightSource }
+  | { readonly kind: 'external'; readonly format: 'savedmodel' | 'onnx' };
 ```
 
 ## WeightSource
 
 ```ts
 interface WeightSource {
-    readonly totalBytes: number;
-    get(name: string): Uint8Array | undefined;
+  readonly totalBytes: number;
+  get(name: string): Uint8Array | undefined;
 }
 ```
 
@@ -50,12 +50,12 @@ interface WeightSource {
 
 ```ts
 interface GraphNode {
-    readonly name: string;
-    readonly opType: string;
-    readonly domain?: string; // ONNX only - absent means standard ai.onnx domain
-    readonly inputs: readonly string[]; // tensor names consumed
-    readonly outputs: readonly string[]; // tensor names produced
-    readonly attributes: Readonly<Record<string, AttributeValue>>;
+  readonly name: string;
+  readonly opType: string;
+  readonly domain?: string; // ONNX only - absent means standard ai.onnx domain
+  readonly inputs: readonly string[]; // tensor names consumed
+  readonly outputs: readonly string[]; // tensor names produced
+  readonly attributes: Readonly<Record<string, AttributeValue>>;
 }
 ```
 
@@ -63,9 +63,9 @@ interface GraphNode {
 
 ```ts
 interface GraphValue {
-    readonly name: string;
-    readonly shape: readonly number[] | null;
-    readonly dtype: string | null;
+  readonly name: string;
+  readonly shape: readonly number[] | null;
+  readonly dtype: string | null;
 }
 ```
 
@@ -81,9 +81,9 @@ Non-fatal issues attached to a successfully-parsed graph:
 
 ```ts
 interface ParseWarning {
-    readonly code: string;
-    readonly context: string;
-    readonly nodeIndex?: number;
+  readonly code: string;
+  readonly context: string;
+  readonly nodeIndex?: number;
 }
 ```
 
@@ -93,8 +93,8 @@ Thrown by all parsers on unrecoverable failures:
 
 ```ts
 class ParseError extends Error {
-    readonly format: string; // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown"
-    readonly context: string; // human-readable description of the failure
+  readonly format: string; // "onnx" | "tflite" | "keras" | "torchscript" | "executorch" | "savedmodel" | "unknown"
+  readonly context: string; // human-readable description of the failure
 }
 ```
 
@@ -108,45 +108,45 @@ import type { FlowNode, FlowEdge, GraphNodeData } from '@wetron/core/transform';
 
 ```ts
 type GraphNodeData = {
-    opType: string;
+  opType: string;
+  name: string;
+  inputs: readonly string[];
+  outputs: readonly string[];
+  attributes: Readonly<Record<string, AttributeValue>>;
+  graphNode?: GraphNode; // set for op nodes
+  graphValue?: GraphValue; // set for I/O nodes
+  shape?: readonly number[] | null;
+  dtype?: string | null;
+  weightInputs?: readonly {
+    slot: number;
+    label: string;
     name: string;
-    inputs: readonly string[];
-    outputs: readonly string[];
-    attributes: Readonly<Record<string, AttributeValue>>;
-    graphNode?: GraphNode; // set for op nodes
-    graphValue?: GraphValue; // set for I/O nodes
-    shape?: readonly number[] | null;
-    dtype?: string | null;
-    weightInputs?: readonly {
-        slot: number;
-        label: string;
-        name: string;
-        shape: readonly number[];
-        dtype: string;
-    }[];
+    shape: readonly number[];
+    dtype: string;
+  }[];
 };
 
 type FlowNode = {
-    id: string;
-    type: 'graphNode' | 'ioNode';
-    position: { x: number; y: number };
-    data: GraphNodeData;
-    initialWidth: number;
-    initialHeight: number;
+  id: string;
+  type: 'graphNode' | 'ioNode';
+  position: { x: number; y: number };
+  data: GraphNodeData;
+  initialWidth: number;
+  initialHeight: number;
 };
 
 type FlowEdge = {
-    id: string;
-    source: string;
-    target: string;
-    type: 'modelEdge';
-    data: {
-        readonly tensorName: string;
-        readonly sourceOpType: string;
-        readonly sourceNodeName: string;
-        readonly targetOpType: string;
-        readonly targetNodeName: string;
-        readonly points?: readonly { x: number; y: number }[];
-    };
+  id: string;
+  source: string;
+  target: string;
+  type: 'modelEdge';
+  data: {
+    readonly tensorName: string;
+    readonly sourceOpType: string;
+    readonly sourceNodeName: string;
+    readonly targetOpType: string;
+    readonly targetNodeName: string;
+    readonly points?: readonly { x: number; y: number }[];
+  };
 };
 ```

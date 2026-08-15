@@ -30,12 +30,12 @@ Svelte side - `packages/svelte/src/model-graph-view.svelte:24-32`:
 
 ```svelte
 <script lang="ts">
-  import type { LayoutDirection } from "@wetron/core/transform";
+  import type { LayoutDirection } from '@wetron/core/transform';
 
   let {
     graph,
-    colorMode = "system",
-    rankdir = "TB" as LayoutDirection,
+    colorMode = 'system',
+    rankdir = 'TB' as LayoutDirection,
     // ...existing props
   }: {
     graph: ModelGraph;
@@ -70,7 +70,7 @@ Implementation - the methods proxy to the `SubGraphNav` context already used int
 
 ```svelte
 <script lang="ts">
-  import { getSubGraphNavContext } from "./model-graph-view/nav-context";
+  import { getSubGraphNavContext } from './model-graph-view/nav-context';
 
   const nav = getSubGraphNavContext();
 
@@ -97,9 +97,7 @@ Svelte changes:
 
    ```svelte
    {#if node.subGraph && onOpenSubGraph}
-     <button class="open-subgraph" onclick={() => onOpenSubGraph(node.subGraph)}>
-       Open sub-graph
-     </button>
+     <button class="open-subgraph" onclick={() => onOpenSubGraph(node.subGraph)}> Open sub-graph </button>
    {/if}
    ```
 
@@ -117,7 +115,7 @@ Swap the Unicode glyph for `phosphor-svelte/ArrowLeft`:
 
 ```svelte
 <script>
-  import ArrowLeft from "phosphor-svelte/lib/ArrowLeft";
+  import ArrowLeft from 'phosphor-svelte/lib/ArrowLeft';
 </script>
 
 <button class="back" onclick={onBack}>

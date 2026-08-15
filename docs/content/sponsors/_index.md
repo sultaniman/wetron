@@ -1,11 +1,11 @@
 ---
-title: "Sponsors"
-description: "Support wetron - a browser-native, embeddable ML model graph viewer. No server, no upload, MIT-licensed. Sponsorship funds format coverage, fidelity work, and ongoing maintenance."
-lead: "Help keep wetron embeddable, browser-native, and free of trackers."
+title: 'Sponsors'
+description: 'Support wetron - a browser-native, embeddable ML model graph viewer. No server, no upload, MIT-licensed. Sponsorship funds format coverage, fidelity work, and ongoing maintenance.'
+lead: 'Help keep wetron embeddable, browser-native, and free of trackers.'
 menu:
   main:
     weight: 50
-    name: "Sponsors"
+    name: 'Sponsors'
 ---
 
 ## What wetron is

@@ -1,7 +1,7 @@
 ---
-title: "Svelte"
-description: "ModelGraphView and NodePropertyPanel Svelte 5 components for Wetron - built on @xyflow/svelte with runes and CSS custom property theming."
-lead: "Drop-in components built on @xyflow/svelte."
+title: 'Svelte'
+description: 'ModelGraphView and NodePropertyPanel Svelte 5 components for Wetron - built on @xyflow/svelte with runes and CSS custom property theming.'
+lead: 'Drop-in components built on @xyflow/svelte.'
 weight: 20
 ---
 
@@ -9,14 +9,10 @@ weight: 20
 
 ```svelte
 <script>
-  import { ModelGraphView } from "@wetron/svelte";
+  import { ModelGraphView } from '@wetron/svelte';
 </script>
 
-<ModelGraphView
-  graph={graph}
-  onTargetClick={(t) => selected = t}
-  colorMode="system"
-/>
+<ModelGraphView {graph} onTargetClick={(t) => (selected = t)} colorMode="system" />
 ```
 
 ### Props
@@ -47,14 +43,10 @@ type ExportHelpers = {
 
 ```svelte
 <script>
-  import { NodePropertyPanel } from "@wetron/svelte";
+  import { NodePropertyPanel } from '@wetron/svelte';
 </script>
 
-<NodePropertyPanel
-  target={selected}
-  colorMode="system"
-  onClose={() => selected = null}
-/>
+<NodePropertyPanel target={selected} colorMode="system" onClose={() => (selected = null)} />
 ```
 
 ### Props
@@ -75,7 +67,7 @@ type ExportHelpers = {
 ```ts
 type PanelTarget =
   | GraphNode
-  | { graphValue: GraphValue; direction: "input" | "output" }
+  | { graphValue: GraphValue; direction: 'input' | 'output' }
   | {
       edge: {
         tensorName: string;

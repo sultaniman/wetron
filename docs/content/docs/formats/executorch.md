@@ -1,7 +1,7 @@
 ---
-title: "ExecuTorch"
-description: "ExecuTorch .pte parser for Wetron - reads FlatBuffers execution plans from ET12 files, extracting operator chains with tensor shapes and dtypes."
-lead: "Parses `.pte` FlatBuffers files produced by ExecuTorch."
+title: 'ExecuTorch'
+description: 'ExecuTorch .pte parser for Wetron - reads FlatBuffers execution plans from ET12 files, extracting operator chains with tensor shapes and dtypes.'
+lead: 'Parses `.pte` FlatBuffers files produced by ExecuTorch.'
 weight: 50
 ---
 

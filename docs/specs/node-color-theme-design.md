@@ -86,7 +86,7 @@ This is pure - no React/Svelte imports. Both renderer packages import it from `@
 type Props = {
   graph: ModelGraph;
   onNodeClick?: (node: GraphNode) => void;
-  colorMode?: "light" | "dark" | "system"; // default: 'system'
+  colorMode?: 'light' | 'dark' | 'system'; // default: 'system'
 };
 ```
 
