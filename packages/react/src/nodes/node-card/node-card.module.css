@@ -90,12 +90,23 @@
   white-space: nowrap;
 }
 
+/* One shared column set so every row in a node lines up: role, name, shape,
+   dtype. Rows opt into it with subgrid and keep their own hover surface. */
+.weights {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  row-gap: 3px;
+  margin-top: 3px;
+}
+
 .weightRow {
-  display: flex;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
   gap: 4px;
   font-size: 10px;
   color: var(--wetron-node-muted, #999);
-  margin-top: 3px;
   border-radius: 2px;
   padding: 2px 3px;
   cursor: pointer;
@@ -109,11 +120,9 @@
 .weightLabel {
   font-weight: 600;
   color: var(--node-color);
-  min-width: 14px;
 }
 
 .weightName {
-  flex: 1;
   min-width: 0;
   opacity: 0.65;
   font-family: ui-monospace, Menlo, monospace;
@@ -123,14 +132,16 @@
 }
 
 .weightShape {
+  justify-self: end;
   opacity: 0.85;
   overflow: hidden;
+  font-variant-numeric: tabular-nums;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .weightDtype {
-  flex-shrink: 0;
+  justify-self: end;
   padding: 1px 3px;
   border-radius: 3px;
   background: color-mix(in oklch, var(--node-color) 12%, transparent);

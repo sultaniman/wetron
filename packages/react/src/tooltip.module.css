@@ -3,7 +3,8 @@
 }
 
 .popup {
-  max-width: 280px;
+  max-width: 320px;
+  white-space: pre-line;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 11px;

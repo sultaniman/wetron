@@ -9,6 +9,11 @@ export function pickColormap(min: number, max: number): ColormapKind {
 const STOPS_LIGHT: readonly string[] = ["#eff6ff", "#bfdbfe", "#60a5fa", "#2563eb", "#1e3a8a"];
 const STOPS_DARK: readonly string[] = ["#bfdbfe", "#93c5fd", "#3b82f6", "#1d4ed8", "#1e3a8a"];
 
+/** Colour stops used by `colorForCell`, low to high, for rendering a legend. */
+export function colormapStops(isDark = false): readonly string[] {
+  return isDark ? STOPS_DARK : STOPS_LIGHT;
+}
+
 export function colorForCell(
   value: number,
   min: number,

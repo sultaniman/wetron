@@ -35,8 +35,9 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
       scopeName={subGraph ? displayName : undefined}
       onOpenScope={subGraph ? () => navigateInto(subGraph) : undefined}
     >
-      {visible && visible.length > 0
-        ? visible.map((w) => (
+      {visible && visible.length > 0 ? (
+        <div className={css.weights}>
+          {visible.map((w) => (
             <div
               key={w.slot}
               className={css.weightRow}
@@ -59,8 +60,9 @@ export function GraphNodeComponent({ data, selected }: NodeProps<Node<GraphNodeD
                 {w.dtype}
               </span>
             </div>
-          ))
-        : null}
+          ))}
+        </div>
+      ) : null}
 
       {hiddenCount > 0 ? (
         <div

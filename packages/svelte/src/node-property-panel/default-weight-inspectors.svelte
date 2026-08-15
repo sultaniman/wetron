@@ -1,100 +1,59 @@
 <script lang="ts">
-  import { formatVal, isIntegerDtype } from '@wetron/core/format-val';
-  import { getWeightInspection } from './weight-inspection-context.ts';
-  import VirtualValues from './virtual-values.svelte';
-  import WeightHeatmap from './weight-heatmap.svelte';
-  import WeightHistogram from './weight-histogram.svelte';
-
-  const context = getWeightInspection();
-  const inspection = $derived(context.current.status === 'ready' ? context.current : null);
-  const dtype = $derived(inspection?.tensor.dtype ?? 'float32');
-  let viz = $state<'dist' | 'heat'>('heat');
+    import { untrack } from 'svelte';
+    import { inspectorViewHint } from '@wetron/core/inspector-hints';
+    import { getWeightInspection } from './weight-inspection-context.ts';
+    import Hint from './hint.svelte';
+    import AxisProfileInspector from './axis-profile-inspector.svelte';
+    import DiagnosticsInspector from './diagnostics-inspector.svelte';
+    import DistributionInspector from './distribution-inspector.svelte';
+    import KernelGalleryInspector from './kernel-gallery-inspector.svelte';
+    import MatrixInspector from './matrix-inspector.svelte';
+    import QuantizationInspector from './quantization-inspector.svelte';
+    import SparsityInspector from './sparsity-inspector.svelte';
+    import ValuesInspector from './values-inspector.svelte';
+    import './inspectors.css';
+    import type { WeightInspectorName } from './weight-inspector-types.ts';
+    let { selected = $bindable<WeightInspectorName>('distribution') }: { selected?: WeightInspectorName } = $props();
+    const context = getWeightInspection();
+    const inspection = $derived(context.current);
+    const rank = $derived(inspection.tensor.shape?.length ?? 0);
+    const supportsKernel = $derived(
+        rank === 4 && inspection.tensor.shape!.every((dimension) => Number.isSafeInteger(dimension) && dimension > 0),
+    );
+    const available = $derived<readonly WeightInspectorName[]>(
+        inspection.status === 'ready'
+            ? [
+                  ...(rank >= 2 ? ['matrix' as const] : []),
+                  'distribution',
+                  ...(rank >= 1 ? ['axis' as const] : []),
+                  'sparsity',
+                  ...(supportsKernel ? ['kernel' as const] : []),
+                  ...(inspection.tensor.dtype === 'Q4_0' ? ['quantization' as const] : []),
+                  ...(rank >= 1 ? ['diagnostics' as const] : []),
+                  'values',
+              ]
+            : [],
+    );
+    selected = untrack(() => (selected === 'distribution' && rank >= 2 ? 'matrix' : selected));
+    const active = $derived(available.includes(selected) ? selected : available[0]);
+    $effect(() => {
+        if (inspection.status === 'ready' && active && active !== selected) selected = active;
+    });
 </script>
 
-{#if inspection}
-  <div class="section">
-    <div class="sectionLabelRow">
-      <span>{viz === 'dist' ? 'Distribution' : 'Heatmap'}</span>
-      <div class="seg">
-        <button
-          data-testid="viz-heat"
-          class={viz === 'heat' ? 'segOn' : ''}
-          onclick={() => (viz = 'heat')}
-        >heat</button>
-        <button
-          data-testid="viz-dist"
-          class={viz === 'dist' ? 'segOn' : ''}
-          onclick={() => (viz = 'dist')}
-        >dist</button>
-      </div>
+{#if inspection.status === 'ready'}<div class="inspector inspector-picker">
+        <span class="inspector-caption">View</span><select
+            class="inspector-selector"
+            aria-label="Weight inspector"
+            value={active}
+            onchange={(event) => (selected = event.currentTarget.value as WeightInspectorName)}
+            >{#each available as name}<option value={name}
+                    >{name === 'axis' ? 'per-axis profile' : name === 'kernel' ? 'kernel gallery' : name}</option
+                >{/each}</select
+        >{#if active}<Hint text={inspectorViewHint(active)} />{/if}
     </div>
-
-    {#if viz === 'dist'}
-      <WeightHistogram stats={inspection.stats} {dtype} />
-    {:else}
-      <WeightHeatmap stats={inspection.stats} {dtype} isDark={context.isDark} />
-    {/if}
-  </div>
-
-  <div class="sectionLast">
-    <div class="sectionLabelRow">
-      <span>Values</span>
-      <span class="valuesMeta">{inspection.values.length.toLocaleString()} values</span>
-    </div>
-    <VirtualValues
-      values={inspection.values}
-      format={(value: number | bigint) => typeof value === 'bigint' ? value.toString() : formatVal(value, dtype)}
-      align={isIntegerDtype(dtype) ? 'center' : 'right'}
-    />
-  </div>
-{/if}
-
-<style>
-  .section {
-    padding: 7px 11px;
-    border-bottom: 1px solid var(--panel-section-border);
-  }
-  .sectionLast {
-    padding: 7px 11px;
-  }
-  .sectionLabelRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--panel-label);
-    margin-bottom: 6px;
-  }
-  .seg {
-    display: inline-flex;
-    background: var(--panel-seg-bg, #f1f5f9);
-    border-radius: 6px;
-    padding: 2px;
-  }
-  .seg button {
-    background: none;
-    border: none;
-    font: inherit;
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: var(--panel-seg-color, #64748b);
-    text-transform: none;
-    letter-spacing: 0;
-  }
-  .seg .segOn {
-    background: var(--panel-seg-on-bg, #fff);
-    color: var(--panel-seg-on-color, #2563eb);
-    font-weight: 600;
-  }
-  .valuesMeta {
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 9px;
-    color: var(--panel-subtitle);
-    text-transform: none;
-    letter-spacing: 0;
-  }
-</style>
+    {#if active === 'matrix'}<MatrixInspector />{:else if active === 'distribution'}<DistributionInspector
+        />{:else if active === 'axis'}<AxisProfileInspector />{:else if active === 'sparsity'}<SparsityInspector
+        />{:else if active === 'kernel'}<KernelGalleryInspector
+        />{:else if active === 'quantization'}<QuantizationInspector
+        />{:else if active === 'diagnostics'}<DiagnosticsInspector />{:else}<ValuesInspector />{/if}{/if}

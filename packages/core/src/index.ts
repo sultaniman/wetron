@@ -10,6 +10,66 @@ export type { DecodedWeight } from "./weight-decoder.ts";
 export { computeStats } from "./weight-stats.ts";
 export type { WeightStats } from "./weight-stats.ts";
 export type { WeightInspectionData, WeightInspectionStatus } from "./weight-inspection.ts";
+export {
+  coordinateToOffset,
+  describeTensorSlice,
+  offsetToCoordinate,
+  tensorElementCount,
+  tensorStrides,
+} from "./tensor-index.ts";
+export type { TensorSliceDescriptor, TensorSliceSelection } from "./tensor-index.ts";
+export { sampleTensorSlice } from "./tensor-slice.ts";
+export type { TensorSliceCell, TensorSliceSample } from "./tensor-slice.ts";
+export { computeWeightDistribution } from "./weight-distribution.ts";
+export type { WeightDistribution } from "./weight-distribution.ts";
+export { computeAxisStats } from "./weight-axis-stats.ts";
+export type { AxisMetric, AxisStats } from "./weight-axis-stats.ts";
+export { computeSparsityBlocks, computeWeightSparsity } from "./weight-sparsity.ts";
+export type { SparsityBlock, SparsitySummary } from "./weight-sparsity.ts";
+export {
+  KERNEL_LAYOUTS,
+  computeKernelL2,
+  kernelSlicePage,
+  validateKernelAxisMapping,
+} from "./weight-kernel.ts";
+export type { KernelAxisMapping, KernelLayoutPreset, KernelSlice } from "./weight-kernel.ts";
+export { inspectWeightQuantization } from "./weight-quantization.ts";
+export type {
+  Q4_0BlockInspection,
+  Q4_0QuantizationInspection,
+  QuantizationInspection,
+} from "./weight-quantization.ts";
+export { inspectWeightDiagnostics } from "./weight-diagnostics.ts";
+export type {
+  DiagnosticSeverity,
+  NormOutlierTest,
+  WeightDiagnosticFinding,
+} from "./weight-diagnostics.ts";
+export {
+  axisExcludedHint,
+  axisMetricHint,
+  axisOptionLabel,
+  axisProfileAxisHint,
+  diagnosticCodeHint,
+  distributionApproximateHint,
+  distributionDomainHint,
+  distributionScaleHint,
+  inspectorViewHint,
+  kernelInputHint,
+  kernelL2Hint,
+  kernelLayoutHint,
+  kernelPageLabel,
+  matrixAxisHint,
+  matrixSampleHint,
+  matrixScaleHint,
+  quantizationHint,
+  sparsityBlockHint,
+  sparsityDeadHint,
+  sparsityModeHint,
+  sparsityZeroHint,
+  weightStatsHint,
+} from "./inspector-hints.ts";
+export type { InspectorName, QuantizationField } from "./inspector-hints.ts";
 
 export { ParseError } from "@wetron/common/ir";
 export type {
@@ -36,11 +96,7 @@ export {
   parseCheckpointIndex,
   attachCheckpointToGraph,
 } from "@wetron/savedmodel";
-export type {
-  CheckpointVariableMeta,
-  LoadedCheckpoint,
-  CheckpointMeta,
-} from "@wetron/savedmodel";
+export type { CheckpointVariableMeta, LoadedCheckpoint, CheckpointMeta } from "@wetron/savedmodel";
 
 import { detectFormat } from "./detect.ts";
 import type { ModelGraph } from "@wetron/common/ir";

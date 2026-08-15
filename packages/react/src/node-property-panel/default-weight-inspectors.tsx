@@ -1,69 +1,100 @@
-import { useState } from "react";
-import { Tabs } from "@base-ui/react/tabs";
-import { formatVal, isIntegerDtype } from "@wetron/core/format-val";
-import { VirtualValues } from "./virtual-values/virtual-values.tsx";
-import { WeightHeatmap, WeightHistogram } from "./weight-viz/weight-viz.tsx";
+import { useEffect, useState } from "react";
+import { inspectorViewHint } from "@wetron/core/inspector-hints";
 import { useWeightInspection } from "./weight-inspection-context.tsx";
-import propertyPanelCss from "./node-property-panel.module.css";
-import weightPanelCss from "./weight-panel/weight-panel.module.css";
+import { Hint } from "./inspectors/hint.tsx";
+import { AxisProfileInspector } from "./inspectors/axis-profile-inspector.tsx";
+import { DiagnosticsInspector } from "./inspectors/diagnostics-inspector.tsx";
+import { DistributionInspector } from "./inspectors/distribution-inspector.tsx";
+import { KernelGalleryInspector } from "./inspectors/kernel-gallery-inspector.tsx";
+import { MatrixInspector } from "./inspectors/matrix-inspector.tsx";
+import { QuantizationInspector } from "./inspectors/quantization-inspector.tsx";
+import { SparsityInspector } from "./inspectors/sparsity-inspector.tsx";
+import { ValuesInspector } from "./inspectors/values-inspector.tsx";
+import css from "./inspectors/inspectors.module.css";
 
-export function DefaultWeightInspectors() {
+export type WeightInspectorName =
+  | "matrix"
+  | "distribution"
+  | "axis"
+  | "sparsity"
+  | "kernel"
+  | "quantization"
+  | "diagnostics"
+  | "values";
+
+export function DefaultWeightInspectors({
+  selected,
+  onSelected,
+}: { selected?: WeightInspectorName; onSelected?: (name: WeightInspectorName) => void } = {}) {
   const inspection = useWeightInspection();
-  const [viz, setViz] = useState<"dist" | "heat">("heat");
+  const rank = inspection.tensor.shape?.length ?? 0;
+  const supportsKernel =
+    rank === 4 &&
+    inspection.tensor.shape!.every((dimension) => Number.isSafeInteger(dimension) && dimension > 0);
+  const available: readonly WeightInspectorName[] =
+    inspection.status === "ready"
+      ? [
+          ...(rank >= 2 ? ["matrix" as const] : []),
+          "distribution",
+          ...(rank >= 1 ? ["axis" as const] : []),
+          "sparsity",
+          ...(supportsKernel ? ["kernel" as const] : []),
+          ...(inspection.tensor.dtype === "Q4_0" ? ["quantization" as const] : []),
+          ...(rank >= 1 ? ["diagnostics" as const] : []),
+          "values",
+        ]
+      : [];
+  const [localSelected, setLocalSelected] = useState<WeightInspectorName>(
+    rank >= 2 ? "matrix" : "distribution",
+  );
+  const requested = selected ?? localSelected;
+  const active = available.includes(requested) ? requested : (available[0] ?? requested);
+  useEffect(() => {
+    if (inspection.status === "ready" && active !== requested) {
+      setLocalSelected(active);
+      onSelected?.(active);
+    }
+  }, [active, inspection.status, requested, onSelected]);
+  const select = (name: WeightInspectorName) => {
+    setLocalSelected(name);
+    onSelected?.(name);
+  };
   if (inspection.status !== "ready") return null;
-
-  const dtype = inspection.tensor.dtype ?? "float32";
   return (
     <>
-      <Tabs.Root value={viz} onValueChange={(value) => setViz(value as "dist" | "heat")}>
-        <div className={propertyPanelCss.section}>
-          <div className={weightPanelCss.sectionLabelRow}>
-            <span>{viz === "dist" ? "Distribution" : "Heatmap"}</span>
-            <Tabs.List className={weightPanelCss.seg}>
-              <Tabs.Tab
-                value="heat"
-                data-testid="viz-heat"
-                className={viz === "heat" ? weightPanelCss.segOn : ""}
-              >
-                heat
-              </Tabs.Tab>
-              <Tabs.Tab
-                value="dist"
-                data-testid="viz-dist"
-                className={viz === "dist" ? weightPanelCss.segOn : ""}
-              >
-                dist
-              </Tabs.Tab>
-            </Tabs.List>
-          </div>
-          {viz === "dist" ? (
-            <WeightHistogram stats={inspection.stats} dtype={dtype} />
-          ) : (
-            <WeightHeatmap
-              stats={inspection.stats}
-              dtype={dtype}
-              isDark={inspection.isDark}
-            />
-          )}
-        </div>
-      </Tabs.Root>
-
-      <div className={propertyPanelCss.sectionLast}>
-        <div className={weightPanelCss.sectionLabelRow}>
-          <span>Values</span>
-          <span className={weightPanelCss.valuesMeta}>
-            {inspection.values.length.toLocaleString()} values
-          </span>
-        </div>
-        <VirtualValues
-          data-testid="values-grid"
-          values={inspection.values}
-          format={(value) =>
-            typeof value === "bigint" ? value.toString() : formatVal(value, dtype)
-          }
-          align={isIntegerDtype(dtype) ? "center" : "right"}
-        />
+      <div className={`${css.root} ${css.picker}`}>
+        <span className={css.caption}>View</span>
+        <select
+          className={css.selector}
+          aria-label="Weight inspector"
+          value={active}
+          onChange={(event) => select(event.target.value as WeightInspectorName)}
+        >
+          {available.map((name) => (
+            <option value={name} key={name}>
+              {name === "axis" ? "per-axis profile" : name === "kernel" ? "kernel gallery" : name}
+            </option>
+          ))}
+        </select>
+        <Hint text={inspectorViewHint(active)} />
       </div>
+      {active === "matrix" ? (
+        <MatrixInspector />
+      ) : active === "distribution" ? (
+        <DistributionInspector />
+      ) : active === "axis" ? (
+        <AxisProfileInspector />
+      ) : active === "sparsity" ? (
+        <SparsityInspector />
+      ) : active === "kernel" ? (
+        <KernelGalleryInspector />
+      ) : active === "quantization" ? (
+        <QuantizationInspector />
+      ) : active === "diagnostics" ? (
+        <DiagnosticsInspector />
+      ) : (
+        <ValuesInspector />
+      )}
     </>
   );
 }

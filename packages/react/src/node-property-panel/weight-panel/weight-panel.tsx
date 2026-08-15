@@ -2,10 +2,15 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ModelGraph } from "@wetron/common/ir";
 import { computeStats, decodeWeight, type WeightInspectionData } from "@wetron/core";
 import { formatVal } from "@wetron/core/format-val";
+import { weightStatsHint } from "@wetron/core/inspector-hints";
 import { BackButton } from "../panel-ui.tsx";
 import { Tooltip } from "../../tooltip.tsx";
-import { DefaultWeightInspectors } from "../default-weight-inspectors.tsx";
+import {
+  DefaultWeightInspectors,
+  type WeightInspectorName,
+} from "../default-weight-inspectors.tsx";
 import { WeightInspectionProvider } from "../weight-inspection-context.tsx";
+import { Hint } from "../inspectors/hint.tsx";
 import propertyPanelCss from "../node-property-panel.module.css";
 import weightPanelCss from "./weight-panel.module.css";
 
@@ -101,6 +106,9 @@ export function WeightPanel({
 }) {
   const defaultShowWeights = graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined;
   const [storedShowWeights, setStoredShowWeights] = useState(defaultShowWeights);
+  const [defaultInspector, setDefaultInspector] = useState<WeightInspectorName>(
+    (target.shape?.length ?? 0) >= 2 ? "matrix" : "distribution",
+  );
   const previousTensorName = useRef(target.name);
   const previousHadWeights = useRef(graph.weights !== undefined);
   const showWeights =
@@ -188,7 +196,8 @@ export function WeightPanel({
             <div className={weightPanelCss.sizeNote}>
               <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong>
               <br />
-              Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
+              Stats and plots require reading every weight byte. Toggle on to load this tensor's
+              data.
             </div>
           )}
           {inspection.status === "unsupported" && (
@@ -202,29 +211,37 @@ export function WeightPanel({
       {inspection.status === "ready" && (
         <div className={propertyPanelCss.section}>
           <div className={propertyPanelCss.row}>
-            <span className={propertyPanelCss.rowLabel}>min</span>
-            <span className={propertyPanelCss.rowValue}>{formatVal(inspection.stats.min, dtype || "float32")}</span>
+            <span className={`${propertyPanelCss.rowLabel} ${weightPanelCss.statLabel}`}>
+              min <Hint text={weightStatsHint(inspection.stats)} />
+            </span>
+            <span className={propertyPanelCss.rowValue}>
+              {formatVal(inspection.stats.min, dtype || "float32")}
+            </span>
           </div>
           <div className={propertyPanelCss.row}>
             <span className={propertyPanelCss.rowLabel}>max</span>
-            <span className={propertyPanelCss.rowValue}>{formatVal(inspection.stats.max, dtype || "float32")}</span>
+            <span className={propertyPanelCss.rowValue}>
+              {formatVal(inspection.stats.max, dtype || "float32")}
+            </span>
           </div>
           <div className={propertyPanelCss.row}>
             <span className={propertyPanelCss.rowLabel}>{"μ ± σ"}</span>
             <span className={propertyPanelCss.rowValue}>
-              {formatVal(inspection.stats.mean, dtype || "float32")} ± {formatVal(inspection.stats.std, dtype || "float32")}
+              {formatVal(inspection.stats.mean, dtype || "float32")} ±{" "}
+              {formatVal(inspection.stats.std, dtype || "float32")}
             </span>
           </div>
           <div className={propertyPanelCss.row}>
             <span className={propertyPanelCss.rowLabel}>zeros</span>
             <span className={propertyPanelCss.rowValue}>{inspection.stats.zeros}</span>
           </div>
-          <div className={weightPanelCss.valuesMeta}>Stats computed on flattened weights</div>
         </div>
       )}
 
       <WeightInspectionProvider key={target.name} inspection={inspection} isDark={isDark}>
-        {children ?? <DefaultWeightInspectors />}
+        {children ?? (
+          <DefaultWeightInspectors selected={defaultInspector} onSelected={setDefaultInspector} />
+        )}
       </WeightInspectionProvider>
     </>
   );

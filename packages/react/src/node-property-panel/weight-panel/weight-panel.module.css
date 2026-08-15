@@ -85,6 +85,14 @@
   font-weight: 600;
 }
 
+/* The stats block's label row also carries the hint explaining that these
+   numbers cover the whole tensor and never follow the selected view. */
+.statLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .valuesMeta {
   margin-top: 4px;
   font-family: ui-monospace, Menlo, monospace;
