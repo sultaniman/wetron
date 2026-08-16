@@ -8,12 +8,12 @@
     "model-parser",
     "quantization"
   ],
-  "homepage": "https://codeberg.org/askar/wetron",
+  "homepage": "https://github.com/sultaniman/wetron",
   "license": "MIT",
   "author": "Sultan Iman",
   "repository": {
     "type": "git",
-    "url": "https://codeberg.org/askar/wetron.git",
+    "url": "https://github.com/sultaniman/wetron",
     "directory": "packages/gguf"
   },
   "files": [

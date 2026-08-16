@@ -2642,7 +2642,7 @@ Sorted-keys, no-whitespace JSON serialiser. Two reports for the same file produc
 
 ## See also
 
-- [docs/specs/inspection-report-design.md](https://codeberg.org/askar/wetron/src/branch/main/docs/specs/inspection-report-design.md) - the design spec.
+- [docs/specs/inspection-report-design.md](https://github.com/sultaniman/wetron/blob/main/docs/specs/inspection-report-design.md) - the design spec.
 - [Weights](./weights/) - `WeightStats` shape used in `identity+stats` mode.
 
 ````

@@ -69,7 +69,7 @@ See the [docs](docs/) for the full API reference, Svelte examples, and theming t
 ## Development
 
 ```sh
-git clone ssh://git@codeberg.org/askar/wetron.git
+git clone https://github.com/sultaniman/wetron
 cd wetron
 pnpm install
 ```
