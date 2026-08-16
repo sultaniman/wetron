@@ -62,7 +62,7 @@ def report_external_weights(out: Path) -> None:
     tf.saved_model.save always emits a variables/ directory, but it's empty when
     the module has no tf.Variable. Real models persist weights as one or more
     variables.data-*-of-* shards plus a variables.index. The @wetron/savedmodel
-    parser needs all of those alongside saved_model.pb when hasExternalWeights
+    parser needs all of those alongside saved_model.pb when weights.kind is external
     is true.
     """
     variables_dir = out / "variables"

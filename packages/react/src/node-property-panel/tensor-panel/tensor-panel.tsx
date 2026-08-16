@@ -1,7 +1,7 @@
-import { CubeIcon } from "@phosphor-icons/react";
-import { Row, BackButton } from "../panel-ui.tsx";
-import { Tooltip } from "../../tooltip.tsx";
-import propertyPanelCss from "../node-property-panel.module.css";
+import { CubeIcon } from '@phosphor-icons/react';
+import { Row, BackButton } from '../panel-ui.tsx';
+import { Tooltip } from '../../tooltip.tsx';
+import propertyPanelCss from '../node-property-panel.module.css';
 
 export function TensorPanel({
   tensor,
@@ -27,9 +27,7 @@ export function TensorPanel({
       </div>
       {hasInfo && (
         <div className={propertyPanelCss.sectionLast}>
-          {tensor.shape !== null && (
-            <Row label="shape" value={`[${tensor.shape.join(" × ")}]`} chip="int[]" />
-          )}
+          {tensor.shape !== null && <Row label="shape" value={`[${tensor.shape.join(' × ')}]`} chip="int[]" />}
           {tensor.dtype !== null && <Row label="dtype" value={tensor.dtype} chip="str" />}
         </div>
       )}

@@ -1,2 +1,2 @@
-export { parseOnnx } from "./parse.ts";
-export { loadOnnxExternalWeightsFromUrl } from "./load-external.ts";
+export { parseOnnx } from './parse.ts';
+export { loadOnnxExternalWeightsFromUrl } from './load-external.ts';

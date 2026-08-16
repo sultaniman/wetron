@@ -1,17 +1,17 @@
-import { expect, test } from "vitest";
-import type { WeightInspectionData, WeightInspectionStatus } from "../src/index.ts";
+import { expect, test } from 'vitest';
+import type { WeightInspectionData, WeightInspectionStatus } from '../src/index.ts';
 
-const tensor = { name: "w", shape: [2] as const, dtype: "float32" };
+const tensor = { name: 'w', shape: [2] as const, dtype: 'float32' };
 
-test("weight inspection statuses expose only their available data", () => {
+test('weight inspection statuses expose only their available data', () => {
   const allStatuses: readonly WeightInspectionStatus[] = [
-    "deferred",
-    "external",
-    "unavailable",
-    "unsupported",
-    "ready",
+    'deferred',
+    'external',
+    'unavailable',
+    'unsupported',
+    'ready',
   ];
-  const emptyStatuses = ["deferred", "external", "unavailable"] as const;
+  const emptyStatuses = ['deferred', 'external', 'unavailable'] as const;
   const empty = emptyStatuses.map((status): WeightInspectionData => ({
     status,
     tensor,
@@ -21,7 +21,7 @@ test("weight inspection statuses expose only their available data", () => {
   }));
   const bytes = new Uint8Array(8);
   const unsupported: WeightInspectionData = {
-    status: "unsupported",
+    status: 'unsupported',
     tensor,
     bytes,
     values: null,
@@ -29,10 +29,11 @@ test("weight inspection statuses expose only their available data", () => {
   };
   const values = new Float64Array([1, 2]);
   const ready: WeightInspectionData = {
-    status: "ready",
+    status: 'ready',
     tensor,
     bytes,
     values,
+    numeric: values,
     stats: {
       count: 2,
       min: 1,
@@ -53,5 +54,6 @@ test("weight inspection statuses expose only their available data", () => {
   expect(unsupported.values).toBeNull();
   expect(ready.bytes).toBe(bytes);
   expect(ready.values).toBe(values);
+  expect(ready.numeric).toBe(values);
   expect(ready.stats.count).toBe(2);
 });

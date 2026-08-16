@@ -1,12 +1,12 @@
-import React from "react";
-import { ArrowLeftIcon, CaretRightIcon, XIcon } from "@phosphor-icons/react";
-import type { IconEntry } from "../theme.ts";
-import { Tooltip } from "../tooltip.tsx";
-import propertyPanelCss from "./node-property-panel.module.css";
-export { attrChipLabel, formatAttr } from "@wetron/core/panel-utils";
+import React from 'react';
+import { ArrowLeftIcon, CaretRightIcon, XIcon } from '@phosphor-icons/react';
+import type { IconEntry } from '../theme.ts';
+import { Tooltip } from '../tooltip.tsx';
+import propertyPanelCss from './node-property-panel.module.css';
+export { attrChipLabel, formatAttr } from '@wetron/core/panel-utils';
 
 export function renderIconEntry(entry: IconEntry): React.ReactNode {
-  if (entry.kind === "glyph") {
+  if (entry.kind === 'glyph') {
     return <span className={propertyPanelCss.glyphIcon}>{entry.char}</span>;
   }
   return <entry.Component size={15} />;
@@ -15,7 +15,7 @@ export function renderIconEntry(entry: IconEntry): React.ReactNode {
 export function Chip({ label, color }: { label: string; color?: string }) {
   if (color) {
     return (
-      <span className={propertyPanelCss.chip} style={{ background: color + "22", color }}>
+      <span className={propertyPanelCss.chip} style={{ background: color + '22', color }}>
         {label}
       </span>
     );
@@ -42,8 +42,8 @@ export function Row({
 }) {
   return (
     <div
-      role={onClick ? "button" : undefined}
-      className={`${propertyPanelCss.row}${onClick ? ` ${propertyPanelCss.rowClickable}` : ""}`}
+      role={onClick ? 'button' : undefined}
+      className={`${propertyPanelCss.row}${onClick ? ` ${propertyPanelCss.rowClickable}` : ''}`}
       onClick={onClick}
     >
       <Tooltip text={label} onlyIfOverflow>

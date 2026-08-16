@@ -1,6 +1,6 @@
 # @wetron/onnx
 
-ONNX model parser for wetron. Reads `.onnx` files and returns a `ModelGraph` IR. Initializer bytes are surfaced lazily through `ModelGraph.weights`; initializers with `data_location = EXTERNAL` are not inlined and must be fetched separately (see below).
+ONNX model parser for wetron. Reads `.onnx` files and returns a `ModelGraph` IR. Inline initializer bytes use `ModelGraph.weights.kind === "available"`; initializers with `data_location = EXTERNAL` use `kind === "external"` and must be fetched separately.
 
 ## Install
 
@@ -13,7 +13,7 @@ Included automatically when you install `@wetron/core` or `@wetron/react`.
 ## API
 
 ```ts
-import { parseOnnx } from "@wetron/onnx";
+import { parseOnnx } from '@wetron/onnx';
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseOnnx(bytes);
@@ -26,13 +26,15 @@ Throws `ParseError` from `@wetron/common/ir` on malformed input.
 For models where initializers use `data_location = EXTERNAL`, fetch the external files and build a `WeightSource`:
 
 ```ts
-import { loadOnnxExternalWeightsFromUrl } from "@wetron/onnx";
+import { loadOnnxExternalWeightsFromUrl } from '@wetron/onnx';
 
-const weights = await loadOnnxExternalWeightsFromUrl(modelBytes, "https://.../model-dir");
+const weights = await loadOnnxExternalWeightsFromUrl(modelBytes, 'https://.../model-dir');
 // weights.get("init_name") -> Uint8Array | undefined
+
+const graphWithWeights = { ...graph, weights: { kind: 'available' as const, source: weights } };
 ```
 
-Each unique `location` filename is fetched once from `${baseUrl}/${location}` and shared across initializers that slice it. Returns an empty `WeightSource` when the model has no `EXTERNAL` initializers. Throws `ParseError` on non-`ok` responses.
+Each unique `location` filename is fetched once from `${baseUrl}/${location}` and shared across initializers that slice it. If any initializer is external, `parseOnnx` does not expose a partial source for inline initializers. The loader returns an empty `WeightSource` when the model has no `EXTERNAL` initializers and throws `ParseError` on non-`ok` responses.
 
 ## What gets parsed
 

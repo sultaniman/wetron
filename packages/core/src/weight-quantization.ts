@@ -1,4 +1,4 @@
-import { readFloat16 } from "@wetron/common/dtypes";
+import { readFloat16 } from '@wetron/common/dtypes';
 
 export interface Q4_0BlockInspection {
   readonly index: number;
@@ -9,7 +9,7 @@ export interface Q4_0BlockInspection {
 }
 
 export interface Q4_0QuantizationInspection {
-  readonly dtype: "Q4_0";
+  readonly dtype: 'Q4_0';
   readonly blockBytes: 18;
   readonly valuesPerBlock: 32;
   readonly blocks: readonly Q4_0BlockInspection[];
@@ -19,11 +19,8 @@ export interface Q4_0QuantizationInspection {
 
 export type QuantizationInspection = Q4_0QuantizationInspection;
 
-export function inspectWeightQuantization(
-  bytes: Uint8Array,
-  dtype: string,
-): QuantizationInspection | null {
-  if (dtype !== "Q4_0") return null;
+export function inspectWeightQuantization(bytes: Uint8Array, dtype: string): QuantizationInspection | null {
+  if (dtype !== 'Q4_0') return null;
   const blockBytes = 18;
   const count = Math.floor(bytes.byteLength / blockBytes);
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -48,7 +45,7 @@ export function inspectWeightQuantization(
     });
   }
   return {
-    dtype: "Q4_0",
+    dtype: 'Q4_0',
     blockBytes,
     valuesPerBlock: 32,
     blocks,

@@ -1,7 +1,7 @@
-import type { DecodedWeight } from "./weight-decoder.ts";
-import { offsetToCoordinate, tensorElementCount } from "./tensor-index.ts";
+import { numericView, type DecodedWeight } from './weight-decoder.ts';
+import { tensorLayout } from './tensor-index.ts';
 
-export type AxisMetric = "mean" | "std" | "l1" | "l2" | "max-abs" | "zero-ratio";
+export type AxisMetric = 'mean' | 'std' | 'l1' | 'l2' | 'max-abs' | 'zero-ratio';
 
 export interface AxisStats {
   readonly axis: number;
@@ -11,15 +11,11 @@ export interface AxisStats {
   readonly max: number;
 }
 
-export function computeAxisStats(
-  values: DecodedWeight,
-  shape: readonly number[],
-  axis: number,
-): AxisStats {
-  const count = tensorElementCount(shape);
-  if (values.length < count) throw new RangeError("decoded values are shorter than tensor shape");
-  if (!Number.isSafeInteger(axis) || axis < 0 || axis >= shape.length)
-    throw new RangeError("axis is out of range");
+export function computeAxisStats(values: DecodedWeight, shape: readonly number[], axis: number): AxisStats {
+  const layout = tensorLayout(shape);
+  const { count } = layout;
+  if (values.length < count) throw new RangeError('decoded values are shorter than tensor shape');
+  if (!Number.isSafeInteger(axis) || axis < 0 || axis >= shape.length) throw new RangeError('axis is out of range');
   const length = shape[axis];
   const sums = new Float64Array(length);
   const sumSquares = new Float64Array(length);
@@ -29,10 +25,10 @@ export function computeAxisStats(
   const finite = new Uint32Array(length);
   const excluded = new Uint32Array(length);
   const totals = new Uint32Array(length);
+  const numeric = numericView(values);
   for (let offset = 0; offset < count; offset++) {
-    const position = offsetToCoordinate(offset, shape)[axis];
-    const raw = values[offset];
-    const value = typeof raw === "bigint" ? Number(raw) : raw;
+    const position = Math.floor(offset / layout.strides[axis]) % shape[axis];
+    const value = numeric[offset];
     totals[position]++;
     if (!Number.isFinite(value)) {
       excluded[position]++;
@@ -54,8 +50,8 @@ export function computeAxisStats(
     std,
     l1: Array.from(l1),
     l2: Array.from(sumSquares, Math.sqrt),
-    "max-abs": Array.from(maxAbs),
-    "zero-ratio": Array.from(zeros, (value, index) => (totals[index] ? value / totals[index] : 0)),
+    'max-abs': Array.from(maxAbs),
+    'zero-ratio': Array.from(zeros, (value, index) => (totals[index] ? value / totals[index] : 0)),
   } satisfies Record<AxisMetric, readonly number[]>;
   const all = Object.values(metrics).flat();
   return {

@@ -10,6 +10,12 @@ export interface TensorSliceDescriptor {
   readonly selection: TensorSliceSelection;
 }
 
+export interface TensorLayout {
+  readonly shape: readonly number[];
+  readonly strides: readonly number[];
+  readonly count: number;
+}
+
 export function tensorElementCount(shape: readonly number[]): number {
   let count = 1;
   for (const dimension of shape) {
@@ -17,25 +23,25 @@ export function tensorElementCount(shape: readonly number[]): number {
       throw new RangeError(`invalid tensor dimension ${dimension}`);
     }
     count *= dimension;
-    if (!Number.isSafeInteger(count)) throw new RangeError("tensor element count is not safe");
+    if (!Number.isSafeInteger(count)) throw new RangeError('tensor element count is not safe');
   }
   return count;
 }
 
 export function tensorStrides(shape: readonly number[]): readonly number[] {
-  tensorElementCount(shape);
-  const strides = Array.from({ length: shape.length }, () => 1);
-  for (let i = shape.length - 2; i >= 0; i--) strides[i] = strides[i + 1] * shape[i + 1];
-  return strides;
+  return tensorLayout(shape).strides;
 }
 
-export function coordinateToOffset(
-  coordinate: readonly number[],
-  shape: readonly number[],
-): number {
-  if (coordinate.length !== shape.length)
-    throw new RangeError("coordinate rank does not match shape");
-  const strides = tensorStrides(shape);
+export function tensorLayout(shape: readonly number[]): TensorLayout {
+  const count = tensorElementCount(shape);
+  const strides = Array.from({ length: shape.length }, () => 1);
+  for (let i = shape.length - 2; i >= 0; i--) strides[i] = strides[i + 1] * shape[i + 1];
+  return { shape, strides, count };
+}
+
+export function coordinateToOffsetInLayout(coordinate: readonly number[], layout: TensorLayout): number {
+  const { shape, strides } = layout;
+  if (coordinate.length !== shape.length) throw new RangeError('coordinate rank does not match shape');
   let offset = 0;
   for (let axis = 0; axis < shape.length; axis++) {
     const index = coordinate[axis];
@@ -47,20 +53,25 @@ export function coordinateToOffset(
   return offset;
 }
 
-export function offsetToCoordinate(offset: number, shape: readonly number[]): readonly number[] {
-  const count = tensorElementCount(shape);
+export function coordinateToOffset(coordinate: readonly number[], shape: readonly number[]): number {
+  if (coordinate.length !== shape.length) throw new RangeError('coordinate rank does not match shape');
+  return coordinateToOffsetInLayout(coordinate, tensorLayout(shape));
+}
+
+export function offsetToCoordinateInLayout(offset: number, layout: TensorLayout): readonly number[] {
+  const { shape, strides, count } = layout;
   if (!Number.isSafeInteger(offset) || offset < 0 || offset >= count) {
-    throw new RangeError("tensor offset is out of range");
+    throw new RangeError('tensor offset is out of range');
   }
-  const strides = tensorStrides(shape);
   return strides.map((stride, axis) => Math.floor(offset / stride) % shape[axis]);
 }
 
-export function describeTensorSlice(
-  shape: readonly number[],
-  selection: TensorSliceSelection,
-): TensorSliceDescriptor {
-  if (shape.length < 2) throw new RangeError("tensor slice requires rank 2 or greater");
+export function offsetToCoordinate(offset: number, shape: readonly number[]): readonly number[] {
+  return offsetToCoordinateInLayout(offset, tensorLayout(shape));
+}
+
+export function describeTensorSlice(shape: readonly number[], selection: TensorSliceSelection): TensorSliceDescriptor {
+  if (shape.length < 2) throw new RangeError('tensor slice requires rank 2 or greater');
   tensorElementCount(shape);
   const { rowAxis, colAxis } = selection;
   if (
@@ -72,7 +83,7 @@ export function describeTensorSlice(
     colAxis >= shape.length ||
     rowAxis === colAxis
   ) {
-    throw new RangeError("display axes must be distinct valid axes");
+    throw new RangeError('display axes must be distinct valid axes');
   }
   for (let axis = 0; axis < shape.length; axis++) {
     if (axis === rowAxis || axis === colAxis) continue;

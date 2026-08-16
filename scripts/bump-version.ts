@@ -1,29 +1,29 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from 'node:fs';
 
 const version = process.argv[2];
 if (!version) {
-  console.error("usage: pnpm exec tsx scripts/bump-version.ts <version>");
+  console.error('usage: pnpm exec tsx scripts/bump-version.ts <version>');
   process.exit(1);
 }
 
 const packages = [
-  "packages/common",
-  "packages/core",
-  "packages/tokens",
-  "packages/onnx",
-  "packages/tflite",
-  "packages/keras",
-  "packages/executorch",
-  "packages/torchscript",
-  "packages/savedmodel",
-  "packages/react",
-  "packages/svelte",
+  'packages/common',
+  'packages/core',
+  'packages/tokens',
+  'packages/onnx',
+  'packages/tflite',
+  'packages/keras',
+  'packages/executorch',
+  'packages/torchscript',
+  'packages/savedmodel',
+  'packages/react',
+  'packages/svelte',
 ];
 
 for (const dir of packages) {
   const path = `${dir}/package.json`;
-  const pkg = JSON.parse(readFileSync(path, "utf8"));
+  const pkg = JSON.parse(readFileSync(path, 'utf8'));
   pkg.version = version;
-  writeFileSync(path, JSON.stringify(pkg, null, 2) + "\n");
+  writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
   console.log(`  ${pkg.name}  ->  ${version}`);
 }

@@ -1,18 +1,18 @@
-import * as Dagre from "dagre";
-import type { ModelGraph, GraphNode, GraphValue, AttributeValue } from "@wetron/common/ir";
-import { opInputLabels } from "./op-inputs.ts";
+import * as Dagre from 'dagre';
+import type { ModelGraph, GraphNode, GraphValue, AttributeValue } from '@wetron/common/ir';
+import { opInputLabels } from './op-inputs.ts';
 
-export type GraphNodeData = {
+type NodeData = {
   opType: string;
   name: string;
   inputs: readonly string[];
   outputs: readonly string[];
   attributes: Readonly<Record<string, AttributeValue>>;
-  graphNode?: GraphNode;
-  graphValue?: GraphValue;
-  shape?: readonly number[] | null;
-  dtype?: string | null;
-  weightInputs?: readonly {
+};
+
+export type GraphOperationNodeData = NodeData & {
+  graphNode: GraphNode;
+  weightInputs: readonly {
     slot: number;
     label: string;
     name: string;
@@ -21,20 +21,39 @@ export type GraphNodeData = {
   }[];
 };
 
-export type FlowNode = {
+export type IoNodeData = NodeData & {
+  opType: 'Input' | 'Output';
+  graphValue: GraphValue;
+  shape: readonly number[] | null;
+  dtype: string | null;
+};
+
+export type GraphNodeData = GraphOperationNodeData | IoNodeData;
+
+type FlowNodeBase = {
   id: string;
-  type: "graphNode" | "ioNode";
   position: { x: number; y: number };
-  data: GraphNodeData;
   initialWidth: number;
   initialHeight: number;
 };
+
+export type GraphFlowNode = FlowNodeBase & {
+  type: 'graphNode';
+  data: GraphOperationNodeData;
+};
+
+export type IoFlowNode = FlowNodeBase & {
+  type: 'ioNode';
+  data: IoNodeData;
+};
+
+export type FlowNode = GraphFlowNode | IoFlowNode;
 
 export type FlowEdge = {
   id: string;
   source: string;
   target: string;
-  type: "modelEdge";
+  type: 'modelEdge';
   data: {
     readonly tensorName: string;
     readonly sourceOpType: string;
@@ -62,13 +81,32 @@ const ION_H = CARD_BASE + META_MARGIN + 12; // 49
 // vertical space and starving dagre's rank assignment.
 export const WEIGHT_ROW_LIMIT = 8;
 
-export type LayoutDirection = "TB" | "LR";
+export type LayoutDirection = 'TB' | 'LR';
+
+function graphNodeId(node: GraphNode, index: number): string {
+  return `node::${index}::${node.name || node.opType}`;
+}
+
+export function filterGraph(graph: ModelGraph, query: string): ReadonlySet<string> {
+  const q = query.trim().toLowerCase();
+  if (!q) return new Set();
+
+  const matches = new Set<string>();
+  for (let index = 0; index < graph.nodes.length; index++) {
+    const node = graph.nodes[index];
+    if (graph.initializers.has(node.name)) continue;
+    if (node.opType.toLowerCase().includes(q) || node.name.toLowerCase().includes(q)) {
+      matches.add(graphNodeId(node, index));
+    }
+  }
+  return matches;
+}
 
 export function modelGraphToFlow(
   graph: ModelGraph,
   options?: { rankdir?: LayoutDirection },
 ): { nodes: FlowNode[]; edges: FlowEdge[] } {
-  const rankdir = options?.rankdir ?? "TB";
+  const rankdir = options?.rankdir ?? 'TB';
   const g = new Dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir, nodesep: 60, ranksep: 100 });
@@ -94,13 +132,13 @@ export function modelGraphToFlow(
 
   for (let i = 0; i < graph.inputs.length; i++) {
     const gv = graph.inputs[i];
-    const id = uniqueIoId("input", gv.name, i);
+    const id = uniqueIoId('input', gv.name, i);
     flowNodes.push({
       id,
-      type: "ioNode",
+      type: 'ioNode',
       position: { x: 0, y: 0 },
       data: {
-        opType: "Input",
+        opType: 'Input',
         name: gv.name,
         inputs: [],
         outputs: [gv.name],
@@ -115,7 +153,7 @@ export function modelGraphToFlow(
 
     g.setNode(id, { width: NODE_W, height: ION_H });
     outputToNodeId.set(gv.name, id);
-    nodeIdToOpType.set(id, "Input");
+    nodeIdToOpType.set(id, 'Input');
     nodeIdToName.set(id, gv.name);
   }
 
@@ -126,7 +164,7 @@ export function modelGraphToFlow(
     // standalone graph nodes. Keep them in `graph.nodes` for callers like
     // attachCheckpointToGraph but skip them from layout/edges here.
     if (graph.initializers.has(node.name)) continue;
-    const id = `node::${i}::${node.name || node.opType}`;
+    const id = graphNodeId(node, i);
     const labels = opInputLabels(node.opType);
     const weightInputsRaw = node.inputs
       .map((name, slot) => {
@@ -135,18 +173,15 @@ export function modelGraphToFlow(
       })
       .filter((w): w is NonNullable<typeof w> => w !== null);
 
-    const weightInputs = weightInputsRaw.length > 0 ? weightInputsRaw : undefined;
     const hasSubtitle = !!(node.name && !/^op_\d+$/.test(node.name));
-    const nWeights = weightInputs?.length ?? 0;
+    const nWeights = weightInputsRaw.length;
     const visibleRows = nWeights <= WEIGHT_ROW_LIMIT ? nWeights : WEIGHT_ROW_LIMIT + 1; // +1 for "more" row
     const nodeH =
-      CARD_BASE +
-      (hasSubtitle ? SUBTITLE_H : 0) +
-      (visibleRows > 0 ? META_MARGIN + visibleRows * ROW_H : 0);
+      CARD_BASE + (hasSubtitle ? SUBTITLE_H : 0) + (visibleRows > 0 ? META_MARGIN + visibleRows * ROW_H : 0);
 
     flowNodes.push({
       id,
-      type: "graphNode",
+      type: 'graphNode',
       position: { x: 0, y: 0 },
       data: {
         opType: node.opType,
@@ -155,7 +190,7 @@ export function modelGraphToFlow(
         outputs: node.outputs,
         attributes: node.attributes,
         graphNode: node,
-        weightInputs,
+        weightInputs: weightInputsRaw,
       },
       initialWidth: NODE_W,
       initialHeight: nodeH,
@@ -170,13 +205,13 @@ export function modelGraphToFlow(
 
   for (let i = 0; i < graph.outputs.length; i++) {
     const gv = graph.outputs[i];
-    const id = uniqueIoId("output", gv.name, i);
+    const id = uniqueIoId('output', gv.name, i);
     flowNodes.push({
       id,
-      type: "ioNode",
+      type: 'ioNode',
       position: { x: 0, y: 0 },
       data: {
-        opType: "Output",
+        opType: 'Output',
         name: gv.name,
         inputs: [gv.name],
         outputs: [],
@@ -190,7 +225,7 @@ export function modelGraphToFlow(
     });
 
     g.setNode(id, { width: NODE_W, height: ION_H });
-    nodeIdToOpType.set(id, "Output");
+    nodeIdToOpType.set(id, 'Output');
     nodeIdToName.set(id, gv.name);
   }
 
@@ -200,7 +235,7 @@ export function modelGraphToFlow(
   const emittedEdgeKeys = new Set<string>();
 
   for (const fn of flowNodes) {
-    if (fn.type === "ioNode" && fn.data.opType === "Input") continue;
+    if (fn.type === 'ioNode' && fn.data.opType === 'Input') continue;
 
     for (let slot = 0; slot < fn.data.inputs.length; slot++) {
       const inputName = fn.data.inputs[slot];
@@ -215,13 +250,13 @@ export function modelGraphToFlow(
         id: edgeKey,
         source: srcId,
         target: fn.id,
-        type: "modelEdge",
+        type: 'modelEdge',
         data: {
           tensorName: inputName,
-          sourceOpType: nodeIdToOpType.get(srcId) ?? "",
-          sourceNodeName: nodeIdToName.get(srcId) ?? "",
+          sourceOpType: nodeIdToOpType.get(srcId) ?? '',
+          sourceNodeName: nodeIdToName.get(srcId) ?? '',
           targetOpType: fn.data.opType,
-          targetNodeName: nodeIdToName.get(fn.id) ?? "",
+          targetNodeName: nodeIdToName.get(fn.id) ?? '',
         },
       });
 
@@ -255,9 +290,7 @@ export function modelGraphToFlow(
     const key = `${fe.source}::${fe.target}`;
     let pts = ptCache.get(key);
     if (pts === undefined) {
-      const raw = (
-        g.edge(fe.source, fe.target) as { points?: { x: number; y: number }[] } | undefined
-      )?.points;
+      const raw = (g.edge(fe.source, fe.target) as { points?: { x: number; y: number }[] } | undefined)?.points;
       // Slice off first and last - those are dagre's node-center estimates;
       // the edge component uses xyflow's actual handle positions instead.
       pts = raw && raw.length > 2 ? raw.slice(1, raw.length - 1) : [];

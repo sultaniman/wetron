@@ -1,36 +1,35 @@
-import { useMemo, useState } from "react";
-import { computeWeightDistribution } from "@wetron/core/weight-distribution";
-import { formatVal } from "@wetron/core/format-val";
+import { useMemo, useState } from 'react';
+import { computeWeightDistribution } from '@wetron/core/weight-distribution';
+import { formatVal } from '@wetron/core/format-val';
 import {
   distributionApproximateHint,
   distributionDomainHint,
   distributionScaleHint,
-} from "@wetron/core/inspector-hints";
-import { useWeightInspection } from "../weight-inspection-context.tsx";
-import { Hint } from "./hint.tsx";
-import css from "./inspectors.module.css";
+} from '@wetron/core/inspector-hints';
+import { useWeightInspection } from '../weight-inspection-context.tsx';
+import { Hint } from './hint.tsx';
+import css from './inspectors.module.css';
 
 export function DistributionInspector() {
   const inspection = useWeightInspection();
-  const [scale, setScale] = useState<"linear" | "log">("linear");
-  const [domain, setDomain] = useState<"full" | "percentile">("full");
+  const [scale, setScale] = useState<'linear' | 'log'>('linear');
+  const [domain, setDomain] = useState<'full' | 'percentile'>('full');
   const result = useMemo(
-    () => (inspection.status === "ready" ? computeWeightDistribution(inspection.values) : null),
+    () => (inspection.status === 'ready' ? computeWeightDistribution(inspection.numeric) : null),
     [inspection],
   );
-  if (!result || inspection.status !== "ready") return null;
-  const histogram =
-    domain === "percentile" && result.percentileRange ? result.percentileRange : result.fullRange;
-  const heights = histogram.counts.map((count) => (scale === "log" ? Math.log1p(count) : count));
+  if (!result || inspection.status !== 'ready') return null;
+  const histogram = domain === 'percentile' && result.percentileRange ? result.percentileRange : result.fullRange;
+  const heights = histogram.counts.map((count) => (scale === 'log' ? Math.log1p(count) : count));
   const max = Math.max(...heights, 1);
-  const dtype = inspection.tensor.dtype ?? "float32";
+  const dtype = inspection.tensor.dtype ?? 'float32';
   const percentiles = Object.entries(result.percentiles).map(
-    ([label, value]) => [label === "p50" ? "median" : label, formatVal(value, dtype)] as const,
+    ([label, value]) => [label === 'p50' ? 'median' : label, formatVal(value, dtype)] as const,
   );
   const nonFinite = [
-    ["NaN", result.nanCount],
-    ["+Inf", result.positiveInfinityCount],
-    ["-Inf", result.negativeInfinityCount],
+    ['NaN', result.nanCount],
+    ['+Inf', result.positiveInfinityCount],
+    ['-Inf', result.negativeInfinityCount],
   ] as const;
   return (
     <div className={css.root} data-testid="distribution-inspector">
@@ -43,7 +42,7 @@ export function DistributionInspector() {
             className={css.field}
             aria-label="Distribution count scale"
             value={scale}
-            onChange={(event) => setScale(event.target.value as "linear" | "log")}
+            onChange={(event) => setScale(event.target.value as 'linear' | 'log')}
           >
             <option value="linear">linear</option>
             <option value="log">log</option>
@@ -58,7 +57,7 @@ export function DistributionInspector() {
               className={css.field}
               aria-label="Distribution domain"
               value={domain}
-              onChange={(event) => setDomain(event.target.value as "full" | "percentile")}
+              onChange={(event) => setDomain(event.target.value as 'full' | 'percentile')}
             >
               <option value="full">full range</option>
               <option value="percentile">p1–p99</option>

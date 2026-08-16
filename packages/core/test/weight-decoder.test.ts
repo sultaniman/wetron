@@ -1,179 +1,188 @@
-import { test, expect, describe } from "vitest";
-import { decodeWeight, decodeFirstN, elementSize } from "../src/weight-decoder.ts";
+import { test, expect, describe } from 'vitest';
+import { decodeWeight, decodeFirstN, elementSize, numericView } from '../src/weight-decoder.ts';
 
 function bytesOf(...vals: number[]): Uint8Array {
   return new Uint8Array(vals);
 }
 
-describe("decodeWeight", () => {
-  test("decodes float32 little-endian", () => {
+describe('decodeWeight', () => {
+  test('decodes float32 little-endian', () => {
     // 1.0 = 0x3f800000, 2.0 = 0x40000000
     const bytes = bytesOf(0x00, 0x00, 0x80, 0x3f, 0x00, 0x00, 0x00, 0x40);
-    const out = decodeWeight(bytes, "float32", [2]) as Float64Array;
+    const out = decodeWeight(bytes, 'float32', [2]) as Float64Array;
     expect(out).toBeInstanceOf(Float64Array);
     expect(out.length).toBe(2);
     expect(out[0]).toBeCloseTo(1.0, 6);
     expect(out[1]).toBeCloseTo(2.0, 6);
   });
 
-  test("decodes int8 with sign extension", () => {
+  test('decodes int8 with sign extension', () => {
     const bytes = bytesOf(0x01, 0x7f, 0x80, 0xff); // 1, 127, -128, -1
-    const out = decodeWeight(bytes, "int8", [4]) as Int32Array;
+    const out = decodeWeight(bytes, 'int8', [4]) as Int32Array;
     expect(out).toBeInstanceOf(Int32Array);
     expect(Array.from(out)).toEqual([1, 127, -128, -1]);
   });
 
-  test("decodes uint8", () => {
+  test('decodes uint8', () => {
     const bytes = bytesOf(0, 1, 254, 255);
-    const out = decodeWeight(bytes, "uint8", [4]) as Int32Array;
+    const out = decodeWeight(bytes, 'uint8', [4]) as Int32Array;
     expect(Array.from(out)).toEqual([0, 1, 254, 255]);
   });
 
-  test("decodes int32 little-endian", () => {
+  test('decodes int32 little-endian', () => {
     const bytes = bytesOf(0x01, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff);
-    const out = decodeWeight(bytes, "int32", [2]) as Int32Array;
+    const out = decodeWeight(bytes, 'int32', [2]) as Int32Array;
     expect(Array.from(out)).toEqual([1, -1]);
   });
 
-  test("decodes int64 to BigInt64Array", () => {
+  test('decodes int64 to BigInt64Array', () => {
     const bytes = new Uint8Array(8);
     new DataView(bytes.buffer).setBigInt64(0, 42n, true);
-    const out = decodeWeight(bytes, "int64", [1]) as BigInt64Array;
+    const out = decodeWeight(bytes, 'int64', [1]) as BigInt64Array;
     expect(out).toBeInstanceOf(BigInt64Array);
     expect(out[0]).toBe(42n);
   });
 
-  test("preserves the maximum uint32 value", () => {
+  test('preserves the maximum uint32 value', () => {
     const bytes = new Uint8Array(4);
     new DataView(bytes.buffer).setUint32(0, 0xffff_ffff, true);
-    const out = decodeWeight(bytes, "uint32", [1]) as Uint32Array;
+    const out = decodeWeight(bytes, 'uint32', [1]) as Uint32Array;
     expect(out).toBeInstanceOf(Uint32Array);
     expect(out[0]).toBe(0xffff_ffff);
   });
 
-  test("preserves the maximum uint64 value", () => {
+  test('preserves the maximum uint64 value', () => {
     const bytes = new Uint8Array(8);
     new DataView(bytes.buffer).setBigUint64(0, 0xffff_ffff_ffff_ffffn, true);
-    const out = decodeWeight(bytes, "uint64", [1]) as BigUint64Array;
+    const out = decodeWeight(bytes, 'uint64', [1]) as BigUint64Array;
     expect(out).toBeInstanceOf(BigUint64Array);
     expect(out[0]).toBe(0xffff_ffff_ffff_ffffn);
   });
 
-  test("decodes float16 (1.0)", () => {
+  test('decodes float16 (1.0)', () => {
     // half-precision 1.0 = 0x3c00
     const bytes = bytesOf(0x00, 0x3c);
-    const out = decodeWeight(bytes, "float16", [1]) as Float64Array;
+    const out = decodeWeight(bytes, 'float16', [1]) as Float64Array;
     expect(out[0]).toBeCloseTo(1.0, 4);
   });
 
-  test("decodes GGML scalar dtype names", () => {
+  test('decodes GGML scalar dtype names', () => {
     const bytes = bytesOf(0x00, 0x00, 0x80, 0x3f);
-    const out = decodeWeight(bytes, "F32", [1]) as Float64Array;
+    const out = decodeWeight(bytes, 'F32', [1]) as Float64Array;
     expect(out[0]).toBeCloseTo(1, 6);
   });
 
-  test("dequantizes a GGML Q4_0 block", () => {
+  test('dequantizes a GGML Q4_0 block', () => {
     const bytes = new Uint8Array(18);
     new DataView(bytes.buffer).setUint16(0, 0x3c00, true);
     for (let i = 0; i < 16; i++) bytes[2 + i] = i | ((15 - i) << 4);
 
-    const out = decodeWeight(bytes, "Q4_0", [32]) as Float64Array;
-    expect(Array.from(out.subarray(0, 16))).toEqual([
-      -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7,
-    ]);
-    expect(Array.from(out.subarray(16))).toEqual([
-      7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8,
-    ]);
+    const out = decodeWeight(bytes, 'Q4_0', [32]) as Float64Array;
+    expect(Array.from(out.subarray(0, 16))).toEqual([-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(Array.from(out.subarray(16))).toEqual([7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7, -8]);
   });
 
-  test("returns null for unsupported dtypes", () => {
-    expect(decodeWeight(bytesOf(1, 2, 3), "string", [1])).toBeNull();
-    expect(decodeWeight(bytesOf(1, 2, 3), "complex64", [1])).toBeNull();
+  test('returns null for unsupported dtypes', () => {
+    expect(decodeWeight(bytesOf(1, 2, 3), 'string', [1])).toBeNull();
+    expect(decodeWeight(bytesOf(1, 2, 3), 'complex64', [1])).toBeNull();
   });
 
-  test("treats scalar shape [] as a single value", () => {
+  test('treats scalar shape [] as a single value', () => {
     // shape = [] means rank-0 tensor; reduce with init 1 yields 1 element.
     const bytes = bytesOf(0x00, 0x00, 0x80, 0x3f);
-    const out = decodeWeight(bytes, "float32", []) as Float64Array;
+    const out = decodeWeight(bytes, 'float32', []) as Float64Array;
     expect(out.length).toBe(1);
     expect(out[0]).toBeCloseTo(1.0, 6);
   });
 
-  test("returns null when shape product overflows to Infinity", () => {
+  test('returns null when shape product overflows to Infinity', () => {
     // 1e9 * 1e9 * 1e9 = 1e27 -> loses precision but is finite; use larger to actually overflow.
     // Number.MAX_SAFE_INTEGER ≈ 9e15; product of large shape elements goes to Infinity past Number.MAX_VALUE.
     const huge = [1e200, 1e200];
-    expect(decodeWeight(bytesOf(0x00, 0x00, 0x80, 0x3f), "float32", huge)).toBeNull();
+    expect(decodeWeight(bytesOf(0x00, 0x00, 0x80, 0x3f), 'float32', huge)).toBeNull();
   });
 
-  test("returns null for negative shape product", () => {
-    expect(decodeWeight(bytesOf(0x01), "uint8", [-1])).toBeNull();
+  test('returns null for negative shape product', () => {
+    expect(decodeWeight(bytesOf(0x01), 'uint8', [-1])).toBeNull();
   });
 });
 
-describe("decodeFirstN", () => {
-  test("returns exactly N values", () => {
+describe('decodeFirstN', () => {
+  test('returns exactly N values', () => {
     const buf = new ArrayBuffer(40);
     const view = new DataView(buf);
     for (let i = 0; i < 10; i++) view.setFloat32(i * 4, i + 0.5, true);
-    const out = decodeFirstN(new Uint8Array(buf), "float32", 4) as Float64Array;
+    const out = decodeFirstN(new Uint8Array(buf), 'float32', 4) as Float64Array;
     expect(out.length).toBe(4);
     expect(out[0]).toBeCloseTo(0.5, 6);
     expect(out[3]).toBeCloseTo(3.5, 6);
   });
 
-  test("clamps when N exceeds available", () => {
+  test('clamps when N exceeds available', () => {
     const buf = new ArrayBuffer(8);
     new DataView(buf).setFloat32(0, 9.0, true);
     new DataView(buf).setFloat32(4, 9.5, true);
-    const out = decodeFirstN(new Uint8Array(buf), "float32", 1000) as Float64Array;
+    const out = decodeFirstN(new Uint8Array(buf), 'float32', 1000) as Float64Array;
     expect(out.length).toBe(2);
   });
 });
 
-describe("elementSize", () => {
-  test("returns byte width for native dtypes", () => {
-    expect(elementSize("float32")).toBe(4);
-    expect(elementSize("float64")).toBe(8);
-    expect(elementSize("float16")).toBe(2);
-    expect(elementSize("bfloat16")).toBe(2);
-    expect(elementSize("int8")).toBe(1);
-    expect(elementSize("uint8")).toBe(1);
-    expect(elementSize("int16")).toBe(2);
-    expect(elementSize("uint16")).toBe(2);
-    expect(elementSize("int32")).toBe(4);
-    expect(elementSize("uint32")).toBe(4);
-    expect(elementSize("int64")).toBe(8);
-    expect(elementSize("uint64")).toBe(8);
-    expect(elementSize("bool")).toBe(1);
+describe('elementSize', () => {
+  test('returns byte width for native dtypes', () => {
+    expect(elementSize('float32')).toBe(4);
+    expect(elementSize('float64')).toBe(8);
+    expect(elementSize('float16')).toBe(2);
+    expect(elementSize('bfloat16')).toBe(2);
+    expect(elementSize('int8')).toBe(1);
+    expect(elementSize('uint8')).toBe(1);
+    expect(elementSize('int16')).toBe(2);
+    expect(elementSize('uint16')).toBe(2);
+    expect(elementSize('int32')).toBe(4);
+    expect(elementSize('uint32')).toBe(4);
+    expect(elementSize('int64')).toBe(8);
+    expect(elementSize('uint64')).toBe(8);
+    expect(elementSize('bool')).toBe(1);
   });
 
-  test("resolves GGML scalar aliases to their native width", () => {
-    expect(elementSize("F32")).toBe(4);
-    expect(elementSize("F16")).toBe(2);
-    expect(elementSize("BF16")).toBe(2);
-    expect(elementSize("I8")).toBe(1);
-    expect(elementSize("I16")).toBe(2);
-    expect(elementSize("I32")).toBe(4);
-    expect(elementSize("I64")).toBe(8);
-    expect(elementSize("F64")).toBe(8);
+  test('resolves GGML scalar aliases to their native width', () => {
+    expect(elementSize('F32')).toBe(4);
+    expect(elementSize('F16')).toBe(2);
+    expect(elementSize('BF16')).toBe(2);
+    expect(elementSize('I8')).toBe(1);
+    expect(elementSize('I16')).toBe(2);
+    expect(elementSize('I32')).toBe(4);
+    expect(elementSize('I64')).toBe(8);
+    expect(elementSize('F64')).toBe(8);
   });
 
-  test("returns the fractional block width for Q4_0", () => {
+  test('returns the fractional block width for Q4_0', () => {
     // 18 bytes per 32-element block.
-    expect(elementSize("Q4_0")).toBe(18 / 32);
+    expect(elementSize('Q4_0')).toBe(18 / 32);
   });
 
-  test("returns 0 for an unknown dtype", () => {
-    expect(elementSize("not_a_dtype")).toBe(0);
-    expect(elementSize("")).toBe(0);
+  test('returns 0 for an unknown dtype', () => {
+    expect(elementSize('not_a_dtype')).toBe(0);
+    expect(elementSize('')).toBe(0);
   });
 
-  test("covers every dtype decodeWeight can decode", () => {
+  test('covers every dtype decodeWeight can decode', () => {
     // Guards the drift this export exists to prevent: a dtype the decoder
     // understands but the size table does not would make byte math silently wrong.
-    for (const dtype of ["float32", "int8", "uint32", "int64", "uint64", "Q4_0"]) {
+    for (const dtype of ['float32', 'int8', 'uint32', 'int64', 'uint64', 'Q4_0']) {
       expect(elementSize(dtype)).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('numericView', () => {
+  test('returns number-valued arrays without copying', () => {
+    for (const values of [new Float64Array([1, 2]), new Int32Array([-1, 2]), new Uint32Array([1, 2])]) {
+      expect(numericView(values)).toBe(values);
+    }
+  });
+
+  test('widens signed and unsigned bigint arrays to float64', () => {
+    expect(numericView(new BigInt64Array([-2n, 3n]))).toEqual(new Float64Array([-2, 3]));
+    expect(numericView(new BigUint64Array([4n, 5n]))).toEqual(new Float64Array([4, 5]));
   });
 });

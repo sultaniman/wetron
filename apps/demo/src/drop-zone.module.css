@@ -18,7 +18,7 @@
     box-shadow 0.15s;
 }
 
-.root[data-theme="dark"] {
+.root[data-theme='dark'] {
   --dz-headline: #ececf1;
   --dz-sub: #9ea0aa;
   --dz-faint: #6b6e78;

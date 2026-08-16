@@ -1,3 +1,6 @@
+import { computeWeightDistribution } from './weight-distribution.ts';
+import type { NumericWeight } from './weight-decoder.ts';
+
 export interface WeightStats {
   readonly count: number;
   readonly min: number;
@@ -24,7 +27,7 @@ const HEAT_COLS = 16;
 const HEAT_ROWS = 8;
 const HEAT_CELLS = HEAT_COLS * HEAT_ROWS;
 
-export function computeStats(values: Float64Array | Int32Array | Uint32Array): WeightStats {
+export function computeStats(values: NumericWeight): WeightStats {
   const n = values.length;
   if (n === 0) {
     return {
@@ -95,4 +98,3 @@ export function computeStats(values: Float64Array | Int32Array | Uint32Array): W
 
   return { count: n, min, max, mean, std, zeros, histogram, heatmap, chunkSize, filledCells };
 }
-import { computeWeightDistribution } from "./weight-distribution.ts";

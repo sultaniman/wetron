@@ -472,15 +472,7 @@
               "id": 16
             }
           },
-          "reserved": [
-            [3, 3],
-            [4, 4],
-            [6, 9],
-            "ir_version",
-            "producer_version",
-            "producer_tag",
-            "domain"
-          ]
+          "reserved": [[3, 3], [4, 4], [6, 9], "ir_version", "producer_version", "producer_tag", "domain"]
         },
         "TensorProto": {
           "edition": "proto2",

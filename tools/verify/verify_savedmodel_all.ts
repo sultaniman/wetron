@@ -1,11 +1,11 @@
-import { readFileSync } from "node:fs";
-import { parseSavedModel } from "@wetron/savedmodel";
+import { readFileSync } from 'node:fs';
+import { parseSavedModel } from '@wetron/savedmodel';
 
 const files = [
-  "test-models/small_saved_model.pb",
-  "test-models/large_saved_model.pb",
-  "test-models/vertical_saved_model.pb",
-  "test-models/vertical_tf2/saved_model.pb",
+  'test-models/small_saved_model.pb',
+  'test-models/large_saved_model.pb',
+  'test-models/vertical_saved_model.pb',
+  'test-models/vertical_tf2/saved_model.pb',
 ];
 
 for (const path of files) {
@@ -26,9 +26,7 @@ for (const path of files) {
     const shared = [...consumerCount.entries()].filter(([, c]) => c > 1);
 
     // Standalone VarHandleOp nodes (multi-consumer or 0-consumer where transform should render)
-    const standaloneVH = graph.nodes.filter(
-      (n) => n.opType === "VarHandleOp" && !graph.initializers.has(n.name),
-    );
+    const standaloneVH = graph.nodes.filter((n) => n.opType === 'VarHandleOp' && !graph.initializers.has(n.name));
 
     console.log(`\n=== ${path} ===`);
     console.log(`  nodes:                 ${graph.nodes.length}`);
@@ -42,7 +40,7 @@ for (const path of files) {
         `    sample shared: ${shared
           .slice(0, 3)
           .map(([n, c]) => `${n}(${c})`)
-          .join(", ")}`,
+          .join(', ')}`,
       );
   } catch (e) {
     console.log(`\n!! ${path}: ${(e as Error).message}`);

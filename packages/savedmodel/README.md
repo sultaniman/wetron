@@ -18,7 +18,7 @@ Included automatically when you install `@wetron/core`.
 ## API
 
 ```ts
-import { parseSavedModel } from "@wetron/savedmodel";
+import { parseSavedModel } from '@wetron/savedmodel';
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseSavedModel(bytes); // synchronous, returns ModelGraph
@@ -31,25 +31,21 @@ Throws `ParseError` from `@wetron/common/ir` if the file is too short or has unr
 Variable weights live outside the `.pb` file in the TF2 `variables/` checkpoint pair. Load and attach them with:
 
 ```ts
-import {
-  loadSavedModelWeights,
-  loadSavedModelWeightsFromUrls,
-  attachCheckpointToGraph,
-} from "@wetron/savedmodel";
+import { loadSavedModelWeights, loadSavedModelWeightsFromUrls, attachCheckpointToGraph } from '@wetron/savedmodel';
 
 // From local files
 const loaded = await loadSavedModelWeights(indexFile, dataFile);
 
 // From URLs (one URL per shard, in shard order)
 const loaded = await loadSavedModelWeightsFromUrls(
-  "https://.../variables.index",
-  "https://.../variables.data-00000-of-00001",
+  'https://.../variables.index',
+  'https://.../variables.data-00000-of-00001',
 );
 
 const graphWithWeights = attachCheckpointToGraph(graph, loaded);
 ```
 
-`graph.hasExternalWeights` is `true` whenever at least one `VarHandleOp` is present, signalling the host app to prompt for the checkpoint files.
+`graph.weights` is `{ kind: "external", format: "savedmodel" }` whenever at least one `VarHandleOp` requires checkpoint files. `attachCheckpointToGraph` replaces it with `{ kind: "available", source }`.
 
 ## Format detection
 

@@ -1,11 +1,10 @@
-import type { DecodedWeight } from "./weight-decoder.ts";
+import { numericView, type DecodedWeight } from './weight-decoder.ts';
 import {
-  coordinateToOffset,
+  coordinateToOffsetInLayout,
   describeTensorSlice,
-  offsetToCoordinate,
-  tensorElementCount,
+  tensorLayout,
   type TensorSliceSelection,
-} from "./tensor-index.ts";
+} from './tensor-index.ts';
 
 export interface SparsitySummary {
   readonly count: number;
@@ -24,8 +23,8 @@ export interface SparsityBlock {
   readonly empty: number;
 }
 
-function isZero(value: number | bigint, threshold: number): boolean {
-  return typeof value === "bigint" ? value === 0n : Math.abs(value) <= threshold;
+function isZero(value: number, threshold: number): boolean {
+  return Math.abs(value) <= threshold;
 }
 
 export function computeWeightSparsity(
@@ -35,10 +34,12 @@ export function computeWeightSparsity(
   threshold = 0,
 ): SparsitySummary {
   if (!Number.isFinite(threshold) || threshold < 0)
-    throw new RangeError("sparsity threshold must be finite and non-negative");
-  const count = tensorElementCount(shape);
+    throw new RangeError('sparsity threshold must be finite and non-negative');
+  const layout = tensorLayout(shape);
+  const numeric = numericView(values);
+  const { count } = layout;
   if (shape.length === 0) {
-    const zeroCount = count && isZero(values[0], threshold) ? 1 : 0;
+    const zeroCount = count && isZero(numeric[0], threshold) ? 1 : 0;
     const zeroRatio = count ? zeroCount / count : 0;
     return {
       count,
@@ -48,14 +49,14 @@ export function computeWeightSparsity(
       deadSlices: zeroRatio === 1 ? 1 : 0,
     };
   }
-  if (axis < 0 || axis >= shape.length) throw new RangeError("axis is out of range");
+  if (axis < 0 || axis >= shape.length) throw new RangeError('axis is out of range');
   const zeros = Array.from({ length: shape[axis] }, () => 0);
   const totals = Array.from({ length: shape[axis] }, () => 0);
   let zeroCount = 0;
   for (let offset = 0; offset < count; offset++) {
-    const position = offsetToCoordinate(offset, shape)[axis];
+    const position = Math.floor(offset / layout.strides[axis]) % shape[axis];
     totals[position]++;
-    if (isZero(values[offset], threshold)) {
+    if (isZero(numeric[offset], threshold)) {
       zeros[position]++;
       zeroCount++;
     }
@@ -79,15 +80,12 @@ export function computeSparsityBlocks(
   threshold = 0,
 ): readonly SparsityBlock[] {
   if (!Number.isFinite(threshold) || threshold < 0)
-    throw new RangeError("sparsity threshold must be finite and non-negative");
-  if (
-    !Number.isSafeInteger(blockRows) ||
-    blockRows < 1 ||
-    !Number.isSafeInteger(blockCols) ||
-    blockCols < 1
-  )
-    throw new RangeError("block sizes must be positive integers");
+    throw new RangeError('sparsity threshold must be finite and non-negative');
+  if (!Number.isSafeInteger(blockRows) || blockRows < 1 || !Number.isSafeInteger(blockCols) || blockCols < 1)
+    throw new RangeError('block sizes must be positive integers');
   const slice = describeTensorSlice(shape, selection);
+  const layout = tensorLayout(shape);
+  const numeric = numericView(values);
   const blocks: SparsityBlock[] = [];
   for (let row = 0; row < slice.rows; row += blockRows) {
     for (let col = 0; col < slice.cols; col += blockCols) {
@@ -97,11 +95,7 @@ export function computeSparsityBlocks(
         axis === selection.rowAxis ? row : axis === selection.colAxis ? col : selection.fixed[axis],
       );
       const end = shape.map((_, axis) =>
-        axis === selection.rowAxis
-          ? rowEnd
-          : axis === selection.colAxis
-            ? colEnd
-            : selection.fixed[axis],
+        axis === selection.rowAxis ? rowEnd : axis === selection.colAxis ? colEnd : selection.fixed[axis],
       );
       let occupied = 0;
       let empty = 0;
@@ -110,7 +104,7 @@ export function computeSparsityBlocks(
           const coordinate = [...start];
           coordinate[selection.rowAxis] = sourceRow;
           coordinate[selection.colAxis] = sourceCol;
-          if (isZero(values[coordinateToOffset(coordinate, shape)], threshold)) empty++;
+          if (isZero(numeric[coordinateToOffsetInLayout(coordinate, layout)], threshold)) empty++;
           else occupied++;
         }
       blocks.push({

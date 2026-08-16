@@ -1,14 +1,14 @@
-import { useState, useCallback, useEffect } from "react";
-import { XIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { useState, useCallback, useEffect } from 'react';
+import { XIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
 import {
   loadSavedModelWeights,
   loadSavedModelWeightsFromUrls,
   attachCheckpointToGraph,
   type ModelGraph,
-} from "@wetron/core";
-import css from "./weights-dialog.module.css";
+} from '@wetron/core';
+import css from './weights-dialog.module.css';
 
-type LoadState = { status: "idle" } | { status: "loading" } | { status: "error"; message: string };
+type LoadState = { status: 'idle' } | { status: 'loading' } | { status: 'error'; message: string };
 
 export function WeightsDialog({
   theme,
@@ -16,53 +16,53 @@ export function WeightsDialog({
   onClose,
   onLoaded,
 }: {
-  theme: "light" | "dark";
+  theme: 'light' | 'dark';
   graph: ModelGraph;
   onClose: () => void;
   onLoaded: (graph: ModelGraph) => void;
 }) {
   const [indexFile, setIndexFile] = useState<File | null>(null);
   const [dataFile, setDataFile] = useState<File | null>(null);
-  const [indexUrl, setIndexUrl] = useState("");
-  const [dataUrls, setDataUrls] = useState<string[]>([""]);
-  const [load, setLoad] = useState<LoadState>({ status: "idle" });
+  const [indexUrl, setIndexUrl] = useState('');
+  const [dataUrls, setDataUrls] = useState<string[]>(['']);
+  const [load, setLoad] = useState<LoadState>({ status: 'idle' });
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
   const submitFiles = useCallback(async () => {
     if (!indexFile || !dataFile) return;
-    setLoad({ status: "loading" });
+    setLoad({ status: 'loading' });
     try {
       const loaded = await loadSavedModelWeights(indexFile, dataFile);
       onLoaded(attachCheckpointToGraph(graph, loaded));
       onClose();
     } catch (e) {
-      setLoad({ status: "error", message: e instanceof Error ? e.message : String(e) });
+      setLoad({ status: 'error', message: e instanceof Error ? e.message : String(e) });
     }
   }, [indexFile, dataFile, graph, onLoaded, onClose]);
 
   const submitUrls = useCallback(async () => {
     const filled = dataUrls.map((u) => u.trim()).filter(Boolean);
     if (!indexUrl.trim() || filled.length === 0) return;
-    setLoad({ status: "loading" });
+    setLoad({ status: 'loading' });
     try {
       const loaded = await loadSavedModelWeightsFromUrls(indexUrl.trim(), ...filled);
       onLoaded(attachCheckpointToGraph(graph, loaded));
       onClose();
     } catch (e) {
-      setLoad({ status: "error", message: e instanceof Error ? e.message : String(e) });
+      setLoad({ status: 'error', message: e instanceof Error ? e.message : String(e) });
     }
   }, [indexUrl, dataUrls, graph, onLoaded, onClose]);
 
   const filesValid = indexFile !== null && dataFile !== null;
-  const urlsValid = indexUrl.trim() !== "" && dataUrls.some((u) => u.trim() !== "");
-  const loading = load.status === "loading";
+  const urlsValid = indexUrl.trim() !== '' && dataUrls.some((u) => u.trim() !== '');
+  const loading = load.status === 'loading';
 
   return (
     <div
@@ -87,23 +87,10 @@ export function WeightsDialog({
             <div className={css.sectionHint}>
               Pick the TF2 SavedModel <code>variables/</code> pair.
             </div>
-            <FilePickerRow
-              label="variables.index"
-              file={indexFile}
-              accept=".index"
-              onChange={setIndexFile}
-            />
-            <FilePickerRow
-              label="variables.data-XXXXX-of-XXXXX"
-              file={dataFile}
-              onChange={setDataFile}
-            />
+            <FilePickerRow label="variables.index" file={indexFile} accept=".index" onChange={setIndexFile} />
+            <FilePickerRow label="variables.data-XXXXX-of-XXXXX" file={dataFile} onChange={setDataFile} />
             <div className={css.actions}>
-              <button
-                disabled={!filesValid || loading}
-                onClick={submitFiles}
-                className={css.primaryButton}
-              >
+              <button disabled={!filesValid || loading} onClick={submitFiles} className={css.primaryButton}>
                 Load files
               </button>
             </div>
@@ -132,7 +119,7 @@ export function WeightsDialog({
                 <div key={i} className={css.shardRow}>
                   <input
                     type="url"
-                    placeholder={`https://…/variables.data-${String(i).padStart(5, "0")}-of-${String(dataUrls.length).padStart(5, "0")}`}
+                    placeholder={`https://…/variables.data-${String(i).padStart(5, '0')}-of-${String(dataUrls.length).padStart(5, '0')}`}
                     value={url}
                     onChange={(e) => {
                       const next = [...dataUrls];
@@ -151,23 +138,19 @@ export function WeightsDialog({
                   </button>
                 </div>
               ))}
-              <button onClick={() => setDataUrls([...dataUrls, ""])} className={css.addShard}>
+              <button onClick={() => setDataUrls([...dataUrls, ''])} className={css.addShard}>
                 <PlusIcon size={12} /> Add shard
               </button>
             </div>
 
             <div className={css.actions}>
-              <button
-                disabled={!urlsValid || loading}
-                onClick={submitUrls}
-                className={css.primaryButton}
-              >
-                {loading ? "Loading…" : "Load from URLs"}
+              <button disabled={!urlsValid || loading} onClick={submitUrls} className={css.primaryButton}>
+                {loading ? 'Loading…' : 'Load from URLs'}
               </button>
             </div>
           </section>
 
-          {load.status === "error" && <div className={css.error}>{load.message}</div>}
+          {load.status === 'error' && <div className={css.error}>{load.message}</div>}
         </div>
       </div>
     </div>
@@ -188,7 +171,7 @@ function FilePickerRow({
   return (
     <label className={css.filePicker}>
       <span className={css.filePickerLabel}>{label}</span>
-      <span className={`${css.filePickerBox} ${file ? "" : css.filePickerBoxEmpty}`}>
+      <span className={`${css.filePickerBox} ${file ? '' : css.filePickerBoxEmpty}`}>
         <input
           type="file"
           {...(accept ? { accept } : {})}
@@ -206,7 +189,7 @@ function FilePickerRow({
         >
           Choose
         </button>
-        <span className={css.filePickerName}>{file?.name ?? "No file selected"}</span>
+        <span className={css.filePickerName}>{file?.name ?? 'No file selected'}</span>
       </span>
     </label>
   );

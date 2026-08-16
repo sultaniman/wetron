@@ -1,9 +1,1 @@
-export type WeightInspectorName =
-  | "matrix"
-  | "distribution"
-  | "axis"
-  | "sparsity"
-  | "kernel"
-  | "quantization"
-  | "diagnostics"
-  | "values";
+export type { InspectorName as WeightInspectorName } from '@wetron/core/inspector-hints';

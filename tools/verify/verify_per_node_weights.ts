@@ -1,6 +1,6 @@
-import { readFileSync } from "node:fs";
-import { parseModel } from "@wetron/core";
-import { modelGraphToFlow } from "@wetron/core/transform";
+import { readFileSync } from 'node:fs';
+import { parseModel } from '@wetron/core';
+import { modelGraphToFlow } from '@wetron/core/transform';
 
 async function check(path: string) {
   const bytes = new Uint8Array(readFileSync(path));
@@ -13,7 +13,7 @@ async function check(path: string) {
   let totalWeightRows = 0;
 
   for (const n of nodes) {
-    if (n.type !== "graphNode") continue;
+    if (n.type !== 'graphNode') continue;
     const wi = (n.data as any).weightInputs as
       | Array<{
           name: string;
@@ -47,7 +47,7 @@ async function check(path: string) {
   if (shared.length > 0) {
     console.log(`  --- SHARED INITIALIZERS (first 5) ---`);
     for (const [name, arr] of shared.slice(0, 5)) {
-      console.log(`    ${name}  ->  ${arr.join(", ")}`);
+      console.log(`    ${name}  ->  ${arr.join(', ')}`);
     }
   }
 
@@ -55,23 +55,22 @@ async function check(path: string) {
   let printed = 0;
   for (const n of nodes) {
     if (printed >= 3) break;
-    if (n.type !== "graphNode") continue;
+    if (n.type !== 'graphNode') continue;
     const wi = (n.data as any).weightInputs;
     if (!wi || wi.length === 0) continue;
     console.log(`  sample node "${(n.data as any).name || n.id}" (${(n.data as any).opType}):`);
-    for (const w of wi)
-      console.log(`    [${w.slot}] ${w.label}: ${w.name}  ${w.dtype}[${w.shape.join(",")}]`);
+    for (const w of wi) console.log(`    [${w.slot}] ${w.label}: ${w.name}  ${w.dtype}[${w.shape.join(',')}]`);
     printed++;
   }
 }
 
 const models = [
-  "test-models/mnist-12.onnx",
-  "test-models/feastconv_Opset18.onnx",
-  "test-models/mobile_net_v1.tflite",
-  "test-models/small_saved_model.pb",
-  "test-models/large_saved_model.pb",
-  "test-models/vertical_saved_model.pb",
+  'test-models/mnist-12.onnx',
+  'test-models/feastconv_Opset18.onnx',
+  'test-models/mobile_net_v1.tflite',
+  'test-models/small_saved_model.pb',
+  'test-models/large_saved_model.pb',
+  'test-models/vertical_saved_model.pb',
 ];
 
 for (const m of models) {

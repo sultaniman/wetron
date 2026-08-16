@@ -47,19 +47,13 @@ function catmullRom(pts: readonly Point[]): string {
     }
   }
 
-  return segs.join(" ");
+  return segs.join(' ');
 }
 
 // Smooth path from (sx,sy) through optional Dagre waypoints to (tx,ty).
 // With no waypoints: symmetric S-curve with vertical tangents (same as 2-point catmull-rom
 // but uses an explicit bezier so the curve is visually consistent with the spline).
-export function waypointPath(
-  sx: number,
-  sy: number,
-  pts: readonly Point[],
-  tx: number,
-  ty: number,
-): string {
+export function waypointPath(sx: number, sy: number, pts: readonly Point[], tx: number, ty: number): string {
   if (pts.length === 0) {
     const mid = (sy + ty) / 2;
     return `M ${sx} ${sy} C ${sx} ${mid} ${tx} ${mid} ${tx} ${ty}`;

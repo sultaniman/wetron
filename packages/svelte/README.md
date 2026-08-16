@@ -12,8 +12,8 @@ pnpm add @wetron/svelte
 
 ```svelte
 <script>
-  import { parseModel } from "@wetron/core";
-  import { ModelGraphView, NodePropertyPanel } from "@wetron/svelte";
+  import { parseModel } from '@wetron/core';
+  import { ModelGraphView, NodePropertyPanel } from '@wetron/svelte';
 
   let graph = $state(null);
   let target = $state(null);
@@ -50,13 +50,13 @@ Create an inspector component that reads the nearest `WeightPanel` context:
 ```svelte
 <!-- TensorCount.svelte -->
 <script lang="ts">
-  import { getWeightInspection } from "@wetron/svelte";
-  import { computeWeightDistribution } from "@wetron/core/weight-distribution";
+  import { getWeightInspection } from '@wetron/svelte';
+  import { computeWeightDistribution } from '@wetron/core/weight-distribution';
 
   const context = getWeightInspection();
   const inspection = $derived(context.current);
   const distribution = $derived(
-    inspection.status === "ready" ? computeWeightDistribution(inspection.values, 24) : null,
+    inspection.status === 'ready' ? computeWeightDistribution(inspection.values, 24) : null,
   );
 </script>
 
@@ -131,7 +131,7 @@ type ExportHelpers = {
 ```ts
 type PanelTarget =
   | GraphNode
-  | { graphValue: GraphValue; direction: "input" | "output" }
+  | { graphValue: GraphValue; direction: 'input' | 'output' }
   | {
       edge: {
         tensorName: string;

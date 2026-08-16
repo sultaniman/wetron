@@ -1,18 +1,9 @@
-import { ByteBuffer } from "flatbuffers";
-import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/common/ir";
-import { ParseError } from "@wetron/common/ir";
-import {
-  int8_,
-  int32_,
-  uint32_,
-  string_,
-  vecLen,
-  vecTable,
-  vecInt32,
-  vecStructBase,
-} from "@wetron/common/flatbuffers";
-import { BUILTIN_OP_NAMES } from "./builtin-ops.ts";
-import { TENSOR_TYPE_NAMES } from "./tensor-types.ts";
+import { ByteBuffer } from 'flatbuffers';
+import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from '@wetron/common/ir';
+import { ParseError } from '@wetron/common/ir';
+import { int8_, int32_, uint32_, string_, vecLen, vecTable, vecInt32, vecStructBase } from '@wetron/common/flatbuffers';
+import { BUILTIN_OP_NAMES } from './builtin-ops.ts';
+import { TENSOR_TYPE_NAMES } from './tensor-types.ts';
 
 function fieldOffset(fieldIndex: number): number {
   return 4 + fieldIndex * 2;
@@ -25,46 +16,41 @@ const TFLITE_MAGIC = [
 
 function isTflite(bytes: Uint8Array): boolean {
   if (bytes.length < 8) return false;
-  return TFLITE_MAGIC.some(
-    (m) => bytes[4] === m[0] && bytes[5] === m[1] && bytes[6] === m[2] && bytes[7] === m[3],
-  );
+  return TFLITE_MAGIC.some((m) => bytes[4] === m[0] && bytes[5] === m[1] && bytes[6] === m[2] && bytes[7] === m[3]);
 }
 
 function readOpName(bb: ByteBuffer, opcodeTable: number): string {
   const builtinCode = int32_(bb, opcodeTable, fieldOffset(3), -1);
   if (builtinCode >= 0) {
-    if (builtinCode === 32) return string_(bb, opcodeTable, fieldOffset(1)) ?? "CUSTOM";
+    if (builtinCode === 32) return string_(bb, opcodeTable, fieldOffset(1)) ?? 'CUSTOM';
     return BUILTIN_OP_NAMES[builtinCode] ?? `OP_${builtinCode}`;
   }
   const deprecated = int8_(bb, opcodeTable, fieldOffset(0), 0);
-  if (deprecated === 32) return string_(bb, opcodeTable, fieldOffset(1)) ?? "CUSTOM";
+  if (deprecated === 32) return string_(bb, opcodeTable, fieldOffset(1)) ?? 'CUSTOM';
   return BUILTIN_OP_NAMES[deprecated] ?? `OP_${deprecated}`;
 }
 
-function readTensor(
-  bb: ByteBuffer,
-  tensorTable: number,
-): { name: string; shape: number[]; dtype: string } {
-  const name = string_(bb, tensorTable, fieldOffset(3)) ?? "";
+function readTensor(bb: ByteBuffer, tensorTable: number): { name: string; shape: number[]; dtype: string } {
+  const name = string_(bb, tensorTable, fieldOffset(3)) ?? '';
   const type = int8_(bb, tensorTable, fieldOffset(1), 0);
   const shapeLen = vecLen(bb, tensorTable, fieldOffset(0));
   const shape: number[] = [];
   for (let i = 0; i < shapeLen; i++) {
     shape.push(vecInt32(bb, tensorTable, fieldOffset(0), i));
   }
-  return { name, shape, dtype: TENSOR_TYPE_NAMES[type] ?? "unknown" };
+  return { name, shape, dtype: TENSOR_TYPE_NAMES[type] ?? 'unknown' };
 }
 
 export function parseTflite(bytes: Uint8Array): ModelGraph {
   if (!isTflite(bytes)) {
-    throw new ParseError("tflite", "Not a TFLite file (missing magic bytes TFL3/ODLF)");
+    throw new ParseError('tflite', 'Not a TFLite file (missing magic bytes TFL3/ODLF)');
   }
 
   let bb: ByteBuffer;
   try {
     bb = new ByteBuffer(bytes);
   } catch (e) {
-    throw new ParseError("tflite", `ByteBuffer init failed: ${e}`);
+    throw new ParseError('tflite', `ByteBuffer init failed: ${e}`);
   }
 
   // Model field indices: 0=version, 1=operator_codes, 2=subgraphs, 3=description
@@ -77,7 +63,7 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
   }
 
   if (vecLen(bb, model, fieldOffset(2)) === 0) {
-    throw new ParseError("tflite", "Model has no subgraphs");
+    throw new ParseError('tflite', 'Model has no subgraphs');
   }
   const subgraph = vecTable(bb, model, fieldOffset(2), 0);
 
@@ -105,8 +91,7 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
 
   const numOutputIdxs = vecLen(bb, subgraph, fieldOffset(2));
   const outputIdxs: number[] = [];
-  for (let i = 0; i < numOutputIdxs; i++)
-    outputIdxs.push(vecInt32(bb, subgraph, fieldOffset(2), i));
+  for (let i = 0; i < numOutputIdxs; i++) outputIdxs.push(vecInt32(bb, subgraph, fieldOffset(2), i));
 
   // Identify constant tensors (initializers) via buffer presence.
   // Model field 4 = buffers; Buffer field 0 = data; Tensor field 2 = buffer index.
@@ -170,7 +155,7 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
         // -1 = optional input. Push empty string instead of skipping so slot
         // indices match opInputLabels (e.g. TRANSPOSE_CONV slot 3 = "bias").
         if (idx < 0) {
-          opInputs.push("");
+          opInputs.push('');
           continue;
         }
         opInputs.push(idx < tensors.length ? tensors[idx].name : `tensor_${idx}`);
@@ -193,7 +178,7 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
       });
     } catch (e) {
       warnings.push({
-        code: "node_parse_error",
+        code: 'node_parse_error',
         context: `Operator ${i}: ${e instanceof Error ? e.message : String(e)}`,
         nodeIndex: i,
       });
@@ -202,17 +187,13 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
 
   const toGraphValue = (idx: number): GraphValue => {
     const t = tensors[idx];
-    return t
-      ? { name: t.name, shape: t.shape, dtype: t.dtype }
-      : { name: `tensor_${idx}`, shape: null, dtype: null };
+    return t ? { name: t.name, shape: t.shape, dtype: t.dtype } : { name: `tensor_${idx}`, shape: null, dtype: null };
   };
 
-  const tensorShapes = new Map(
-    tensors.map((t) => [t.name, { shape: t.shape as readonly number[], dtype: t.dtype }]),
-  );
+  const tensorShapes = new Map(tensors.map((t) => [t.name, { shape: t.shape as readonly number[], dtype: t.dtype }]));
 
   return {
-    name: string_(bb, subgraph, fieldOffset(4)) ?? "",
+    name: string_(bb, subgraph, fieldOffset(4)) ?? '',
     inputs: inputIdxs.map(toGraphValue),
     outputs: outputIdxs.map(toGraphValue),
     nodes,
@@ -220,8 +201,11 @@ export function parseTflite(bytes: Uint8Array): ModelGraph {
     tensorShapes,
     fileSizeBytes: bytes.byteLength,
     weights: {
-      totalBytes: totalWeightBytes,
-      get: (name: string) => weightBytes.get(name),
+      kind: 'available',
+      source: {
+        totalBytes: totalWeightBytes,
+        get: (name: string) => weightBytes.get(name),
+      },
     },
     ...(warnings.length ? { warnings } : {}),
   };

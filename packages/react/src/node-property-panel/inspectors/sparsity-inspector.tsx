@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { computeSparsityBlocks, computeWeightSparsity } from "@wetron/core/weight-sparsity";
+import { useMemo, useState } from 'react';
+import { computeSparsityBlocks, computeWeightSparsity } from '@wetron/core/weight-sparsity';
 import {
   axisOptionLabel,
   matrixAxisHint,
@@ -7,10 +7,10 @@ import {
   sparsityDeadHint,
   sparsityModeHint,
   sparsityZeroHint,
-} from "@wetron/core/inspector-hints";
-import { useWeightInspection } from "../weight-inspection-context.tsx";
-import { Hint } from "./hint.tsx";
-import css from "./inspectors.module.css";
+} from '@wetron/core/inspector-hints';
+import { useWeightInspection } from '../weight-inspection-context.tsx';
+import { Hint } from './hint.tsx';
+import css from './inspectors.module.css';
 
 export function SparsityInspector() {
   const inspection = useWeightInspection();
@@ -25,7 +25,7 @@ export function SparsityInspector() {
   const effectiveThreshold = near ? threshold : 0;
   const result = useMemo(
     () =>
-      inspection.status === "ready" && shape
+      inspection.status === 'ready' && shape
         ? computeWeightSparsity(
             inspection.values,
             shape,
@@ -39,7 +39,7 @@ export function SparsityInspector() {
   const blockCols = shape && shape.length >= 2 ? Math.max(1, Math.ceil(shape[colAxis] / 4)) : 1;
   const blocks = useMemo(
     () =>
-      inspection.status === "ready" && shape && shape.length >= 2
+      inspection.status === 'ready' && shape && shape.length >= 2
         ? computeSparsityBlocks(
             inspection.values,
             shape,
@@ -51,9 +51,9 @@ export function SparsityInspector() {
         : [],
     [inspection, shape, rowAxis, colAxis, fixed, effectiveThreshold, blockRows, blockCols],
   );
-  if (!result || inspection.status !== "ready" || !shape) return null;
-  const setAxis = (kind: "row" | "col", axis: number) => {
-    if (kind === "row") {
+  if (!result || inspection.status !== 'ready' || !shape) return null;
+  const setAxis = (kind: 'row' | 'col', axis: number) => {
+    if (kind === 'row') {
       setRowAxis(axis);
       if (axis === colAxis) setColAxis(rowAxis);
     } else {
@@ -71,8 +71,8 @@ export function SparsityInspector() {
           <select
             className={css.field}
             aria-label="Sparsity mode"
-            value={near ? "near" : "exact"}
-            onChange={(event) => setNear(event.target.value === "near")}
+            value={near ? 'near' : 'exact'}
+            onChange={(event) => setNear(event.target.value === 'near')}
           >
             <option value="exact">exact zero</option>
             <option value="near">near zero</option>
@@ -96,13 +96,13 @@ export function SparsityInspector() {
           <>
             <div className={css.control}>
               <span className={css.caption}>
-                rows <Hint text={matrixAxisHint("row")} />
+                rows <Hint text={matrixAxisHint('row')} />
               </span>
               <select
                 className={css.field}
                 aria-label="Sparsity row axis"
                 value={rowAxis}
-                onChange={(event) => setAxis("row", Number(event.target.value))}
+                onChange={(event) => setAxis('row', Number(event.target.value))}
               >
                 {shape.map((_, axis) => (
                   <option key={axis} value={axis}>
@@ -113,13 +113,13 @@ export function SparsityInspector() {
             </div>
             <div className={css.control}>
               <span className={css.caption}>
-                cols <Hint text={matrixAxisHint("col")} />
+                cols <Hint text={matrixAxisHint('col')} />
               </span>
               <select
                 className={css.field}
                 aria-label="Sparsity column axis"
                 value={colAxis}
-                onChange={(event) => setAxis("col", Number(event.target.value))}
+                onChange={(event) => setAxis('col', Number(event.target.value))}
               >
                 {shape.map((_, axis) => (
                   <option key={axis} value={axis}>
@@ -164,8 +164,7 @@ export function SparsityInspector() {
         <div className={css.summaryItem}>
           <span className={css.summaryValue}>{result.deadSlices}</span>
           <span className={css.summaryLabel}>
-            dead slices{" "}
-            <Hint text={sparsityDeadHint(result, Math.min(rowAxis, shape.length - 1))} />
+            dead slices <Hint text={sparsityDeadHint(result, Math.min(rowAxis, shape.length - 1))} />
           </span>
         </div>
       </div>
@@ -174,13 +173,13 @@ export function SparsityInspector() {
           <div className={css.blockMap}>
             {blocks.map((block, index) => {
               const total = block.occupied + block.empty;
-              const state = block.occupied === 0 ? "empty" : block.empty === 0 ? "full" : "partial";
+              const state = block.occupied === 0 ? 'empty' : block.empty === 0 ? 'full' : 'partial';
               return (
                 <span
                   key={index}
                   aria-label={`${state} block`}
                   className={`${css.block} ${css[state]}`}
-                  title={`coordinates [${block.coordinateStart.join(", ")}]…[${block.coordinateEnd.join(", ")}] · ${block.occupied}/${total} occupied`}
+                  title={`coordinates [${block.coordinateStart.join(', ')}]…[${block.coordinateEnd.join(', ')}] · ${block.occupied}/${total} occupied`}
                 />
               );
             })}

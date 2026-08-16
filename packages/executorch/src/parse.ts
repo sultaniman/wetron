@@ -1,28 +1,19 @@
-import { ByteBuffer } from "flatbuffers";
-import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from "@wetron/common/ir";
-import { ParseError } from "@wetron/common/ir";
-import {
-  int8_,
-  int32_,
-  string_,
-  vecLen,
-  vecTable,
-  vecInt32,
-  unionType,
-  unionTable,
-} from "@wetron/common/flatbuffers";
+import { ByteBuffer } from 'flatbuffers';
+import type { ModelGraph, GraphNode, GraphValue, ParseWarning } from '@wetron/common/ir';
+import { ParseError } from '@wetron/common/ir';
+import { int8_, int32_, string_, vecLen, vecTable, vecInt32, unionType, unionTable } from '@wetron/common/flatbuffers';
 
 // PyTorch / ExecuTorch ScalarType enum -> dtype string
 const SCALAR_TYPE: Record<number, string> = {
-  0: "uint8",
-  1: "int8",
-  2: "int16",
-  3: "int32",
-  4: "int64",
-  5: "float16",
-  6: "float32",
-  7: "float64",
-  11: "bool",
+  0: 'uint8',
+  1: 'int8',
+  2: 'int16',
+  3: 'int32',
+  4: 'int64',
+  5: 'float16',
+  6: 'float32',
+  7: 'float64',
+  11: 'bool',
 };
 
 function isExecutorch(bytes: Uint8Array): boolean {
@@ -37,10 +28,7 @@ function isExecutorch(bytes: Uint8Array): boolean {
 
 // EValue.val union at vto 4 (type) / 6 (table). KernelTypes type 5 = Tensor.
 // Tensor: scalar_type at vto 4, sizes at vto 8
-function readTensorInfo(
-  bb: ByteBuffer,
-  evalueTable: number,
-): { shape: number[]; dtype: string } | null {
+function readTensorInfo(bb: ByteBuffer, evalueTable: number): { shape: number[]; dtype: string } | null {
   if (unionType(bb, evalueTable, 4) !== 5) return null;
   const tensorTable = unionTable(bb, evalueTable, 4);
   if (!tensorTable) return null;
@@ -49,31 +37,31 @@ function readTensorInfo(
   const sizesLen = vecLen(bb, tensorTable, 8);
   const shape: number[] = [];
   for (let i = 0; i < sizesLen; i++) shape.push(vecInt32(bb, tensorTable, 8, i));
-  return { shape, dtype: SCALAR_TYPE[scalarType] ?? "float32" };
+  return { shape, dtype: SCALAR_TYPE[scalarType] ?? 'float32' };
 }
 
 export function parseExecutorch(bytes: Uint8Array): ModelGraph {
   if (!isExecutorch(bytes)) {
-    throw new ParseError("executorch", "Not an ExecuTorch file (missing ET12 identifier)");
+    throw new ParseError('executorch', 'Not an ExecuTorch file (missing ET12 identifier)');
   }
 
   let bb: ByteBuffer;
   try {
     bb = new ByteBuffer(bytes);
   } catch (e) {
-    throw new ParseError("executorch", `ByteBuffer init failed: ${e}`);
+    throw new ParseError('executorch', `ByteBuffer init failed: ${e}`);
   }
 
   // Program is the root table.
   // Program: version=4, execution_plan=6, constant_buffer=8, …
   const program = bb.__indirect(bb.position());
   if (vecLen(bb, program, 6) === 0) {
-    throw new ParseError("executorch", "Program has no execution plans");
+    throw new ParseError('executorch', 'Program has no execution plans');
   }
   const plan = vecTable(bb, program, 6, 0);
 
   // ExecutionPlan: name=4, values=8, inputs=10, outputs=12, chains=14, operators=16
-  const planName = string_(bb, plan, 4) ?? "forward";
+  const planName = string_(bb, plan, 4) ?? 'forward';
 
   const numOps = vecLen(bb, plan, 16);
   const operators: string[] = [];
@@ -138,7 +126,7 @@ export function parseExecutorch(bytes: Uint8Array): ModelGraph {
         nodeIndex++;
       } catch (e) {
         warnings.push({
-          code: "node_parse_error",
+          code: 'node_parse_error',
           context: `Chain ${c} instruction ${k}: ${e instanceof Error ? e.message : String(e)}`,
           nodeIndex,
         });
@@ -148,9 +136,7 @@ export function parseExecutorch(bytes: Uint8Array): ModelGraph {
 
   const toGraphValue = (idx: number): GraphValue => {
     const t = valueTensors.get(idx);
-    return t
-      ? { name: `v${idx}`, shape: t.shape, dtype: t.dtype }
-      : { name: `v${idx}`, shape: null, dtype: null };
+    return t ? { name: `v${idx}`, shape: t.shape, dtype: t.dtype } : { name: `v${idx}`, shape: null, dtype: null };
   };
 
   const tensorShapes = new Map<string, { shape: readonly number[]; dtype: string }>();

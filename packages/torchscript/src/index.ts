@@ -1,1 +1,1 @@
-export { parseTorchscript } from "./parse.ts";
+export { parseTorchscript } from './parse.ts';

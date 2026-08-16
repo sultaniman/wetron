@@ -1,8 +1,8 @@
-import type { ModelGraph } from "@wetron/common/ir";
-import { ParseError } from "@wetron/common/ir";
-import { createProtobufReader } from "@wetron/common/protobuf";
-import type { KerasModelConfig } from "@wetron/keras";
-import { buildKerasGraph } from "@wetron/keras";
+import type { ModelGraph } from '@wetron/common/ir';
+import { ParseError } from '@wetron/common/ir';
+import { createProtobufReader } from '@wetron/common/protobuf';
+import type { KerasModelConfig } from '@wetron/keras';
+import { buildKerasGraph } from '@wetron/keras';
 
 export function parseKerasMetadataPb(bytes: Uint8Array, fileSizeBytes: number): ModelGraph {
   const reader = createProtobufReader(bytes);
@@ -16,7 +16,7 @@ export function parseKerasMetadataPb(bytes: Uint8Array, fileSizeBytes: number): 
         raw = JSON.parse(json);
       } catch (e) {
         throw new ParseError(
-          "savedmodel",
+          'savedmodel',
           `keras_metadata.pb: JSON parse failed: ${e instanceof Error ? e.message : String(e)}`,
         );
       }
@@ -24,5 +24,5 @@ export function parseKerasMetadataPb(bytes: Uint8Array, fileSizeBytes: number): 
     }
     reader.skipType(tag & 0x7);
   }
-  throw new ParseError("savedmodel", "keras_metadata.pb: field 1 (model config) not found");
+  throw new ParseError('savedmodel', 'keras_metadata.pb: field 1 (model config) not found');
 }

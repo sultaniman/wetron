@@ -12,8 +12,7 @@ interface DataViewWithFloat16 extends DataView {
 }
 
 // Float16 - use DataView.getFloat16 if available, otherwise manual decode
-const _hasNativeFloat16 =
-  typeof (DataView.prototype as DataViewWithFloat16).getFloat16 === "function";
+const _hasNativeFloat16 = typeof (DataView.prototype as DataViewWithFloat16).getFloat16 === 'function';
 
 export function readFloat16(view: DataView, offset: number, le: boolean): number {
   if (_hasNativeFloat16) {
@@ -107,22 +106,12 @@ export function readInt4(view: DataView, byteOffset: number, highNibble: boolean
 }
 
 // Generic bit-level reads (operates within a single byte)
-export function readUintBits(
-  view: DataView,
-  byteOffset: number,
-  bitOffset: number,
-  bits: number,
-): number {
+export function readUintBits(view: DataView, byteOffset: number, bitOffset: number, bits: number): number {
   const byte = view.getUint8(byteOffset);
   return (byte >> bitOffset) & ((1 << bits) - 1);
 }
 
-export function readIntBits(
-  view: DataView,
-  byteOffset: number,
-  bitOffset: number,
-  bits: number,
-): number {
+export function readIntBits(view: DataView, byteOffset: number, bitOffset: number, bits: number): number {
   const u = readUintBits(view, byteOffset, bitOffset, bits);
   const signBit = 1 << (bits - 1);
   return u >= signBit ? u - (signBit << 1) : u;

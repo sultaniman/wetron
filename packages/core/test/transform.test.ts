@@ -1,36 +1,36 @@
-import { test, expect } from "vitest";
-import { modelGraphToFlow } from "../src/transform.ts";
-import type { ModelGraph } from "@wetron/common/ir";
+import { test, expect } from 'vitest';
+import { modelGraphToFlow } from '../src/transform.ts';
+import type { ModelGraph } from '@wetron/common/ir';
 
 const GRAPH: ModelGraph = {
-  name: "test",
-  inputs: [{ name: "x", shape: [1, 3, 224, 224], dtype: "float32" }],
-  outputs: [{ name: "y", shape: [1, 1000], dtype: "float32" }],
+  name: 'test',
+  inputs: [{ name: 'x', shape: [1, 3, 224, 224], dtype: 'float32' }],
+  outputs: [{ name: 'y', shape: [1, 1000], dtype: 'float32' }],
   nodes: [
     {
-      name: "conv1",
-      opType: "Conv",
-      inputs: ["x", "weight", "bias"],
-      outputs: ["h"],
+      name: 'conv1',
+      opType: 'Conv',
+      inputs: ['x', 'weight', 'bias'],
+      outputs: ['h'],
       attributes: {},
     },
-    { name: "relu1", opType: "Relu", inputs: ["h"], outputs: ["y"], attributes: {} },
+    { name: 'relu1', opType: 'Relu', inputs: ['h'], outputs: ['y'], attributes: {} },
   ],
   initializers: new Map([
-    ["weight", { shape: [64, 3, 3, 3], dtype: "float32" }],
-    ["bias", { shape: [64], dtype: "float32" }],
+    ['weight', { shape: [64, 3, 3, 3], dtype: 'float32' }],
+    ['bias', { shape: [64], dtype: 'float32' }],
   ]),
   tensorShapes: new Map(),
   fileSizeBytes: 0,
 };
 
-test("node and edge counts: 2 ops + 2 IO nodes, 3 edges", () => {
+test('node and edge counts: 2 ops + 2 IO nodes, 3 edges', () => {
   const { nodes, edges } = modelGraphToFlow(GRAPH);
   expect(nodes.length).toBe(4);
   expect(edges.length).toBe(3);
 });
 
-test("all nodes have finite dagre positions", () => {
+test('all nodes have finite dagre positions', () => {
   const { nodes } = modelGraphToFlow(GRAPH);
   for (const n of nodes) {
     expect(isFinite(n.position.x)).toBe(true);
@@ -38,7 +38,7 @@ test("all nodes have finite dagre positions", () => {
   }
 });
 
-test("edge sources and targets reference existing node ids", () => {
+test('edge sources and targets reference existing node ids', () => {
   const { nodes, edges } = modelGraphToFlow(GRAPH);
   const ids = new Set(nodes.map((n) => n.id));
   for (const e of edges) {
@@ -47,28 +47,44 @@ test("edge sources and targets reference existing node ids", () => {
   }
 });
 
-test("Conv node gets weightInputs with labels and shapes from initializers", () => {
+test('Conv node gets weightInputs with labels and shapes from initializers', () => {
   const { nodes } = modelGraphToFlow(GRAPH);
-  const conv = nodes.find((n) => n.data.opType === "Conv");
-  expect(conv?.data.weightInputs?.length).toBe(2);
-  expect(conv?.data.weightInputs?.[0].label).toBe("W");
-  expect(conv?.data.weightInputs?.[0].shape).toEqual([64, 3, 3, 3]);
+  const conv = nodes.find((n) => n.type === 'graphNode');
+  expect(conv?.data.opType).toBe('Conv');
+  expect(conv?.data.weightInputs.length).toBe(2);
+  expect(conv?.data.weightInputs[0].label).toBe('W');
+  expect(conv?.data.weightInputs[0].shape).toEqual([64, 3, 3, 3]);
 });
 
-test("FlowNode and FlowEdge ids are unique", () => {
+test('flow node type selects one complete data variant', () => {
+  const { nodes } = modelGraphToFlow(GRAPH);
+  for (const node of nodes) {
+    if (node.type === 'graphNode') {
+      expect(node.data.graphNode).toBeDefined();
+      expect(Array.isArray(node.data.weightInputs)).toBe(true);
+      expect('graphValue' in node.data).toBe(false);
+    } else {
+      expect(node.data.graphValue).toBeDefined();
+      expect(node.data.opType === 'Input' || node.data.opType === 'Output').toBe(true);
+      expect('graphNode' in node.data).toBe(false);
+    }
+  }
+});
+
+test('FlowNode and FlowEdge ids are unique', () => {
   const { nodes, edges } = modelGraphToFlow(GRAPH);
   expect(new Set(nodes.map((n) => n.id)).size).toBe(nodes.length);
   expect(new Set(edges.map((e) => e.id)).size).toBe(edges.length);
 });
 
-test("same tensor consumed in multiple slots produces one edge, not N", () => {
+test('same tensor consumed in multiple slots produces one edge, not N', () => {
   // Add(x, x) - same input tensor in slot 0 and slot 1. Should produce one
   // edge from input::x to Add rather than two overlapping ones.
   const graph: ModelGraph = {
-    name: "selfadd",
-    inputs: [{ name: "x", shape: [1], dtype: "float32" }],
-    outputs: [{ name: "y", shape: [1], dtype: "float32" }],
-    nodes: [{ name: "add", opType: "Add", inputs: ["x", "x"], outputs: ["y"], attributes: {} }],
+    name: 'selfadd',
+    inputs: [{ name: 'x', shape: [1], dtype: 'float32' }],
+    outputs: [{ name: 'y', shape: [1], dtype: 'float32' }],
+    nodes: [{ name: 'add', opType: 'Add', inputs: ['x', 'x'], outputs: ['y'], attributes: {} }],
     initializers: new Map(),
     tensorShapes: new Map(),
     fileSizeBytes: 0,
@@ -77,26 +93,26 @@ test("same tensor consumed in multiple slots produces one edge, not N", () => {
   // 1 edge from input::x to Add + 1 from Add to output::y.
   expect(edges.length).toBe(2);
   expect(new Set(edges.map((e) => e.id)).size).toBe(edges.length);
-  const addInputs = edges.filter((e) => e.source.startsWith("input::"));
+  const addInputs = edges.filter((e) => e.source.startsWith('input::'));
   expect(addInputs.length).toBe(1);
 });
 
-test("FlowNode ids are unique when two graph inputs share a name", () => {
+test('FlowNode ids are unique when two graph inputs share a name', () => {
   // Pathological but possible in malformed graphs.
   const graph: ModelGraph = {
-    name: "dup",
+    name: 'dup',
     inputs: [
-      { name: "x", shape: [1], dtype: "float32" },
-      { name: "x", shape: [2], dtype: "float32" },
+      { name: 'x', shape: [1], dtype: 'float32' },
+      { name: 'x', shape: [2], dtype: 'float32' },
     ],
-    outputs: [{ name: "y", shape: [1], dtype: "float32" }],
-    nodes: [{ name: "id", opType: "Identity", inputs: ["x"], outputs: ["y"], attributes: {} }],
+    outputs: [{ name: 'y', shape: [1], dtype: 'float32' }],
+    nodes: [{ name: 'id', opType: 'Identity', inputs: ['x'], outputs: ['y'], attributes: {} }],
     initializers: new Map(),
     tensorShapes: new Map(),
     fileSizeBytes: 0,
   };
   const { nodes } = modelGraphToFlow(graph);
-  const inputIds = nodes.filter((n) => n.data.opType === "Input").map((n) => n.id);
+  const inputIds = nodes.filter((n) => n.data.opType === 'Input').map((n) => n.id);
   expect(inputIds.length).toBe(2);
   expect(new Set(inputIds).size).toBe(2);
 });

@@ -1,8 +1,9 @@
-import { test, expect, describe } from "vitest";
-import { computeStats } from "../src/weight-stats.ts";
+import { test, expect, describe } from 'vitest';
+import { computeStats } from '../src/weight-stats.ts';
+import { numericView } from '../src/weight-decoder.ts';
 
-describe("computeStats", () => {
-  test("simple float64 array", () => {
+describe('computeStats', () => {
+  test('simple float64 array', () => {
     const v = new Float64Array([-1, 0, 0, 1, 2]);
     const s = computeStats(v);
     expect(s.count).toBe(5);
@@ -14,7 +15,7 @@ describe("computeStats", () => {
     expect(s.std).toBeCloseTo(1.0198, 3);
   });
 
-  test("histogram has 12 bins summing to count", () => {
+  test('histogram has 12 bins summing to count', () => {
     const v = new Float64Array(1000);
     for (let i = 0; i < 1000; i++) v[i] = (i % 100) / 100; // 0..0.99 cycles
     const s = computeStats(v);
@@ -23,14 +24,14 @@ describe("computeStats", () => {
     expect(sum).toBe(1000);
   });
 
-  test("heatmap has 128 cells", () => {
+  test('heatmap has 128 cells', () => {
     const v = new Float64Array(2048);
     for (let i = 0; i < 2048; i++) v[i] = i / 2048;
     const s = computeStats(v);
     expect(s.heatmap.length).toBe(128);
   });
 
-  test("handles single-value tensor", () => {
+  test('handles single-value tensor', () => {
     const v = new Float64Array([3.14]);
     const s = computeStats(v);
     expect(s.min).toBe(3.14);
@@ -38,7 +39,7 @@ describe("computeStats", () => {
     expect(s.std).toBe(0);
   });
 
-  test("works on Int32Array", () => {
+  test('works on Int32Array', () => {
     const v = new Int32Array([-2, 0, 0, 2]);
     const s = computeStats(v);
     expect(s.min).toBe(-2);
@@ -46,20 +47,27 @@ describe("computeStats", () => {
     expect(s.zeros).toBe(2);
   });
 
-  test("chunkSize matches heatmap chunk size", () => {
+  test('accepts the numeric projection of int64 weights', () => {
+    const stats = computeStats(numericView(new BigInt64Array([-2n, 0n, 4n])));
+    expect(stats.min).toBe(-2);
+    expect(stats.max).toBe(4);
+    expect(stats.zeros).toBe(1);
+  });
+
+  test('chunkSize matches heatmap chunk size', () => {
     const v = new Float64Array(2048);
     for (let i = 0; i < 2048; i++) v[i] = i;
     const s = computeStats(v);
     expect(s.chunkSize).toBe(Math.floor(2048 / 128));
   });
 
-  test("chunkSize is at least 1 for tiny tensors", () => {
+  test('chunkSize is at least 1 for tiny tensors', () => {
     const v = new Float64Array([1, 2]);
     const s = computeStats(v);
     expect(s.chunkSize).toBe(1);
   });
 
-  test("NaN values are skipped in mean, std, and heatmap cells", () => {
+  test('NaN values are skipped in mean, std, and heatmap cells', () => {
     // 3 finite values mixed with NaN (as can occur from float16 decoding)
     const v = new Float64Array([1, NaN, 3, NaN, 5]);
     const s = computeStats(v);
@@ -73,7 +81,7 @@ describe("computeStats", () => {
     }
   });
 
-  test("Infinity values are skipped in mean, std, and heatmap cells", () => {
+  test('Infinity values are skipped in mean, std, and heatmap cells', () => {
     const v = new Float64Array([1, Infinity, 2, -Infinity, 3]);
     const s = computeStats(v);
     // min/max from comparisons: -Infinity < Infinity check etc.
@@ -85,14 +93,14 @@ describe("computeStats", () => {
     }
   });
 
-  test("filledCells equals 128 for large tensors", () => {
+  test('filledCells equals 128 for large tensors', () => {
     const v = new Float64Array(2048);
     for (let i = 0; i < 2048; i++) v[i] = i;
     const s = computeStats(v);
     expect(s.filledCells).toBe(128);
   });
 
-  test("filledCells equals count for small tensors", () => {
+  test('filledCells equals count for small tensors', () => {
     // 24-element bias: chunkSize=1, so exactly 24 cells filled
     const v = new Int32Array(24);
     for (let i = 0; i < 24; i++) v[i] = i * 100;
@@ -105,13 +113,13 @@ describe("computeStats", () => {
     }
   });
 
-  test("filledCells is 0 for empty tensor", () => {
+  test('filledCells is 0 for empty tensor', () => {
     const v = new Float64Array(0);
     const s = computeStats(v);
     expect(s.filledCells).toBe(0);
   });
 
-  test("all-NaN tensor produces finite zeroed stats", () => {
+  test('all-NaN tensor produces finite zeroed stats', () => {
     const v = new Float64Array([NaN, NaN, NaN]);
     const s = computeStats(v);
     expect(s.mean).toBe(0);

@@ -1,1 +1,1 @@
-export { parseGguf } from "./parse.ts";
+export { parseGguf } from './parse.ts';

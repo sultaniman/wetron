@@ -1,11 +1,11 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: { index: "src/index.ts" },
-  format: ["esm"],
+  entry: { index: 'src/index.ts' },
+  format: ['esm'],
   dts: true,
   sourcemap: true,
-  tsconfig: "../../tsconfig.build.json",
+  tsconfig: '../../tsconfig.build.json',
   clean: true,
-  external: ["@wetron/common", "flatbuffers", "fflate"],
+  external: ['@wetron/common', 'flatbuffers', 'fflate'],
 });

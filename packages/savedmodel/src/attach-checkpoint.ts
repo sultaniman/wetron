@@ -1,7 +1,7 @@
-import type { ModelGraph, WeightSource } from "@wetron/common/ir";
-import type { LoadedCheckpoint } from "./load-checkpoint.ts";
+import type { ModelGraph, WeightSource } from '@wetron/common/ir';
+import type { LoadedCheckpoint } from './load-checkpoint.ts';
 
-const SUFFIX = "/.ATTRIBUTES/VARIABLE_VALUE";
+const SUFFIX = '/.ATTRIBUTES/VARIABLE_VALUE';
 
 /**
  * Re-key a checkpoint's WeightSource by the graph node names that consume those
@@ -20,9 +20,9 @@ export function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpo
   const nameToKey = new Map<string, string>();
 
   for (const node of graph.nodes) {
-    if (node.opType !== "VarHandleOp") continue;
-    const shared = node.attributes["shared_name"];
-    if (typeof shared !== "string" || shared.length === 0) continue;
+    if (node.opType !== 'VarHandleOp') continue;
+    const shared = node.attributes['shared_name'];
+    if (typeof shared !== 'string' || shared.length === 0) continue;
 
     const viaObjectGraph = loaded.fullNameToKey.get(shared);
     if (viaObjectGraph !== undefined && loaded.metas.has(viaObjectGraph)) {
@@ -45,8 +45,7 @@ export function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpo
 
   let totalBytes = 0;
   for (const key of nameToKey.values()) {
-    const bytes = loaded.weights.get(key);
-    if (bytes) totalBytes += bytes.byteLength;
+    totalBytes += loaded.metas.get(key)!.size;
   }
 
   const weights: WeightSource = {
@@ -58,5 +57,10 @@ export function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpo
     },
   };
 
-  return { ...graph, weights, tensorShapes, initializers };
+  return {
+    ...graph,
+    weights: { kind: 'available', source: weights },
+    tensorShapes,
+    initializers,
+  };
 }

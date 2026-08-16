@@ -1,28 +1,23 @@
-import { useMemo, useState } from "react";
-import { sampleTensorSlice } from "@wetron/core/tensor-slice";
-import type { TensorSliceSelection } from "@wetron/core/tensor-index";
-import { colorForCell, colormapStops, pickColormap } from "@wetron/core/heatmap-color";
-import { formatVal } from "@wetron/core/format-val";
-import {
-  axisOptionLabel,
-  matrixAxisHint,
-  matrixSampleHint,
-  matrixScaleHint,
-} from "@wetron/core/inspector-hints";
-import { useWeightInspection } from "../weight-inspection-context.tsx";
-import { Hint } from "./hint.tsx";
-import css from "./inspectors.module.css";
+import { useMemo, useState } from 'react';
+import { sampleTensorSlice } from '@wetron/core/tensor-slice';
+import type { TensorSliceSelection } from '@wetron/core/tensor-index';
+import { colorForCell, colormapStops, pickColormap } from '@wetron/core/heatmap-color';
+import { formatVal } from '@wetron/core/format-val';
+import { axisOptionLabel, matrixAxisHint, matrixSampleHint, matrixScaleHint } from '@wetron/core/inspector-hints';
+import { useWeightInspection } from '../weight-inspection-context.tsx';
+import { Hint } from './hint.tsx';
+import css from './inspectors.module.css';
 
 export function MatrixInspector() {
   const inspection = useWeightInspection();
-  if (inspection.status !== "ready" || (inspection.tensor.shape?.length ?? 0) < 2) return null;
+  if (inspection.status !== 'ready' || (inspection.tensor.shape?.length ?? 0) < 2) return null;
   return <ReadyMatrixInspector inspection={inspection} />;
 }
 
 function ReadyMatrixInspector({
   inspection,
 }: {
-  inspection: ReturnType<typeof useWeightInspection> & { status: "ready" };
+  inspection: ReturnType<typeof useWeightInspection> & { status: 'ready' };
 }) {
   const shape = inspection.tensor.shape!;
   const [rowAxis, setRowAxis] = useState(shape.length - 2);
@@ -32,12 +27,12 @@ function ReadyMatrixInspector({
   );
   const selection: TensorSliceSelection = { rowAxis, colAxis, fixed };
   const sample = useMemo(
-    () => sampleTensorSlice(inspection.values, shape, selection, 16, 24),
-    [inspection.values, shape, rowAxis, colAxis, fixed],
+    () => sampleTensorSlice(inspection.numeric, shape, selection, 16, 24),
+    [inspection.numeric, shape, rowAxis, colAxis, fixed],
   );
   const colormap = pickColormap(sample.min, sample.max);
-  const setAxis = (kind: "row" | "col", axis: number) => {
-    if (kind === "row") {
+  const setAxis = (kind: 'row' | 'col', axis: number) => {
+    if (kind === 'row') {
       setRowAxis(axis);
       if (axis === colAxis) setColAxis(rowAxis);
     } else {
@@ -46,10 +41,7 @@ function ReadyMatrixInspector({
     }
     setFixed((current) =>
       Object.fromEntries(
-        shape.map((dimension, index) => [
-          index,
-          Math.min(current[index] ?? 0, Math.max(0, dimension - 1)),
-        ]),
+        shape.map((dimension, index) => [index, Math.min(current[index] ?? 0, Math.max(0, dimension - 1))]),
       ),
     );
   };
@@ -58,13 +50,13 @@ function ReadyMatrixInspector({
       <div className={css.controls}>
         <div className={css.control}>
           <span className={css.caption}>
-            rows <Hint text={matrixAxisHint("row")} />
+            rows <Hint text={matrixAxisHint('row')} />
           </span>
           <select
             className={css.field}
             aria-label="Matrix row axis"
             value={rowAxis}
-            onChange={(event) => setAxis("row", Number(event.target.value))}
+            onChange={(event) => setAxis('row', Number(event.target.value))}
           >
             {shape.map((_, axis) => (
               <option key={axis} value={axis}>
@@ -75,13 +67,13 @@ function ReadyMatrixInspector({
         </div>
         <div className={css.control}>
           <span className={css.caption}>
-            cols <Hint text={matrixAxisHint("col")} />
+            cols <Hint text={matrixAxisHint('col')} />
           </span>
           <select
             className={css.field}
             aria-label="Matrix column axis"
             value={colAxis}
-            onChange={(event) => setAxis("col", Number(event.target.value))}
+            onChange={(event) => setAxis('col', Number(event.target.value))}
           >
             {shape.map((_, axis) => (
               <option key={axis} value={axis}>
@@ -123,31 +115,25 @@ function ReadyMatrixInspector({
             key={index}
             className={css.cell}
             data-testid="matrix-cell"
-            title={`coordinates [${cell.coordinateStart.join(", ")}]…[${cell.coordinateEnd.join(", ")}] · mean ${formatVal(cell.mean, inspection.tensor.dtype ?? "float32")} · min ${formatVal(cell.min, inspection.tensor.dtype ?? "float32")} · max ${formatVal(cell.max, inspection.tensor.dtype ?? "float32")}`}
+            title={`coordinates [${cell.coordinateStart.join(', ')}]…[${cell.coordinateEnd.join(', ')}] · mean ${formatVal(cell.mean, inspection.tensor.dtype ?? 'float32')} · min ${formatVal(cell.min, inspection.tensor.dtype ?? 'float32')} · max ${formatVal(cell.max, inspection.tensor.dtype ?? 'float32')}`}
             style={{
-              background: colorForCell(
-                cell.mean,
-                sample.min,
-                sample.max,
-                colormap,
-                inspection.isDark,
-              ),
+              background: colorForCell(cell.mean, sample.min, sample.max, colormap, inspection.isDark),
             }}
           />
         ))}
       </div>
       <div className={css.scale} data-testid="matrix-scale">
         <Hint text={matrixSampleHint(sample)} />
-        {colormap === "sequential" && (
+        {colormap === 'sequential' && (
           <>
-            <span>{formatVal(sample.min, inspection.tensor.dtype ?? "float32")}</span>
+            <span>{formatVal(sample.min, inspection.tensor.dtype ?? 'float32')}</span>
             <span
               className={css.scaleRamp}
               style={{
-                background: `linear-gradient(90deg, ${colormapStops(inspection.isDark).join(", ")})`,
+                background: `linear-gradient(90deg, ${colormapStops(inspection.isDark).join(', ')})`,
               }}
             />
-            <span>{formatVal(sample.max, inspection.tensor.dtype ?? "float32")}</span>
+            <span>{formatVal(sample.max, inspection.tensor.dtype ?? 'float32')}</span>
           </>
         )}
         <Hint text={matrixScaleHint(sample)} />

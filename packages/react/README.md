@@ -47,12 +47,12 @@ Only the selected inspector is mounted. The compatibility `WeightHeatmap` export
 Pass a React node through `weightInspector` to replace the built-in visualization and values grid. The panel header, metadata, loading switch, and statistical summary remain fixed.
 
 ```tsx
-import { computeWeightDistribution } from "@wetron/core/weight-distribution";
-import { NodePropertyPanel, useWeightInspection } from "@wetron/react";
+import { computeWeightDistribution } from '@wetron/core/weight-distribution';
+import { NodePropertyPanel, useWeightInspection } from '@wetron/react';
 
 function TensorCount() {
   const inspection = useWeightInspection();
-  if (inspection.status !== "ready") return <div>{inspection.status}</div>;
+  if (inspection.status !== 'ready') return <div>{inspection.status}</div>;
   const distribution = computeWeightDistribution(inspection.values, 24);
   return (
     <div>
@@ -74,7 +74,7 @@ Custom inspector selectors should mount only their active inspector when analysi
 function ModelGraphView(props: {
   graph: ModelGraph;
   onTargetClick?: (target: PanelTarget) => void;
-  colorMode?: "light" | "dark" | "system"; // default: "system"
+  colorMode?: 'light' | 'dark' | 'system'; // default: "system"
   selectedEdgeTensorName?: string | null;
   searchQuery?: string;
   onWarnings?: (warnings: readonly ParseWarning[]) => void;
@@ -92,7 +92,7 @@ type ModelGraphViewHandle = {
 function NodePropertyPanel(props: {
   target: PanelTarget | null;
   graph?: ModelGraph; // pass to route initializer tensors to WeightPanel
-  colorMode?: "light" | "dark" | "system";
+  colorMode?: 'light' | 'dark' | 'system';
   opsets?: ReadonlyMap<string, number>;
   inputSources?: ReadonlyMap<string, string>;
   tensorShapes?: ReadonlyMap<string, { shape: readonly number[] | null; dtype: string | null }>;
@@ -112,7 +112,7 @@ function WeightPanel(props: {
 
 type PanelTarget =
   | GraphNode
-  | { graphValue: GraphValue; direction: "input" | "output" }
+  | { graphValue: GraphValue; direction: 'input' | 'output' }
   | {
       edge: {
         tensorName: string;
@@ -130,7 +130,7 @@ Use `isGraphNode(target)` from `@wetron/react` to narrow to `GraphNode`.
 Import once in your entry point:
 
 ```ts
-import "@wetron/react/styles.css";
+import '@wetron/react/styles.css';
 ```
 
 ## Theming

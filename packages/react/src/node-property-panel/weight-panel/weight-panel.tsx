@@ -1,18 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { ModelGraph } from "@wetron/common/ir";
-import { computeStats, decodeWeight, elementSize, type WeightInspectionData } from "@wetron/core";
-import { formatVal } from "@wetron/core/format-val";
-import { weightStatsHint } from "@wetron/core/inspector-hints";
-import { BackButton } from "../panel-ui.tsx";
-import { Tooltip } from "../../tooltip.tsx";
-import {
-  DefaultWeightInspectors,
-  type WeightInspectorName,
-} from "../default-weight-inspectors.tsx";
-import { WeightInspectionProvider } from "../weight-inspection-context.tsx";
-import { Hint } from "../inspectors/hint.tsx";
-import propertyPanelCss from "../node-property-panel.module.css";
-import weightPanelCss from "./weight-panel.module.css";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { ModelGraph } from '@wetron/common/ir';
+import { computeStats, decodeWeight, elementSize, numericView, type WeightInspectionData } from '@wetron/core';
+import { formatVal } from '@wetron/core/format-val';
+import { defaultInspector, weightStatsHint } from '@wetron/core/inspector-hints';
+import { BackButton } from '../panel-ui.tsx';
+import { Tooltip } from '../../tooltip.tsx';
+import { DefaultWeightInspectors, type WeightInspectorName } from '../default-weight-inspectors.tsx';
+import { WeightInspectionProvider } from '../weight-inspection-context.tsx';
+import { Hint } from '../inspectors/hint.tsx';
+import propertyPanelCss from '../node-property-panel.module.css';
+import weightPanelCss from './weight-panel.module.css';
 
 const SIZE_THRESHOLD = 20 * 1024 * 1024;
 
@@ -29,38 +26,37 @@ type WeightTarget = {
   readonly dtype: string | null;
 };
 
-function useWeightInspectionData(
-  target: WeightTarget,
-  graph: ModelGraph,
-  showWeights: boolean,
-): WeightInspectionData {
+function useWeightInspectionData(target: WeightTarget, graph: ModelGraph, showWeights: boolean): WeightInspectionData {
   return useMemo((): WeightInspectionData => {
-    const empty = (status: "deferred" | "external" | "unavailable"): WeightInspectionData => ({
+    const empty = (status: 'deferred' | 'external' | 'unavailable'): WeightInspectionData => ({
       status,
       tensor: target,
       bytes: null,
       values: null,
       stats: null,
     });
-    if (!graph.weights) return empty(graph.hasExternalWeights ? "external" : "unavailable");
-    if (!showWeights) return empty("deferred");
+    if (!graph.weights || graph.weights.kind === 'external') {
+      return empty(graph.weights?.kind === 'external' ? 'external' : 'unavailable');
+    }
+    if (!showWeights) return empty('deferred');
 
-    const bytes = graph.weights.get(target.name);
-    if (!bytes) return empty("unavailable");
-    const dtype = target.dtype ?? "float32";
+    const bytes = graph.weights.source.get(target.name);
+    if (!bytes) return empty('unavailable');
+    const dtype = target.dtype ?? 'float32';
     const shape = target.shape ?? [bytes.byteLength / (elementSize(dtype) || 1)];
     const values = decodeWeight(bytes, dtype, shape);
-    if (!values) return { status: "unsupported", tensor: target, bytes, values: null, stats: null };
+    if (!values) return { status: 'unsupported', tensor: target, bytes, values: null, stats: null };
 
-    let numeric: Float64Array | Int32Array | Uint32Array;
-    if (values instanceof BigInt64Array || values instanceof BigUint64Array) {
-      numeric = new Float64Array(values.length);
-      for (let i = 0; i < values.length; i++) numeric[i] = Number(values[i]);
-    } else {
-      numeric = values;
-    }
-    return { status: "ready", tensor: target, bytes, values, stats: computeStats(numeric) };
-  }, [graph.hasExternalWeights, graph.weights, showWeights, target]);
+    const numeric = numericView(values);
+    return {
+      status: 'ready',
+      tensor: target,
+      bytes,
+      values,
+      numeric,
+      stats: computeStats(numeric),
+    };
+  }, [graph.weights, showWeights, target]);
 }
 
 export function WeightPanel({
@@ -76,34 +72,31 @@ export function WeightPanel({
   isDark?: boolean;
   children?: ReactNode;
 }) {
-  const defaultShowWeights = graph.fileSizeBytes <= SIZE_THRESHOLD && graph.weights !== undefined;
+  const hasWeights = graph.weights?.kind === 'available';
+  const defaultShowWeights = graph.fileSizeBytes <= SIZE_THRESHOLD && hasWeights;
   const [storedShowWeights, setStoredShowWeights] = useState(defaultShowWeights);
-  const [defaultInspector, setDefaultInspector] = useState<WeightInspectorName>(
-    (target.shape?.length ?? 0) >= 2 ? "matrix" : "distribution",
-  );
+  const [selectedInspector, setSelectedInspector] = useState<WeightInspectorName>(defaultInspector(target.shape));
   const previousTensorName = useRef(target.name);
-  const previousHadWeights = useRef(graph.weights !== undefined);
-  const showWeights =
-    previousTensorName.current === target.name ? storedShowWeights : defaultShowWeights;
+  const previousHadWeights = useRef(hasWeights);
+  const showWeights = previousTensorName.current === target.name ? storedShowWeights : defaultShowWeights;
 
   useEffect(() => {
     if (previousTensorName.current !== target.name) {
       setStoredShowWeights(defaultShowWeights);
       previousTensorName.current = target.name;
-      previousHadWeights.current = graph.weights !== undefined;
+      previousHadWeights.current = hasWeights;
       return;
     }
-    const hasWeights = graph.weights !== undefined;
     if (hasWeights && !previousHadWeights.current && graph.fileSizeBytes <= SIZE_THRESHOLD) {
       setStoredShowWeights(true);
     }
     previousHadWeights.current = hasWeights;
-  }, [defaultShowWeights, graph.fileSizeBytes, graph.weights, target.name]);
+  }, [defaultShowWeights, graph.fileSizeBytes, graph.weights, hasWeights, target.name]);
 
   const inspection = useWeightInspectionData(target, graph, showWeights);
-  const dtype = target.dtype ?? "";
+  const dtype = target.dtype ?? '';
   const shape = target.shape;
-  const shapeLabel = shape ? `[${shape.join(" × ")}]` : "unknown";
+  const shapeLabel = shape ? `[${shape.join(' × ')}]` : 'unknown';
   const totalElements = shape ? shape.reduce((a, b) => a * b, 1) : 0;
   const sizeBytes = dtype ? totalElements * elementSize(dtype) : 0;
   const isLarge = graph.fileSizeBytes > SIZE_THRESHOLD;
@@ -144,63 +137,64 @@ export function WeightPanel({
         )}
       </div>
 
-      {(graph.weights !== undefined || graph.hasExternalWeights) && (
+      {graph.weights !== undefined && (
         <div className={propertyPanelCss.section}>
           <div className={weightPanelCss.toggleRow}>
             <span>Show weights</span>
             <button
               data-testid="show-weights-switch"
-              className={`${weightPanelCss.switch}${showWeights ? "" : ` ${weightPanelCss.switchOff}`}`}
+              className={`${weightPanelCss.switch}${showWeights ? '' : ` ${weightPanelCss.switchOff}`}`}
               onClick={() => setStoredShowWeights(!showWeights)}
               aria-label="Show weights"
-              disabled={graph.weights === undefined}
+              disabled={!hasWeights}
             />
           </div>
-          {inspection.status === "external" && (
+          {inspection.status === 'external' && (
             <div className={weightPanelCss.sizeNote}>
-              <strong>Weights live in an external checkpoint.</strong>
+              <strong>Weights live in external files.</strong>
               <br />
-              Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see
-              stats and plots for this tensor.
+              {graph.weights?.kind === 'external' && graph.weights.format === 'savedmodel' ? (
+                <>
+                  Load <code>variables.index</code> + <code>variables.data-00000-of-00001</code> to see stats and plots
+                  for this tensor.
+                </>
+              ) : (
+                <>Load the ONNX external data files to inspect this tensor.</>
+              )}
             </div>
           )}
-          {isLarge && inspection.status === "deferred" && (
+          {isLarge && inspection.status === 'deferred' && (
             <div className={weightPanelCss.sizeNote}>
               <strong>Large model - {formatBytes(graph.fileSizeBytes)}</strong>
               <br />
-              Stats and plots require reading every weight byte. Toggle on to load this tensor's
-              data.
+              Stats and plots require reading every weight byte. Toggle on to load this tensor's data.
             </div>
           )}
-          {inspection.status === "unsupported" && (
+          {inspection.status === 'unsupported' && (
             <div className={weightPanelCss.sizeNote}>
-              Value decoding is not available for {dtype || "this tensor type"}.
+              Value decoding is not available for {dtype || 'this tensor type'}.
             </div>
           )}
         </div>
       )}
 
-      {inspection.status === "ready" && (
+      {inspection.status === 'ready' && (
         <div className={propertyPanelCss.section}>
           <div className={propertyPanelCss.row}>
             <span className={`${propertyPanelCss.rowLabel} ${weightPanelCss.statLabel}`}>
               min <Hint text={weightStatsHint(inspection.stats)} />
             </span>
-            <span className={propertyPanelCss.rowValue}>
-              {formatVal(inspection.stats.min, dtype || "float32")}
-            </span>
+            <span className={propertyPanelCss.rowValue}>{formatVal(inspection.stats.min, dtype || 'float32')}</span>
           </div>
           <div className={propertyPanelCss.row}>
             <span className={propertyPanelCss.rowLabel}>max</span>
-            <span className={propertyPanelCss.rowValue}>
-              {formatVal(inspection.stats.max, dtype || "float32")}
-            </span>
+            <span className={propertyPanelCss.rowValue}>{formatVal(inspection.stats.max, dtype || 'float32')}</span>
           </div>
           <div className={propertyPanelCss.row}>
-            <span className={propertyPanelCss.rowLabel}>{"μ ± σ"}</span>
+            <span className={propertyPanelCss.rowLabel}>{'μ ± σ'}</span>
             <span className={propertyPanelCss.rowValue}>
-              {formatVal(inspection.stats.mean, dtype || "float32")} ±{" "}
-              {formatVal(inspection.stats.std, dtype || "float32")}
+              {formatVal(inspection.stats.mean, dtype || 'float32')} ±{' '}
+              {formatVal(inspection.stats.std, dtype || 'float32')}
             </span>
           </div>
           <div className={propertyPanelCss.row}>
@@ -211,9 +205,7 @@ export function WeightPanel({
       )}
 
       <WeightInspectionProvider key={target.name} inspection={inspection} isDark={isDark}>
-        {children ?? (
-          <DefaultWeightInspectors selected={defaultInspector} onSelected={setDefaultInspector} />
-        )}
+        {children ?? <DefaultWeightInspectors selected={selectedInspector} onSelected={setSelectedInspector} />}
       </WeightInspectionProvider>
     </>
   );

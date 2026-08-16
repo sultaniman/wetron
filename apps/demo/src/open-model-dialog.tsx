@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { XIcon } from "@phosphor-icons/react";
-import css from "./open-model-dialog.module.css";
+import React, { useState, useCallback, useEffect } from 'react';
+import { XIcon } from '@phosphor-icons/react';
+import css from './open-model-dialog.module.css';
 
 export function OpenModelDialog({
   theme,
@@ -8,19 +8,19 @@ export function OpenModelDialog({
   onFile,
   onUrl,
 }: {
-  theme: "light" | "dark";
+  theme: 'light' | 'dark';
   onClose: () => void;
   onFile: (file: File) => void;
   onUrl: (url: string) => void;
 }) {
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState('');
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
   const onFileChange = useCallback(
@@ -41,7 +41,7 @@ export function OpenModelDialog({
     onClose();
   }, [url, onUrl, onClose]);
 
-  const urlValid = url.trim() !== "";
+  const urlValid = url.trim() !== '';
 
   return (
     <div
@@ -86,7 +86,7 @@ export function OpenModelDialog({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && urlValid) submitUrl();
+                if (e.key === 'Enter' && urlValid) submitUrl();
               }}
               className={css.urlInput}
             />

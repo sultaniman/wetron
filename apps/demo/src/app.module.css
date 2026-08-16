@@ -13,7 +13,7 @@
   color: var(--app-text);
 }
 
-.root[data-theme="dark"] {
+.root[data-theme='dark'] {
   --app-bg: #16161e;
   --app-border: #2a2a3a;
   --app-text: #e0e0e0;

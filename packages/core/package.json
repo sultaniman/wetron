@@ -115,6 +115,7 @@
     "@wetron/onnx": "workspace:*",
     "@wetron/savedmodel": "workspace:*",
     "@wetron/tflite": "workspace:*",
+    "@wetron/tokens": "workspace:*",
     "@wetron/torchscript": "workspace:*",
     "dagre": "^0.8.5",
     "fflate": "^0.8.3",

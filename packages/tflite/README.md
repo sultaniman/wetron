@@ -13,7 +13,7 @@ Included automatically when you install `@wetron/core` or `@wetron/react`.
 ## API
 
 ```ts
-import { parseTflite } from "@wetron/tflite";
+import { parseTflite } from '@wetron/tflite';
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseTflite(bytes); // synchronous

@@ -1,12 +1,7 @@
-import type { DecodedWeight } from "./weight-decoder.ts";
-import type { WeightStats } from "./weight-stats.ts";
+import type { DecodedWeight, NumericWeight } from './weight-decoder.ts';
+import type { WeightStats } from './weight-stats.ts';
 
-export type WeightInspectionStatus =
-  | "deferred"
-  | "external"
-  | "unavailable"
-  | "ready"
-  | "unsupported";
+export type WeightInspectionStatus = 'deferred' | 'external' | 'unavailable' | 'ready' | 'unsupported';
 
 interface WeightInspectionBase {
   readonly tensor: {
@@ -19,21 +14,22 @@ interface WeightInspectionBase {
 export type WeightInspectionData = WeightInspectionBase &
   (
     | {
-        readonly status: "deferred" | "external" | "unavailable";
+        readonly status: 'deferred' | 'external' | 'unavailable';
         readonly bytes: null;
         readonly values: null;
         readonly stats: null;
       }
     | {
-        readonly status: "unsupported";
+        readonly status: 'unsupported';
         readonly bytes: Uint8Array;
         readonly values: null;
         readonly stats: null;
       }
     | {
-        readonly status: "ready";
+        readonly status: 'ready';
         readonly bytes: Uint8Array;
         readonly values: DecodedWeight;
+        readonly numeric: NumericWeight;
         readonly stats: WeightStats;
       }
   );

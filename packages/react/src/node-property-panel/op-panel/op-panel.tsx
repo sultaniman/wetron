@@ -1,48 +1,40 @@
-import React from "react";
-import {
-  ArrowCircleDownIcon,
-  ArrowCircleUpIcon,
-  SlidersHorizontalIcon,
-  StackIcon,
-} from "@phosphor-icons/react";
-import type { GraphNode, ModelGraph } from "@wetron/common/ir";
-import { opCategory } from "@wetron/core";
-import { CATEGORY_ICON, OP_ICON } from "../../theme.ts";
-import { renderIconEntry, Row, SectionLabel, BackButton } from "../panel-ui.tsx";
-import { AttrRow } from "../attr-row/attr-row.tsx";
-import { Tooltip } from "../../tooltip.tsx";
-import propertyPanelCss from "../node-property-panel.module.css";
+import React from 'react';
+import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon, StackIcon } from '@phosphor-icons/react';
+import type { GraphNode, ModelGraph } from '@wetron/common/ir';
+import { opCategory } from '@wetron/core';
+import { CATEGORY_ICON, OP_ICON } from '../../theme.ts';
+import { renderIconEntry, Row, SectionLabel, BackButton } from '../panel-ui.tsx';
+import { AttrRow } from '../attr-row/attr-row.tsx';
+import { Tooltip } from '../../tooltip.tsx';
+import propertyPanelCss from '../node-property-panel.module.css';
 
-function formatModule(
-  domain: string | undefined,
-  opsets: ReadonlyMap<string, number> | undefined,
-): string | null {
+function formatModule(domain: string | undefined, opsets: ReadonlyMap<string, number> | undefined): string | null {
   if (!opsets || opsets.size === 0) return null;
-  const key = domain ?? "";
+  const key = domain ?? '';
   const version = opsets.get(key);
-  const displayDomain = key === "" ? "ai.onnx" : key;
+  const displayDomain = key === '' ? 'ai.onnx' : key;
   return version != null ? `${displayDomain} v${version}` : displayDomain;
 }
 
 function formatGgufQuantization(node: GraphNode): string | null {
-  if (!node.opType.startsWith("GGUF")) return null;
-  const fileType = node.attributes["general.file_type_name"];
-  const version = node.attributes["general.quantization_version"];
+  if (!node.opType.startsWith('GGUF')) return null;
+  const fileType = node.attributes['general.file_type_name'];
+  const version = node.attributes['general.quantization_version'];
 
   let typeLabel: string | null = null;
-  if (typeof fileType === "string") {
-    if (fileType.startsWith("MOSTLY_")) typeLabel = `${fileType.slice(7)} (mostly)`;
-    else if (fileType.startsWith("ALL_")) typeLabel = fileType.slice(4);
+  if (typeof fileType === 'string') {
+    if (fileType.startsWith('MOSTLY_')) typeLabel = `${fileType.slice(7)} (mostly)`;
+    else if (fileType.startsWith('ALL_')) typeLabel = fileType.slice(4);
     else typeLabel = fileType;
   }
 
-  if (typeLabel && typeof version === "number") {
+  if (typeLabel && typeof version === 'number') {
     return `${typeLabel} · quant v${version}`;
   }
 
   if (typeLabel) return typeLabel;
 
-  return typeof version === "number" ? `Quantization v${version}` : null;
+  return typeof version === 'number' ? `Quantization v${version}` : null;
 }
 
 export function OpPanel({
@@ -66,9 +58,7 @@ export function OpPanel({
   const iconEntry = OP_ICON[node.opType] ?? CATEGORY_ICON[cat];
   // Preserve the original slot index so the React key is unique even when a
   // node consumes the same tensor twice (e.g. Add(x, x)).
-  const visibleInputs = node.inputs
-    .map((name, slot) => ({ name, slot }))
-    .filter(({ name }) => name !== "");
+  const visibleInputs = node.inputs.map((name, slot) => ({ name, slot })).filter(({ name }) => name !== '');
   const attrEntries = Object.entries(node.attributes);
   const module = formatModule(node.domain, opsets);
   const quantization = formatGgufQuantization(node);
@@ -78,7 +68,7 @@ export function OpPanel({
         {onBack && <BackButton onBack={onBack} />}
         <div
           className={propertyPanelCss.iconBox}
-          style={{ "--icon-box-bg": iconBg, "--icon-box-color": color } as React.CSSProperties}
+          style={{ '--icon-box-bg': iconBg, '--icon-box-color': color } as React.CSSProperties}
         >
           {renderIconEntry(iconEntry)}
         </div>
@@ -128,7 +118,7 @@ export function OpPanel({
               <Row
                 key={`${slot}::${name}`}
                 label={name}
-                chip={sourceOp ?? "tensor"}
+                chip={sourceOp ?? 'tensor'}
                 chipColor={sourceColor}
                 onClick={onTensorClick ? () => onTensorClick(name) : undefined}
               />
@@ -137,10 +127,7 @@ export function OpPanel({
         </div>
       )}
       {node.outputs.length > 0 && (
-        <div
-          className={`${propertyPanelCss.section} ${propertyPanelCss.scrollSection}`}
-          data-scroll="true"
-        >
+        <div className={`${propertyPanelCss.section} ${propertyPanelCss.scrollSection}`} data-scroll="true">
           <SectionLabel icon={<ArrowCircleUpIcon size={12} />} title="Outputs" />
           {node.outputs.map((name, i) => (
             <Row

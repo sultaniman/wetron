@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, test } from "vitest";
-import { mount, tick, unmount } from "svelte";
-import type { ModelGraph } from "@wetron/common/ir";
+import { afterEach, describe, expect, test } from 'vitest';
+import { mount, tick, unmount } from 'svelte';
+import type { ModelGraph } from '@wetron/common/ir';
 import {
   DefaultWeightInspectors,
   NodePropertyPanel,
@@ -18,7 +18,7 @@ import {
   getWeightInspection,
   type ExportHelpers,
   type WeightInspectionContextValue,
-} from "../src/index.ts";
+} from '../src/index.ts';
 
 const mounted: Array<ReturnType<typeof mount>> = [];
 
@@ -32,19 +32,22 @@ function graphWithWeight(): ModelGraph {
   const view = new DataView(bytes.buffer);
   view.setBigUint64(0, 0xffff_ffff_ffff_ffffn, true);
   return {
-    name: "weights",
+    name: 'weights',
     inputs: [],
     outputs: [],
     nodes: [],
-    initializers: new Map([["w", { shape: [1], dtype: "uint64" }]]),
-    tensorShapes: new Map([["w", { shape: [1], dtype: "uint64" }]]),
+    initializers: new Map([['w', { shape: [1], dtype: 'uint64' }]]),
+    tensorShapes: new Map([['w', { shape: [1], dtype: 'uint64' }]]),
     fileSizeBytes: bytes.byteLength,
-    weights: { totalBytes: bytes.byteLength, get: (name) => (name === "w" ? bytes : undefined) },
+    weights: {
+      kind: 'available',
+      source: { totalBytes: bytes.byteLength, get: (name) => (name === 'w' ? bytes : undefined) },
+    },
   };
 }
 
-describe("Svelte package surface", () => {
-  test("exports its imperative handle type from a TypeScript module", () => {
+describe('Svelte package surface', () => {
+  test('exports its imperative handle type from a TypeScript module', () => {
     const handle: ExportHelpers = {
       fitAll: async () => {},
       getViewport: () => ({ x: 0, y: 0, zoom: 1 }),
@@ -55,7 +58,7 @@ describe("Svelte package surface", () => {
     expect(handle.getViewportElement()).toBeNull();
     const contextType: WeightInspectionContextValue | null = null;
     expect(contextType).toBeNull();
-    expect(getWeightInspection).toBeTypeOf("function");
+    expect(getWeightInspection).toBeTypeOf('function');
     expect(DefaultWeightInspectors).toBeDefined();
     expect(WeightHistogram).toBeDefined();
     expect(WeightHeatmap).toBeDefined();
@@ -73,78 +76,78 @@ describe("Svelte package surface", () => {
       expect(inspector).toBeDefined();
   });
 
-  test("routes initializers to the weight panel", async () => {
-    const target = document.createElement("div");
+  test('routes initializers to the weight panel', async () => {
+    const target = document.createElement('div');
     document.body.append(target);
     mounted.push(
       mount(NodePropertyPanel, {
         target,
         props: {
-          target: { tensor: { name: "w", shape: [1], dtype: "uint64" } },
+          target: { tensor: { name: 'w', shape: [1], dtype: 'uint64' } },
           graph: graphWithWeight(),
-          colorMode: "light",
+          colorMode: 'light',
         },
       }),
     );
     await tick();
 
-    expect(target.textContent).toContain("Weight");
-    expect(target.textContent).toContain("uint64");
+    expect(target.textContent).toContain('Weight');
+    expect(target.textContent).toContain('uint64');
     expect(target.querySelector('[data-testid="show-weights-switch"]')).not.toBeNull();
   });
 
-  test("hides raw-value controls for metadata-only tensors", async () => {
+  test('hides raw-value controls for metadata-only tensors', async () => {
     const graph: ModelGraph = {
-      name: "gguf",
+      name: 'gguf',
       inputs: [],
       outputs: [],
       nodes: [],
-      initializers: new Map([["w", { shape: [64, 512], dtype: "Q4_0" }]]),
-      tensorShapes: new Map([["w", { shape: [64, 512], dtype: "Q4_0" }]]),
+      initializers: new Map([['w', { shape: [64, 512], dtype: 'Q4_0' }]]),
+      tensorShapes: new Map([['w', { shape: [64, 512], dtype: 'Q4_0' }]]),
       fileSizeBytes: 1024,
     };
-    const target = document.createElement("div");
+    const target = document.createElement('div');
     document.body.append(target);
     mounted.push(
       mount(NodePropertyPanel, {
         target,
         props: {
-          target: { tensor: { name: "w", shape: [64, 512], dtype: "Q4_0" } },
+          target: { tensor: { name: 'w', shape: [64, 512], dtype: 'Q4_0' } },
           graph,
-          colorMode: "light",
+          colorMode: 'light',
         },
       }),
     );
     await tick();
 
-    expect(target.textContent).toContain("Q4_0");
+    expect(target.textContent).toContain('Q4_0');
     expect(target.querySelector('[data-testid="show-weights-switch"]')).toBeNull();
-    expect(target.textContent).not.toContain("Raw tensor values");
+    expect(target.textContent).not.toContain('Raw tensor values');
   });
 
-  test("shows the GGUF model-level quantization summary", async () => {
-    const target = document.createElement("div");
+  test('shows the GGUF model-level quantization summary', async () => {
+    const target = document.createElement('div');
     document.body.append(target);
     mounted.push(
       mount(NodePropertyPanel, {
         target,
         props: {
           target: {
-            name: "llama",
-            opType: "GGUF v3",
+            name: 'llama',
+            opType: 'GGUF v3',
             inputs: [],
-            outputs: ["output"],
+            outputs: ['output'],
             attributes: {
-              "general.file_type_name": "MOSTLY_Q4_0",
-              "general.quantization_version": 2,
+              'general.file_type_name': 'MOSTLY_Q4_0',
+              'general.quantization_version': 2,
             },
           },
-          colorMode: "light",
+          colorMode: 'light',
         },
       }),
     );
     await tick();
 
-    expect(target.textContent).toContain("Q4_0 (mostly) · quant v2");
+    expect(target.textContent).toContain('Q4_0 (mostly) · quant v2');
   });
 });

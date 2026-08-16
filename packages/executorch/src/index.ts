@@ -1,1 +1,1 @@
-export { parseExecutorch } from "./parse.ts";
+export { parseExecutorch } from './parse.ts';

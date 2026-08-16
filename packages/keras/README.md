@@ -13,7 +13,7 @@ Included automatically when you install `@wetron/core` or `@wetron/react`.
 ## API
 
 ```ts
-import { parseKeras } from "@wetron/keras";
+import { parseKeras } from '@wetron/keras';
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseKeras(bytes); // synchronous

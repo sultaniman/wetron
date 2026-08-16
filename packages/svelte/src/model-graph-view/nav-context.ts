@@ -1,7 +1,7 @@
-import { getContext, setContext } from "svelte";
-import type { ModelGraph } from "@wetron/common/ir";
+import { getContext, setContext } from 'svelte';
+import type { ModelGraph } from '@wetron/common/ir';
 
-const KEY = Symbol("wetron-sub-graph-nav");
+const KEY = Symbol('wetron-sub-graph-nav');
 
 export type SubGraphNav = {
   readonly depth: number;

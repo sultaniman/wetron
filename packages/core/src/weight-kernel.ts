@@ -1,6 +1,6 @@
-import type { TensorSliceSelection } from "./tensor-index.ts";
-import type { DecodedWeight } from "./weight-decoder.ts";
-import { coordinateToOffset, describeTensorSlice } from "./tensor-index.ts";
+import type { TensorSliceSelection } from './tensor-index.ts';
+import { numericView, type DecodedWeight } from './weight-decoder.ts';
+import { coordinateToOffsetInLayout, describeTensorSlice, tensorLayout } from './tensor-index.ts';
 
 export interface KernelAxisMapping {
   readonly output: number;
@@ -10,7 +10,7 @@ export interface KernelAxisMapping {
   readonly group?: number;
 }
 
-export type KernelLayoutPreset = "OIHW" | "OHWI" | "HWIO" | "IHWO";
+export type KernelLayoutPreset = 'OIHW' | 'OHWI' | 'HWIO' | 'IHWO';
 
 export const KERNEL_LAYOUTS: Readonly<Record<KernelLayoutPreset, KernelAxisMapping>> = {
   OIHW: { output: 0, input: 1, height: 2, width: 3 },
@@ -19,10 +19,7 @@ export const KERNEL_LAYOUTS: Readonly<Record<KernelLayoutPreset, KernelAxisMappi
   IHWO: { input: 0, height: 1, width: 2, output: 3 },
 };
 
-export function validateKernelAxisMapping(
-  shape: readonly number[],
-  mapping: KernelAxisMapping,
-): void {
+export function validateKernelAxisMapping(shape: readonly number[], mapping: KernelAxisMapping): void {
   const axes = [
     mapping.output,
     mapping.input,
@@ -34,7 +31,7 @@ export function validateKernelAxisMapping(
     new Set(axes).size !== axes.length ||
     axes.some((axis) => !Number.isSafeInteger(axis) || axis < 0 || axis >= shape.length)
   ) {
-    throw new RangeError("kernel roles must map to distinct valid axes");
+    throw new RangeError('kernel roles must map to distinct valid axes');
   }
 }
 
@@ -53,10 +50,9 @@ export function kernelSlicePage(
   group = 0,
 ): readonly KernelSlice[] {
   validateKernelAxisMapping(shape, mapping);
-  if (input < 0 || input >= shape[mapping.input])
-    throw new RangeError("kernel input is out of range");
+  if (input < 0 || input >= shape[mapping.input]) throw new RangeError('kernel input is out of range');
   if (mapping.group !== undefined && (group < 0 || group >= shape[mapping.group]))
-    throw new RangeError("kernel group is out of range");
+    throw new RangeError('kernel group is out of range');
   const end = Math.min(shape[mapping.output], outputStart + pageSize);
   const slices: KernelSlice[] = [];
   for (let output = outputStart; output < end; output++) {
@@ -81,14 +77,15 @@ export function computeKernelL2(
   selection: TensorSliceSelection,
 ): number {
   const slice = describeTensorSlice(shape, selection);
+  const layout = tensorLayout(shape);
+  const numeric = numericView(values);
   let sumSquares = 0;
   for (let row = 0; row < slice.rows; row++)
     for (let col = 0; col < slice.cols; col++) {
       const coordinate = shape.map((_, axis) =>
         axis === selection.rowAxis ? row : axis === selection.colAxis ? col : selection.fixed[axis],
       );
-      const raw = values[coordinateToOffset(coordinate, shape)];
-      const value = typeof raw === "bigint" ? Number(raw) : raw;
+      const value = numeric[coordinateToOffsetInLayout(coordinate, layout)];
       sumSquares += value * value;
     }
   return Math.sqrt(sumSquares);

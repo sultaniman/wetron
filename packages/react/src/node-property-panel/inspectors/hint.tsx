@@ -1,6 +1,6 @@
-import { InfoIcon } from "@phosphor-icons/react";
-import { Tooltip } from "../../tooltip.tsx";
-import css from "./inspectors.module.css";
+import { InfoIcon } from '@phosphor-icons/react';
+import { Tooltip } from '../../tooltip.tsx';
+import css from './inspectors.module.css';
 
 /** Explains a control or value. The tooltip is the whole behavior; clicking does nothing. */
 export function Hint({ text }: { text: string }) {

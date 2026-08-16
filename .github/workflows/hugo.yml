@@ -2,8 +2,8 @@ name: Deploy Docs
 
 on:
   push:
-    branches: ["main"]
-    paths: ["docs/**"]
+    branches: ['main']
+    paths: ['docs/**']
   workflow_dispatch:
 
 permissions:
@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: false
 
 defaults:
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: "0.157.0"
+          hugo-version: '0.157.0'
           extended: true
 
       - name: Install Dart Sass

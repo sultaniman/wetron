@@ -271,14 +271,14 @@
   border-radius: 3px;
   background: var(--inspector-surface);
 }
-.inspector-profile-track[data-signed="true"]::after {
+.inspector-profile-track[data-signed='true']::after {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 50%;
   width: 1px;
   background: var(--inspector-border);
-  content: "";
+  content: '';
 }
 .inspector-profile-bar {
   position: absolute;
@@ -435,13 +435,13 @@
   color: var(--inspector-label);
   font-size: 11px;
 }
-.inspector-finding-icon[data-severity="error"] {
+.inspector-finding-icon[data-severity='error'] {
   color: #ef4444;
 }
-.inspector-finding-icon[data-severity="warning"] {
+.inspector-finding-icon[data-severity='warning'] {
   color: #f59e0b;
 }
-.inspector-finding-icon[data-severity="info"] {
+.inspector-finding-icon[data-severity='info'] {
   color: var(--inspector-accent);
 }
 .inspector-finding-label {

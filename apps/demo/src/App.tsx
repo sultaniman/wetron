@@ -1,49 +1,49 @@
-import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { getViewportForBounds } from "@xyflow/react";
-import { toPng } from "html-to-image";
-import { parseModel, parseModelFromUrl } from "@wetron/core";
-import { ModelGraphView, NodePropertyPanel } from "@wetron/react";
-import type { ModelGraphViewHandle } from "@wetron/react";
-import type { ModelGraph } from "@wetron/core";
-import type { PanelTarget } from "@wetron/react";
-import { BrandMark } from "./brand-mark.tsx";
-import { GitHubIcon } from "./github-icon.tsx";
-import { DropZone } from "./drop-zone.tsx";
-import { OpenModelDialog } from "./open-model-dialog.tsx";
-import { WeightsDialog } from "./weights-dialog.tsx";
-import { MODE_CYCLE, MODE_ICON, MODE_LABEL, resolveMode, type ColorMode } from "./theme.ts";
-import css from "./app.module.css";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { getViewportForBounds } from '@xyflow/react';
+import { toPng } from 'html-to-image';
+import { parseModel, parseModelFromUrl } from '@wetron/core';
+import { ModelGraphView, NodePropertyPanel } from '@wetron/react';
+import type { ModelGraphViewHandle } from '@wetron/react';
+import type { ModelGraph } from '@wetron/core';
+import type { PanelTarget } from '@wetron/react';
+import { BrandMark } from './brand-mark.tsx';
+import { GitHubIcon } from './github-icon.tsx';
+import { DropZone } from './drop-zone.tsx';
+import { OpenModelDialog } from './open-model-dialog.tsx';
+import { WeightsDialog } from './weights-dialog.tsx';
+import { MODE_CYCLE, MODE_ICON, MODE_LABEL, resolveMode, type ColorMode } from './theme.ts';
+import css from './app.module.css';
 
 type State =
-  | { status: "idle" }
-  | { status: "loading"; name: string }
-  | { status: "ready"; graph: ModelGraph; name: string }
-  | { status: "error"; message: string; name: string };
+  | { status: 'idle' }
+  | { status: 'loading'; name: string }
+  | { status: 'ready'; graph: ModelGraph; name: string }
+  | { status: 'error'; message: string; name: string };
 
 export default function App() {
-  const [state, setState] = useState<State>({ status: "idle" });
+  const [state, setState] = useState<State>({ status: 'idle' });
   const [dragging, setDragging] = useState(false);
   const [selected, setSelected] = useState<PanelTarget | null>(null);
   const [history, setHistory] = useState<PanelTarget[]>([]);
   const [selectedEdgeTensorName, setSelectedEdgeTensorName] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [colorMode, setColorMode] = useState<ColorMode>("system");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [colorMode, setColorMode] = useState<ColorMode>('system');
   const [weightsDialogOpen, setWeightsDialogOpen] = useState(false);
   const [openDialogOpen, setOpenDialogOpen] = useState(false);
   const graphContainerRef = useRef<HTMLDivElement>(null);
   const graphViewRef = useRef<ModelGraphViewHandle>(null);
-  const [resolvedMode, setResolvedMode] = useState<"light" | "dark">(() => resolveMode("system"));
+  const [resolvedMode, setResolvedMode] = useState<'light' | 'dark'>(() => resolveMode('system'));
 
   useEffect(() => {
     setResolvedMode(resolveMode(colorMode));
   }, [colorMode]);
 
   useEffect(() => {
-    if (colorMode !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => setResolvedMode(resolveMode("system"));
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+    if (colorMode !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = () => setResolvedMode(resolveMode('system'));
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, [colorMode]);
 
   const cycleMode = useCallback(() => {
@@ -51,20 +51,20 @@ export default function App() {
   }, []);
 
   const loadFile = useCallback(async (file: File) => {
-    setState({ status: "loading", name: file.name });
+    setState({ status: 'loading', name: file.name });
     setSelected(null);
     setHistory([]);
     setSelectedEdgeTensorName(null);
-    setSearchQuery("");
+    setSearchQuery('');
     setWeightsDialogOpen(false);
     try {
       const buf = await file.arrayBuffer();
       const graph = await parseModel(new Uint8Array(buf), file.name);
-      setState({ status: "ready", graph, name: file.name });
-      if (graph.nodes[0]?.opType.startsWith("GGUF")) setSelected(graph.nodes[0]);
+      setState({ status: 'ready', graph, name: file.name });
+      if (graph.nodes[0]?.opType.startsWith('GGUF')) setSelected(graph.nodes[0]);
     } catch (e) {
       setState({
-        status: "error",
+        status: 'error',
         message: e instanceof Error ? e.message : String(e),
         name: file.name,
       });
@@ -74,24 +74,24 @@ export default function App() {
   const loadUrl = useCallback(async (url: string) => {
     const name = (() => {
       try {
-        return new URL(url).pathname.split("/").at(-1) || url;
+        return new URL(url).pathname.split('/').at(-1) || url;
       } catch {
         return url;
       }
     })();
-    setState({ status: "loading", name });
+    setState({ status: 'loading', name });
     setSelected(null);
     setHistory([]);
     setSelectedEdgeTensorName(null);
-    setSearchQuery("");
+    setSearchQuery('');
     setWeightsDialogOpen(false);
     try {
       const graph = await parseModelFromUrl(url);
-      setState({ status: "ready", graph, name });
-      if (graph.nodes[0]?.opType.startsWith("GGUF")) setSelected(graph.nodes[0]);
+      setState({ status: 'ready', graph, name });
+      if (graph.nodes[0]?.opType.startsWith('GGUF')) setSelected(graph.nodes[0]);
     } catch (e) {
       setState({
-        status: "error",
+        status: 'error',
         message: e instanceof Error ? e.message : String(e),
         name,
       });
@@ -99,11 +99,11 @@ export default function App() {
   }, []);
 
   const onWeightsLoaded = useCallback((nextGraph: ModelGraph) => {
-    setState((prev) => (prev.status === "ready" ? { ...prev, graph: nextGraph } : prev));
+    setState((prev) => (prev.status === 'ready' ? { ...prev, graph: nextGraph } : prev));
   }, []);
 
   const tensorSources = useMemo<ReadonlyMap<string, string>>(() => {
-    if (state.status !== "ready") return new Map();
+    if (state.status !== 'ready') return new Map();
     const map = new Map<string, string>();
     for (const node of state.graph.nodes) {
       for (const out of node.outputs) {
@@ -111,7 +111,7 @@ export default function App() {
       }
     }
     for (const gv of state.graph.inputs) {
-      map.set(gv.name, "Input");
+      map.set(gv.name, 'Input');
     }
     return map;
   }, [state]);
@@ -119,7 +119,7 @@ export default function App() {
   const handleTargetClick = useCallback((target: PanelTarget) => {
     setHistory([]);
     setSelected(target);
-    setSelectedEdgeTensorName("edge" in target ? target.edge.tensorName : null);
+    setSelectedEdgeTensorName('edge' in target ? target.edge.tensorName : null);
   }, []);
 
   const handleClose = useCallback(() => {
@@ -130,7 +130,7 @@ export default function App() {
 
   const handleTensorClick = useCallback(
     (name: string) => {
-      if (state.status !== "ready") return;
+      if (state.status !== 'ready') return;
       const info = state.graph.tensorShapes.get(name);
       setSelected((prev) => {
         if (prev) setHistory((h) => [...h, prev]);
@@ -144,14 +144,14 @@ export default function App() {
     const prev = history[history.length - 1];
     if (prev !== undefined) {
       setSelected(prev);
-      setSelectedEdgeTensorName("edge" in prev ? prev.edge.tensorName : null);
+      setSelectedEdgeTensorName('edge' in prev ? prev.edge.tensorName : null);
     }
     setHistory((h) => h.slice(0, -1));
   }, [history]);
 
   const exportPng = useCallback(async () => {
-    if (!graphViewRef.current || state.status !== "ready") return;
-    const name = state.name.replace(/\.[^.]+$/, "") || "graph";
+    if (!graphViewRef.current || state.status !== 'ready') return;
+    const name = state.name.replace(/\.[^.]+$/, '') || 'graph';
     const saved = graphViewRef.current.getViewport();
     // fitAll renders all nodes into the DOM (onlyRenderVisibleElements)
     await graphViewRef.current.fitAll();
@@ -161,14 +161,7 @@ export default function App() {
     const PAD = 60;
     const imgW = Math.ceil(bounds.width + PAD * 2);
     const imgH = Math.ceil(bounds.height + PAD * 2);
-    const vp = getViewportForBounds(
-      bounds,
-      imgW,
-      imgH,
-      0.1,
-      4,
-      PAD / Math.max(bounds.width, bounds.height),
-    );
+    const vp = getViewportForBounds(bounds, imgW, imgH, 0.1, 4, PAD / Math.max(bounds.width, bounds.height));
     const dataUrl = await toPng(el, {
       cacheBust: true,
       pixelRatio: 2,
@@ -181,7 +174,7 @@ export default function App() {
       },
     });
     graphViewRef.current.setViewport(saved);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = dataUrl;
     a.download = `${name}.png`;
     a.click();
@@ -198,11 +191,9 @@ export default function App() {
   );
 
   const ModeIcon = MODE_ICON[colorMode];
-  const ready = state.status === "ready";
+  const ready = state.status === 'ready';
   const showWeightsButton =
-    ready &&
-    state.graph.weights?.kind === "external" &&
-    state.graph.weights.format === "savedmodel";
+    ready && state.graph.weights?.kind === 'external' && state.graph.weights.format === 'savedmodel';
 
   return (
     <div className={css.root} data-theme={resolvedMode}>
@@ -231,11 +222,10 @@ export default function App() {
         >
           Docs
         </a>
-        {state.status !== "idle" && <span className={css.fileName}>{state.name}</span>}
+        {state.status !== 'idle' && <span className={css.fileName}>{state.name}</span>}
         {ready && (
           <span className={css.stats}>
-            {state.graph.nodes.length} nodes · {state.graph.inputs.length} inputs ·{" "}
-            {state.graph.outputs.length} outputs
+            {state.graph.nodes.length} nodes · {state.graph.inputs.length} inputs · {state.graph.outputs.length} outputs
             {state.graph.initializers.size > 0 && ` · ${state.graph.initializers.size} tensors`}
           </span>
         )}
@@ -258,7 +248,7 @@ export default function App() {
             Load weights…
           </button>
         )}
-        {ready && state.graph.weights?.kind === "available" && (
+        {ready && state.graph.weights?.kind === 'available' && (
           <span
             className={css.weightsStatus}
             title={`${state.graph.weights.source.totalBytes.toLocaleString()} bytes loaded`}
@@ -268,7 +258,7 @@ export default function App() {
         )}
         <button
           onClick={() => setOpenDialogOpen(true)}
-          className={`${css.openButton} ${ready ? "" : css.openButtonPushRight}`}
+          className={`${css.openButton} ${ready ? '' : css.openButtonPushRight}`}
         >
           Open model
         </button>
@@ -283,7 +273,7 @@ export default function App() {
       </header>
 
       <main className={css.main}>
-        {state.status === "idle" && (
+        {state.status === 'idle' && (
           <DropZone
             theme={resolvedMode}
             dragging={dragging}
@@ -296,10 +286,8 @@ export default function App() {
             onOpen={() => setOpenDialogOpen(true)}
           />
         )}
-        {state.status === "loading" && (
-          <div className={css.placeholder}>Parsing {state.name}...</div>
-        )}
-        {state.status === "error" && (
+        {state.status === 'loading' && <div className={css.placeholder}>Parsing {state.name}...</div>}
+        {state.status === 'error' && (
           <div className={css.errorBox}>
             <div className={css.errorTitle}>Failed to parse {state.name}</div>
             <div className={css.errorMessage}>{state.message}</div>

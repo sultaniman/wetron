@@ -16,7 +16,7 @@
  * we scan for the proto start rather than relying on a fixed offset.
  */
 
-import { readVarint } from "./varint.ts";
+import { readVarint } from './varint.ts';
 
 const _dec = new TextDecoder();
 

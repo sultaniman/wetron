@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "@wetron/gguf": ["../gguf/src/index.ts"]
+      "@wetron/gguf": ["../gguf/src/index.ts"],
+      "@wetron/tokens": ["../tokens/src/index.ts"]
     }
   },
   "include": ["src", "test"]

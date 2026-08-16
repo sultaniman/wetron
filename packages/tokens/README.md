@@ -11,11 +11,11 @@ pnpm add @wetron/tokens
 ## API
 
 ```ts
-import { CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME, CANVAS_VARS, PANEL_VARS } from "@wetron/tokens";
+import { CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME, CANVAS_VARS, PANEL_VARS } from '@wetron/tokens';
 
 // Node header colors by op category
-CATEGORY_THEME["conv"].light; // "#4a90d9"
-CATEGORY_THEME["conv"].dark; // "#2d6aad"
+CATEGORY_THEME['conv'].light; // "#4a90d9"
+CATEGORY_THEME['conv'].dark; // "#2d6aad"
 
 // Apply canvas CSS variables
 for (const [key, value] of Object.entries(CANVAS_VARS.light)) {

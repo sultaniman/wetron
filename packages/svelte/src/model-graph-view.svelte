@@ -1,316 +1,312 @@
 <script lang="ts">
-    import { SvelteFlow, Controls, Background } from '@xyflow/svelte';
-    import FitViewHelper from './fit-view-helper.svelte';
-    import MinimapNav from './minimap-nav.svelte';
-    import ExportHelper from './export-helper.svelte';
-    import type { ExportHelpers } from './export-helper.ts';
-    import '@xyflow/svelte/dist/style.css';
-    import { untrack } from 'svelte';
-    import { modelGraphToFlow, filterGraph } from '@wetron/core';
-    import type { FlowEdge, GraphNodeData } from '@wetron/core/transform';
-    import type { ModelGraph, ParseWarning } from '@wetron/common/ir';
-    import GraphNodeComponent from './nodes/graph-node.svelte';
-    import IoNodeComponent from './nodes/io-node.svelte';
-    import ModelEdgeComponent from './edges/model-edge.svelte';
-    import { provideColorMode, resolveColorMode, type ColorMode } from './color-mode-context.ts';
-    import type { PanelTarget } from './types.ts';
-    import { CANVAS_VARS, MINIMAP_THEME, EDGE_THEME } from '@wetron/tokens';
-    import { categoryVars } from './category-vars.ts';
-    import { provideSubGraphNav } from './model-graph-view/nav-context.ts';
-    import ScopeChrome from './model-graph-view/scope-chrome.svelte';
+  import { SvelteFlow, Controls, Background } from '@xyflow/svelte';
+  import FitViewHelper from './fit-view-helper.svelte';
+  import MinimapNav from './minimap-nav.svelte';
+  import ExportHelper from './export-helper.svelte';
+  import type { ExportHelpers } from './export-helper.ts';
+  import '@xyflow/svelte/dist/style.css';
+  import { untrack } from 'svelte';
+  import { modelGraphToFlow, filterGraph } from '@wetron/core';
+  import type { FlowEdge, FlowNode } from '@wetron/core/transform';
+  import type { ModelGraph, ParseWarning } from '@wetron/common/ir';
+  import GraphNodeComponent from './nodes/graph-node.svelte';
+  import IoNodeComponent from './nodes/io-node.svelte';
+  import ModelEdgeComponent from './edges/model-edge.svelte';
+  import { provideColorMode, resolveColorMode, type ColorMode } from './color-mode-context.ts';
+  import type { PanelTarget } from './types.ts';
+  import { CANVAS_VARS, MINIMAP_THEME, EDGE_THEME } from '@wetron/tokens';
+  import { categoryVars } from './category-vars.ts';
+  import { provideSubGraphNav } from './model-graph-view/nav-context.ts';
+  import ScopeChrome from './model-graph-view/scope-chrome.svelte';
 
-    type FlowEdgeData = FlowEdge['data'];
+  type FlowEdgeData = FlowEdge['data'];
 
-    interface Props {
-        graph: ModelGraph;
-        onTargetClick?: (target: PanelTarget) => void;
-        onWarnings?: (warnings: readonly ParseWarning[]) => void;
-        selectedEdgeTensorName?: string | null;
-        searchQuery?: string;
-        colorMode?: ColorMode;
-        exportRef?: ExportHelpers | null;
-    }
+  interface Props {
+    graph: ModelGraph;
+    onTargetClick?: (target: PanelTarget) => void;
+    onWarnings?: (warnings: readonly ParseWarning[]) => void;
+    selectedEdgeTensorName?: string | null;
+    searchQuery?: string;
+    colorMode?: ColorMode;
+    exportRef?: ExportHelpers | null;
+  }
 
-    let {
-        graph,
-        onTargetClick,
-        onWarnings,
-        selectedEdgeTensorName = null,
-        searchQuery = '',
-        colorMode = 'system',
-        exportRef = $bindable<ExportHelpers | null>(null),
-    }: Props = $props();
-    let rootElement = $state<HTMLDivElement | null>(null);
+  let {
+    graph,
+    onTargetClick,
+    onWarnings,
+    selectedEdgeTensorName = null,
+    searchQuery = '',
+    colorMode = 'system',
+    exportRef = $bindable<ExportHelpers | null>(null),
+  }: Props = $props();
+  let rootElement = $state<HTMLDivElement | null>(null);
 
-    let navStack = $state<ModelGraph[]>(untrack(() => [graph]));
-    $effect.pre(() => {
-        // reset stack whenever a different root graph is provided
-        navStack = [graph];
-    });
-    const currentGraph = $derived(navStack[navStack.length - 1]);
-    const depth = $derived(navStack.length - 1);
-    provideSubGraphNav({
-        get depth() {
-            return depth;
-        },
-        get scopeName() {
-            return depth > 0 ? currentGraph.name : null;
-        },
-        navigateInto(sub: ModelGraph) {
-            navStack = [...navStack, sub];
-        },
-        navigateBack() {
-            if (navStack.length > 1) navStack = navStack.slice(0, -1);
-        },
-    });
+  let navStack = $state<ModelGraph[]>(untrack(() => [graph]));
+  $effect.pre(() => {
+    // reset stack whenever a different root graph is provided
+    navStack = [graph];
+  });
+  const currentGraph = $derived(navStack[navStack.length - 1]);
+  const depth = $derived(navStack.length - 1);
+  provideSubGraphNav({
+    get depth() {
+      return depth;
+    },
+    get scopeName() {
+      return depth > 0 ? currentGraph.name : null;
+    },
+    navigateInto(sub: ModelGraph) {
+      navStack = [...navStack, sub];
+    },
+    navigateBack() {
+      if (navStack.length > 1) navStack = navStack.slice(0, -1);
+    },
+  });
 
-    let systemIsDark = $state(resolveColorMode('system') === 'dark');
+  let systemIsDark = $state(resolveColorMode('system') === 'dark');
 
-    $effect(() => {
-        if (colorMode !== 'system') return;
-        const mq = window.matchMedia('(prefers-color-scheme: dark)');
-        systemIsDark = mq.matches;
-        const handler = (e: MediaQueryListEvent) => {
-            systemIsDark = e.matches;
-        };
-        mq.addEventListener('change', handler);
-        return () => mq.removeEventListener('change', handler);
-    });
-
-    const isDark = $derived(colorMode === 'dark' ? true : colorMode === 'light' ? false : systemIsDark);
-
-    // $state object in context - child nodes read .resolved inside $derived,
-    // creating an explicit signal subscription that re-fires on theme change.
-    const colorCtx: { resolved: 'light' | 'dark' } = $state({ resolved: 'light' });
-    $effect.pre(() => {
-        colorCtx.resolved = isDark ? 'dark' : 'light';
-    });
-    provideColorMode(colorCtx);
-
-    const nodeTypes = {
-        graphNode: GraphNodeComponent,
-        ioNode: IoNodeComponent,
+  $effect(() => {
+    if (colorMode !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    systemIsDark = mq.matches;
+    const handler = (e: MediaQueryListEvent) => {
+      systemIsDark = e.matches;
     };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  });
 
-    const edgeTypes = {
-        modelEdge: ModelEdgeComponent,
-    };
+  const isDark = $derived(colorMode === 'dark' ? true : colorMode === 'light' ? false : systemIsDark);
 
-    const edgeDefaults = $derived(isDark ? { style: 'stroke: #7a7a9a; opacity: 0.55;' } : { style: 'opacity: 0.35;' });
+  // $state object in context - child nodes read .resolved inside $derived,
+  // creating an explicit signal subscription that re-fires on theme change.
+  const colorCtx: { resolved: 'light' | 'dark' } = $state({ resolved: 'light' });
+  $effect.pre(() => {
+    colorCtx.resolved = isDark ? 'dark' : 'light';
+  });
+  provideColorMode(colorCtx);
 
-    $effect(() => {
-        onWarnings?.(currentGraph.warnings ?? []);
-    });
+  const nodeTypes = {
+    graphNode: GraphNodeComponent,
+    ioNode: IoNodeComponent,
+  };
 
-    const rawFlow = $derived(modelGraphToFlow(currentGraph));
-    const matchedNames = $derived(searchQuery ? filterGraph(currentGraph, searchQuery) : new Set<string>());
+  const edgeTypes = {
+    modelEdge: ModelEdgeComponent,
+  };
 
-    // $state.raw prevents @xyflow/svelte from seeing deeply-reactive proxies;
-    // it mutates node objects internally (computed dims/positions) and that would
-    // write back through Svelte's proxy, invalidating rawFlow -> infinite loop.
-    let flowNodes = $state.raw(untrack(() => rawFlow.nodes));
-    $effect.pre(() => {
-        flowNodes = rawFlow.nodes;
-    });
+  const edgeDefaults = $derived(isDark ? { style: 'stroke: #7a7a9a; opacity: 0.55;' } : { style: 'opacity: 0.35;' });
 
-    const styledFlowNodes = $derived(
-        matchedNames.size === 0
-            ? flowNodes
-            : flowNodes.map((n) => {
-                  const data = n.data as GraphNodeData | undefined;
-                  if (!data?.graphNode) return n;
-                  return matchedNames.has(data.graphNode.name) ? n : { ...n, style: 'opacity: 0.1' };
-              }),
-    );
+  $effect(() => {
+    onWarnings?.(currentGraph.warnings ?? []);
+  });
 
-    const flowEdges = $derived(
-        rawFlow.edges.map((edge) => {
-            const d = edge.data as FlowEdgeData | undefined;
-            const isSelected = selectedEdgeTensorName != null && d?.tensorName === selectedEdgeTensorName;
-            const anySelected = selectedEdgeTensorName != null;
-            const filtering = matchedNames.size > 0;
-            const edgeDimmed =
-                filtering && !matchedNames.has(d?.sourceNodeName ?? '') && !matchedNames.has(d?.targetNodeName ?? '');
-            return {
-                ...edge,
-                style: isSelected
-                    ? `stroke: ${EDGE_THEME.selectedStroke}; stroke-width: ${EDGE_THEME.selectedStrokeWidth}; opacity: 1;`
-                    : anySelected
-                      ? `stroke: ${isDark ? 'rgba(120,120,160,0.2)' : 'rgba(0,0,0,0.1)'}; opacity: 1;`
-                      : edgeDimmed
-                        ? `stroke: ${isDark ? 'rgba(120,120,160,0.15)' : 'rgba(0,0,0,0.07)'}; opacity: 1;`
-                        : edgeDefaults.style,
-            };
+  const rawFlow = $derived(modelGraphToFlow(currentGraph));
+  const matchedNodeIds = $derived(searchQuery ? filterGraph(currentGraph, searchQuery) : new Set<string>());
+
+  // $state.raw prevents @xyflow/svelte from seeing deeply-reactive proxies;
+  // it mutates node objects internally (computed dims/positions) and that would
+  // write back through Svelte's proxy, invalidating rawFlow -> infinite loop.
+  let flowNodes = $state.raw(untrack(() => rawFlow.nodes));
+  $effect.pre(() => {
+    flowNodes = rawFlow.nodes;
+  });
+
+  const styledFlowNodes = $derived(
+    matchedNodeIds.size === 0
+      ? flowNodes
+      : flowNodes.map((n) => {
+          if (n.type !== 'graphNode') return n;
+          return matchedNodeIds.has(n.id) ? n : { ...n, style: 'opacity: 0.1' };
         }),
-    );
+  );
 
-    function handleNodeClick({ node, event }: { node: { data: GraphNodeData }; event: MouseEvent | TouchEvent }) {
-        if (!onTargetClick) return;
-        const weightRow = (event.target as Element).closest('[data-weight-name]') as HTMLElement | null;
-        if (weightRow) {
-            const name = weightRow.dataset.weightName;
-            const shapeStr = weightRow.dataset.weightShape;
-            if (name && shapeStr) {
-                onTargetClick({
-                    tensor: {
-                        name,
-                        shape: shapeStr.split(',').map(Number),
-                        dtype: weightRow.dataset.weightDtype ?? null,
-                    },
-                });
-            }
-            return;
-        }
-        if (node.data.graphNode) {
-            onTargetClick(node.data.graphNode);
-        } else if (node.data.graphValue) {
-            onTargetClick({
-                graphValue: node.data.graphValue,
-                direction: node.data.opType === 'Input' ? 'input' : 'output',
-            });
-        }
-    }
+  const flowEdges = $derived(
+    rawFlow.edges.map((edge) => {
+      const d = edge.data as FlowEdgeData | undefined;
+      const isSelected = selectedEdgeTensorName != null && d?.tensorName === selectedEdgeTensorName;
+      const anySelected = selectedEdgeTensorName != null;
+      const filtering = matchedNodeIds.size > 0;
+      const edgeDimmed = filtering && !matchedNodeIds.has(edge.source) && !matchedNodeIds.has(edge.target);
+      return {
+        ...edge,
+        style: isSelected
+          ? `stroke: ${EDGE_THEME.selectedStroke}; stroke-width: ${EDGE_THEME.selectedStrokeWidth}; opacity: 1;`
+          : anySelected
+            ? `stroke: ${isDark ? 'rgba(120,120,160,0.2)' : 'rgba(0,0,0,0.1)'}; opacity: 1;`
+            : edgeDimmed
+              ? `stroke: ${isDark ? 'rgba(120,120,160,0.15)' : 'rgba(0,0,0,0.07)'}; opacity: 1;`
+              : edgeDefaults.style,
+      };
+    }),
+  );
 
-    function handleEdgeClick({ edge }: { edge: { data?: FlowEdgeData }; event: MouseEvent }) {
-        if (!onTargetClick || !edge.data) return;
-        const d = edge.data;
-        const sameEdges = rawFlow.edges.filter(
-            (e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
-        );
-        const from = { opType: d.sourceOpType, name: d.sourceNodeName };
-        const to = sameEdges.map((e) => ({
-            opType: (e.data as FlowEdgeData).targetOpType,
-            name: (e.data as FlowEdgeData).targetNodeName,
-        }));
-        onTargetClick({ edge: { tensorName: d.tensorName, from, to } });
+  function handleNodeClick({ node, event }: { node: FlowNode; event: MouseEvent | TouchEvent }) {
+    if (!onTargetClick) return;
+    const weightRow = (event.target as Element).closest('[data-weight-name]') as HTMLElement | null;
+    if (weightRow) {
+      const name = weightRow.dataset.weightName;
+      const shapeStr = weightRow.dataset.weightShape;
+      if (name && shapeStr) {
+        onTargetClick({
+          tensor: {
+            name,
+            shape: shapeStr.split(',').map(Number),
+            dtype: weightRow.dataset.weightDtype ?? null,
+          },
+        });
+      }
+      return;
     }
+    if (node.type === 'graphNode') {
+      onTargetClick(node.data.graphNode);
+    } else {
+      onTargetClick({
+        graphValue: node.data.graphValue,
+        direction: node.data.opType === 'Input' ? 'input' : 'output',
+      });
+    }
+  }
+
+  function handleEdgeClick({ edge }: { edge: { data?: FlowEdgeData }; event: MouseEvent }) {
+    if (!onTargetClick || !edge.data) return;
+    const d = edge.data;
+    const sameEdges = rawFlow.edges.filter((e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName);
+    const from = { opType: d.sourceOpType, name: d.sourceNodeName };
+    const to = sameEdges.map((e) => ({
+      opType: (e.data as FlowEdgeData).targetOpType,
+      name: (e.data as FlowEdgeData).targetNodeName,
+    }));
+    onTargetClick({ edge: { tensorName: d.tensorName, from, to } });
+  }
 </script>
 
 <div
-    bind:this={rootElement}
-    class="wetron-graph"
-    class:nested={depth > 0}
-    data-theme={isDark ? 'dark' : 'light'}
-    data-depth={depth}
-    style={[...Object.entries(CANVAS_VARS[isDark ? 'dark' : 'light']), ...Object.entries(categoryVars(isDark))]
-        .map(([k, v]) => `${k}:${v}`)
-        .join(';')}
+  bind:this={rootElement}
+  class="wetron-graph"
+  class:nested={depth > 0}
+  data-theme={isDark ? 'dark' : 'light'}
+  data-depth={depth}
+  style={[...Object.entries(CANVAS_VARS[isDark ? 'dark' : 'light']), ...Object.entries(categoryVars(isDark))]
+    .map(([k, v]) => `${k}:${v}`)
+    .join(';')}
 >
-    <ScopeChrome />
-    <SvelteFlow
-        nodes={styledFlowNodes}
-        edges={flowEdges}
-        {nodeTypes}
-        {edgeTypes}
-        onnodeclick={handleNodeClick}
-        onedgeclick={handleEdgeClick}
-        nodesConnectable={false}
-        nodesDraggable={false}
-        panOnScroll
-        zoomOnScroll={false}
-        zoomOnDoubleClick={false}
-        zoomActivationKey="Meta"
-        minZoom={0.05}
-        colorMode={isDark ? 'dark' : 'light'}
-        onlyRenderVisibleElements
-        proOptions={{ hideAttribution: true }}
-    >
-        <MinimapNav
-            style={`background: ${isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background}; border-radius: ${MINIMAP_THEME.borderRadius}px; border: none; overflow: hidden; cursor: crosshair;`}
-            nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
-            maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
-        />
-        <Controls />
-        <Background patternColor={isDark ? '#2a2a3a' : '#d0d0d8'} />
-        <FitViewHelper nodes={flowNodes} />
-        <ExportHelper bind:ref={exportRef} root={rootElement} />
-    </SvelteFlow>
+  <ScopeChrome />
+  <SvelteFlow
+    nodes={styledFlowNodes}
+    edges={flowEdges}
+    {nodeTypes}
+    {edgeTypes}
+    onnodeclick={handleNodeClick}
+    onedgeclick={handleEdgeClick}
+    nodesConnectable={false}
+    nodesDraggable={false}
+    panOnScroll
+    zoomOnScroll={false}
+    zoomOnDoubleClick={false}
+    zoomActivationKey="Meta"
+    minZoom={0.05}
+    colorMode={isDark ? 'dark' : 'light'}
+    onlyRenderVisibleElements
+    proOptions={{ hideAttribution: true }}
+  >
+    <MinimapNav
+      style={`background: ${isDark ? MINIMAP_THEME.dark.background : MINIMAP_THEME.light.background}; border-radius: ${MINIMAP_THEME.borderRadius}px; border: none; overflow: hidden; cursor: crosshair;`}
+      nodeColor={isDark ? MINIMAP_THEME.dark.nodeColor : MINIMAP_THEME.light.nodeColor}
+      maskColor={isDark ? MINIMAP_THEME.dark.maskColor : MINIMAP_THEME.light.maskColor}
+    />
+    <Controls />
+    <Background patternColor={isDark ? '#2a2a3a' : '#d0d0d8'} />
+    <FitViewHelper nodes={flowNodes} />
+    <ExportHelper bind:ref={exportRef} root={rootElement} />
+  </SvelteFlow>
 </div>
 
 <style>
-    .wetron-graph {
-        all: revert;
-        position: relative;
-        width: 100%;
-        height: 100%;
-        font-family: system-ui, sans-serif;
-        font-size: 14px;
-        box-sizing: border-box;
-    }
+  .wetron-graph {
+    all: revert;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
 
-    :global(.wetron-graph.nested .svelte-flow) {
-        border: 1px solid color-mix(in oklch, var(--wetron-bg-pattern, #d0d0d8) 70%, transparent);
-        border-radius: 6px;
-    }
+  :global(.wetron-graph.nested .svelte-flow) {
+    border: 1px solid color-mix(in oklch, var(--wetron-bg-pattern, #d0d0d8) 70%, transparent);
+    border-radius: 6px;
+  }
 
-    /* ── Handles ── */
-    :global(.wetron-graph .svelte-flow__handle) {
-        width: 6px;
-        height: 6px;
-        min-width: 6px;
-        min-height: 6px;
-    }
+  /* ── Handles ── */
+  :global(.wetron-graph .svelte-flow__handle) {
+    width: 6px;
+    height: 6px;
+    min-width: 6px;
+    min-height: 6px;
+  }
 
-    /* ── Controls ── */
-    :global(.wetron-graph .svelte-flow__controls) {
-        box-shadow: none;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-    }
+  /* ── Controls ── */
+  :global(.wetron-graph .svelte-flow__controls) {
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
 
-    :global(.wetron-graph .svelte-flow__controls-button) {
-        border-radius: 4px;
-        border-bottom: none;
-    }
+  :global(.wetron-graph .svelte-flow__controls-button) {
+    border-radius: 4px;
+    border-bottom: none;
+  }
 
-    /* ── Dark theme ── */
-    :global(.wetron-graph[data-theme='dark'] .svelte-flow) {
-        background-color: #13131f;
-    }
+  /* ── Dark theme ── */
+  :global(.wetron-graph[data-theme='dark'] .svelte-flow) {
+    background-color: #13131f;
+  }
 
-    :global(.wetron-graph[data-theme='dark'] .svelte-flow__controls-button) {
-        background-color: #1e1e2e;
-        border-color: #2a2a3a;
-        color: #7a7a9a;
-    }
+  :global(.wetron-graph[data-theme='dark'] .svelte-flow__controls-button) {
+    background-color: #1e1e2e;
+    border-color: #2a2a3a;
+    color: #7a7a9a;
+  }
 
-    :global(.wetron-graph[data-theme='dark'] .svelte-flow__controls-button:hover) {
-        background-color: #252538;
-        color: #a0a0c0;
-    }
+  :global(.wetron-graph[data-theme='dark'] .svelte-flow__controls-button:hover) {
+    background-color: #252538;
+    color: #a0a0c0;
+  }
 
-    :global(.wetron-graph[data-theme='dark'] .svelte-flow__controls-button svg) {
-        fill: #7a7a9a;
-    }
+  :global(.wetron-graph[data-theme='dark'] .svelte-flow__controls-button svg) {
+    fill: #7a7a9a;
+  }
 
-    :global(.wetron-graph[data-theme='dark'] .svelte-flow__controls-button:hover svg) {
-        fill: #a0a0c0;
-    }
+  :global(.wetron-graph[data-theme='dark'] .svelte-flow__controls-button:hover svg) {
+    fill: #a0a0c0;
+  }
 
-    /* ── Light theme ── */
-    :global(.wetron-graph[data-theme='light'] .svelte-flow) {
-        background-color: #f8f8fc;
-    }
+  /* ── Light theme ── */
+  :global(.wetron-graph[data-theme='light'] .svelte-flow) {
+    background-color: #f8f8fc;
+  }
 
-    :global(.wetron-graph[data-theme='light'] .svelte-flow__controls-button) {
-        background-color: #ffffff;
-        border-color: #e0e0e0;
-        color: #555;
-    }
+  :global(.wetron-graph[data-theme='light'] .svelte-flow__controls-button) {
+    background-color: #ffffff;
+    border-color: #e0e0e0;
+    color: #555;
+  }
 
-    :global(.wetron-graph[data-theme='light'] .svelte-flow__controls-button:hover) {
-        background-color: #f0f0f8;
-        color: #333;
-    }
+  :global(.wetron-graph[data-theme='light'] .svelte-flow__controls-button:hover) {
+    background-color: #f0f0f8;
+    color: #333;
+  }
 
-    /* ── Node defaults - remove XY Flow's default border/shadow on nodes ── */
-    :global(.wetron-graph .svelte-flow__node) {
-        border: none;
-        border-radius: 0;
-        box-shadow: none;
-        background: transparent;
-        padding: 0;
-        font-size: inherit;
-    }
+  /* ── Node defaults - remove XY Flow's default border/shadow on nodes ── */
+  :global(.wetron-graph .svelte-flow__node) {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+  }
 </style>

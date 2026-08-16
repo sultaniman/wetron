@@ -1,43 +1,43 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import dts from "vite-plugin-dts";
-import { resolve } from "path";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import dts from 'vite-plugin-dts';
+import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [
     react(),
     dts({
-      include: ["src"],
-      tsconfigPath: "../../tsconfig.build.json",
-      entryRoot: "src",
+      include: ['src'],
+      tsconfigPath: '../../tsconfig.build.json',
+      entryRoot: 'src',
       bundleTypes: true,
     }),
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
-      formats: ["es"],
-      fileName: "index",
+      entry: resolve(__dirname, 'src/index.ts'),
+      formats: ['es'],
+      fileName: 'index',
     },
     rollupOptions: {
       external: [
-        "react",
-        "react/jsx-runtime",
-        "react-dom",
-        "@xyflow/react",
-        "@phosphor-icons/react",
-        "@base-ui/react",
-        "@base-ui/react/tooltip",
-        "@base-ui/react/collapsible",
-        "@base-ui/react/scroll-area",
-        "@base-ui/react/tabs",
-        "@wetron/common",
-        "@wetron/common/ir",
-        "@wetron/core",
-        "@wetron/core/transform",
-        "@wetron/core/edge-path",
-        "@wetron/core/panel-utils",
-        "@wetron/tokens",
+        'react',
+        'react/jsx-runtime',
+        'react-dom',
+        '@xyflow/react',
+        '@phosphor-icons/react',
+        '@base-ui/react',
+        '@base-ui/react/tooltip',
+        '@base-ui/react/collapsible',
+        '@base-ui/react/scroll-area',
+        '@base-ui/react/tabs',
+        '@wetron/common',
+        '@wetron/common/ir',
+        '@wetron/core',
+        '@wetron/core/transform',
+        '@wetron/core/edge-path',
+        '@wetron/core/panel-utils',
+        '@wetron/tokens',
       ],
     },
     sourcemap: true,

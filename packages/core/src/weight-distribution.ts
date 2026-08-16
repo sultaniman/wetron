@@ -1,4 +1,4 @@
-import type { DecodedWeight } from "./weight-decoder.ts";
+import { numericView, type DecodedWeight } from './weight-decoder.ts';
 
 export interface WeightDistribution {
   readonly finiteCount: number;
@@ -7,7 +7,7 @@ export interface WeightDistribution {
   readonly negativeInfinityCount: number;
   readonly min: number;
   readonly max: number;
-  readonly percentiles: Readonly<Record<"p1" | "p5" | "p50" | "p95" | "p99", number>>;
+  readonly percentiles: Readonly<Record<'p1' | 'p5' | 'p50' | 'p95' | 'p99', number>>;
   readonly approximate: boolean;
   readonly fullRange: { readonly edges: readonly number[]; readonly counts: readonly number[] };
   readonly percentileRange: {
@@ -31,22 +31,19 @@ function histogram(values: readonly number[], min: number, max: number, bins: nu
   const counts = Array.from({ length: bins }, () => 0);
   const edges = Array.from({ length: bins + 1 }, (_, index) => min + ((max - min) * index) / bins);
   if (max === min) counts[Math.floor(bins / 2)] = values.length;
-  else
-    for (const value of values)
-      counts[Math.min(bins - 1, Math.floor(((value - min) / (max - min)) * bins))]++;
+  else for (const value of values) counts[Math.min(bins - 1, Math.floor(((value - min) / (max - min)) * bins))]++;
   return { edges, counts };
 }
 
 export function computeWeightDistribution(values: DecodedWeight, bins = 12): WeightDistribution {
-  if (!Number.isSafeInteger(bins) || bins < 1)
-    throw new RangeError("histogram bins must be positive");
+  if (!Number.isSafeInteger(bins) || bins < 1) throw new RangeError('histogram bins must be positive');
   const finite: number[] = [];
   let nanCount = 0;
   let positiveInfinityCount = 0;
   let negativeInfinityCount = 0;
-  for (let index = 0; index < values.length; index++) {
-    const raw = values[index];
-    const value = typeof raw === "bigint" ? Number(raw) : raw;
+  const numeric = numericView(values);
+  for (let index = 0; index < numeric.length; index++) {
+    const value = numeric[index];
     if (Number.isNaN(value)) nanCount++;
     else if (value === Infinity) positiveInfinityCount++;
     else if (value === -Infinity) negativeInfinityCount++;

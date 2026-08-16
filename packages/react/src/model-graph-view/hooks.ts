@@ -1,37 +1,32 @@
-import { useMemo, useEffect, useCallback, useState } from "react";
-import {
-  useNodesState,
-  useReactFlow,
-  MarkerType,
-  type Node,
-  type Edge,
-  type NodeMouseHandler,
-} from "@xyflow/react";
-import type { MouseEvent } from "react";
+import { useMemo, useEffect, useCallback, useState } from 'react';
+import { useNodesState, useReactFlow, MarkerType, type Node, type Edge, type NodeMouseHandler } from '@xyflow/react';
+import type { MouseEvent } from 'react';
 import {
   modelGraphToFlow,
-  type GraphNodeData,
   type FlowEdge,
+  type GraphFlowNode,
+  type IoFlowNode,
   type LayoutDirection,
-} from "@wetron/core/transform";
-import type { ModelGraph, PanelTarget } from "@wetron/common/ir";
-import { EDGE_THEME } from "../theme.ts";
+} from '@wetron/core/transform';
+import type { ModelGraph, PanelTarget } from '@wetron/common/ir';
+import { EDGE_THEME } from '../theme.ts';
 
-type FlowEdgeData = FlowEdge["data"];
+type FlowEdgeData = FlowEdge['data'];
+type ModelFlowNode = Node<GraphFlowNode['data'], 'graphNode'> | Node<IoFlowNode['data'], 'ioNode'>;
 
-export function useModelNodes(graph: ModelGraph, rankdir: LayoutDirection = "TB") {
+export function useModelNodes(graph: ModelGraph, rankdir: LayoutDirection = 'TB') {
   const { nodes: layoutNodes, edges: layoutEdges } = useMemo(
     () => modelGraphToFlow(graph, { rankdir }),
     [graph, rankdir],
   );
-  const [nodes, setNodes, onNodesChange] = useNodesState(layoutNodes as Node<GraphNodeData>[]);
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutNodes as ModelFlowNode[]);
   useEffect(() => {
-    setNodes(layoutNodes as Node<GraphNodeData>[]);
+    setNodes(layoutNodes as ModelFlowNode[]);
   }, [layoutNodes, setNodes]);
   return {
     nodes,
     onNodesChange,
-    layoutNodes: layoutNodes as Node<GraphNodeData>[],
+    layoutNodes: layoutNodes as ModelFlowNode[],
     layoutEdges,
   };
 }
@@ -40,11 +35,11 @@ export function useEdgeHighlight(
   layoutEdges: Edge[],
   selectedEdgeTensorName: string | null | undefined,
   isDark: boolean,
-  matchedNames?: ReadonlySet<string>,
+  matchedNodeIds?: ReadonlySet<string>,
 ): Edge[] {
   return useMemo(() => {
     const anySelected = selectedEdgeTensorName != null;
-    const filtering = matchedNames != null && matchedNames.size > 0;
+    const filtering = matchedNodeIds != null && matchedNodeIds.size > 0;
     return layoutEdges.map((e) => {
       const d = e.data as FlowEdgeData | undefined;
       if (d?.tensorName === selectedEdgeTensorName) {
@@ -67,19 +62,19 @@ export function useEdgeHighlight(
         return {
           ...e,
           style: {
-            stroke: isDark ? "rgba(120,120,160,0.2)" : "rgba(0,0,0,0.1)",
+            stroke: isDark ? 'rgba(120,120,160,0.2)' : 'rgba(0,0,0,0.1)',
             opacity: 1,
           },
         };
       }
       if (filtering) {
-        const sourceMatch = matchedNames!.has(d?.sourceNodeName ?? "");
-        const targetMatch = matchedNames!.has(d?.targetNodeName ?? "");
+        const sourceMatch = matchedNodeIds!.has(e.source);
+        const targetMatch = matchedNodeIds!.has(e.target);
         if (!sourceMatch && !targetMatch) {
           return {
             ...e,
             style: {
-              stroke: isDark ? "rgba(120,120,160,0.15)" : "rgba(0,0,0,0.07)",
+              stroke: isDark ? 'rgba(120,120,160,0.15)' : 'rgba(0,0,0,0.07)',
               opacity: 1,
             },
           };
@@ -87,19 +82,15 @@ export function useEdgeHighlight(
       }
       return e;
     });
-  }, [layoutEdges, selectedEdgeTensorName, isDark, matchedNames]);
+  }, [layoutEdges, selectedEdgeTensorName, isDark, matchedNodeIds]);
 }
 
-export function useNodeClickHandler(
-  onTargetClick?: (target: PanelTarget) => void,
-): NodeMouseHandler<Node<GraphNodeData>> {
-  return useCallback<NodeMouseHandler<Node<GraphNodeData>>>(
+export function useNodeClickHandler(onTargetClick?: (target: PanelTarget) => void): NodeMouseHandler<ModelFlowNode> {
+  return useCallback<NodeMouseHandler<ModelFlowNode>>(
     (event, node) => {
       if (!onTargetClick) return;
 
-      const weightRow = (event.target as Element).closest(
-        "[data-weight-name]",
-      ) as HTMLElement | null;
+      const weightRow = (event.target as Element).closest('[data-weight-name]') as HTMLElement | null;
       if (weightRow) {
         const name = weightRow.dataset.weightName;
         const shapeStr = weightRow.dataset.weightShape;
@@ -107,7 +98,7 @@ export function useNodeClickHandler(
           onTargetClick({
             tensor: {
               name,
-              shape: shapeStr.split(",").map(Number),
+              shape: shapeStr.split(',').map(Number),
               dtype: weightRow.dataset.weightDtype ?? null,
             },
           });
@@ -115,12 +106,12 @@ export function useNodeClickHandler(
         return;
       }
 
-      if (node.data.graphNode) {
+      if (node.type === 'graphNode') {
         onTargetClick(node.data.graphNode);
-      } else if (node.data.graphValue) {
+      } else {
         onTargetClick({
           graphValue: node.data.graphValue,
-          direction: node.data.opType === "Input" ? "input" : "output",
+          direction: node.data.opType === 'Input' ? 'input' : 'output',
         });
       }
     },
@@ -137,9 +128,7 @@ export function useEdgeClickHandler(
       if (!onTargetClick || !edge.data) return;
 
       const d = edge.data as FlowEdgeData;
-      const sameEdges = layoutEdges.filter(
-        (e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName,
-      );
+      const sameEdges = layoutEdges.filter((e) => (e.data as FlowEdgeData | undefined)?.tensorName === d.tensorName);
       const from = { opType: d.sourceOpType, name: d.sourceNodeName };
       const to = sameEdges.map((e) => ({
         opType: (e.data as FlowEdgeData).targetOpType,
@@ -152,18 +141,15 @@ export function useEdgeClickHandler(
   );
 }
 
-export function useNodeDim(
-  nodes: Node<GraphNodeData>[],
-  matchedNames: ReadonlySet<string>,
-): Node<GraphNodeData>[] {
+export function useNodeDim(nodes: ModelFlowNode[], matchedNodeIds: ReadonlySet<string>): ModelFlowNode[] {
   return useMemo(() => {
-    if (matchedNames.size === 0) return nodes;
+    if (matchedNodeIds.size === 0) return nodes;
     return nodes.map((n) => {
-      if (!n.data.graphNode) return n; // IO nodes always fully visible
-      const matched = matchedNames.has(n.data.graphNode.name);
+      if (n.type !== 'graphNode') return n;
+      const matched = matchedNodeIds.has(n.id);
       return matched ? n : { ...n, style: { ...n.style, opacity: 0.1 } };
     });
-  }, [nodes, matchedNames]);
+  }, [nodes, matchedNodeIds]);
 }
 
 export type NavStack = {
@@ -196,7 +182,7 @@ export function useNavStack(rootGraph: ModelGraph): NavStack {
   };
 }
 
-export function useFitOnGraphChange(graph: ModelGraph, layoutNodes: Node<GraphNodeData>[]): void {
+export function useFitOnGraphChange(graph: ModelGraph, layoutNodes: ModelFlowNode[]): void {
   const { fitView } = useReactFlow();
   useEffect(() => {
     const topNodes = [...layoutNodes]

@@ -1,5 +1,5 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
-import type { WeightInspectionData } from "@wetron/core";
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import type { WeightInspectionData } from '@wetron/core';
 
 export type WeightInspectionContextValue = WeightInspectionData & {
   readonly isDark: boolean;
@@ -16,17 +16,12 @@ export function WeightInspectionProvider({
   isDark: boolean;
   children: ReactNode;
 }) {
-  const value = useMemo(
-    (): WeightInspectionContextValue => ({ ...inspection, isDark }),
-    [inspection, isDark],
-  );
-  return (
-    <WeightInspectionContext.Provider value={value}>{children}</WeightInspectionContext.Provider>
-  );
+  const value = useMemo((): WeightInspectionContextValue => ({ ...inspection, isDark }), [inspection, isDark]);
+  return <WeightInspectionContext.Provider value={value}>{children}</WeightInspectionContext.Provider>;
 }
 
 export function useWeightInspection(): WeightInspectionContextValue {
   const value = useContext(WeightInspectionContext);
-  if (!value) throw new Error("useWeightInspection must be used inside WeightPanel");
+  if (!value) throw new Error('useWeightInspection must be used inside WeightPanel');
   return value;
 }

@@ -1,10 +1,10 @@
-import React from "react";
-import { Handle, Position } from "@xyflow/react";
-import { CaretRightIcon } from "@phosphor-icons/react";
-import type { OpCategory } from "@wetron/core";
-import type { IconEntry } from "../../theme.ts";
-import { Tooltip } from "../../tooltip.tsx";
-import css from "./node-card.module.css";
+import React from 'react';
+import { Handle, Position } from '@xyflow/react';
+import { CaretRightIcon } from '@phosphor-icons/react';
+import type { OpCategory } from '@wetron/core';
+import type { IconEntry } from '../../theme.ts';
+import { Tooltip } from '../../tooltip.tsx';
+import css from './node-card.module.css';
 
 type CardColors = {
   color: string;
@@ -26,7 +26,7 @@ export function NodeCard({
   scopeName,
   onOpenScope,
 }: {
-  nodeType: "graphNode" | "ioNode";
+  nodeType: 'graphNode' | 'ioNode';
   topHandle?: boolean;
   bottomHandle?: boolean;
   pill: string;
@@ -47,10 +47,10 @@ export function NodeCard({
       aria-label={ariaLabel ?? pill}
       aria-pressed={selected}
       data-nodetype={nodeType}
-      className={`${css.card}${tinted ? ` ${css.cardTinted}` : ""}`}
+      className={`${css.card}${tinted ? ` ${css.cardTinted}` : ''}`}
       style={
         {
-          "--node-color": colors.color,
+          '--node-color': colors.color,
           ...(selected
             ? {
                 borderColor: colors.color,
@@ -66,7 +66,7 @@ export function NodeCard({
           <span className={css.pill}>{pill}</span>
         </Tooltip>
         <span data-icon={cat} className={css.icon}>
-          {iconEntry.kind === "glyph" ? (
+          {iconEntry.kind === 'glyph' ? (
             <span className={css.glyph}>{iconEntry.char}</span>
           ) : (
             <iconEntry.Component size={16} color="currentColor" />

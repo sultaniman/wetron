@@ -1,6 +1,6 @@
-import React from "react";
-import { BrandMark } from "./brand-mark.tsx";
-import css from "./drop-zone.module.css";
+import React from 'react';
+import { BrandMark } from './brand-mark.tsx';
+import css from './drop-zone.module.css';
 
 export function DropZone({
   theme,
@@ -10,7 +10,7 @@ export function DropZone({
   onDragLeave,
   onOpen,
 }: {
-  theme: "light" | "dark";
+  theme: 'light' | 'dark';
   dragging: boolean;
   onDrop: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -23,7 +23,7 @@ export function DropZone({
       onDrop={onDrop}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
-      className={`${css.root} ${dragging ? css.dragging : ""}`}
+      className={`${css.root} ${dragging ? css.dragging : ''}`}
     >
       <BrandMark size={64} />
       <div className={css.headline}>Open a neural network model</div>

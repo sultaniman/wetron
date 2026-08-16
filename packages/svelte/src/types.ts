@@ -1,1 +1,1 @@
-export type { PanelTarget } from "@wetron/common/ir";
+export type { PanelTarget } from '@wetron/common/ir';

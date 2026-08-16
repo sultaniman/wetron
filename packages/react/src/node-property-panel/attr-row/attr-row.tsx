@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import type { AttributeValue } from "@wetron/common/ir";
-import { formatAttrBrief } from "@wetron/core/panel-utils";
-import { attrChipLabel, formatAttr, Chip } from "../panel-ui.tsx";
-import propertyPanelCss from "../node-property-panel.module.css";
-import attrRowCss from "./attr-row.module.css";
+import React, { useState } from 'react';
+import type { AttributeValue } from '@wetron/common/ir';
+import { formatAttrBrief } from '@wetron/core/panel-utils';
+import { attrChipLabel, formatAttr, Chip } from '../panel-ui.tsx';
+import propertyPanelCss from '../node-property-panel.module.css';
+import attrRowCss from './attr-row.module.css';
 
 export function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
   const [expanded, setExpanded] = useState(false);
@@ -26,7 +26,7 @@ export function AttrRow({ name, value }: { name: string; value: AttributeValue }
               setExpanded((v) => !v);
             }}
           >
-            {expanded ? "▴" : "···"}
+            {expanded ? '▴' : '···'}
           </button>
         )}
         <Chip label={attrChipLabel(value)} />

@@ -1,4 +1,4 @@
-import type { WeightSource } from "@wetron/common/ir";
+import type { WeightSource } from '@wetron/common/ir';
 
 export type WeightMeta = {
   readonly shape: readonly number[];
@@ -7,8 +7,10 @@ export type WeightMeta = {
   readonly h5Path: string;
 };
 
-/** All weight metadata keyed by H5 path. */
-export type WeightIndex = Map<string, WeightMeta>;
+export type WeightIndex = {
+  readonly metas: ReadonlyMap<string, WeightMeta>;
+  readonly groups: ReadonlyMap<string, ReadonlyMap<string, readonly string[]>>;
+};
 
 type H5Meta = { type: number; size: number; signed: boolean; shape: number[] };
 
@@ -35,11 +37,11 @@ type H5Wasm = {
 };
 
 async function getH5Wasm(): Promise<H5Wasm> {
-  const h5wasm = await import("h5wasm");
+  const h5wasm = await import('h5wasm');
   const Module = await h5wasm.default.ready;
   return {
-    File: (h5wasm.default as unknown as { File: H5Wasm["File"] }).File,
-    FS: (Module as unknown as { FS: H5Wasm["FS"] }).FS,
+    File: (h5wasm.default as unknown as { File: H5Wasm['File'] }).File,
+    FS: (Module as unknown as { FS: H5Wasm['FS'] }).FS,
   };
 }
 
@@ -49,23 +51,24 @@ async function getH5Wasm(): Promise<H5Wasm> {
  *   LSTMCell -> lstm_cell
  */
 export function kerasSnakeCase(name: string): string {
-  let s = name.replace(/(.)([A-Z][a-z]+)/g, "$1_$2");
-  s = s.replace(/([a-z])([A-Z])/g, "$1_$2");
+  let s = name.replace(/(.)([A-Z][a-z]+)/g, '$1_$2');
+  s = s.replace(/([a-z])([A-Z])/g, '$1_$2');
   return s.toLowerCase();
 }
 
 function functionalKey(idx: number): string {
-  return idx === 0 ? "functional" : `functional_${idx}`;
+  return idx === 0 ? 'functional' : `functional_${idx}`;
 }
 
 function isDataset(obj: H5Group | H5Dataset): obj is H5Dataset {
-  return "metadata" in obj;
+  return 'metadata' in obj;
 }
 
 function collectDatasets(
   group: H5Group,
   prefix: string,
   out: Map<string, { shape: number[]; dtype: string }>,
+  weightGroups: Set<string>,
 ): void {
   for (const key of group.keys()) {
     const child = group.get(key);
@@ -76,7 +79,8 @@ function collectDatasets(
         out.set(path, { shape: child.shape, dtype: normaliseDtype(child.metadata) });
       }
     } else {
-      collectDatasets(child, path, out);
+      if (key === 'layers') weightGroups.add(`${path}/`);
+      collectDatasets(child, path, out, weightGroups);
     }
   }
 }
@@ -84,21 +88,21 @@ function collectDatasets(
 // h5wasm metadata type codes: 0=integer, 1=float, 3=string
 function normaliseDtype(meta: H5Meta): string {
   if (meta.type === 1) {
-    if (meta.size === 2) return "float16";
-    if (meta.size === 4) return "float32";
-    if (meta.size === 8) return "float64";
+    if (meta.size === 2) return 'float16';
+    if (meta.size === 4) return 'float32';
+    if (meta.size === 8) return 'float64';
   }
   if (meta.type === 0) {
     if (meta.signed) {
-      if (meta.size === 1) return "int8";
-      if (meta.size === 2) return "int16";
-      if (meta.size === 4) return "int32";
-      if (meta.size === 8) return "int64";
+      if (meta.size === 1) return 'int8';
+      if (meta.size === 2) return 'int16';
+      if (meta.size === 4) return 'int32';
+      if (meta.size === 8) return 'int64';
     } else {
-      if (meta.size === 1) return "uint8";
-      if (meta.size === 2) return "uint16";
-      if (meta.size === 4) return "uint32";
-      if (meta.size === 8) return "uint64";
+      if (meta.size === 1) return 'uint8';
+      if (meta.size === 2) return 'uint16';
+      if (meta.size === 4) return 'uint32';
+      if (meta.size === 8) return 'uint64';
     }
   }
   return `type${meta.type}size${meta.size}`;
@@ -108,9 +112,7 @@ function normaliseDtype(meta: H5Meta): string {
  * Parse model.weights.h5 bytes and return a WeightIndex (path -> meta)
  * and a WeightSource for lazy byte access.
  */
-export async function parseH5Weights(
-  h5Bytes: Uint8Array,
-): Promise<{ index: WeightIndex; source: WeightSource }> {
+export async function parseH5Weights(h5Bytes: Uint8Array): Promise<{ index: WeightIndex; source: WeightSource }> {
   const { File, FS } = await getH5Wasm();
 
   const tmpPath = `/wetron_weights_${Date.now()}.h5`;
@@ -118,37 +120,61 @@ export async function parseH5Weights(
 
   let file: H5File;
   try {
-    file = new File(tmpPath, "r");
+    file = new File(tmpPath, 'r');
   } catch (e) {
     FS.unlink(tmpPath);
     throw new Error(`H5 open failed: ${e instanceof Error ? e.message : String(e)}`);
   }
 
   const rawMap = new Map<string, { shape: number[]; dtype: string }>();
+  const weightGroupKeys = new Set<string>();
   try {
-    collectDatasets(file as unknown as H5Group, "", rawMap);
+    collectDatasets(file as unknown as H5Group, '', rawMap, weightGroupKeys);
   } finally {
     file.close();
     FS.unlink(tmpPath);
   }
 
-  const index: WeightIndex = new Map();
+  const metas = new Map<string, WeightMeta>();
+  const groups = new Map<string, Map<string, string[]>>([...weightGroupKeys].map((key) => [key, new Map()]));
   for (const [path, meta] of rawMap) {
-    index.set(path, { ...meta, h5Path: path });
+    metas.set(path, { ...meta, h5Path: path });
+    const varsAt = path.lastIndexOf('/vars/');
+    if (varsAt < 0) continue;
+    const layerPath = path.slice(0, varsAt);
+    const layerAt = layerPath.lastIndexOf('/');
+    if (layerAt < 0) continue;
+    const groupKey = layerPath.slice(0, layerAt + 1);
+    const layerKey = layerPath.slice(layerAt + 1);
+    const group = groups.get(groupKey) ?? new Map<string, string[]>();
+    if (!groups.has(groupKey)) groups.set(groupKey, group);
+    const paths = group.get(layerKey) ?? [];
+    if (!group.has(layerKey)) group.set(layerKey, paths);
+    paths.push(path);
   }
+  for (const group of groups.values()) {
+    for (const paths of group.values()) {
+      paths.sort((a, b) => {
+        const aIndex = Number.parseInt(a.slice(a.lastIndexOf('/vars/') + 6).split('/')[0]);
+        const bIndex = Number.parseInt(b.slice(b.lastIndexOf('/vars/') + 6).split('/')[0]);
+        return (Number.isNaN(aIndex) ? 999 : aIndex) - (Number.isNaN(bIndex) ? 999 : bIndex);
+      });
+    }
+  }
+  const index: WeightIndex = { metas, groups };
 
   const source: WeightSource = {
     totalBytes: h5Bytes.byteLength,
     get(name: string): Uint8Array | undefined {
-      const meta = index.get(name);
+      const meta = index.metas.get(name);
       if (!meta) return undefined;
 
       let f: H5File | undefined;
       const tmp = `/wetron_weights_read_${Date.now()}.h5`;
       try {
         FS.writeFile(tmp, h5Bytes);
-        f = new File(tmp, "r");
-        const parts = meta.h5Path.split("/");
+        f = new File(tmp, 'r');
+        const parts = meta.h5Path.split('/');
         let node: H5Group | H5Dataset | null = f as unknown as H5Group;
         for (const part of parts) {
           if (!node || isDataset(node as H5Group | H5Dataset)) break;
@@ -158,8 +184,7 @@ export async function parseH5Weights(
         const ds = node as H5Dataset;
         const val = ds.value;
         if (val instanceof Uint8Array) return val;
-        if (ArrayBuffer.isView(val))
-          return new Uint8Array(val.buffer, val.byteOffset, val.byteLength);
+        if (ArrayBuffer.isView(val)) return new Uint8Array(val.buffer, val.byteOffset, val.byteLength);
         if (val instanceof ArrayBuffer) return new Uint8Array(val);
         return undefined;
       } finally {
@@ -172,26 +197,25 @@ export async function parseH5Weights(
   return { index, source };
 }
 
-function matchWeightsWithPrefix(
-  modelPrefix: string,
+function matchWeightsInGroup(
+  groupKey: string,
   classNames: string[],
   nodeNames: string[],
   index: WeightIndex,
-): Map<string, string[]> {
+): Map<string, string[]> | undefined {
+  const group = index.groups.get(groupKey);
+  if (!group) return undefined;
   const byBase = new Map<string, string[]>();
-  for (const path of index.keys()) {
-    if (!path.startsWith(modelPrefix)) continue;
-    const rest = path.slice(modelPrefix.length);
-    const layerKey = rest.split("/")[0];
-    const base = layerKey.replace(/_\d+$/, "");
+  for (const layerKey of group.keys()) {
+    const base = layerKey.replace(/_\d+$/, '');
     if (!byBase.has(base)) byBase.set(base, []);
     const arr = byBase.get(base)!;
     if (!arr.includes(layerKey)) arr.push(layerKey);
   }
   for (const arr of byBase.values()) {
     arr.sort((a, b) => {
-      const na = parseInt(a.match(/_(\d+)$/)?.[1] ?? "-1");
-      const nb = parseInt(b.match(/_(\d+)$/)?.[1] ?? "-1");
+      const na = parseInt(a.match(/_(\d+)$/)?.[1] ?? '-1');
+      const nb = parseInt(b.match(/_(\d+)$/)?.[1] ?? '-1');
       return na - nb;
     });
   }
@@ -208,20 +232,8 @@ function matchWeightsWithPrefix(
     if (!keys || n >= keys.length) continue;
     const layerKey = keys[n];
 
-    const layerPrefix = `${modelPrefix}${layerKey}/vars/`;
-    const varPaths: Array<[number, string]> = [];
-    for (const path of index.keys()) {
-      if (path.startsWith(layerPrefix)) {
-        const varIdx = parseInt(path.slice(layerPrefix.length).split("/")[0]);
-        varPaths.push([isNaN(varIdx) ? 999 : varIdx, path]);
-      }
-    }
-    varPaths.sort((a, b) => a[0] - b[0]);
-    if (varPaths.length > 0)
-      result.set(
-        nodeNames[i],
-        varPaths.map(([, p]) => p),
-      );
+    const varPaths = group.get(layerKey) ?? [];
+    if (varPaths.length > 0) result.set(nodeNames[i], [...varPaths]);
   }
 
   return result;
@@ -237,13 +249,8 @@ export function matchWeightsForModel(
   classNames: string[],
   nodeNames: string[],
   index: WeightIndex,
-): Map<string, string[]> {
-  return matchWeightsWithPrefix(
-    `layers/${functionalKey(subModelFunctionalIndex)}/layers/`,
-    classNames,
-    nodeNames,
-    index,
-  );
+): Map<string, string[]> | undefined {
+  return matchWeightsInGroup(`layers/${functionalKey(subModelFunctionalIndex)}/layers/`, classNames, nodeNames, index);
 }
 
 /**
@@ -255,6 +262,6 @@ export function matchWeightsFlatFormat(
   classNames: string[],
   nodeNames: string[],
   index: WeightIndex,
-): Map<string, string[]> {
-  return matchWeightsWithPrefix("layers/", classNames, nodeNames, index);
+): Map<string, string[]> | undefined {
+  return matchWeightsInGroup('layers/', classNames, nodeNames, index);
 }

@@ -1,9 +1,10 @@
-import type { DecodedWeight } from "./weight-decoder.ts";
+import { numericView, type DecodedWeight } from './weight-decoder.ts';
 import {
-  coordinateToOffset,
+  coordinateToOffsetInLayout,
   describeTensorSlice,
+  tensorLayout,
   type TensorSliceSelection,
-} from "./tensor-index.ts";
+} from './tensor-index.ts';
 
 export interface TensorSliceCell {
   readonly row: readonly [number, number];
@@ -33,17 +34,14 @@ export function sampleTensorSlice(
   maxCols: number,
 ): TensorSliceSample {
   const descriptor = describeTensorSlice(shape, selection);
-  if (
-    !Number.isSafeInteger(maxRows) ||
-    maxRows < 1 ||
-    !Number.isSafeInteger(maxCols) ||
-    maxCols < 1
-  ) {
-    throw new RangeError("sample dimensions must be positive integers");
+  const layout = tensorLayout(shape);
+  if (!Number.isSafeInteger(maxRows) || maxRows < 1 || !Number.isSafeInteger(maxCols) || maxCols < 1) {
+    throw new RangeError('sample dimensions must be positive integers');
   }
   const rows = Math.min(descriptor.rows, maxRows);
   const cols = Math.min(descriptor.cols, maxCols);
   const cells: TensorSliceCell[] = [];
+  const numeric = numericView(values);
   let sampleMin = Infinity;
   let sampleMax = -Infinity;
   for (let row = 0; row < rows; row++) {
@@ -53,18 +51,10 @@ export function sampleTensorSlice(
       const colStart = Math.floor((col * descriptor.cols) / cols);
       const colEnd = Math.floor(((col + 1) * descriptor.cols) / cols) - 1;
       const start = shape.map((_, axis) =>
-        axis === selection.rowAxis
-          ? rowStart
-          : axis === selection.colAxis
-            ? colStart
-            : selection.fixed[axis],
+        axis === selection.rowAxis ? rowStart : axis === selection.colAxis ? colStart : selection.fixed[axis],
       );
       const end = shape.map((_, axis) =>
-        axis === selection.rowAxis
-          ? rowEnd
-          : axis === selection.colAxis
-            ? colEnd
-            : selection.fixed[axis],
+        axis === selection.rowAxis ? rowEnd : axis === selection.colAxis ? colEnd : selection.fixed[axis],
       );
       let sum = 0;
       let count = 0;
@@ -75,8 +65,7 @@ export function sampleTensorSlice(
           const coordinate = [...start];
           coordinate[selection.rowAxis] = sourceRow;
           coordinate[selection.colAxis] = sourceCol;
-          const raw = values[coordinateToOffset(coordinate, shape)];
-          const value = typeof raw === "bigint" ? Number(raw) : raw;
+          const value = numeric[coordinateToOffsetInLayout(coordinate, layout)];
           sum += value;
           count++;
           if (value < min) min = value;

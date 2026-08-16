@@ -51,15 +51,15 @@ Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@pho
 ## Usage
 
 ```ts
-import { parseModel } from "@wetron/core";
+import { parseModel } from '@wetron/core';
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = await parseModel(bytes, file.name); // auto-detects format from magic bytes
 ```
 
 ```tsx
-import { ModelGraphView } from "@wetron/react";
-import "@wetron/react/styles.css";
+import { ModelGraphView } from '@wetron/react';
+import '@wetron/react/styles.css';
 
 <ModelGraphView graph={graph} colorMode="system" />;
 ```

@@ -1,128 +1,128 @@
 <script lang="ts">
-    import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon } from 'phosphor-svelte';
-    import type { GraphNode } from '@wetron/common/ir';
-    import { opCategory } from '@wetron/core';
-    import CategoryIcon from '../nodes/category-icon.svelte';
-    import Row from './row.svelte';
-    import AttrRow from './attr-row.svelte';
-    import SectionLabel from './section-label.svelte';
-    import PanelHeader from './panel-header.svelte';
+  import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon } from 'phosphor-svelte';
+  import type { GraphNode } from '@wetron/common/ir';
+  import { opCategory } from '@wetron/core';
+  import CategoryIcon from '../nodes/category-icon.svelte';
+  import Row from './row.svelte';
+  import AttrRow from './attr-row.svelte';
+  import SectionLabel from './section-label.svelte';
+  import PanelHeader from './panel-header.svelte';
 
-    let {
-        node,
-        inputSources,
-        onTensorClick,
-        onBack,
-        opsets,
-    }: {
-        node: GraphNode;
-        inputSources?: ReadonlyMap<string, string>;
-        onTensorClick?: (name: string) => void;
-        onBack?: () => void;
-        opsets?: ReadonlyMap<string, number>;
-    } = $props();
+  let {
+    node,
+    inputSources,
+    onTensorClick,
+    onBack,
+    opsets,
+  }: {
+    node: GraphNode;
+    inputSources?: ReadonlyMap<string, string>;
+    onTensorClick?: (name: string) => void;
+    onBack?: () => void;
+    opsets?: ReadonlyMap<string, number>;
+  } = $props();
 
-    function formatModule(domain: string | undefined, sets: ReadonlyMap<string, number> | undefined): string | null {
-        if (!sets || sets.size === 0) return null;
-        const key = domain ?? '';
-        const version = sets.get(key);
-        const displayDomain = key === '' ? 'ai.onnx' : key;
-        return version != null ? `${displayDomain} v${version}` : displayDomain;
+  function formatModule(domain: string | undefined, sets: ReadonlyMap<string, number> | undefined): string | null {
+    if (!sets || sets.size === 0) return null;
+    const key = domain ?? '';
+    const version = sets.get(key);
+    const displayDomain = key === '' ? 'ai.onnx' : key;
+    return version != null ? `${displayDomain} v${version}` : displayDomain;
+  }
+
+  function formatGgufQuantization(value: GraphNode): string | null {
+    if (!value.opType.startsWith('GGUF')) return null;
+    const fileType = value.attributes['general.file_type_name'];
+    const version = value.attributes['general.quantization_version'];
+    let typeLabel: string | null = null;
+    if (typeof fileType === 'string') {
+      if (fileType.startsWith('MOSTLY_')) typeLabel = `${fileType.slice(7)} (mostly)`;
+      else if (fileType.startsWith('ALL_')) typeLabel = fileType.slice(4);
+      else typeLabel = fileType;
     }
+    if (typeLabel && typeof version === 'number') return `${typeLabel} · quant v${version}`;
+    if (typeLabel) return typeLabel;
+    return typeof version === 'number' ? `Quantization v${version}` : null;
+  }
 
-    function formatGgufQuantization(value: GraphNode): string | null {
-        if (!value.opType.startsWith('GGUF')) return null;
-        const fileType = value.attributes['general.file_type_name'];
-        const version = value.attributes['general.quantization_version'];
-        let typeLabel: string | null = null;
-        if (typeof fileType === 'string') {
-            if (fileType.startsWith('MOSTLY_')) typeLabel = `${fileType.slice(7)} (mostly)`;
-            else if (fileType.startsWith('ALL_')) typeLabel = fileType.slice(4);
-            else typeLabel = fileType;
-        }
-        if (typeLabel && typeof version === 'number') return `${typeLabel} · quant v${version}`;
-        if (typeLabel) return typeLabel;
-        return typeof version === 'number' ? `Quantization v${version}` : null;
-    }
-
-    const cat = $derived(opCategory(node.opType));
-    const color = $derived(`var(--wetron-category-${cat})`);
-    const iconBg = $derived(`color-mix(in oklch, var(--wetron-category-${cat}) 12%, transparent)`);
-    const module = $derived(formatModule(node.domain, opsets));
-    const quantization = $derived(formatGgufQuantization(node));
-    // Preserve slot index so the {#each} key is unique even when a node consumes
-    // the same tensor twice (e.g. Add(x, x)).
-    const visibleInputs = $derived(node.inputs.map((name, slot) => ({ name, slot })).filter(({ name }) => name !== ''));
-    const attrEntries = $derived(Object.entries(node.attributes));
+  const cat = $derived(opCategory(node.opType));
+  const color = $derived(`var(--wetron-category-${cat})`);
+  const iconBg = $derived(`color-mix(in oklch, var(--wetron-category-${cat}) 12%, transparent)`);
+  const module = $derived(formatModule(node.domain, opsets));
+  const quantization = $derived(formatGgufQuantization(node));
+  // Preserve slot index so the {#each} key is unique even when a node consumes
+  // the same tensor twice (e.g. Add(x, x)).
+  const visibleInputs = $derived(node.inputs.map((name, slot) => ({ name, slot })).filter(({ name }) => name !== ''));
+  const attrEntries = $derived(Object.entries(node.attributes));
 </script>
 
 <PanelHeader
-    title={node.opType}
-    subtitle={module ?? (node.name || undefined)}
-    extraSubtitle={quantization ?? (module ? node.name || undefined : undefined)}
-    {iconBg}
-    iconColor={color}
-    {onBack}
+  title={node.opType}
+  subtitle={module ?? (node.name || undefined)}
+  extraSubtitle={quantization ?? (module ? node.name || undefined : undefined)}
+  {iconBg}
+  iconColor={color}
+  {onBack}
 >
-    {#snippet icon()}<CategoryIcon {cat} op={node.opType} size={15} />{/snippet}
+  {#snippet icon()}<CategoryIcon {cat} op={node.opType} size={15} />{/snippet}
 </PanelHeader>
 {#if visibleInputs.length > 0}
-    <div class="section scrollSection inputsScroll">
-        <SectionLabel title="Inputs">
-            {#snippet icon()}<ArrowCircleDownIcon size={12} />{/snippet}
-        </SectionLabel>
-        {#each visibleInputs as { name, slot } (`${slot}::${name}`)}
-            {@const sourceOp = inputSources?.get(name)}
-            {@const sourceCat = sourceOp ? opCategory(sourceOp) : null}
-            {@const sourceColor = sourceCat ? `var(--wetron-category-${sourceCat})` : undefined}
-            <Row
-                label={name}
-                chip={sourceOp ?? 'tensor'}
-                chipColor={sourceColor}
-                onClick={onTensorClick ? () => onTensorClick!(name) : undefined}
-            />
-        {/each}
-    </div>
+  <div class="section scrollSection inputsScroll">
+    <SectionLabel title="Inputs">
+      {#snippet icon()}<ArrowCircleDownIcon size={12} />{/snippet}
+    </SectionLabel>
+    {#each visibleInputs as { name, slot } (`${slot}::${name}`)}
+      {@const sourceOp = inputSources?.get(name)}
+      {@const sourceCat = sourceOp ? opCategory(sourceOp) : null}
+      {@const sourceColor = sourceCat ? `var(--wetron-category-${sourceCat})` : undefined}
+      <Row
+        label={name}
+        chip={sourceOp ?? 'tensor'}
+        chipColor={sourceColor}
+        onClick={onTensorClick ? () => onTensorClick!(name) : undefined}
+      />
+    {/each}
+  </div>
 {/if}
 {#if node.outputs.length > 0}
-    <div class="section scrollSection">
-        <SectionLabel title="Outputs">
-            {#snippet icon()}<ArrowCircleUpIcon size={12} />{/snippet}
-        </SectionLabel>
-        {#each node.outputs as name, i (`${i}::${name}`)}
-            <Row
-                label={name || `output_${i}`}
-                value=""
-                chip="tensor"
-                onClick={name && onTensorClick ? () => onTensorClick!(name) : undefined}
-            />
-        {/each}
-    </div>
+  <div class="section scrollSection">
+    <SectionLabel title="Outputs">
+      {#snippet icon()}<ArrowCircleUpIcon size={12} />{/snippet}
+    </SectionLabel>
+    {#each node.outputs as name, i (`${i}::${name}`)}
+      <Row
+        label={name || `output_${i}`}
+        value=""
+        chip="tensor"
+        onClick={name && onTensorClick ? () => onTensorClick!(name) : undefined}
+      />
+    {/each}
+  </div>
 {/if}
 {#if attrEntries.length > 0}
-    <div class="sectionLast">
-        <SectionLabel title="Attributes">
-            {#snippet icon()}<SlidersHorizontalIcon size={12} />{/snippet}
-        </SectionLabel>
-        {#each attrEntries as [key, val] (key)}
-            <AttrRow name={key} value={val} />
-        {/each}
-    </div>
+  <div class="sectionLast">
+    <SectionLabel title="Attributes">
+      {#snippet icon()}<SlidersHorizontalIcon size={12} />{/snippet}
+    </SectionLabel>
+    {#each attrEntries as [key, val] (key)}
+      <AttrRow name={key} value={val} />
+    {/each}
+  </div>
 {/if}
 
 <style>
-    .section {
-        padding: 7px 11px;
-        border-bottom: 1px solid var(--panel-section-border);
-    }
-    .sectionLast {
-        padding: 7px 11px;
-    }
-    .scrollSection {
-        max-height: 240px;
-        overflow-y: auto;
-    }
-    .inputsScroll {
-        max-height: 312px;
-    }
+  .section {
+    padding: 7px 11px;
+    border-bottom: 1px solid var(--panel-section-border);
+  }
+  .sectionLast {
+    padding: 7px 11px;
+  }
+  .scrollSection {
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .inputsScroll {
+    max-height: 312px;
+  }
 </style>

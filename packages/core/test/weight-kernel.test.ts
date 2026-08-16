@@ -1,18 +1,13 @@
-import { expect, test } from "vitest";
-import {
-  KERNEL_LAYOUTS,
-  computeKernelL2,
-  kernelSlicePage,
-  validateKernelAxisMapping,
-} from "../src/weight-kernel.ts";
-import { sampleTensorSlice } from "../src/tensor-slice.ts";
+import { expect, test } from 'vitest';
+import { KERNEL_LAYOUTS, computeKernelL2, kernelSlicePage, validateKernelAxisMapping } from '../src/weight-kernel.ts';
+import { sampleTensorSlice } from '../src/tensor-slice.ts';
 
-test("maps every explicit preset without shape inference", () => {
+test('maps every explicit preset without shape inference', () => {
   const cases = [
-    ["OIHW", [2, 3, 2, 2]],
-    ["OHWI", [2, 2, 2, 3]],
-    ["HWIO", [2, 2, 3, 2]],
-    ["IHWO", [3, 2, 2, 2]],
+    ['OIHW', [2, 3, 2, 2]],
+    ['OHWI', [2, 2, 2, 3]],
+    ['HWIO', [2, 2, 3, 2]],
+    ['IHWO', [3, 2, 2, 2]],
   ] as const;
   for (const [preset, shape] of cases) {
     const mapping = KERNEL_LAYOUTS[preset];
@@ -26,8 +21,6 @@ test("maps every explicit preset without shape inference", () => {
   }
 });
 
-test("rejects duplicated or invalid kernel roles", () => {
-  expect(() =>
-    validateKernelAxisMapping([2, 2, 2, 2], { output: 0, input: 0, height: 2, width: 3 }),
-  ).toThrow();
+test('rejects duplicated or invalid kernel roles', () => {
+  expect(() => validateKernelAxisMapping([2, 2, 2, 2], { output: 0, input: 0, height: 2, width: 3 })).toThrow();
 });

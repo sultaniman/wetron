@@ -7,15 +7,15 @@
 //   test-models/keras3_with_subgraphs.keras   (Keras 3 inbound_nodes format)
 //   test-models/keras2_with_subgraphs.keras   (Keras 2 dict-format inbound_nodes)
 
-import { writeFileSync } from "fs";
-import { dirname, resolve } from "path";
-import { fileURLToPath } from "url";
-import { zipSync } from "fflate";
-import h5wasm from "h5wasm";
+import { writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { zipSync } from 'fflate';
+import h5wasm from 'h5wasm';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
-type Format = "keras2" | "keras3";
+type Format = 'keras2' | 'keras3';
 
 type InboundV = unknown[]; // a single inbound_nodes entry as serialized
 
@@ -28,14 +28,14 @@ type LayerEntry = {
 
 function inboundFor(format: Format, parents: string[]): InboundV {
   if (parents.length === 0) return [];
-  if (format === "keras3") {
+  if (format === 'keras3') {
     // single call: args is [tensorRef] for one input, [[tensorRef, ...]] for merges
     if (parents.length === 1) {
-      const ref = { class_name: "__keras_tensor__", config: { keras_history: [parents[0], 0, 0] } };
+      const ref = { class_name: '__keras_tensor__', config: { keras_history: [parents[0], 0, 0] } };
       return [{ args: [ref], kwargs: {} }];
     }
     const refs = parents.map((p) => ({
-      class_name: "__keras_tensor__",
+      class_name: '__keras_tensor__',
       config: { keras_history: [p, 0, 0] },
     }));
     return [{ args: [refs], kwargs: {} }];
@@ -52,21 +52,21 @@ type WeightSpec = { class_name: string; shapes: number[][] };
 
 const WEIGHT_SPECS: Record<string, (cfg: Record<string, unknown>) => number[][]> = {
   Conv2D: (cfg) => {
-    const k = cfg["kernel_size"] as [number, number];
-    const f = cfg["filters"] as number;
-    const inCh = (cfg["_in_channels"] as number) ?? 3;
+    const k = cfg['kernel_size'] as [number, number];
+    const f = cfg['filters'] as number;
+    const inCh = (cfg['_in_channels'] as number) ?? 3;
     return [
       [k[0], k[1], inCh, f], // kernel
       [f], // bias
     ];
   },
   Dense: (cfg) => {
-    const units = cfg["units"] as number;
-    const inUnits = (cfg["_in_units"] as number) ?? 128;
+    const units = cfg['units'] as number;
+    const inUnits = (cfg['_in_units'] as number) ?? 128;
     return [[inUnits, units], [units]];
   },
   BatchNormalization: (cfg) => {
-    const axis = (cfg["_channels"] as number) ?? 32;
+    const axis = (cfg['_channels'] as number) ?? 32;
     return [[axis], [axis], [axis], [axis]]; // gamma, beta, moving_mean, moving_var
   },
 };
@@ -82,11 +82,11 @@ function buildSubFunctional(
 } {
   const layers: LayerEntry[] = [];
   layers.push({
-    class_name: "InputLayer",
+    class_name: 'InputLayer',
     name: `${name}_input`,
     config: {
       name: `${name}_input`,
-      dtype: "float32",
+      dtype: 'float32',
       batch_shape: inputShape,
       batch_input_shape: inputShape,
     },
@@ -98,7 +98,7 @@ function buildSubFunctional(
   const classCount = new Map<string, number>();
 
   for (const layer of spec) {
-    const cfg = { name: layer.name, dtype: "float32", trainable: true, ...(layer.cfg ?? {}) };
+    const cfg = { name: layer.name, dtype: 'float32', trainable: true, ...(layer.cfg ?? {}) };
     layers.push({
       class_name: layer.cls,
       name: layer.name,
@@ -118,7 +118,7 @@ function buildSubFunctional(
   }
 
   const config = {
-    class_name: "Functional",
+    class_name: 'Functional',
     config: {
       name,
       trainable: true,
@@ -132,8 +132,8 @@ function buildSubFunctional(
 
 function kerasSnakeCase(s: string): string {
   return s
-    .replace(/(.)([A-Z][a-z]+)/g, "$1_$2")
-    .replace(/([a-z])([A-Z])/g, "$1_$2")
+    .replace(/(.)([A-Z][a-z]+)/g, '$1_$2')
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
     .toLowerCase();
 }
 
@@ -144,16 +144,16 @@ async function writeH5(
   const { File, FS } = h5wasmModule;
   const tmp = `/wetron_gen_${Date.now()}.h5`;
   FS.writeFile(tmp, new Uint8Array());
-  const f = new File(tmp, "w");
+  const f = new File(tmp, 'w');
 
-  const root = f.create_group("layers");
+  const root = f.create_group('layers');
   subModels.forEach((sub, idx) => {
-    const fkey = idx === 0 ? "functional" : `functional_${idx}`;
+    const fkey = idx === 0 ? 'functional' : `functional_${idx}`;
     const subGroup = root.create_group(fkey);
-    const layersGroup = subGroup.create_group("layers");
+    const layersGroup = subGroup.create_group('layers');
     for (const wl of sub.weightLayers) {
       const layerGroup = layersGroup.create_group(wl.snakeKey);
-      const vars = layerGroup.create_group("vars");
+      const vars = layerGroup.create_group('vars');
       wl.varShapes.forEach((shape, vidx) => {
         const total = shape.reduce((a, b) => a * b, 1);
         const data = new Float32Array(total);
@@ -163,7 +163,7 @@ async function writeH5(
           name: String(vidx),
           data,
           shape,
-          dtype: "<f4",
+          dtype: '<f4',
         });
       });
     }
@@ -183,11 +183,11 @@ function buildRootFunctional(
 ): Record<string, unknown> {
   const layers: LayerEntry[] = [];
   layers.push({
-    class_name: "InputLayer",
-    name: "input_1",
+    class_name: 'InputLayer',
+    name: 'input_1',
     config: {
-      name: "input_1",
-      dtype: "float32",
+      name: 'input_1',
+      dtype: 'float32',
       batch_shape: [null, 32, 32, 3],
       batch_input_shape: [null, 32, 32, 3],
     },
@@ -201,9 +201,9 @@ function buildRootFunctional(
 
   for (let i = 0; i < subs.length; i++) {
     const sub = subs[i];
-    const parent = i === 0 ? "input_1" : featureName;
+    const parent = i === 0 ? 'input_1' : featureName;
     layers.push({
-      class_name: "Functional",
+      class_name: 'Functional',
       name: sub.name,
       config: (sub.config as { config: Record<string, unknown> }).config,
       inbound_nodes: inboundFor(format, [parent]),
@@ -211,12 +211,12 @@ function buildRootFunctional(
   }
 
   return {
-    class_name: "Functional",
+    class_name: 'Functional',
     config: {
       name: rootName,
       trainable: true,
       layers,
-      input_layers: [["input_1", 0, 0]],
+      input_layers: [['input_1', 0, 0]],
       output_layers: [
         [classifierName, 0, 0],
         [regressionName, 0, 0],
@@ -228,70 +228,70 @@ function buildRootFunctional(
 async function generate(format: Format, outName: string): Promise<void> {
   const featureExtractor = buildSubFunctional(
     format,
-    "feature_extractor",
+    'feature_extractor',
     [null as unknown as number, 32, 32, 3],
     [
       {
-        cls: "Conv2D",
-        name: "fe_conv1",
-        cfg: { filters: 32, kernel_size: [3, 3], padding: "same", _in_channels: 3 },
+        cls: 'Conv2D',
+        name: 'fe_conv1',
+        cfg: { filters: 32, kernel_size: [3, 3], padding: 'same', _in_channels: 3 },
       },
       {
-        cls: "BatchNormalization",
-        name: "fe_bn1",
+        cls: 'BatchNormalization',
+        name: 'fe_bn1',
         cfg: { axis: -1, momentum: 0.99, epsilon: 0.001, _channels: 32 },
       },
-      { cls: "Activation", name: "fe_relu1", cfg: { activation: "relu" } },
+      { cls: 'Activation', name: 'fe_relu1', cfg: { activation: 'relu' } },
       {
-        cls: "Conv2D",
-        name: "fe_conv2",
-        cfg: { filters: 64, kernel_size: [3, 3], padding: "same", _in_channels: 32 },
+        cls: 'Conv2D',
+        name: 'fe_conv2',
+        cfg: { filters: 64, kernel_size: [3, 3], padding: 'same', _in_channels: 32 },
       },
-      { cls: "BatchNormalization", name: "fe_bn2", cfg: { axis: -1, _channels: 64 } },
-      { cls: "Activation", name: "fe_relu2", cfg: { activation: "relu" } },
-      { cls: "MaxPooling2D", name: "fe_pool", cfg: { pool_size: [2, 2] } },
+      { cls: 'BatchNormalization', name: 'fe_bn2', cfg: { axis: -1, _channels: 64 } },
+      { cls: 'Activation', name: 'fe_relu2', cfg: { activation: 'relu' } },
+      { cls: 'MaxPooling2D', name: 'fe_pool', cfg: { pool_size: [2, 2] } },
       {
-        cls: "Conv2D",
-        name: "fe_conv3",
-        cfg: { filters: 128, kernel_size: [3, 3], padding: "same", _in_channels: 64 },
+        cls: 'Conv2D',
+        name: 'fe_conv3',
+        cfg: { filters: 128, kernel_size: [3, 3], padding: 'same', _in_channels: 64 },
       },
-      { cls: "BatchNormalization", name: "fe_bn3", cfg: { axis: -1, _channels: 128 } },
-      { cls: "Activation", name: "fe_relu3", cfg: { activation: "relu" } },
-      { cls: "GlobalAveragePooling2D", name: "fe_gap" },
+      { cls: 'BatchNormalization', name: 'fe_bn3', cfg: { axis: -1, _channels: 128 } },
+      { cls: 'Activation', name: 'fe_relu3', cfg: { activation: 'relu' } },
+      { cls: 'GlobalAveragePooling2D', name: 'fe_gap' },
     ],
   );
 
   const classifier = buildSubFunctional(
     format,
-    "classifier",
+    'classifier',
     [null as unknown as number, 128],
     [
-      { cls: "Dense", name: "cl_dense1", cfg: { units: 64, activation: "relu", _in_units: 128 } },
-      { cls: "Dropout", name: "cl_drop1", cfg: { rate: 0.5 } },
-      { cls: "Dense", name: "cl_dense2", cfg: { units: 10, activation: "softmax", _in_units: 64 } },
+      { cls: 'Dense', name: 'cl_dense1', cfg: { units: 64, activation: 'relu', _in_units: 128 } },
+      { cls: 'Dropout', name: 'cl_drop1', cfg: { rate: 0.5 } },
+      { cls: 'Dense', name: 'cl_dense2', cfg: { units: 10, activation: 'softmax', _in_units: 64 } },
     ],
   );
 
   const regression = buildSubFunctional(
     format,
-    "regression",
+    'regression',
     [null as unknown as number, 128],
     [
-      { cls: "Dense", name: "rg_dense1", cfg: { units: 32, activation: "relu", _in_units: 128 } },
-      { cls: "Dense", name: "rg_dense2", cfg: { units: 1, _in_units: 32 } },
+      { cls: 'Dense', name: 'rg_dense1', cfg: { units: 32, activation: 'relu', _in_units: 128 } },
+      { cls: 'Dense', name: 'rg_dense2', cfg: { units: 1, _in_units: 32 } },
     ],
   );
 
-  const root = buildRootFunctional(format, "branched_net", [
-    { name: "feature_extractor", config: featureExtractor.config },
-    { name: "classifier", config: classifier.config },
-    { name: "regression", config: regression.config },
+  const root = buildRootFunctional(format, 'branched_net', [
+    { name: 'feature_extractor', config: featureExtractor.config },
+    { name: 'classifier', config: classifier.config },
+    { name: 'regression', config: regression.config },
   ]);
 
   const config = {
     ...root,
-    keras_version: format === "keras3" ? "3.4.1" : "2.13.1",
-    backend: "tensorflow",
+    keras_version: format === 'keras3' ? '3.4.1' : '2.13.1',
+    backend: 'tensorflow',
   };
 
   const h5wasmModule = await (async () => {
@@ -305,17 +305,17 @@ async function generate(format: Format, outName: string): Promise<void> {
   const h5Bytes = await writeH5(h5wasmModule, [featureExtractor, classifier, regression]);
 
   const zipped = zipSync({
-    "config.json": new TextEncoder().encode(JSON.stringify(config, null, 2)),
-    "metadata.json": new TextEncoder().encode(
-      JSON.stringify({ keras_version: config.keras_version, date_saved: "2026-05-27" }),
+    'config.json': new TextEncoder().encode(JSON.stringify(config, null, 2)),
+    'metadata.json': new TextEncoder().encode(
+      JSON.stringify({ keras_version: config.keras_version, date_saved: '2026-05-27' }),
     ),
-    "model.weights.h5": h5Bytes,
+    'model.weights.h5': h5Bytes,
   });
 
-  const dest = resolve(here, "..", "test-models", outName);
+  const dest = resolve(here, '..', 'test-models', outName);
   writeFileSync(dest, zipped);
   console.log(`wrote ${dest} — h5=${h5Bytes.length}b, zip=${zipped.length}b`);
 }
 
-await generate("keras3", "keras3_with_subgraphs.keras");
-await generate("keras2", "keras2_with_subgraphs.keras");
+await generate('keras3', 'keras3_with_subgraphs.keras');
+await generate('keras2', 'keras2_with_subgraphs.keras');

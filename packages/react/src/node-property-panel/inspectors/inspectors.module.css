@@ -299,14 +299,14 @@
   background: var(--inspector-surface);
 }
 
-.profileTrack[data-signed="true"]::after {
+.profileTrack[data-signed='true']::after {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 50%;
   width: 1px;
   background: var(--inspector-border);
-  content: "";
+  content: '';
 }
 
 .profileBar {
@@ -493,13 +493,13 @@
   font-size: 11px;
 }
 
-.findingIcon[data-severity="error"] {
+.findingIcon[data-severity='error'] {
   color: #ef4444;
 }
-.findingIcon[data-severity="warning"] {
+.findingIcon[data-severity='warning'] {
   color: #f59e0b;
 }
-.findingIcon[data-severity="info"] {
+.findingIcon[data-severity='info'] {
   color: var(--inspector-accent);
 }
 

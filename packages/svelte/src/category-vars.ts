@@ -1,4 +1,4 @@
-import { CATEGORY_THEME, type OpCategory } from "@wetron/tokens";
+import { CATEGORY_THEME, type OpCategory } from '@wetron/tokens';
 
 export function categoryVars(isDark: boolean): Record<string, string> {
   const out: Record<string, string> = {};

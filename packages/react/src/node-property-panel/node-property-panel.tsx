@@ -1,17 +1,17 @@
-import { ScrollArea } from "@base-ui/react/scroll-area";
-import type { ReactNode } from "react";
-import type { GraphNode, ModelGraph, PanelTarget } from "@wetron/common/ir";
-import { useResolvedColorMode, type ColorMode } from "../color-mode-context.ts";
-import { OpPanel } from "./op-panel/op-panel.tsx";
-import { IoPanel } from "./io-panel/io-panel.tsx";
-import { EdgePanel } from "./edge-panel/edge-panel.tsx";
-import { TensorPanel } from "./tensor-panel/tensor-panel.tsx";
-import { WeightPanel } from "./weight-panel/weight-panel.tsx";
-import { CloseButton } from "./panel-ui.tsx";
-import propertyPanelCss from "./node-property-panel.module.css";
+import { ScrollArea } from '@base-ui/react/scroll-area';
+import type { ReactNode } from 'react';
+import type { GraphNode, ModelGraph, PanelTarget } from '@wetron/common/ir';
+import { useResolvedColorMode, type ColorMode } from '../color-mode-context.ts';
+import { OpPanel } from './op-panel/op-panel.tsx';
+import { IoPanel } from './io-panel/io-panel.tsx';
+import { EdgePanel } from './edge-panel/edge-panel.tsx';
+import { TensorPanel } from './tensor-panel/tensor-panel.tsx';
+import { WeightPanel } from './weight-panel/weight-panel.tsx';
+import { CloseButton } from './panel-ui.tsx';
+import propertyPanelCss from './node-property-panel.module.css';
 
 export function isGraphNode(t: PanelTarget): t is GraphNode {
-  return "opType" in t;
+  return 'opType' in t;
 }
 
 function isEdgeTarget(t: PanelTarget): t is {
@@ -21,13 +21,13 @@ function isEdgeTarget(t: PanelTarget): t is {
     to: Array<{ opType: string; name: string }>;
   };
 } {
-  return "edge" in t;
+  return 'edge' in t;
 }
 
 function isTensorTarget(
   t: PanelTarget,
 ): t is { tensor: { name: string; shape: readonly number[] | null; dtype: string | null } } {
-  return "tensor" in t;
+  return 'tensor' in t;
 }
 
 type TensorInfo = { readonly shape: readonly number[] | null; readonly dtype: string | null };
@@ -58,17 +58,14 @@ export function NodePropertyPanel({
   opsets?: ReadonlyMap<string, number>;
   weightInspector?: ReactNode;
 }) {
-  const theme = useResolvedColorMode(colorMode ?? "system");
-  const isDark = theme === "dark";
+  const theme = useResolvedColorMode(colorMode ?? 'system');
+  const isDark = theme === 'dark';
 
   if (!target) return null;
   return (
     <div className={propertyPanelCss.panel} data-theme={theme}>
       {onClose && <CloseButton onClose={onClose} />}
-      <ScrollArea.Root
-        key={isGraphNode(target) ? target.name : "other"}
-        className={propertyPanelCss.scrollRoot}
-      >
+      <ScrollArea.Root key={isGraphNode(target) ? target.name : 'other'} className={propertyPanelCss.scrollRoot}>
         <ScrollArea.Viewport className={propertyPanelCss.scrollViewport}>
           <ScrollArea.Content>
             <div className={propertyPanelCss.scrollContent}>
@@ -92,11 +89,7 @@ export function NodePropertyPanel({
                   <TensorPanel tensor={target.tensor} onBack={onBack} />
                 )
               ) : (
-                <IoPanel
-                  graphValue={target.graphValue}
-                  direction={target.direction}
-                  onBack={onBack}
-                />
+                <IoPanel graphValue={target.graphValue} direction={target.direction} onBack={onBack} />
               )}
             </div>
           </ScrollArea.Content>

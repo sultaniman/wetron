@@ -1,21 +1,22 @@
-import { test, expect } from "vitest";
-import { parseOnnx } from "../src/index.ts";
-import { readFileSync } from "node:fs";
+import { test, expect } from 'vitest';
+import { parseOnnx } from '../src/index.ts';
+import { readFileSync } from 'node:fs';
 
-test("ONNX parse exposes weight bytes for initializers", async () => {
-  const bytes = new Uint8Array(readFileSync("test-models/mnist-12.onnx"));
+test('ONNX parse exposes weight bytes for initializers', async () => {
+  const bytes = new Uint8Array(readFileSync('test-models/mnist-12.onnx'));
   const graph = parseOnnx(bytes);
 
   expect(graph.fileSizeBytes).toBe(bytes.byteLength);
-  expect(graph.weights).toBeDefined();
-  expect(graph.weights!.totalBytes).toBeGreaterThan(0);
+  expect(graph.weights?.kind).toBe('available');
+  if (graph.weights?.kind !== 'available') throw new Error('expected inline weights');
+  expect(graph.weights.source.totalBytes).toBeGreaterThan(0);
 
   // Pick the first initializer name.
   const firstName = [...graph.initializers.keys()][0];
   expect(firstName).toBeDefined();
 
   const init = graph.initializers.get(firstName)!;
-  const out = graph.weights!.get(firstName);
+  const out = graph.weights.source.get(firstName);
   expect(out).toBeInstanceOf(Uint8Array);
 
   // Byte length should match shape × dtype size for typical Tier 1 dtypes.
@@ -36,8 +37,9 @@ test("ONNX parse exposes weight bytes for initializers", async () => {
   }
 });
 
-test("ONNX weights.get returns undefined for unknown name", () => {
-  const bytes = new Uint8Array(readFileSync("test-models/mnist-12.onnx"));
+test('ONNX weights.get returns undefined for unknown name', () => {
+  const bytes = new Uint8Array(readFileSync('test-models/mnist-12.onnx'));
   const graph = parseOnnx(bytes);
-  expect(graph.weights!.get("__nope__")).toBeUndefined();
+  if (graph.weights?.kind !== 'available') throw new Error('expected inline weights');
+  expect(graph.weights.source.get('__nope__')).toBeUndefined();
 });

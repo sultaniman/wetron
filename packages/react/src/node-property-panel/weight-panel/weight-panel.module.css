@@ -19,7 +19,7 @@
   padding: 0;
 }
 .switch::after {
-  content: "";
+  content: '';
   position: absolute;
   right: 2px;
   top: 2px;

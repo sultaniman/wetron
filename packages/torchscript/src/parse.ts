@@ -1,16 +1,8 @@
-import { ByteBuffer } from "flatbuffers";
-import { unzipSync } from "fflate/browser";
-import type { ModelGraph, GraphNode, ParseWarning } from "@wetron/common/ir";
-import { ParseError } from "@wetron/common/ir";
-import {
-  string_,
-  vecLen,
-  vecTable,
-  vecUint32,
-  vecStructBase,
-  unionType,
-  unionTable,
-} from "@wetron/common/flatbuffers";
+import { ByteBuffer } from 'flatbuffers';
+import { unzipSync } from 'fflate/browser';
+import type { ModelGraph, GraphNode, ParseWarning } from '@wetron/common/ir';
+import { ParseError } from '@wetron/common/ir';
+import { string_, vecLen, vecTable, vecUint32, vecStructBase, unionType, unionTable } from '@wetron/common/flatbuffers';
 
 function isTorchscript(bytes: Uint8Array): boolean {
   if (bytes.length < 8) return false;
@@ -22,12 +14,17 @@ function isTorchscript(bytes: Uint8Array): boolean {
   );
 }
 
+/** PyTorch's canonical operator spelling. */
+function opName(name: string, overload: string | null | undefined): string {
+  return overload ? `${name}.${overload}` : name;
+}
+
 // Function: qn=4, instructions (struct vector, stride=8) at vto 6, operators=8
 // Instruction struct: op (int8 at +0), n (uint16 at +2), x (int32 at +4)
 // op == 0 (OP): call operator operators[x]
 // Operator: name=4, overload_name=6
 function readFunction(bb: ByteBuffer, funcTable: number): { qn: string; ops: string[] } {
-  const qn = string_(bb, funcTable, 4) ?? "";
+  const qn = string_(bb, funcTable, 4) ?? '';
 
   const numOps = vecLen(bb, funcTable, 8);
   const operatorNames: string[] = [];
@@ -35,7 +32,7 @@ function readFunction(bb: ByteBuffer, funcTable: number): { qn: string; ops: str
     const opTable = vecTable(bb, funcTable, 8, i);
     const name = string_(bb, opTable, 4) ?? `op_${i}`;
     const overload = string_(bb, opTable, 6);
-    operatorNames.push(overload ? `${name}/${overload}` : name);
+    operatorNames.push(opName(name, overload));
   }
 
   const numInstrs = vecLen(bb, funcTable, 6);
@@ -240,20 +237,20 @@ function parseZipTorchscript(bytes: Uint8Array): ModelGraph {
   try {
     files = unzipSync(bytes);
   } catch (e) {
-    throw new ParseError("torchscript", `Failed to unzip: ${e}`);
+    throw new ParseError('torchscript', `Failed to unzip: ${e}`);
   }
 
-  const firstKey = Object.keys(files)[0] ?? "";
-  const modelName = firstKey.split("/")[0] || "torchscript";
+  const firstKey = Object.keys(files)[0] ?? '';
+  const modelName = firstKey.split('/')[0] || 'torchscript';
 
-  const pklKey = Object.keys(files).find((k) => k.endsWith("/bytecode.pkl"));
+  const pklKey = Object.keys(files).find((k) => k.endsWith('/bytecode.pkl'));
   if (!pklKey) {
-    throw new ParseError("torchscript", "No bytecode.pkl found in archive");
+    throw new ParseError('torchscript', 'No bytecode.pkl found in archive');
   }
 
   const decoded = decodePkl(files[pklKey]);
   if (!Array.isArray(decoded)) {
-    throw new ParseError("torchscript", "Unexpected bytecode format");
+    throw new ParseError('torchscript', 'Unexpected bytecode format');
   }
 
   // bytecode = [version, (funcName, ((key, val), ...), ...), ...]
@@ -265,34 +262,34 @@ function parseZipTorchscript(bytes: Uint8Array): ModelGraph {
     const body = entry[1];
     if (!Array.isArray(body)) continue;
     for (const section of body as PklVal[]) {
-      if (!Array.isArray(section) || section[0] !== "operators") continue;
+      if (!Array.isArray(section) || section[0] !== 'operators') continue;
       const ops = section[1];
       if (!Array.isArray(ops)) continue;
       for (const op of ops as PklVal[]) {
         if (!Array.isArray(op)) continue;
         const name = op[0];
         const overload = op[1];
-        if (typeof name !== "string") continue;
-        orderedOps.push(typeof overload === "string" && overload ? `${name}.${overload}` : name);
+        if (typeof name !== 'string') continue;
+        orderedOps.push(opName(name, typeof overload === 'string' ? overload : null));
       }
     }
   }
 
   if (orderedOps.length === 0) {
-    throw new ParseError("torchscript", "No operator calls found in bytecode");
+    throw new ParseError('torchscript', 'No operator calls found in bytecode');
   }
 
   const nodes: GraphNode[] = orderedOps.map((opType, i) => ({
     name: `op_${i}`,
     opType,
-    inputs: [i === 0 ? "input" : `t${i - 1}`],
+    inputs: [i === 0 ? 'input' : `t${i - 1}`],
     outputs: [`t${i}`],
     attributes: {},
   }));
 
   return {
     name: modelName,
-    inputs: [{ name: "input", shape: null, dtype: null }],
+    inputs: [{ name: 'input', shape: null, dtype: null }],
     outputs: [{ name: `t${orderedOps.length - 1}`, shape: null, dtype: null }],
     nodes,
     initializers: new Map(),
@@ -303,25 +300,19 @@ function parseZipTorchscript(bytes: Uint8Array): ModelGraph {
 
 export function parseTorchscript(bytes: Uint8Array): ModelGraph {
   // ZIP-based format (torch.jit.save / newer lite interpreter)
-  if (
-    bytes.length >= 4 &&
-    bytes[0] === 0x50 &&
-    bytes[1] === 0x4b &&
-    bytes[2] === 0x03 &&
-    bytes[3] === 0x04
-  ) {
+  if (bytes.length >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04) {
     return parseZipTorchscript(bytes);
   }
 
   if (!isTorchscript(bytes)) {
-    throw new ParseError("torchscript", "Not a TorchScript Mobile file (missing PTMF identifier)");
+    throw new ParseError('torchscript', 'Not a TorchScript Mobile file (missing PTMF identifier)');
   }
 
   let bb: ByteBuffer;
   try {
     bb = new ByteBuffer(bytes);
   } catch (e) {
-    throw new ParseError("torchscript", `ByteBuffer init failed: ${e}`);
+    throw new ParseError('torchscript', `ByteBuffer init failed: ${e}`);
   }
 
   // Module is the root table.
@@ -334,7 +325,7 @@ export function parseTorchscript(bytes: Uint8Array): ModelGraph {
 
   const warnings: ParseWarning[] = [];
   const allOpCalls: string[] = [];
-  let modelName = "";
+  let modelName = '';
 
   for (let m = 0; m < numMethods; m++) {
     const ivalIdx = vecUint32(bb, module, 8, m);
@@ -354,7 +345,7 @@ export function parseTorchscript(bytes: Uint8Array): ModelGraph {
       allOpCalls.push(...ops);
     } catch (e) {
       warnings.push({
-        code: "node_parse_error",
+        code: 'node_parse_error',
         context: `Method ${m}: ${e instanceof Error ? e.message : String(e)}`,
         nodeIndex: m,
       });
@@ -382,14 +373,14 @@ export function parseTorchscript(bytes: Uint8Array): ModelGraph {
   }
 
   if (allOpCalls.length === 0) {
-    throw new ParseError("torchscript", "No operator calls found in TorchScript Mobile module");
+    throw new ParseError('torchscript', 'No operator calls found in TorchScript Mobile module');
   }
 
   // Build a linear graph: input -> op_0 -> op_1 -> … -> output
   const nodes: GraphNode[] = allOpCalls.map((opType, i) => ({
     name: `op_${i}`,
     opType,
-    inputs: [i === 0 ? "input" : `t${i - 1}`],
+    inputs: [i === 0 ? 'input' : `t${i - 1}`],
     outputs: [`t${i}`],
     attributes: {},
   }));
@@ -397,8 +388,8 @@ export function parseTorchscript(bytes: Uint8Array): ModelGraph {
   const lastOutput = `t${allOpCalls.length - 1}`;
 
   return {
-    name: modelName || "torchscript",
-    inputs: [{ name: "input", shape: null, dtype: null }],
+    name: modelName || 'torchscript',
+    inputs: [{ name: 'input', shape: null, dtype: null }],
     outputs: [{ name: lastOutput, shape: null, dtype: null }],
     nodes,
     initializers: new Map(),

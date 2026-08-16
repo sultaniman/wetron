@@ -1,8 +1,8 @@
-import { useRef } from "react";
-import { ScrollArea } from "@base-ui/react/scroll-area";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import propertyPanelCss from "../node-property-panel.module.css";
-import virtualValuesCss from "./virtual-values.module.css";
+import { useRef } from 'react';
+import { ScrollArea } from '@base-ui/react/scroll-area';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import propertyPanelCss from '../node-property-panel.module.css';
+import virtualValuesCss from './virtual-values.module.css';
 
 const ROW_HEIGHT = 16;
 const COLS = 5;
@@ -12,13 +12,13 @@ type Values = Float64Array | Int32Array | Uint32Array | BigInt64Array | BigUint6
 export function VirtualValues({
   values,
   format,
-  align = "center",
-  "data-testid": testId,
+  align = 'center',
+  'data-testid': testId,
 }: {
   values: Values;
   format: (v: number | bigint) => string;
-  align?: "center" | "right";
-  "data-testid"?: string;
+  align?: 'center' | 'right';
+  'data-testid'?: string;
 }) {
   const parentRef = useRef<HTMLDivElement>(null);
   const totalRows = Math.ceil(values.length / COLS);
@@ -30,17 +30,13 @@ export function VirtualValues({
     overscan: 6,
   });
 
-  const alignClass =
-    align === "right" ? virtualValuesCss.gridAlignRight : virtualValuesCss.gridAlignCenter;
+  const alignClass = align === 'right' ? virtualValuesCss.gridAlignRight : virtualValuesCss.gridAlignCenter;
 
   return (
     <ScrollArea.Root className={virtualValuesCss.valuesScrollRoot} data-testid={testId}>
       <ScrollArea.Viewport ref={parentRef} className={virtualValuesCss.valuesScrollViewport}>
         <ScrollArea.Content>
-          <div
-            className={virtualValuesCss.gridVals}
-            style={{ height: v.getTotalSize(), position: "relative" }}
-          >
+          <div className={virtualValuesCss.gridVals} style={{ height: v.getTotalSize(), position: 'relative' }}>
             {v.getVirtualItems().map((row) => (
               <div
                 key={row.index}

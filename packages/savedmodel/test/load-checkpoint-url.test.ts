@@ -1,6 +1,6 @@
-import { test, expect, describe, afterEach } from "vitest";
-import { loadSavedModelWeightsFromUrls } from "../src/load-checkpoint.ts";
-import { ParseError } from "@wetron/common/ir";
+import { test, expect, describe, afterEach } from 'vitest';
+import { loadSavedModelWeightsFromUrls } from '../src/load-checkpoint.ts';
+import { ParseError } from '@wetron/common/ir';
 
 function writeVarint(out: number[], v: number): void {
   while (v > 0x7f) {
@@ -47,12 +47,7 @@ function buildSstable(entries: Array<[string, Uint8Array]>): Uint8Array {
   for (const [key, value] of entries) {
     const keyBytes = enc.encode(key);
     let shared = 0;
-    while (
-      shared < prevKey.length &&
-      shared < keyBytes.length &&
-      prevKey[shared] === keyBytes[shared]
-    )
-      shared++;
+    while (shared < prevKey.length && shared < keyBytes.length && prevKey[shared] === keyBytes[shared]) shared++;
     const nonShared = keyBytes.length - shared;
     writeVarint(blockData, shared);
     writeVarint(blockData, nonShared);
@@ -109,7 +104,7 @@ const originalFetch = globalThis.fetch;
 
 function mockFetch(routes: Record<string, Uint8Array | { status: number }>): void {
   globalThis.fetch = (async (input: RequestInfo | URL) => {
-    const url = typeof input === "string" ? input : input.toString();
+    const url = typeof input === 'string' ? input : input.toString();
     const hit = routes[url];
     if (!hit) return new Response(null, { status: 404 });
     if (hit instanceof Uint8Array) {
@@ -125,8 +120,8 @@ afterEach(() => {
   globalThis.fetch = originalFetch;
 });
 
-describe("loadSavedModelWeightsFromUrls", () => {
-  test("fetches index + data URL and returns sliced bytes", async () => {
+describe('loadSavedModelWeightsFromUrls', () => {
+  test('fetches index + data URL and returns sliced bytes', async () => {
     const kernel = encodeBundleEntry({
       dtype: 1,
       shape: [2, 4],
@@ -142,63 +137,61 @@ describe("loadSavedModelWeightsFromUrls", () => {
       size: 16,
     });
     const indexBytes = buildSstable([
-      ["w/bias/.ATTRIBUTES/VARIABLE_VALUE", bias],
-      ["w/kernel/.ATTRIBUTES/VARIABLE_VALUE", kernel],
+      ['w/bias/.ATTRIBUTES/VARIABLE_VALUE', bias],
+      ['w/kernel/.ATTRIBUTES/VARIABLE_VALUE', kernel],
     ]);
-    const dataBytes = new Uint8Array(
-      new Float32Array([0, 1, 2, 3, 4, 5, 6, 7, 10, 20, 30, 40]).buffer,
-    );
+    const dataBytes = new Uint8Array(new Float32Array([0, 1, 2, 3, 4, 5, 6, 7, 10, 20, 30, 40]).buffer);
 
     mockFetch({
-      "https://x/variables.index": indexBytes,
-      "https://x/variables.data-00000-of-00001": dataBytes,
+      'https://x/variables.index': indexBytes,
+      'https://x/variables.data-00000-of-00001': dataBytes,
     });
 
     const { weights, metas } = await loadSavedModelWeightsFromUrls(
-      "https://x/variables.index",
-      "https://x/variables.data-00000-of-00001",
+      'https://x/variables.index',
+      'https://x/variables.data-00000-of-00001',
     );
 
     expect(weights.totalBytes).toBe(48);
-    expect(metas.get("w/kernel/.ATTRIBUTES/VARIABLE_VALUE")?.shape).toEqual([2, 4]);
+    expect(metas.get('w/kernel/.ATTRIBUTES/VARIABLE_VALUE')?.shape).toEqual([2, 4]);
 
-    const kBytes = weights.get("w/kernel/.ATTRIBUTES/VARIABLE_VALUE")!;
+    const kBytes = weights.get('w/kernel/.ATTRIBUTES/VARIABLE_VALUE')!;
     const kFloats = new Float32Array(kBytes.buffer, kBytes.byteOffset, kBytes.byteLength / 4);
     expect(Array.from(kFloats)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
   });
 
-  test("selects correct shard buffer by shardId", async () => {
+  test('selects correct shard buffer by shardId', async () => {
     const a = encodeBundleEntry({ dtype: 1, shape: [2], shardId: 0, offset: 0, size: 8 });
     const b = encodeBundleEntry({ dtype: 1, shape: [2], shardId: 1, offset: 0, size: 8 });
     const indexBytes = buildSstable([
-      ["a/.ATTRIBUTES/VARIABLE_VALUE", a],
-      ["b/.ATTRIBUTES/VARIABLE_VALUE", b],
+      ['a/.ATTRIBUTES/VARIABLE_VALUE', a],
+      ['b/.ATTRIBUTES/VARIABLE_VALUE', b],
     ]);
     const shard0 = new Uint8Array(new Float32Array([1, 2]).buffer);
     const shard1 = new Uint8Array(new Float32Array([99, 100]).buffer);
 
     mockFetch({
-      "https://x/variables.index": indexBytes,
-      "https://x/variables.data-00000-of-00002": shard0,
-      "https://x/variables.data-00001-of-00002": shard1,
+      'https://x/variables.index': indexBytes,
+      'https://x/variables.data-00000-of-00002': shard0,
+      'https://x/variables.data-00001-of-00002': shard1,
     });
 
     const { weights } = await loadSavedModelWeightsFromUrls(
-      "https://x/variables.index",
-      "https://x/variables.data-00000-of-00002",
-      "https://x/variables.data-00001-of-00002",
+      'https://x/variables.index',
+      'https://x/variables.data-00000-of-00002',
+      'https://x/variables.data-00001-of-00002',
     );
 
-    const aBytes = weights.get("a/.ATTRIBUTES/VARIABLE_VALUE")!;
-    const bBytes = weights.get("b/.ATTRIBUTES/VARIABLE_VALUE")!;
+    const aBytes = weights.get('a/.ATTRIBUTES/VARIABLE_VALUE')!;
+    const bBytes = weights.get('b/.ATTRIBUTES/VARIABLE_VALUE')!;
     expect(Array.from(new Float32Array(aBytes.buffer, aBytes.byteOffset, 2))).toEqual([1, 2]);
     expect(Array.from(new Float32Array(bBytes.buffer, bBytes.byteOffset, 2))).toEqual([99, 100]);
   });
 
-  test("throws ParseError on non-ok response", async () => {
-    mockFetch({ "https://x/variables.index": { status: 404 } });
+  test('throws ParseError on non-ok response', async () => {
+    mockFetch({ 'https://x/variables.index': { status: 404 } });
     await expect(
-      loadSavedModelWeightsFromUrls("https://x/variables.index", "https://x/variables.data"),
+      loadSavedModelWeightsFromUrls('https://x/variables.index', 'https://x/variables.data'),
     ).rejects.toBeInstanceOf(ParseError);
   });
 });

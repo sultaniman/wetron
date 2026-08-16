@@ -1,16 +1,14 @@
-import type { Node, NodeProps } from "@xyflow/react";
-import type { GraphNodeData } from "@wetron/core/transform";
-import { CATEGORY_ICON } from "../theme.ts";
-import { NodeCard } from "./node-card/node-card.tsx";
+import type { Node, NodeProps } from '@xyflow/react';
+import type { IoFlowNode } from '@wetron/core/transform';
+import { CATEGORY_ICON } from '../theme.ts';
+import { NodeCard } from './node-card/node-card.tsx';
 
-export function IoNodeComponent({ data, selected }: NodeProps<Node<GraphNodeData>>) {
-  const isInput = data.opType === "Input";
-  const cat = isInput ? ("input" as const) : ("output" as const);
+export function IoNodeComponent({ data, selected }: NodeProps<Node<IoFlowNode['data'], 'ioNode'>>) {
+  const isInput = data.opType === 'Input';
+  const cat = isInput ? ('input' as const) : ('output' as const);
   const color = `var(--wetron-category-${cat})`;
-  const meta = [data.shape ? `[${data.shape.join(" × ")}]` : null, data.dtype]
-    .filter(Boolean)
-    .join(" ");
-  const ariaLabel = `${isInput ? "Input" : "Output"}: ${data.name}${meta ? `, ${meta}` : ""}`;
+  const meta = [data.shape ? `[${data.shape.join(' × ')}]` : null, data.dtype].filter(Boolean).join(' ');
+  const ariaLabel = `${isInput ? 'Input' : 'Output'}: ${data.name}${meta ? `, ${meta}` : ''}`;
   return (
     <NodeCard
       nodeType="ioNode"

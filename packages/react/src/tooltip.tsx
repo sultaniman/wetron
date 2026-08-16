@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Tooltip as BaseTooltip } from "@base-ui/react/tooltip";
-import css from "./tooltip.module.css";
+import React, { useEffect, useRef, useState } from 'react';
+import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip';
+import css from './tooltip.module.css';
 
 export function Tooltip({
   text,

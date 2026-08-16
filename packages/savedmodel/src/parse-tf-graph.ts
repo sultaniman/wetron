@@ -1,24 +1,18 @@
-import type { INamespace } from "protobufjs/light.js";
-import type {
-  ModelGraph,
-  GraphNode,
-  GraphValue,
-  AttributeValue,
-  ParseWarning,
-} from "@wetron/common/ir";
-import { ParseError } from "@wetron/common/ir";
-import { bigIntToNumber } from "@wetron/common/dtypes";
-import { memoizeRoot } from "@wetron/common/protobuf";
-import { TF_DTYPE } from "./tf-dtype.ts";
-import descriptor from "./tf-descriptor.json" with { type: "json" };
+import type { INamespace } from 'protobufjs/light.js';
+import type { ModelGraph, GraphNode, GraphValue, AttributeValue, ParseWarning } from '@wetron/common/ir';
+import { ParseError } from '@wetron/common/ir';
+import { bigIntToNumber } from '@wetron/common/dtypes';
+import { memoizeRoot } from '@wetron/common/protobuf';
+import { TF_DTYPE } from './tf-dtype.ts';
+import descriptor from './tf-descriptor.json' with { type: 'json' };
 
 const getRoot = memoizeRoot(descriptor as INamespace);
 
 // protobufjs int64 values come back as Long objects, plain numbers, or bigints
 function longToNumber(v: unknown): number {
-  if (typeof v === "number") return v;
-  if (typeof v === "bigint") return bigIntToNumber(v);
-  if (v && typeof (v as { toNumber?: unknown }).toNumber === "function") {
+  if (typeof v === 'number') return v;
+  if (typeof v === 'bigint') return bigIntToNumber(v);
+  if (v && typeof (v as { toNumber?: unknown }).toNumber === 'function') {
     return (v as { toNumber(): number }).toNumber();
   }
   return Number(v);
@@ -29,10 +23,10 @@ const _decoder = new TextDecoder();
 // Decode a bytes field that may be a Uint8Array or a base64 string (from .toJSON())
 function decodeBytes(s: unknown): string {
   if (s instanceof Uint8Array) return _decoder.decode(s);
-  if (typeof s === "string") {
+  if (typeof s === 'string') {
     return _decoder.decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0)));
   }
-  return "";
+  return '';
 }
 
 // Strip port suffix from an input reference. Top-level NodeDef uses "name:N"
@@ -40,13 +34,13 @@ function decodeBytes(s: unknown): string {
 // "Identity:output:0"). Both forms reduce to the bare node name by stripping
 // from the first colon, so this works for both.
 function stripPort(name: string): string {
-  const colon = name.indexOf(":");
+  const colon = name.indexOf(':');
   return colon >= 0 ? name.slice(0, colon) : name;
 }
 
 // Control dependencies start with ^ - skip them
 function isControlDep(name: string): boolean {
-  return name.startsWith("^");
+  return name.startsWith('^');
 }
 
 type TfDim = { size?: unknown };
@@ -80,6 +74,59 @@ type TfGraphDef = { node?: TfNodeDef[]; library?: TfFunctionDefLibrary };
 type TfMetaGraph = { graphDef?: TfGraphDef };
 type TfSavedModel = { metaGraphs?: TfMetaGraph[] };
 
+type SaveRestoreNode = { readonly name?: string; readonly input?: readonly string[] };
+
+/** Index nodes and find the exact upstream closure used only by saver signatures. */
+export function indexSaveRestoreNodes<T extends SaveRestoreNode>(
+  rawNodes: readonly T[],
+): {
+  readonly excluded: ReadonlySet<string>;
+  readonly rawByName: ReadonlyMap<string, T>;
+} {
+  const rawByName = new Map<string, T>();
+  const cleanInputs = new Map<string, readonly string[]>();
+  const consumersOf = new Map<string, Set<string>>();
+
+  for (const raw of rawNodes) {
+    const name = raw.name;
+    if (!name) continue;
+    if (!rawByName.has(name)) rawByName.set(name, raw);
+    const inputs = (raw.input ?? []).filter((input) => !isControlDep(input)).map(stripPort);
+    cleanInputs.set(name, inputs);
+    for (const producer of new Set(inputs)) {
+      const consumers = consumersOf.get(producer) ?? new Set<string>();
+      consumers.add(name);
+      consumersOf.set(producer, consumers);
+    }
+  }
+
+  const excluded = new Set<string>();
+  for (const [name, inputs] of cleanInputs) {
+    if (inputs.includes('saver_filename')) excluded.add(name);
+  }
+
+  const remainingConsumers = new Map<string, number>();
+  for (const [name, consumers] of consumersOf) remainingConsumers.set(name, consumers.size);
+
+  const queue = [...excluded];
+  for (let cursor = 0; cursor < queue.length; cursor++) {
+    const consumer = queue[cursor];
+    for (const producer of new Set(cleanInputs.get(consumer) ?? [])) {
+      if (!rawByName.has(producer)) continue;
+      const remaining = remainingConsumers.get(producer);
+      if (remaining === undefined) continue;
+      const next = remaining - 1;
+      remainingConsumers.set(producer, next);
+      if (next === 0 && !excluded.has(producer)) {
+        excluded.add(producer);
+        queue.push(producer);
+      }
+    }
+  }
+
+  return { excluded, rawByName };
+}
+
 function shapeFromTf(tfShape: TfShape): readonly number[] | null {
   if (tfShape.unknownRank) return null;
   if (!tfShape.dim) return [];
@@ -88,21 +135,18 @@ function shapeFromTf(tfShape: TfShape): readonly number[] | null {
 
 export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGraph {
   const root = getRoot();
-  const SavedModelType = root.lookupType("SavedModel");
+  const SavedModelType = root.lookupType('SavedModel');
 
   let decoded: TfSavedModel;
   try {
     decoded = SavedModelType.decode(bytes).toJSON() as TfSavedModel;
   } catch (e) {
-    throw new ParseError(
-      "savedmodel",
-      `saved_model.pb decode failed: ${e instanceof Error ? e.message : String(e)}`,
-    );
+    throw new ParseError('savedmodel', `saved_model.pb decode failed: ${e instanceof Error ? e.message : String(e)}`);
   }
 
   const metaGraph = decoded.metaGraphs?.[0];
   if (!metaGraph?.graphDef?.node) {
-    throw new ParseError("savedmodel", "saved_model.pb: no graph nodes found");
+    throw new ParseError('savedmodel', 'saved_model.pb: no graph nodes found');
   }
 
   const rawNodes = metaGraph.graphDef.node;
@@ -123,42 +167,9 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   const inlinedCallNames = new Set<string>();
   let hasVarHandleOp = false;
 
-  // tf.saved_model.save() always emits __saver_save / __saver_restore signatures alongside
-  // the inference signature. They're checkpoint plumbing, not the model - drop them so the
-  // rendered graph doesn't show duplicate-looking branches whose weight chips don't resolve.
-  // Mark nodes consuming `saver_filename` (the saver Placeholder), then transitively mark
-  // upstream nodes whose only remaining consumers are in the excluded set.
-  const saveRestoreExcluded = new Set<string>();
-  for (const raw of rawNodes) {
-    const name = raw.name;
-    if (!name) continue;
-    const ins = (raw.input ?? []).filter((inp) => !isControlDep(inp)).map(stripPort);
-    if (ins.includes("saver_filename")) saveRestoreExcluded.add(name);
-  }
-  // Transitive sweep: producers consumed only by excluded nodes also become excluded.
-  for (let pass = 0; pass < 4; pass++) {
-    let changed = false;
-    for (const raw of rawNodes) {
-      const name = raw.name;
-      if (!name || saveRestoreExcluded.has(name)) continue;
-      let consumers = 0;
-      let excludedConsumers = 0;
-      for (const other of rawNodes) {
-        const oname = other.name;
-        if (!oname) continue;
-        const otherIns = (other.input ?? []).filter((i) => !isControlDep(i)).map(stripPort);
-        if (otherIns.includes(name)) {
-          consumers++;
-          if (saveRestoreExcluded.has(oname)) excludedConsumers++;
-        }
-      }
-      if (consumers > 0 && consumers === excludedConsumers) {
-        saveRestoreExcluded.add(name);
-        changed = true;
-      }
-    }
-    if (!changed) break;
-  }
+  // Saver signatures are checkpoint plumbing, not inference nodes. Exclude their exact
+  // upstream closure while retaining producers that also feed inference or have no consumers.
+  const { excluded: saveRestoreExcluded, rawByName } = indexSaveRestoreNodes(rawNodes);
 
   // Pass 1: identify VarHandleOp and ReadVariableOp so we can fold + rewrite in pass 2.
   for (const raw of rawNodes) {
@@ -167,16 +178,16 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
     if (!name || !op) continue;
     if (saveRestoreExcluded.has(name)) continue;
 
-    if (op === "VarHandleOp") {
+    if (op === 'VarHandleOp') {
       hasVarHandleOp = true;
-      const dtypeNum = raw.attr?.["dtype"]?.type;
-      const shapeAttr = raw.attr?.["shape"]?.shape;
+      const dtypeNum = raw.attr?.['dtype']?.type;
+      const shapeAttr = raw.attr?.['shape']?.shape;
       const shape = shapeAttr ? shapeFromTf(shapeAttr) : null;
       // Variables require concrete shape + dtype; if either is missing skip the fold.
-      if (shape && Array.isArray(shape) && typeof dtypeNum === "number" && TF_DTYPE[dtypeNum]) {
+      if (shape && Array.isArray(shape) && typeof dtypeNum === 'number' && TF_DTYPE[dtypeNum]) {
         varHandleInfo.set(name, { shape, dtype: TF_DTYPE[dtypeNum] });
       }
-    } else if (op === "ReadVariableOp") {
+    } else if (op === 'ReadVariableOp') {
       const src = (raw.input ?? []).find((inp) => !isControlDep(inp));
       if (src) readToVar.set(name, stripPort(src));
     }
@@ -189,7 +200,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       const op = raw.op;
       if (!name || !op) {
         warnings.push({
-          code: "node_missing_field",
+          code: 'node_missing_field',
           context: `Node ${i} missing name or op`,
           nodeIndex: i,
         });
@@ -201,7 +212,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       // VarIsInitializedOp / AssignVariableOp run only at session init / checkpoint restore.
       // VarHandleOps stay in `nodes` so attachCheckpointToGraph can walk them for `shared_name`,
       // but they're also added to `initializers` so the renderer folds them into consumers.
-      if (op === "ReadVariableOp" || op === "VarIsInitializedOp" || op === "AssignVariableOp") {
+      if (op === 'ReadVariableOp' || op === 'VarIsInitializedOp' || op === 'AssignVariableOp') {
         continue;
       }
       // Skip the save/restore signature plus everything that fed only into it.
@@ -219,7 +230,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       inputNames.forEach((t) => consumedTensors.add(t));
 
       // Parse _output_shapes for tensorShapes
-      const outputShapesAttr = raw.attr?.["_output_shapes"];
+      const outputShapesAttr = raw.attr?.['_output_shapes'];
       if (outputShapesAttr?.list?.shape?.length) {
         const shape = shapeFromTf(outputShapesAttr.list.shape[0]);
         tensorShapes.set(name, { shape, dtype: null });
@@ -231,22 +242,22 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       // Extract simple attributes (skip internal TF attrs prefixed with _)
       const attributes: Record<string, AttributeValue> = {};
       for (const [key, av] of Object.entries(raw.attr ?? {})) {
-        if (key.startsWith("_")) continue;
-        if (av.s !== undefined && av.s !== null && av.s !== "") {
+        if (key.startsWith('_')) continue;
+        if (av.s !== undefined && av.s !== null && av.s !== '') {
           const str = decodeBytes(av.s);
           if (str.length > 0) attributes[key] = str;
         } else if (av.i !== undefined) {
           attributes[key] = longToNumber(av.i);
-        } else if (typeof av.f === "number") {
+        } else if (typeof av.f === 'number') {
           attributes[key] = av.f;
-        } else if (typeof av.b === "boolean") {
+        } else if (typeof av.b === 'boolean') {
           attributes[key] = av.b;
         }
       }
 
       // Placeholder nodes become graph inputs
-      if (op === "Placeholder") {
-        const shapeAttr = raw.attr?.["shape"];
+      if (op === 'Placeholder') {
+        const shapeAttr = raw.attr?.['shape'];
         const shape = shapeAttr?.shape ? shapeFromTf(shapeAttr.shape) : null;
         inputs.push({ name, shape, dtype: null });
         tensorShapes.set(name, { shape, dtype: null });
@@ -262,7 +273,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       });
     } catch (e) {
       warnings.push({
-        code: "node_parse_error",
+        code: 'node_parse_error',
         context: `Node ${i}: ${e instanceof Error ? e.message : String(e)}`,
         nodeIndex: i,
       });
@@ -292,7 +303,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   ): void {
     if (depth > 6) {
       warnings.push({
-        code: "function_call_too_deep",
+        code: 'function_call_too_deep',
         context: `Function call nesting at "${callName}" exceeds depth limit`,
       });
       return;
@@ -315,7 +326,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       if (bn.name) localNames.add(bn.name);
     }
     for (const bn of bodyNodes) {
-      if (bn.op === "ReadVariableOp" && bn.name) {
+      if (bn.op === 'ReadVariableOp' && bn.name) {
         const src = bn.input?.find((s) => !isControlDep(s));
         if (src) localReadToVar.set(bn.name, stripPort(src));
       }
@@ -345,7 +356,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       const op = bn.op;
       if (!bnName || !op) continue;
       // Plumbing - same rules as the top-level pass.
-      if (op === "ReadVariableOp" || op === "VarIsInitializedOp" || op === "AssignVariableOp") {
+      if (op === 'ReadVariableOp' || op === 'VarIsInitializedOp' || op === 'AssignVariableOp') {
         continue;
       }
 
@@ -354,7 +365,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
       resolved.forEach((t) => consumedTensors.add(t));
 
       // Body-local _output_shapes
-      const osa = bn.attr?.["_output_shapes"];
+      const osa = bn.attr?.['_output_shapes'];
       if (osa?.list?.shape?.length) {
         tensorShapes.set(fullName, { shape: shapeFromTf(osa.list.shape[0]), dtype: null });
       } else if (osa?.shape) {
@@ -363,15 +374,15 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
 
       const attributes: Record<string, AttributeValue> = {};
       for (const [key, av] of Object.entries(bn.attr ?? {})) {
-        if (key.startsWith("_")) continue;
-        if (av.s !== undefined && av.s !== null && av.s !== "") {
+        if (key.startsWith('_')) continue;
+        if (av.s !== undefined && av.s !== null && av.s !== '') {
           const str = decodeBytes(av.s);
           if (str.length > 0) attributes[key] = str;
         } else if (av.i !== undefined) {
           attributes[key] = longToNumber(av.i);
-        } else if (typeof av.f === "number") {
+        } else if (typeof av.f === 'number') {
           attributes[key] = av.f;
-        } else if (typeof av.b === "boolean") {
+        } else if (typeof av.b === 'boolean') {
           attributes[key] = av.b;
         }
       }
@@ -386,7 +397,7 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
 
       // Nested call - recurse with the resolved inputs so its body's args bind to
       // outer-most scope references rather than this body's locals.
-      if (op === "StatefulPartitionedCall" || op === "PartitionedCall") {
+      if (op === 'StatefulPartitionedCall' || op === 'PartitionedCall') {
         const fnName = bn.attr?.f?.func?.name;
         if (fnName && functionByName.has(fnName)) {
           inlineCall(fullName, resolved, functionByName.get(fnName)!, depth + 1);
@@ -401,8 +412,8 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   // the inlining pass to avoid re-entering bodies we've just inlined.
   const topLevelSnapshot = nodes.slice();
   for (const node of topLevelSnapshot) {
-    if (node.opType !== "StatefulPartitionedCall" && node.opType !== "PartitionedCall") continue;
-    const raw = rawNodes.find((r) => r.name === node.name);
+    if (node.opType !== 'StatefulPartitionedCall' && node.opType !== 'PartitionedCall') continue;
+    const raw = rawByName.get(node.name);
     const fnName = raw?.attr?.f?.func?.name;
     if (fnName && functionByName.has(fnName)) {
       inlineCall(node.name, node.inputs as string[], functionByName.get(fnName)!, 0);
@@ -457,23 +468,18 @@ export function parseTfGraph(bytes: Uint8Array, fileSizeBytes: number): ModelGra
   // Skip initializers (folded variables) - they're declarations, never real outputs.
   // Skip standalone VarHandleOps too - they're variable sources, not model outputs.
   const outputs: GraphValue[] = finalNodes
-    .filter(
-      (n) =>
-        !consumedTensors.has(n.outputs[0]) &&
-        !initializers.has(n.name) &&
-        n.opType !== "VarHandleOp",
-    )
+    .filter((n) => !consumedTensors.has(n.outputs[0]) && !initializers.has(n.name) && n.opType !== 'VarHandleOp')
     .map((n) => ({ name: n.name, shape: null, dtype: null }));
 
   return {
-    name: "saved_model",
+    name: 'saved_model',
     inputs,
     outputs,
     nodes: finalNodes,
     initializers,
     tensorShapes,
     fileSizeBytes,
-    ...(hasVarHandleOp ? { hasExternalWeights: true } : {}),
+    ...(hasVarHandleOp ? { weights: { kind: 'external' as const, format: 'savedmodel' as const } } : {}),
     ...(warnings.length ? { warnings } : {}),
   };
 }

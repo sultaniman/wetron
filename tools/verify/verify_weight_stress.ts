@@ -1,6 +1,6 @@
-import { readFileSync } from "node:fs";
-import { parseModel } from "@wetron/core";
-import { modelGraphToFlow } from "@wetron/core/transform";
+import { readFileSync } from 'node:fs';
+import { parseModel } from '@wetron/core';
+import { modelGraphToFlow } from '@wetron/core/transform';
 
 type WeightRow = {
   slot: number;
@@ -18,11 +18,11 @@ function fail(msg: string) {
   process.exitCode = 1;
 }
 
-const bytes = new Uint8Array(readFileSync("test-models/weight_stress.onnx"));
+const bytes = new Uint8Array(readFileSync('test-models/weight_stress.onnx'));
 const graph = await parseModel(bytes);
 const { nodes } = modelGraphToFlow(graph);
 
-const graphNodes = nodes.filter((n) => n.type === "graphNode");
+const graphNodes = nodes.filter((n) => n.type === 'graphNode');
 const byName = new Map<string, (typeof graphNodes)[number]>();
 for (const n of graphNodes) byName.set((n.data as any).name as string, n);
 
@@ -32,77 +32,72 @@ const weightsOf = (name: string): WeightRow[] =>
 console.log(`\n=== weight_stress.onnx ===`);
 console.log(`graph nodes (excluding I/O):  ${graphNodes.length}`);
 console.log(`initializers in IR:           ${graph.initializers.size}`);
-console.log(`initializer names: ${[...graph.initializers.keys()].sort().join(", ")}\n`);
+console.log(`initializer names: ${[...graph.initializers.keys()].sort().join(', ')}\n`);
 
 // ---------- 1. Initializer set is exactly what we authored, no orphans/dupes ----------
 const expectedInits = new Set([
-  "W_conv_a",
-  "B_conv_a",
-  "W_conv_b",
-  "B_conv_b",
-  "W_proj",
-  "W_tied",
-  "W_square",
-  "W_unused",
-  "B_legacy_dual",
+  'W_conv_a',
+  'B_conv_a',
+  'W_conv_b',
+  'B_conv_b',
+  'W_proj',
+  'W_tied',
+  'W_square',
+  'W_unused',
+  'B_legacy_dual',
 ]);
 const actualInits = new Set(graph.initializers.keys());
-if (
-  expectedInits.size === actualInits.size &&
-  [...expectedInits].every((n) => actualInits.has(n))
-) {
-  pass("initializer set matches authored set (no missing, no duplicates)");
+if (expectedInits.size === actualInits.size && [...expectedInits].every((n) => actualInits.has(n))) {
+  pass('initializer set matches authored set (no missing, no duplicates)');
 } else {
-  fail(
-    `initializer set mismatch. expected=${[...expectedInits].sort()} actual=${[...actualInits].sort()}`,
-  );
+  fail(`initializer set mismatch. expected=${[...expectedInits].sort()} actual=${[...actualInits].sort()}`);
 }
 
 // ---------- 2. Each Conv node sees its own W/B, NOT the other Conv's ----------
-const convA = weightsOf("ConvA");
-const convB = weightsOf("ConvB");
+const convA = weightsOf('ConvA');
+const convB = weightsOf('ConvB');
 const convAnames = new Set(convA.map((w) => w.name));
 const convBnames = new Set(convB.map((w) => w.name));
 
-if (convAnames.has("W_conv_a") && convAnames.has("B_conv_a") && convAnames.size === 2) {
-  pass(`ConvA shows exactly W_conv_a + B_conv_a (${[...convAnames].join(", ")})`);
+if (convAnames.has('W_conv_a') && convAnames.has('B_conv_a') && convAnames.size === 2) {
+  pass(`ConvA shows exactly W_conv_a + B_conv_a (${[...convAnames].join(', ')})`);
 } else {
-  fail(`ConvA weights wrong: ${[...convAnames].join(", ")}`);
+  fail(`ConvA weights wrong: ${[...convAnames].join(', ')}`);
 }
 
 if (
-  convBnames.has("W_conv_b") &&
-  convBnames.has("B_conv_b") &&
-  !convBnames.has("W_conv_a") &&
-  !convBnames.has("B_conv_a")
+  convBnames.has('W_conv_b') &&
+  convBnames.has('B_conv_b') &&
+  !convBnames.has('W_conv_a') &&
+  !convBnames.has('B_conv_a')
 ) {
   pass(`ConvB shows its own W_conv_b/B_conv_b and NOT ConvA's weights`);
 } else {
-  fail(`ConvB weights leak: ${[...convBnames].join(", ")}`);
+  fail(`ConvB weights leak: ${[...convBnames].join(', ')}`);
 }
 
 // ---------- 3. Op-specific labels are applied ----------
-const convAW = convA.find((w) => w.name === "W_conv_a");
-const convAB = convA.find((w) => w.name === "B_conv_a");
-if (convAW?.label === "W" && convAW.slot === 1) pass(`ConvA W: label="W" slot=1`);
+const convAW = convA.find((w) => w.name === 'W_conv_a');
+const convAB = convA.find((w) => w.name === 'B_conv_a');
+if (convAW?.label === 'W' && convAW.slot === 1) pass(`ConvA W: label="W" slot=1`);
 else fail(`ConvA W label/slot wrong: ${JSON.stringify(convAW)}`);
-if (convAB?.label === "B" && convAB.slot === 2) pass(`ConvA B: label="B" slot=2`);
+if (convAB?.label === 'B' && convAB.slot === 2) pass(`ConvA B: label="B" slot=2`);
 else fail(`ConvA B label/slot wrong: ${JSON.stringify(convAB)}`);
 
 // ---------- 4. Tied weight: W_tied surfaces on BOTH MatMul nodes ----------
-const tiedAnames = new Set(weightsOf("TiedMatMulA").map((w) => w.name));
-const tiedBnames = new Set(weightsOf("TiedMatMulB").map((w) => w.name));
-if (tiedAnames.has("W_tied") && tiedBnames.has("W_tied")) {
+const tiedAnames = new Set(weightsOf('TiedMatMulA').map((w) => w.name));
+const tiedBnames = new Set(weightsOf('TiedMatMulB').map((w) => w.name));
+if (tiedAnames.has('W_tied') && tiedBnames.has('W_tied')) {
   pass(`tied weight W_tied appears on both TiedMatMulA and TiedMatMulB (correct)`);
 } else {
   fail(`tied weight missing from one of the consumers`);
 }
 
 // ---------- 5. Same initializer twice on one node (MatMul(W_square, W_square)) ----------
-const selfRows = weightsOf("SelfProduct");
-const sqCount = selfRows.filter((w) => w.name === "W_square").length;
+const selfRows = weightsOf('SelfProduct');
+const sqCount = selfRows.filter((w) => w.name === 'W_square').length;
 if (sqCount === 2) {
-  pass(`SelfProduct shows W_square twice (slots ${selfRows.map((w) => w.slot).join(", ")})`);
+  pass(`SelfProduct shows W_square twice (slots ${selfRows.map((w) => w.slot).join(', ')})`);
 } else {
   fail(`SelfProduct should show W_square in two slots, got ${sqCount}`);
 }
@@ -111,7 +106,7 @@ if (sqCount === 2) {
 let unusedLeaks = 0;
 for (const n of graphNodes) {
   const wis = ((n.data as any).weightInputs as WeightRow[] | undefined) ?? [];
-  for (const w of wis) if (w.name === "W_unused") unusedLeaks++;
+  for (const w of wis) if (w.name === 'W_unused') unusedLeaks++;
 }
 if (unusedLeaks === 0) pass(`W_unused does not surface on any node (correct)`);
 else fail(`W_unused leaked onto ${unusedLeaks} node row(s)`);
@@ -119,7 +114,7 @@ else fail(`W_unused leaked onto ${unusedLeaks} node row(s)`);
 // ---------- 7. Legacy dual-listed initializer is in `initializers`, not duplicated ----------
 //   The model declares B_legacy_dual both in graph.initializer and graph.input.
 //   It should be in graph.initializers exactly once, and consumed by AddLegacy.
-const legacyRows = weightsOf("AddLegacy").filter((w) => w.name === "B_legacy_dual");
+const legacyRows = weightsOf('AddLegacy').filter((w) => w.name === 'B_legacy_dual');
 if (legacyRows.length === 1) pass(`B_legacy_dual surfaces once on AddLegacy`);
 else fail(`B_legacy_dual rows on AddLegacy: ${legacyRows.length}`);
 
@@ -138,23 +133,23 @@ for (const n of graphNodes) {
 }
 console.log(`\n--- initializer -> consumers ---`);
 for (const k of [...consumerCount.keys()].sort()) {
-  console.log(`  ${k}  ->  ${consumerCount.get(k)!.join(", ")}`);
+  console.log(`  ${k}  ->  ${consumerCount.get(k)!.join(', ')}`);
 }
-const sharedExpected = new Set(["W_tied"]);
+const sharedExpected = new Set(['W_tied']);
 for (const [name, consumers] of consumerCount) {
   if (consumers.length > 1 && !sharedExpected.has(name)) {
-    fail(`unexpected sharing: ${name} on ${consumers.join(", ")}`);
+    fail(`unexpected sharing: ${name} on ${consumers.join(', ')}`);
   }
 }
-const tiedConsumers = consumerCount.get("W_tied") ?? [];
+const tiedConsumers = consumerCount.get('W_tied') ?? [];
 if (tiedConsumers.length === 2) pass(`W_tied has exactly 2 consumer nodes`);
 else fail(`W_tied consumers: ${tiedConsumers.length} (expected 2)`);
 
 // ---------- 9. Weight bytes are retrievable per-name (not concatenated) ----------
-if (graph.weights) {
-  const wConvA = graph.weights.get("W_conv_a");
-  const wConvB = graph.weights.get("W_conv_b");
-  const wTied = graph.weights.get("W_tied");
+if (graph.weights?.kind === 'available') {
+  const wConvA = graph.weights.source.get('W_conv_a');
+  const wConvB = graph.weights.source.get('W_conv_b');
+  const wTied = graph.weights.source.get('W_tied');
   const expA = 4 * 3 * 3 * 3 * 4; // 432 bytes
   const expB = 8 * 4 * 3 * 3 * 4; // 1152 bytes
   const expT = 16 * 16 * 4; // 1024 bytes

@@ -1,5 +1,5 @@
-import type { AttributeValue, GraphNode, ModelGraph } from "@wetron/common/ir";
-import { ParseError } from "@wetron/common/ir";
+import type { AttributeValue, GraphNode, ModelGraph } from '@wetron/common/ir';
+import { ParseError } from '@wetron/common/ir';
 
 const VALUE_TYPE = {
   UINT8: 0,
@@ -18,112 +18,111 @@ const VALUE_TYPE = {
 } as const;
 
 const GGML_TYPES: Readonly<Record<number, string>> = {
-  0: "F32",
-  1: "F16",
-  2: "Q4_0",
-  3: "Q4_1",
-  4: "Q4_2",
-  5: "Q4_3",
-  6: "Q5_0",
-  7: "Q5_1",
-  8: "Q8_0",
-  9: "Q8_1",
-  10: "Q2_K",
-  11: "Q3_K",
-  12: "Q4_K",
-  13: "Q5_K",
-  14: "Q6_K",
-  15: "Q8_K",
-  16: "IQ2_XXS",
-  17: "IQ2_XS",
-  18: "IQ3_XXS",
-  19: "IQ1_S",
-  20: "IQ4_NL",
-  21: "IQ3_S",
-  22: "IQ2_S",
-  23: "IQ4_XS",
-  24: "I8",
-  25: "I16",
-  26: "I32",
-  27: "I64",
-  28: "F64",
-  29: "IQ1_M",
-  30: "BF16",
-  31: "Q4_0_4_4",
-  32: "Q4_0_4_8",
-  33: "Q4_0_8_8",
-  34: "TQ1_0",
-  35: "TQ2_0",
-  36: "IQ4_NL_4_4",
-  37: "IQ4_NL_4_8",
-  38: "IQ4_NL_8_8",
-  39: "MXFP4",
+  0: 'F32',
+  1: 'F16',
+  2: 'Q4_0',
+  3: 'Q4_1',
+  4: 'Q4_2',
+  5: 'Q4_3',
+  6: 'Q5_0',
+  7: 'Q5_1',
+  8: 'Q8_0',
+  9: 'Q8_1',
+  10: 'Q2_K',
+  11: 'Q3_K',
+  12: 'Q4_K',
+  13: 'Q5_K',
+  14: 'Q6_K',
+  15: 'Q8_K',
+  16: 'IQ2_XXS',
+  17: 'IQ2_XS',
+  18: 'IQ3_XXS',
+  19: 'IQ1_S',
+  20: 'IQ4_NL',
+  21: 'IQ3_S',
+  22: 'IQ2_S',
+  23: 'IQ4_XS',
+  24: 'I8',
+  25: 'I16',
+  26: 'I32',
+  27: 'I64',
+  28: 'F64',
+  29: 'IQ1_M',
+  30: 'BF16',
+  31: 'Q4_0_4_4',
+  32: 'Q4_0_4_8',
+  33: 'Q4_0_8_8',
+  34: 'TQ1_0',
+  35: 'TQ2_0',
+  36: 'IQ4_NL_4_4',
+  37: 'IQ4_NL_4_8',
+  38: 'IQ4_NL_8_8',
+  39: 'MXFP4',
 };
 
-const GGML_TYPE_LAYOUTS: Readonly<Record<number, readonly [blockSize: number, typeSize: number]>> =
-  {
-    0: [1, 4],
-    1: [1, 2],
-    2: [32, 18],
-    3: [32, 20],
-    4: [16, 10],
-    5: [16, 12],
-    6: [32, 22],
-    7: [32, 24],
-    8: [32, 34],
-    9: [32, 40],
-    10: [256, 84],
-    11: [256, 110],
-    12: [256, 144],
-    13: [256, 176],
-    14: [256, 210],
-    15: [256, 292],
-    16: [256, 66],
-    17: [256, 74],
-    18: [256, 98],
-    19: [256, 50],
-    20: [32, 18],
-    21: [256, 110],
-    22: [256, 82],
-    23: [256, 136],
-    24: [1, 1],
-    25: [1, 2],
-    26: [1, 4],
-    27: [1, 8],
-    28: [1, 8],
-    29: [256, 56],
-    30: [1, 2],
-    31: [32, 18],
-    32: [32, 18],
-    33: [32, 18],
-    34: [256, 54],
-    35: [256, 66],
-    36: [32, 18],
-    37: [32, 18],
-    38: [32, 18],
-    39: [32, 17],
-  };
+const GGML_TYPE_LAYOUTS: Readonly<Record<number, readonly [blockSize: number, typeSize: number]>> = {
+  0: [1, 4],
+  1: [1, 2],
+  2: [32, 18],
+  3: [32, 20],
+  4: [16, 10],
+  5: [16, 12],
+  6: [32, 22],
+  7: [32, 24],
+  8: [32, 34],
+  9: [32, 40],
+  10: [256, 84],
+  11: [256, 110],
+  12: [256, 144],
+  13: [256, 176],
+  14: [256, 210],
+  15: [256, 292],
+  16: [256, 66],
+  17: [256, 74],
+  18: [256, 98],
+  19: [256, 50],
+  20: [32, 18],
+  21: [256, 110],
+  22: [256, 82],
+  23: [256, 136],
+  24: [1, 1],
+  25: [1, 2],
+  26: [1, 4],
+  27: [1, 8],
+  28: [1, 8],
+  29: [256, 56],
+  30: [1, 2],
+  31: [32, 18],
+  32: [32, 18],
+  33: [32, 18],
+  34: [256, 54],
+  35: [256, 66],
+  36: [32, 18],
+  37: [32, 18],
+  38: [32, 18],
+  39: [32, 17],
+};
 
 const FILE_TYPES: Readonly<Record<number, string>> = {
-  0: "ALL_F32",
-  1: "MOSTLY_F16",
-  2: "MOSTLY_Q4_0",
-  3: "MOSTLY_Q4_1",
-  4: "MOSTLY_Q4_1_SOME_F16",
-  5: "MOSTLY_Q4_2",
-  6: "MOSTLY_Q4_3",
-  7: "MOSTLY_Q8_0",
-  8: "MOSTLY_Q5_0",
-  9: "MOSTLY_Q5_1",
-  10: "MOSTLY_Q2_K",
-  11: "MOSTLY_Q3_K_S",
-  12: "MOSTLY_Q3_K_M",
-  13: "MOSTLY_Q3_K_L",
-  14: "MOSTLY_Q4_K_S",
-  15: "MOSTLY_Q4_K_M",
-  16: "MOSTLY_Q5_K_S",
-  17: "MOSTLY_Q5_K_M",
-  18: "MOSTLY_Q6_K",
+  0: 'ALL_F32',
+  1: 'MOSTLY_F16',
+  2: 'MOSTLY_Q4_0',
+  3: 'MOSTLY_Q4_1',
+  4: 'MOSTLY_Q4_1_SOME_F16',
+  5: 'MOSTLY_Q4_2',
+  6: 'MOSTLY_Q4_3',
+  7: 'MOSTLY_Q8_0',
+  8: 'MOSTLY_Q5_0',
+  9: 'MOSTLY_Q5_1',
+  10: 'MOSTLY_Q2_K',
+  11: 'MOSTLY_Q3_K_S',
+  12: 'MOSTLY_Q3_K_M',
+  13: 'MOSTLY_Q3_K_L',
+  14: 'MOSTLY_Q4_K_S',
+  15: 'MOSTLY_Q4_K_M',
+  16: 'MOSTLY_Q5_K_S',
+  17: 'MOSTLY_Q5_K_M',
+  18: 'MOSTLY_Q6_K',
 };
 
 type MetadataValue = string | number | boolean | readonly MetadataValue[];
@@ -137,7 +136,7 @@ type TensorInfo = {
 
 class Reader {
   readonly view: DataView;
-  readonly decoder = new TextDecoder("utf-8", { fatal: true });
+  readonly decoder = new TextDecoder('utf-8', { fatal: true });
   offset = 0;
   littleEndian = true;
 
@@ -147,7 +146,7 @@ class Reader {
 
   ensure(size: number, context: string): void {
     if (!Number.isSafeInteger(size) || size < 0 || this.offset + size > this.view.byteLength) {
-      throw new ParseError("gguf", `Unexpected end of file while reading ${context}`);
+      throw new ParseError('gguf', `Unexpected end of file while reading ${context}`);
     }
   }
 
@@ -220,7 +219,7 @@ class Reader {
   safeUint64(context: string): number {
     const value = this.uint64(context);
     if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
-      throw new ParseError("gguf", `${context} exceeds the safe integer range`);
+      throw new ParseError('gguf', `${context} exceeds the safe integer range`);
     }
     return Number(value);
   }
@@ -233,12 +232,12 @@ class Reader {
     try {
       return this.decoder.decode(this.bytes.subarray(start, this.offset));
     } catch {
-      throw new ParseError("gguf", `Invalid UTF-8 in ${context}`);
+      throw new ParseError('gguf', `Invalid UTF-8 in ${context}`);
     }
   }
 
   value(type: number, context: string, depth = 0): MetadataValue {
-    if (depth > 16) throw new ParseError("gguf", `${context} arrays are nested too deeply`);
+    if (depth > 16) throw new ParseError('gguf', `${context} arrays are nested too deeply`);
 
     switch (type) {
       case VALUE_TYPE.UINT8:
@@ -257,8 +256,7 @@ class Reader {
         return this.float32(context);
       case VALUE_TYPE.BOOL: {
         const value = this.uint8(context);
-        if (value !== 0 && value !== 1)
-          throw new ParseError("gguf", `Invalid boolean in ${context}`);
+        if (value !== 0 && value !== 1) throw new ParseError('gguf', `Invalid boolean in ${context}`);
         return value === 1;
       }
       case VALUE_TYPE.STRING:
@@ -267,7 +265,7 @@ class Reader {
         const elementType = this.uint32(`${context} element type`);
         const length = this.safeUint64(`${context} length`);
         if (length > this.view.byteLength - this.offset) {
-          throw new ParseError("gguf", `${context} length exceeds the remaining file size`);
+          throw new ParseError('gguf', `${context} length exceeds the remaining file size`);
         }
         const values: MetadataValue[] = [];
         for (let i = 0; i < length; i++) {
@@ -282,7 +280,7 @@ class Reader {
       case VALUE_TYPE.FLOAT64:
         return this.float64(context);
       default:
-        throw new ParseError("gguf", `Unsupported metadata value type ${type} in ${context}`);
+        throw new ParseError('gguf', `Unsupported metadata value type ${type} in ${context}`);
     }
   }
 }
@@ -312,23 +310,17 @@ function tensorByteLength(info: TensorInfo): number | null {
 
   const count = tensorElementCount(info.shape);
   if (count === null) {
-    throw new ParseError(
-      "gguf",
-      `Tensor ${info.name} element count exceeds the safe integer range`,
-    );
+    throw new ParseError('gguf', `Tensor ${info.name} element count exceeds the safe integer range`);
   }
 
   const [blockSize, typeSize] = layout;
   const rowSize = info.shape[0] ?? 1;
   if (rowSize % blockSize !== 0) {
-    throw new ParseError(
-      "gguf",
-      `Tensor ${info.name} first dimension ${rowSize} is not divisible by ${blockSize}`,
-    );
+    throw new ParseError('gguf', `Tensor ${info.name} first dimension ${rowSize} is not divisible by ${blockSize}`);
   }
   const size = (count / blockSize) * typeSize;
   if (!Number.isSafeInteger(size)) {
-    throw new ParseError("gguf", `Tensor ${info.name} byte length exceeds the safe integer range`);
+    throw new ParseError('gguf', `Tensor ${info.name} byte length exceeds the safe integer range`);
   }
   return size;
 }
@@ -340,8 +332,8 @@ function looksLikeHtml(bytes: Uint8Array): boolean {
 
 function attributeValue(value: MetadataValue): AttributeValue {
   if (!Array.isArray(value)) return value as string | number | boolean;
-  if (value.every((item) => typeof item === "number")) return value as readonly number[];
-  if (value.every((item) => typeof item === "string")) return value as readonly string[];
+  if (value.every((item) => typeof item === 'number')) return value as readonly number[];
+  if (value.every((item) => typeof item === 'string')) return value as readonly string[];
   return JSON.stringify(value);
 }
 
@@ -353,9 +345,9 @@ type TensorGroup = {
   readonly tensors: string[];
 };
 
-function tensorGroup(name: string): Omit<TensorGroup, "tensors"> {
+function tensorGroup(name: string): Omit<TensorGroup, 'tensors'> {
   if (/^(token_embd|pos_embd)\./.test(name)) {
-    return { key: "embedding", name: "embedding", opType: "Embedding", order: 100 };
+    return { key: 'embedding', name: 'embedding', opType: 'Embedding', order: 100 };
   }
 
   const block = /^blk\.(\d+)\.(.+)$/.exec(name);
@@ -366,7 +358,7 @@ function tensorGroup(name: string): Omit<TensorGroup, "tensors"> {
       return {
         key: `block:${index}:attention`,
         name: `blk.${index}.attention`,
-        opType: "Attention",
+        opType: 'Attention',
         order: 1000 + index * 10,
       };
     }
@@ -374,7 +366,7 @@ function tensorGroup(name: string): Omit<TensorGroup, "tensors"> {
       return {
         key: `block:${index}:feed_forward`,
         name: `blk.${index}.feed_forward`,
-        opType: "FeedForward",
+        opType: 'FeedForward',
         order: 1001 + index * 10,
       };
     }
@@ -382,24 +374,24 @@ function tensorGroup(name: string): Omit<TensorGroup, "tensors"> {
       return {
         key: `block:${index}:state_space`,
         name: `blk.${index}.state_space`,
-        opType: "StateSpace",
+        opType: 'StateSpace',
         order: 1002 + index * 10,
       };
     }
     return {
       key: `block:${index}:other`,
       name: `blk.${index}`,
-      opType: "TransformerBlock",
+      opType: 'TransformerBlock',
       order: 1008 + index * 10,
     };
   }
 
   if (/^output(?:_|\.)/.test(name)) {
-    return { key: "output", name: "output", opType: "Output", order: 1_000_000 };
+    return { key: 'output', name: 'output', opType: 'Output', order: 1_000_000 };
   }
 
-  const prefix = name.split(".", 1)[0] || "weights";
-  return { key: `other:${prefix}`, name: prefix, opType: "Weights", order: 500 };
+  const prefix = name.split('.', 1)[0] || 'weights';
+  return { key: `other:${prefix}`, name: prefix, opType: 'Weights', order: 500 };
 }
 
 function buildNodes(
@@ -416,9 +408,7 @@ function buildNodes(
     else groups.set(descriptor.key, { ...descriptor, tensors: [tensorName] });
   }
 
-  const ordered = [...groups.values()].sort(
-    (a, b) => a.order - b.order || a.key.localeCompare(b.key),
-  );
+  const ordered = [...groups.values()].sort((a, b) => a.order - b.order || a.key.localeCompare(b.key));
   const nodeNames = new Set(tensorNames);
   const valueNames = new Set(tensorNames);
   const uniqueName = (preferred: string, used: Set<string>, qualifier: string): string => {
@@ -435,12 +425,11 @@ function buildNodes(
     used.add(candidate);
     return candidate;
   };
-  const stageName = (index: number): string =>
-    uniqueName(`gguf::stage:${index}`, valueNames, "stage");
+  const stageName = (index: number): string => uniqueName(`gguf::stage:${index}`, valueNames, 'stage');
   const firstStage = stageName(0);
   const nodes: GraphNode[] = [
     {
-      name: uniqueName(architecture, nodeNames, "model"),
+      name: uniqueName(architecture, nodeNames, 'model'),
       opType: `GGUF v${version}`,
       inputs: [],
       outputs: [firstStage],
@@ -451,12 +440,9 @@ function buildNodes(
   let previous = firstStage;
   for (let i = 0; i < ordered.length; i++) {
     const group = ordered[i];
-    const output =
-      i === ordered.length - 1
-        ? uniqueName("output", valueNames, "model output")
-        : stageName(i + 1);
+    const output = i === ordered.length - 1 ? uniqueName('output', valueNames, 'model output') : stageName(i + 1);
     nodes.push({
-      name: uniqueName(group.name, nodeNames, "group"),
+      name: uniqueName(group.name, nodeNames, 'group'),
       opType: group.opType,
       inputs: [previous, ...group.tensors],
       outputs: [output],
@@ -471,33 +457,30 @@ function buildNodes(
 export function parseGguf(bytes: Uint8Array): ModelGraph {
   try {
     if (looksLikeHtml(bytes)) {
-      throw new ParseError(
-        "gguf",
-        "This is an HTML page, not a GGUF model. Download the raw model file instead",
-      );
+      throw new ParseError('gguf', 'This is an HTML page, not a GGUF model. Download the raw model file instead');
     }
     const reader = new Reader(bytes);
-    reader.ensure(8, "header");
+    reader.ensure(8, 'header');
     if (
-      reader.uint8("magic") !== 0x47 ||
-      reader.uint8("magic") !== 0x47 ||
-      reader.uint8("magic") !== 0x55 ||
-      reader.uint8("magic") !== 0x46
+      reader.uint8('magic') !== 0x47 ||
+      reader.uint8('magic') !== 0x47 ||
+      reader.uint8('magic') !== 0x55 ||
+      reader.uint8('magic') !== 0x46
     ) {
-      throw new ParseError("gguf", "Invalid GGUF magic");
+      throw new ParseError('gguf', 'Invalid GGUF magic');
     }
 
     const littleVersion = reader.view.getUint32(4, true);
     const bigVersion = reader.view.getUint32(4, false);
     if (littleVersion === 2 || littleVersion === 3) reader.littleEndian = true;
     else if (bigVersion === 2 || bigVersion === 3) reader.littleEndian = false;
-    else throw new ParseError("gguf", `Unsupported GGUF version ${littleVersion}`);
+    else throw new ParseError('gguf', `Unsupported GGUF version ${littleVersion}`);
 
-    const version = reader.uint32("version");
-    const tensorCount = reader.safeUint64("tensor count");
-    const metadataCount = reader.safeUint64("metadata count");
+    const version = reader.uint32('version');
+    const tensorCount = reader.safeUint64('tensor count');
+    const metadataCount = reader.safeUint64('metadata count');
     if (metadataCount > bytes.byteLength || tensorCount > bytes.byteLength) {
-      throw new ParseError("gguf", "Header counts exceed the file size");
+      throw new ParseError('gguf', 'Header counts exceed the file size');
     }
 
     const metadata = new Map<string, AttributeValue>();
@@ -513,7 +496,7 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
       const name = reader.string(`tensor ${i} name`);
       const dimensionCount = reader.uint32(`tensor ${name} dimension count`);
       if (dimensionCount > (bytes.byteLength - reader.offset) / 8) {
-        throw new ParseError("gguf", `Invalid dimension count for tensor ${name}`);
+        throw new ParseError('gguf', `Invalid dimension count for tensor ${name}`);
       }
       const shape: number[] = [];
       for (let j = 0; j < dimensionCount; j++) {
@@ -521,25 +504,22 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
       }
       const type = reader.uint32(`tensor ${name} type`);
       const offset = reader.safeUint64(`tensor ${name} offset`);
-      if (initializers.has(name)) throw new ParseError("gguf", `Duplicate tensor name ${name}`);
+      if (initializers.has(name)) throw new ParseError('gguf', `Duplicate tensor name ${name}`);
       initializers.set(name, { shape, dtype: GGML_TYPES[type] ?? `GGML_TYPE_${type}` });
       tensorInfos.push({ name, shape, type, offset });
     }
 
-    const alignmentValue = metadata.get("general.alignment");
-    const alignment = typeof alignmentValue === "number" ? alignmentValue : 32;
+    const alignmentValue = metadata.get('general.alignment');
+    const alignment = typeof alignmentValue === 'number' ? alignmentValue : 32;
     if (!Number.isSafeInteger(alignment) || alignment <= 0) {
-      throw new ParseError("gguf", `Invalid tensor alignment ${String(alignmentValue)}`);
+      throw new ParseError('gguf', `Invalid tensor alignment ${String(alignmentValue)}`);
     }
-    const tensorDataOffset =
-      tensorInfos.length === 0 ? reader.offset : alignOffset(reader.offset, alignment);
+    const tensorDataOffset = tensorInfos.length === 0 ? reader.offset : alignOffset(reader.offset, alignment);
     if (tensorDataOffset > bytes.byteLength) {
-      throw new ParseError("gguf", "Tensor data starts beyond the end of the file");
+      throw new ParseError('gguf', 'Tensor data starts beyond the end of the file');
     }
 
-    const orderedOffsets = [...new Set(tensorInfos.map((info) => info.offset))].sort(
-      (a, b) => a - b,
-    );
+    const orderedOffsets = [...new Set(tensorInfos.map((info) => info.offset))].sort((a, b) => a - b);
     const nextOffsets = new Map<number, number | undefined>(
       orderedOffsets.map((offset, index) => [offset, orderedOffsets[index + 1]]),
     );
@@ -548,7 +528,7 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
     let hasUnknownTensorType = false;
     for (const info of tensorInfos) {
       if (info.offset % alignment !== 0) {
-        throw new ParseError("gguf", `Tensor ${info.name} offset is not ${alignment}-byte aligned`);
+        throw new ParseError('gguf', `Tensor ${info.name} offset is not ${alignment}-byte aligned`);
       }
       const start = tensorDataOffset + info.offset;
       const nextRelativeOffset = nextOffsets.get(info.offset);
@@ -559,44 +539,30 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
           ? tensorDataOffset + (nextRelativeOffset ?? bytes.byteLength - tensorDataOffset)
           : start + exactLength;
       if (start > bytes.byteLength || end < start || end > bytes.byteLength) {
-        throw new ParseError("gguf", `Tensor ${info.name} data exceeds the file size`);
+        throw new ParseError('gguf', `Tensor ${info.name} data exceeds the file size`);
       }
       if (nextRelativeOffset !== undefined && end > tensorDataOffset + nextRelativeOffset) {
-        throw new ParseError("gguf", `Tensor ${info.name} data overlaps the next tensor`);
+        throw new ParseError('gguf', `Tensor ${info.name} data overlaps the next tensor`);
       }
       tensorRanges.set(info.name, { start, end });
       totalWeightBytes += end - start;
     }
 
-    const architecture = metadata.get("general.architecture");
-    const modelName = metadata.get("general.name");
-    const name =
-      typeof modelName === "string"
-        ? modelName
-        : typeof architecture === "string"
-          ? architecture
-          : "GGUF";
+    const architecture = metadata.get('general.architecture');
+    const modelName = metadata.get('general.name');
+    const name = typeof modelName === 'string' ? modelName : typeof architecture === 'string' ? architecture : 'GGUF';
     const tensorNames = [...initializers.keys()];
     const tensorShapes = new Map(initializers);
     const attributes = Object.fromEntries(metadata);
-    const fileType = metadata.get("general.file_type");
-    if (typeof fileType === "number" && FILE_TYPES[fileType]) {
-      attributes["general.file_type_name"] = FILE_TYPES[fileType];
+    const fileType = metadata.get('general.file_type');
+    if (typeof fileType === 'number' && FILE_TYPES[fileType]) {
+      attributes['general.file_type_name'] = FILE_TYPES[fileType];
     }
-    const graph = buildNodes(
-      version,
-      typeof architecture === "string" ? architecture : name,
-      attributes,
-      tensorNames,
-    );
-    const fullTensorShapes = new Map<
-      string,
-      { shape: readonly number[] | null; dtype: string | null }
-    >(tensorShapes);
+    const graph = buildNodes(version, typeof architecture === 'string' ? architecture : name, attributes, tensorNames);
+    const fullTensorShapes = new Map<string, { shape: readonly number[] | null; dtype: string | null }>(tensorShapes);
     for (const node of graph.nodes) {
       for (const output of node.outputs) {
-        if (!fullTensorShapes.has(output))
-          fullTensorShapes.set(output, { shape: null, dtype: null });
+        if (!fullTensorShapes.has(output)) fullTensorShapes.set(output, { shape: null, dtype: null });
       }
     }
 
@@ -611,16 +577,19 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
       weights:
         reader.littleEndian && !hasUnknownTensorType
           ? {
-              totalBytes: totalWeightBytes,
-              get: (tensorName) => {
-                const range = tensorRanges.get(tensorName);
-                return range ? bytes.subarray(range.start, range.end) : undefined;
+              kind: 'available',
+              source: {
+                totalBytes: totalWeightBytes,
+                get: (tensorName: string) => {
+                  const range = tensorRanges.get(tensorName);
+                  return range ? bytes.subarray(range.start, range.end) : undefined;
+                },
               },
             }
           : undefined,
     };
   } catch (error) {
     if (error instanceof ParseError) throw error;
-    throw new ParseError("gguf", error instanceof Error ? error.message : String(error));
+    throw new ParseError('gguf', error instanceof Error ? error.message : String(error));
   }
 }

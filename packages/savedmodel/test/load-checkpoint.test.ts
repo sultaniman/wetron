@@ -1,5 +1,5 @@
-import { test, expect, describe } from "vitest";
-import { loadSavedModelWeights } from "../src/load-checkpoint.ts";
+import { test, expect, describe } from 'vitest';
+import { loadSavedModelWeights } from '../src/load-checkpoint.ts';
 
 function writeVarint(out: number[], v: number): void {
   while (v > 0x7f) {
@@ -46,12 +46,7 @@ function buildSstable(entries: Array<[string, Uint8Array]>): Uint8Array {
   for (const [key, value] of entries) {
     const keyBytes = enc.encode(key);
     let shared = 0;
-    while (
-      shared < prevKey.length &&
-      shared < keyBytes.length &&
-      prevKey[shared] === keyBytes[shared]
-    )
-      shared++;
+    while (shared < prevKey.length && shared < keyBytes.length && prevKey[shared] === keyBytes[shared]) shared++;
     const nonShared = keyBytes.length - shared;
     writeVarint(blockData, shared);
     writeVarint(blockData, nonShared);
@@ -104,8 +99,8 @@ function buildSstable(entries: Array<[string, Uint8Array]>): Uint8Array {
   ]);
 }
 
-describe("loadSavedModelWeights", () => {
-  test("returns WeightSource that slices data buffer at index offset", async () => {
+describe('loadSavedModelWeights', () => {
+  test('returns WeightSource that slices data buffer at index offset', async () => {
     // Index references two variables in a 12-float data buffer:
     //   "w/kernel/.ATTRIBUTES/VARIABLE_VALUE": offset 0,  size 32 bytes (8 float32)
     //   "w/bias/.ATTRIBUTES/VARIABLE_VALUE":   offset 32, size 16 bytes (4 float32)
@@ -124,8 +119,8 @@ describe("loadSavedModelWeights", () => {
       size: 16,
     });
     const indexBytes = buildSstable([
-      ["w/bias/.ATTRIBUTES/VARIABLE_VALUE", bias],
-      ["w/kernel/.ATTRIBUTES/VARIABLE_VALUE", kernel],
+      ['w/bias/.ATTRIBUTES/VARIABLE_VALUE', bias],
+      ['w/kernel/.ATTRIBUTES/VARIABLE_VALUE', kernel],
     ]);
 
     const dataBuf = new Float32Array([
@@ -136,44 +131,39 @@ describe("loadSavedModelWeights", () => {
     ]);
     const dataBytes = new Uint8Array(dataBuf.buffer);
 
-    const indexFile = new File([indexBytes.buffer as ArrayBuffer], "variables.index");
-    const dataFile = new File([dataBytes.buffer as ArrayBuffer], "variables.data-00000-of-00001");
+    const indexFile = new File([indexBytes.buffer as ArrayBuffer], 'variables.index');
+    const dataFile = new File([dataBytes.buffer as ArrayBuffer], 'variables.data-00000-of-00001');
 
     const { weights, metas } = await loadSavedModelWeights(indexFile, dataFile);
 
     expect(weights.totalBytes).toBe(48);
 
-    const kernelMeta = metas.get("w/kernel/.ATTRIBUTES/VARIABLE_VALUE");
-    expect(kernelMeta?.dtype).toBe("float32");
+    const kernelMeta = metas.get('w/kernel/.ATTRIBUTES/VARIABLE_VALUE');
+    expect(kernelMeta?.dtype).toBe('float32');
     expect(kernelMeta?.shape).toEqual([2, 4]);
+    expect(kernelMeta?.shardId).toBe(0);
+    expect(kernelMeta?.offset).toBe(0);
+    expect(kernelMeta?.size).toBe(32);
 
-    const kernelBytes = weights.get("w/kernel/.ATTRIBUTES/VARIABLE_VALUE");
+    const kernelBytes = weights.get('w/kernel/.ATTRIBUTES/VARIABLE_VALUE');
     expect(kernelBytes).toBeInstanceOf(Uint8Array);
-    const kernelFloats = new Float32Array(
-      kernelBytes!.buffer,
-      kernelBytes!.byteOffset,
-      kernelBytes!.byteLength / 4,
-    );
+    const kernelFloats = new Float32Array(kernelBytes!.buffer, kernelBytes!.byteOffset, kernelBytes!.byteLength / 4);
     expect(Array.from(kernelFloats)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
 
-    const biasBytes = weights.get("w/bias/.ATTRIBUTES/VARIABLE_VALUE");
-    const biasFloats = new Float32Array(
-      biasBytes!.buffer,
-      biasBytes!.byteOffset,
-      biasBytes!.byteLength / 4,
-    );
+    const biasBytes = weights.get('w/bias/.ATTRIBUTES/VARIABLE_VALUE');
+    const biasFloats = new Float32Array(biasBytes!.buffer, biasBytes!.byteOffset, biasBytes!.byteLength / 4);
     expect(Array.from(biasFloats)).toEqual([10, 20, 30, 40]);
   });
 
-  test("returns undefined for unknown variable name", async () => {
+  test('returns undefined for unknown variable name', async () => {
     const kernel = encodeBundleEntry({ dtype: 1, shape: [2], shardId: 0, offset: 0, size: 8 });
-    const indexBytes = buildSstable([["w/kernel/.ATTRIBUTES/VARIABLE_VALUE", kernel]]);
+    const indexBytes = buildSstable([['w/kernel/.ATTRIBUTES/VARIABLE_VALUE', kernel]]);
     const dataBytes = new Uint8Array(new Float32Array([1, 2]).buffer);
 
-    const indexFile = new File([indexBytes.buffer as ArrayBuffer], "variables.index");
-    const dataFile = new File([dataBytes.buffer as ArrayBuffer], "variables.data-00000-of-00001");
+    const indexFile = new File([indexBytes.buffer as ArrayBuffer], 'variables.index');
+    const dataFile = new File([dataBytes.buffer as ArrayBuffer], 'variables.data-00000-of-00001');
 
     const { weights } = await loadSavedModelWeights(indexFile, dataFile);
-    expect(weights.get("does/not/exist")).toBeUndefined();
+    expect(weights.get('does/not/exist')).toBeUndefined();
   });
 });

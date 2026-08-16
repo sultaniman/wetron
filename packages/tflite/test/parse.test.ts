@@ -1,15 +1,15 @@
-import { test, expect } from "vitest";
-import { readFile } from "node:fs/promises";
-import { parseTflite } from "../src/parse.ts";
-import { ParseError } from "@wetron/common/ir";
+import { test, expect } from 'vitest';
+import { readFile } from 'node:fs/promises';
+import { parseTflite } from '../src/parse.ts';
+import { ParseError } from '@wetron/common/ir';
 
-const MODEL_PATH = new URL("../../../test-models/mobilenet_v2.tflite", import.meta.url);
+const MODEL_PATH = new URL('../../../test-models/mobilenet_v2.tflite', import.meta.url);
 
 async function loadModel() {
   return new Uint8Array(await readFile(MODEL_PATH));
 }
 
-test("mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs", async () => {
+test('mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs', async () => {
   const graph = parseTflite(await loadModel());
   expect(graph.nodes.length).toBe(66);
   expect(graph.nodes.every((n) => n.opType.length > 0)).toBe(true);
@@ -21,19 +21,17 @@ test("mobilenet_v2: 66 nodes, 1 input (float32), initializers not in inputs", as
   for (const input of graph.inputs) expect(graph.initializers.has(input.name)).toBe(false);
 });
 
-test("throws ParseError on garbage input", () => {
-  expect(() =>
-    parseTflite(new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00])),
-  ).toThrow(ParseError);
+test('throws ParseError on garbage input', () => {
+  expect(() => parseTflite(new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x00, 0x00, 0x00, 0x00]))).toThrow(ParseError);
 });
 
-test("style_predict_quantized_256: parses quantized weights with int/uint dtypes", async () => {
-  const url = new URL("../../../test-models/style_predict_quantized_256.tflite", import.meta.url);
+test('style_predict_quantized_256: parses quantized weights with int/uint dtypes', async () => {
+  const url = new URL('../../../test-models/style_predict_quantized_256.tflite', import.meta.url);
   const bytes = new Uint8Array(await readFile(url));
   const graph = parseTflite(bytes);
   expect(graph.nodes.length).toBeGreaterThan(0);
   // A quantized model must declare at least one int8 / uint8 / int16 / int32 initializer.
   const dtypes = new Set([...graph.initializers.values()].map((i) => i.dtype));
-  const quantized = ["int8", "uint8", "int16", "int32"].some((d) => dtypes.has(d));
+  const quantized = ['int8', 'uint8', 'int16', 'int32'].some((d) => dtypes.has(d));
   expect(quantized).toBe(true);
 });

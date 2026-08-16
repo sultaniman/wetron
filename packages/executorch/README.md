@@ -13,7 +13,7 @@ Included automatically when you install `@wetron/core` or `@wetron/react`.
 ## API
 
 ```ts
-import { parseExecutorch } from "@wetron/executorch";
+import { parseExecutorch } from '@wetron/executorch';
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseExecutorch(bytes); // synchronous

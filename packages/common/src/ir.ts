@@ -41,10 +41,8 @@ export interface ModelGraph {
   readonly opsets?: ReadonlyMap<string, number>;
   /** Size of the source file in bytes. Used for the >20MB weight gate. */
   readonly fileSizeBytes: number;
-  /** Lazy accessor for initializer bytes. Absent for parsers that do not surface weights. */
-  readonly weights?: WeightSource;
-  /** True when weights live in external files the host app must load (TF2 SavedModel checkpoint). */
-  readonly hasExternalWeights?: boolean;
+  /** Weight availability. Absent when the model has no surfaced weight payloads. */
+  readonly weights?: ModelWeights;
   /** Non-fatal parse warnings (skipped/degraded nodes). Absent when empty. */
   readonly warnings?: readonly ParseWarning[];
 }
@@ -63,9 +61,13 @@ export interface WeightSource {
   get(name: string): Uint8Array | undefined;
 }
 
+export type ModelWeights =
+  | { readonly kind: 'available'; readonly source: WeightSource }
+  | { readonly kind: 'external'; readonly format: 'savedmodel' | 'onnx' };
+
 export type PanelTarget =
   | GraphNode
-  | { graphValue: GraphValue; direction: "input" | "output" }
+  | { graphValue: GraphValue; direction: 'input' | 'output' }
   | {
       edge: {
         tensorName: string;
@@ -81,11 +83,8 @@ export class ParseError extends Error {
     public readonly context: string,
   ) {
     super(`[${format}] ${context}`);
-    this.name = "ParseError";
-    if ("captureStackTrace" in Error)
-      (Error as unknown as { captureStackTrace(t: object, c: unknown): void }).captureStackTrace(
-        this,
-        ParseError,
-      );
+    this.name = 'ParseError';
+    if ('captureStackTrace' in Error)
+      (Error as unknown as { captureStackTrace(t: object, c: unknown): void }).captureStackTrace(this, ParseError);
   }
 }

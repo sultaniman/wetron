@@ -1,1 +1,1 @@
-export { parseTflite } from "./parse.ts";
+export { parseTflite } from './parse.ts';

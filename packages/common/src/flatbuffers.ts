@@ -7,7 +7,7 @@
 // These mirror what the @flatbuffers npm package exposes at the lower level,
 // but typed for the access patterns the parsers use.
 
-import type { ByteBuffer } from "flatbuffers";
+import type { ByteBuffer } from 'flatbuffers';
 
 const _dec = new TextDecoder();
 
@@ -34,7 +34,7 @@ export function string_(bb: ByteBuffer, table: number, vto: number): string | nu
   const off = voff(bb, table, vto);
   if (!off) return null;
   const result = bb.__string(table + off);
-  return typeof result === "string" ? result : _dec.decode(result);
+  return typeof result === 'string' ? result : _dec.decode(result);
 }
 
 export function vecLen(bb: ByteBuffer, table: number, vto: number): number {
@@ -62,13 +62,7 @@ export function vecUint32(bb: ByteBuffer, table: number, vto: number, i: number)
 
 // Struct vector: elements are packed inline (no indirection), each `stride` bytes.
 // Returns the byte offset of element i, or -1 if the field is absent.
-export function vecStructBase(
-  bb: ByteBuffer,
-  table: number,
-  vto: number,
-  i: number,
-  stride: number,
-): number {
+export function vecStructBase(bb: ByteBuffer, table: number, vto: number, i: number, stride: number): number {
   const off = voff(bb, table, vto);
   if (!off) return -1;
   return bb.__vector(table + off) + i * stride;

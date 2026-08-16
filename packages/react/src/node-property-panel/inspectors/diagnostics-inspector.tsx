@@ -1,21 +1,14 @@
-import { useMemo, useState } from "react";
-import {
-  inspectWeightDiagnostics,
-  type WeightDiagnosticFinding,
-} from "@wetron/core/weight-diagnostics";
-import { formatVal } from "@wetron/core/format-val";
-import {
-  axisOptionLabel,
-  axisProfileAxisHint,
-  diagnosticCodeHint,
-} from "@wetron/core/inspector-hints";
-import { useWeightInspection } from "../weight-inspection-context.tsx";
-import { Hint } from "./hint.tsx";
-import css from "./inspectors.module.css";
+import { useMemo, useState } from 'react';
+import { inspectWeightDiagnostics, type WeightDiagnosticFinding } from '@wetron/core/weight-diagnostics';
+import { formatVal } from '@wetron/core/format-val';
+import { axisOptionLabel, axisProfileAxisHint, diagnosticCodeHint } from '@wetron/core/inspector-hints';
+import { useWeightInspection } from '../weight-inspection-context.tsx';
+import { Hint } from './hint.tsx';
+import css from './inspectors.module.css';
 
 type FindingGroup = {
-  readonly code: WeightDiagnosticFinding["code"];
-  readonly severity: WeightDiagnosticFinding["severity"];
+  readonly code: WeightDiagnosticFinding['code'];
+  readonly severity: WeightDiagnosticFinding['severity'];
   readonly findings: readonly WeightDiagnosticFinding[];
   readonly count: number;
 };
@@ -43,20 +36,20 @@ export function DiagnosticsInspector() {
   const [selected, setSelected] = useState<string | null>(null);
   const findings = useMemo(
     () =>
-      inspection.status === "ready" && shape?.length
+      inspection.status === 'ready' && shape?.length
         ? inspectWeightDiagnostics(
-            inspection.values,
+            inspection.numeric,
             shape,
             Math.min(axis, shape.length - 1),
-            inspection.tensor.dtype?.toLowerCase().includes("float") ? 1e-8 : 0,
+            inspection.tensor.dtype?.toLowerCase().includes('float') ? 1e-8 : 0,
           )
         : [],
     [inspection, shape, axis],
   );
   const groups = useMemo(() => groupFindings(findings), [findings]);
-  if (inspection.status !== "ready" || !shape?.length) return null;
-  const icon = { error: "✕", warning: "⚠", info: "i" } as const;
-  const dtype = inspection.tensor.dtype ?? "float32";
+  if (inspection.status !== 'ready' || !shape?.length) return null;
+  const icon = { error: '✕', warning: '⚠', info: 'i' } as const;
+  const dtype = inspection.tensor.dtype ?? 'float32';
   return (
     <div className={css.root} data-testid="diagnostics-inspector">
       <div className={css.controls}>
@@ -99,27 +92,21 @@ export function DiagnosticsInspector() {
                     <span className={css.findingIcon} data-severity={group.severity}>
                       {icon[group.severity]}
                     </span>
-                    <span className={css.findingLabel}>{group.code.replaceAll("-", " ")}</span>
+                    <span className={css.findingLabel}>{group.code.replaceAll('-', ' ')}</span>
                     <span className={css.findingCount}>{group.count}</span>
-                    <span className={css.findingCaret}>{expanded ? "−" : "+"}</span>
+                    <span className={css.findingCaret}>{expanded ? '−' : '+'}</span>
                   </button>
-                  <Hint
-                    text={diagnosticCodeHint(group.findings[0], Math.min(axis, shape.length - 1))}
-                  />
+                  <Hint text={diagnosticCodeHint(group.findings[0], Math.min(axis, shape.length - 1))} />
                 </div>
                 {expanded && (
                   <div className={css.findingDetails}>
                     {group.findings.flatMap((finding, findingIndex) =>
                       finding.coordinates.map((coordinate, coordinateIndex) => (
-                        <div
-                          className={css.findingDetail}
-                          key={`${findingIndex}-${coordinateIndex}`}
-                        >
-                          <span>[{coordinate.join(", ")}]</span>
+                        <div className={css.findingDetail} key={`${findingIndex}-${coordinateIndex}`}>
+                          <span>[{coordinate.join(', ')}]</span>
                           {finding.value !== undefined && (
                             <span data-testid="finding-value" title={String(finding.value)}>
-                              {finding.code === "norm-outlier" ? "norm" : "value"}{" "}
-                              {formatVal(finding.value, dtype)}
+                              {finding.code === 'norm-outlier' ? 'norm' : 'value'} {formatVal(finding.value, dtype)}
                             </span>
                           )}
                         </div>

@@ -73,7 +73,7 @@
 }
 
 /* ── Dark theme ── */
-[data-theme="dark"] {
+[data-theme='dark'] {
   /* XY Flow CSS variable API (cascade to ReactFlow internals) */
   --xy-background-color-default: #13131f;
   --xy-controls-button-background-color-default: #1e1e2e;
@@ -129,26 +129,26 @@
 
 /* Direct overrides - ReactFlow's colorMode="dark" may set these on .react-flow
    directly, which wins over inherited variables. Use specific selectors to win. */
-[data-theme="dark"] .react-flow {
+[data-theme='dark'] .react-flow {
   background-color: #13131f;
 }
 
-[data-theme="dark"] .react-flow__controls-button {
+[data-theme='dark'] .react-flow__controls-button {
   background-color: #1e1e2e;
   border-color: #2a2a3a;
   color: #7a7a9a;
 }
 
-[data-theme="dark"] .react-flow__controls-button:hover {
+[data-theme='dark'] .react-flow__controls-button:hover {
   background-color: #252538;
   color: #a0a0c0;
 }
 
-[data-theme="dark"] .react-flow__controls-button svg {
+[data-theme='dark'] .react-flow__controls-button svg {
   fill: #7a7a9a;
 }
 
-[data-theme="dark"] .react-flow__controls-button:hover svg {
+[data-theme='dark'] .react-flow__controls-button:hover svg {
   fill: #a0a0c0;
 }
 
@@ -162,7 +162,7 @@
 }
 
 /* ── Light theme ── */
-[data-theme="light"] {
+[data-theme='light'] {
   --xy-background-color-default: #f8f8fc;
   --xy-controls-button-background-color-default: #ffffff;
   --xy-controls-button-background-color-hover-default: #f0f0f8;
@@ -215,17 +215,17 @@
   --wetron-category-unknown: #757575;
 }
 
-[data-theme="light"] .react-flow {
+[data-theme='light'] .react-flow {
   background-color: #f8f8fc;
 }
 
-[data-theme="light"] .react-flow__controls-button {
+[data-theme='light'] .react-flow__controls-button {
   background-color: #ffffff;
   border-color: #e0e0e0;
   color: #555;
 }
 
-[data-theme="light"] .react-flow__controls-button:hover {
+[data-theme='light'] .react-flow__controls-button:hover {
   background-color: #f0f0f8;
   color: #333;
 }

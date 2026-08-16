@@ -1,27 +1,21 @@
-export type ColormapKind = "sequential" | "constant";
+export type ColormapKind = 'sequential' | 'constant';
 
 export function pickColormap(min: number, max: number): ColormapKind {
-  if (!Number.isFinite(min) || !Number.isFinite(max)) return "constant";
-  if (min === max) return "constant";
-  return "sequential";
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return 'constant';
+  if (min === max) return 'constant';
+  return 'sequential';
 }
 
-const STOPS_LIGHT: readonly string[] = ["#eff6ff", "#bfdbfe", "#60a5fa", "#2563eb", "#1e3a8a"];
-const STOPS_DARK: readonly string[] = ["#bfdbfe", "#93c5fd", "#3b82f6", "#1d4ed8", "#1e3a8a"];
+const STOPS_LIGHT: readonly string[] = ['#eff6ff', '#bfdbfe', '#60a5fa', '#2563eb', '#1e3a8a'];
+const STOPS_DARK: readonly string[] = ['#bfdbfe', '#93c5fd', '#3b82f6', '#1d4ed8', '#1e3a8a'];
 
 /** Colour stops used by `colorForCell`, low to high, for rendering a legend. */
 export function colormapStops(isDark = false): readonly string[] {
   return isDark ? STOPS_DARK : STOPS_LIGHT;
 }
 
-export function colorForCell(
-  value: number,
-  min: number,
-  max: number,
-  kind: ColormapKind,
-  isDark = false,
-): string {
-  if (kind === "constant") return "rgba(148,163,184,0.15)";
+export function colorForCell(value: number, min: number, max: number, kind: ColormapKind, isDark = false): string {
+  if (kind === 'constant') return 'rgba(148,163,184,0.15)';
 
   const range = max - min;
   const stops = isDark ? STOPS_DARK : STOPS_LIGHT;
@@ -49,6 +43,6 @@ function mix(a: string, b: string, amount: number): string {
 }
 
 function parseHex(hex: string): [number, number, number] {
-  const m = hex.replace("#", "");
+  const m = hex.replace('#', '');
   return [parseInt(m.slice(0, 2), 16), parseInt(m.slice(2, 4), 16), parseInt(m.slice(4, 6), 16)];
 }

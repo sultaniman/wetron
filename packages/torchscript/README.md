@@ -13,7 +13,7 @@ Included automatically when you install `@wetron/core` or `@wetron/react`.
 ## API
 
 ```ts
-import { parseTorchscript } from "@wetron/torchscript";
+import { parseTorchscript } from '@wetron/torchscript';
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = parseTorchscript(bytes); // synchronous

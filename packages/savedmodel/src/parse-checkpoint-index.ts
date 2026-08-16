@@ -1,6 +1,6 @@
-import { ParseError } from "@wetron/common/ir";
-import { readVarint } from "./varint.ts";
-import { TF_DTYPE } from "./tf-dtype.ts";
+import { ParseError } from '@wetron/common/ir';
+import { readVarint } from './varint.ts';
+import { TF_DTYPE } from './tf-dtype.ts';
 
 export interface CheckpointMeta {
   readonly dtype: string;
@@ -62,7 +62,7 @@ function walkBlock(
 function parseBundleEntry(value: Uint8Array): Partial<CheckpointMeta> {
   const view = new DataView(value.buffer, value.byteOffset, value.byteLength);
   let pos = 0;
-  let dtype = "float32";
+  let dtype = 'float32';
   let shardId = 0;
   let offset = 0;
   let size = 0;
@@ -136,20 +136,14 @@ const _dec = new TextDecoder();
 
 export function parseCheckpointIndex(bytes: Uint8Array): Map<string, CheckpointMeta> {
   if (bytes.length < FOOTER_LENGTH) {
-    throw new ParseError("savedmodel", "variables.index too short to be a valid SSTable");
+    throw new ParseError('savedmodel', 'variables.index too short to be a valid SSTable');
   }
 
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const magicStart = bytes.length - 8;
 
-  if (
-    view.getUint32(magicStart, true) !== MAGIC_LO ||
-    view.getUint32(magicStart + 4, true) !== MAGIC_HI
-  ) {
-    throw new ParseError(
-      "savedmodel",
-      "variables.index: invalid SSTable magic - not a TF checkpoint index",
-    );
+  if (view.getUint32(magicStart, true) !== MAGIC_LO || view.getUint32(magicStart + 4, true) !== MAGIC_HI) {
+    throw new ParseError('savedmodel', 'variables.index: invalid SSTable magic - not a TF checkpoint index');
   }
 
   const footerStart = bytes.length - FOOTER_LENGTH;

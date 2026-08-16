@@ -1,6 +1,6 @@
-import { test, expect, describe } from "vitest";
-import { parseCheckpointIndex } from "../src/parse-checkpoint-index.ts";
-import { ParseError } from "@wetron/common/ir";
+import { test, expect, describe } from 'vitest';
+import { parseCheckpointIndex } from '../src/parse-checkpoint-index.ts';
+import { ParseError } from '@wetron/common/ir';
 
 function writeVarint(out: number[], v: number): void {
   while (v > 0x7f) {
@@ -48,12 +48,7 @@ function buildSstable(entries: Array<[string, Uint8Array]>): Uint8Array {
   for (const [key, value] of entries) {
     const keyBytes = enc.encode(key);
     let shared = 0;
-    while (
-      shared < prevKey.length &&
-      shared < keyBytes.length &&
-      prevKey[shared] === keyBytes[shared]
-    )
-      shared++;
+    while (shared < prevKey.length && shared < keyBytes.length && prevKey[shared] === keyBytes[shared]) shared++;
     const nonShared = keyBytes.length - shared;
     writeVarint(blockData, shared);
     writeVarint(blockData, nonShared);
@@ -96,31 +91,24 @@ function buildSstable(entries: Array<[string, Uint8Array]>): Uint8Array {
   footer.length = 40;
   footer.push(0x57, 0xfb, 0x80, 0x8b, 0x24, 0x75, 0x47, 0xdb);
 
-  const all = [
-    ...blockData,
-    ...dataBlockTrailer,
-    ...indexData,
-    ...indexBlockTrailer,
-    ...metaBlock,
-    ...footer,
-  ];
+  const all = [...blockData, ...dataBlockTrailer, ...indexData, ...indexBlockTrailer, ...metaBlock, ...footer];
   return new Uint8Array(all);
 }
 
-describe("parseCheckpointIndex", () => {
-  test("parses single float32 variable", () => {
+describe('parseCheckpointIndex', () => {
+  test('parses single float32 variable', () => {
     const entry = encodeBundleEntry({ dtype: 1, shape: [4, 4], shardId: 0, offset: 0, size: 64 });
-    const sstable = buildSstable([["layer/kernel/.ATTRIBUTES/VARIABLE_VALUE", entry]]);
+    const sstable = buildSstable([['layer/kernel/.ATTRIBUTES/VARIABLE_VALUE', entry]]);
     const result = parseCheckpointIndex(sstable);
     expect(result.size).toBe(1);
-    const meta = result.get("layer/kernel/.ATTRIBUTES/VARIABLE_VALUE");
-    expect(meta?.dtype).toBe("float32");
+    const meta = result.get('layer/kernel/.ATTRIBUTES/VARIABLE_VALUE');
+    expect(meta?.dtype).toBe('float32');
     expect(meta?.shape).toEqual([4, 4]);
     expect(meta?.offset).toBe(0);
     expect(meta?.size).toBe(64);
   });
 
-  test("parses multiple variables", () => {
+  test('parses multiple variables', () => {
     const kernel = encodeBundleEntry({
       dtype: 1,
       shape: [32, 16],
@@ -136,33 +124,33 @@ describe("parseCheckpointIndex", () => {
       size: 64,
     });
     const sstable = buildSstable([
-      ["layer/bias/.ATTRIBUTES/VARIABLE_VALUE", bias],
-      ["layer/kernel/.ATTRIBUTES/VARIABLE_VALUE", kernel],
+      ['layer/bias/.ATTRIBUTES/VARIABLE_VALUE', bias],
+      ['layer/kernel/.ATTRIBUTES/VARIABLE_VALUE', kernel],
     ]);
     const result = parseCheckpointIndex(sstable);
     expect(result.size).toBe(2);
-    expect(result.get("layer/kernel/.ATTRIBUTES/VARIABLE_VALUE")?.shape).toEqual([32, 16]);
-    expect(result.get("layer/bias/.ATTRIBUTES/VARIABLE_VALUE")?.offset).toBe(2048);
+    expect(result.get('layer/kernel/.ATTRIBUTES/VARIABLE_VALUE')?.shape).toEqual([32, 16]);
+    expect(result.get('layer/bias/.ATTRIBUTES/VARIABLE_VALUE')?.offset).toBe(2048);
   });
 
-  test("skips empty key (BundleHeaderProto entry)", () => {
+  test('skips empty key (BundleHeaderProto entry)', () => {
     const header = new Uint8Array([0x08, 0x01, 0x1a, 0x02, 0x08, 0x01]);
     const kernel = encodeBundleEntry({ dtype: 1, shape: [8], shardId: 0, offset: 0, size: 32 });
     const sstable = buildSstable([
-      ["", header],
-      ["w/.ATTRIBUTES/VARIABLE_VALUE", kernel],
+      ['', header],
+      ['w/.ATTRIBUTES/VARIABLE_VALUE', kernel],
     ]);
     const result = parseCheckpointIndex(sstable);
-    expect(result.has("w/.ATTRIBUTES/VARIABLE_VALUE")).toBe(true);
-    expect(result.has("")).toBe(false);
+    expect(result.has('w/.ATTRIBUTES/VARIABLE_VALUE')).toBe(true);
+    expect(result.has('')).toBe(false);
   });
 
-  test("throws ParseError on wrong magic", () => {
+  test('throws ParseError on wrong magic', () => {
     const bad = new Uint8Array(56);
     expect(() => parseCheckpointIndex(bad)).toThrow(ParseError);
   });
 
-  test("throws ParseError on file shorter than footer", () => {
+  test('throws ParseError on file shorter than footer', () => {
     expect(() => parseCheckpointIndex(new Uint8Array(16))).toThrow(ParseError);
   });
 });

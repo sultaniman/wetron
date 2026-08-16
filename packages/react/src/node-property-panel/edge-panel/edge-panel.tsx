@@ -1,7 +1,7 @@
-import { ArrowsLeftRightIcon } from "@phosphor-icons/react";
-import { Row, SectionLabel, BackButton } from "../panel-ui.tsx";
-import { Tooltip } from "../../tooltip.tsx";
-import propertyPanelCss from "../node-property-panel.module.css";
+import { ArrowsLeftRightIcon } from '@phosphor-icons/react';
+import { Row, SectionLabel, BackButton } from '../panel-ui.tsx';
+import { Tooltip } from '../../tooltip.tsx';
+import propertyPanelCss from '../node-property-panel.module.css';
 
 type EdgeData = {
   tensorName: string;
@@ -37,9 +37,7 @@ export function EdgePanel({
       </div>
       {(info?.shape != null || info?.dtype) && (
         <div className={propertyPanelCss.section}>
-          {info?.shape != null && (
-            <Row label="shape" value={`[${info.shape.join(", ")}]`} chip="int[]" />
-          )}
+          {info?.shape != null && <Row label="shape" value={`[${info.shape.join(', ')}]`} chip="int[]" />}
           {info?.dtype && <Row label="dtype" value={info.dtype} chip="str" />}
         </div>
       )}

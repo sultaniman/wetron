@@ -1,7 +1,7 @@
 // The browser bundle has no declaration file; its API is narrowed below.
 // @ts-expect-error protobufjs does not publish types for this browser subpath
-import protobufBrowser from "protobufjs/dist/light/protobuf.js";
-import type { Root, Reader, INamespace } from "protobufjs/light.js";
+import protobufBrowser from 'protobufjs/dist/light/protobuf.js';
+import type { Root, Reader, INamespace } from 'protobufjs/light.js';
 
 const protobuf = protobufBrowser as {
   readonly Reader: { create(bytes: Uint8Array): Reader };

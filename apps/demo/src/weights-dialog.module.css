@@ -17,7 +17,7 @@
   z-index: 100;
 }
 
-.overlay[data-theme="dark"] {
+.overlay[data-theme='dark'] {
   --dlg-bg: #16161e;
   --dlg-border: #2a2a3a;
   --dlg-text: #e0e0e0;
