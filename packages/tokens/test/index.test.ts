@@ -44,12 +44,22 @@ test('PANEL_VARS light and dark have the same 15 keys', () => {
 // silent at runtime because the same names exist in both files; the test fails
 // loudly if anyone edits one site without the other.
 
+// Escape every regex metacharacter, not just `-`, so varName is matched literally.
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
+}
+
 // Walk the source as a flat list of `{...}` blocks (no nesting in these files),
 // return the value of `varName` from the first block whose preceding selector
 // text contains `selectorMarker` and whose body contains the var.
 // Strips CSS / JS comments first so braces inside comments don't confuse parsing.
 function extractCssVar(src: string, varName: string, selectorMarker: string): string | null {
-  const stripped = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  // Normalize quote style so the selector markers below match regardless of how
+  // the formatter renders attribute selectors ([data-theme='dark'] vs "dark").
+  const stripped = src
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '')
+    .replace(/'/g, '"');
   let i = 0;
   while (i < stripped.length) {
     const open = stripped.indexOf('{', i);
@@ -59,7 +69,7 @@ function extractCssVar(src: string, varName: string, selectorMarker: string): st
     const selector = stripped.slice(i, open);
     const body = stripped.slice(open + 1, close);
     if (selector.includes(selectorMarker)) {
-      const m = body.match(new RegExp(`${varName.replace(/-/g, '\\-')}\\s*:\\s*([^;]+);`));
+      const m = body.match(new RegExp(`${escapeRe(varName)}\\s*:\\s*([^;]+);`));
       if (m) return m[1].trim();
     }
     i = close + 1;
