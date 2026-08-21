@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { ModelGraph } from '@wetron/common/ir';
-import { computeStats, decodeWeight, elementSize, numericView, type WeightInspectionData } from '@wetron/core';
+import { computeStats } from '@wetron/core/weight-stats';
+import { decodeWeight, elementSize, numericView } from '@wetron/core/weight-decoder';
+import type { WeightInspectionData } from '@wetron/core/weight-inspection';
 import { formatVal } from '@wetron/core/format-val';
 import { defaultInspector, weightStatsHint } from '@wetron/core/inspector-hints';
 import { BackButton } from '../panel-ui.tsx';

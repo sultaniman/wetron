@@ -29,7 +29,7 @@ import {
   useFitOnGraphChange,
   useNavStack,
 } from './hooks.ts';
-import { filterGraph } from '@wetron/core';
+import { filterGraph } from '@wetron/core/transform';
 import { SubGraphNavContext } from './nav-context.ts';
 import { ScopeChrome } from './scope-chrome.tsx';
 

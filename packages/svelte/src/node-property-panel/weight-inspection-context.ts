@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import type { WeightInspectionData } from '@wetron/core';
+import type { WeightInspectionData } from '@wetron/core/weight-inspection';
 
 export interface WeightInspectionContextValue {
   readonly current: WeightInspectionData;

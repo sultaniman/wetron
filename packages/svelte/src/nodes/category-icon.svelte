@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { OpCategory } from '@wetron/core';
-  import { opBase } from '@wetron/core';
+  import type { OpCategory } from '@wetron/core/categories';
+  import { opBase } from '@wetron/core/categories';
   import {
     ArrowDownIcon,
     ArrowUpIcon,

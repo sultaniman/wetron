@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { GraphFlowNode } from '@wetron/core/transform';
   import { WEIGHT_ROW_LIMIT } from '@wetron/core/transform';
-  import { opCategory } from '@wetron/core';
+  import { opCategory } from '@wetron/core/categories';
   import { consumeColorMode } from '../color-mode-context.ts';
   import { consumeSubGraphNav } from '../model-graph-view/nav-context.ts';
   import NodeCard from './node-card.svelte';

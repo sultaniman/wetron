@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { WeightStats } from '@wetron/core';
+  import type { WeightStats } from '@wetron/core/weight-stats';
   import { formatVal } from '@wetron/core/format-val';
   import { pickColormap, colorForCell } from '@wetron/core/heatmap-color';
 

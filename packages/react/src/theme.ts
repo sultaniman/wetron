@@ -40,8 +40,8 @@ import {
   ExclamationMarkIcon,
   EqualsIcon,
 } from '@phosphor-icons/react';
-import type { OpCategory } from '@wetron/core';
-import { opBase } from '@wetron/core';
+import type { OpCategory } from '@wetron/core/categories';
+import { opBase } from '@wetron/core/categories';
 
 export type { OpCategory };
 export { CATEGORY_THEME, MINIMAP_THEME, EDGE_THEME } from '@wetron/tokens';

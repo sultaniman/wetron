@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
-import type { WeightInspectionData } from '@wetron/core';
+import type { WeightInspectionData } from '@wetron/core/weight-inspection';
 
 export type WeightInspectionContextValue = WeightInspectionData & {
   readonly isDark: boolean;

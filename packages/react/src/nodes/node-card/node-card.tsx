@@ -1,7 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { CaretRightIcon } from '@phosphor-icons/react';
-import type { OpCategory } from '@wetron/core';
+import type { OpCategory } from '@wetron/core/categories';
 import type { IconEntry } from '../../theme.ts';
 import { Tooltip } from '../../tooltip.tsx';
 import css from './node-card.module.css';

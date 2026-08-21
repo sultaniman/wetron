@@ -4,6 +4,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: {
     detect: 'src/detect.ts',
+    categories: 'src/categories.ts',
     transform: 'src/transform.ts',
     'edge-path': 'src/edge-path.ts',
     'panel-utils': 'src/panel-utils.ts',
@@ -11,6 +12,9 @@ export default defineConfig({
     'heatmap-color': 'src/heatmap-color.ts',
     'tensor-index': 'src/tensor-index.ts',
     'tensor-slice': 'src/tensor-slice.ts',
+    'weight-decoder': 'src/weight-decoder.ts',
+    'weight-stats': 'src/weight-stats.ts',
+    'weight-inspection': 'src/weight-inspection.ts',
     'weight-distribution': 'src/weight-distribution.ts',
     'weight-axis-stats': 'src/weight-axis-stats.ts',
     'weight-sparsity': 'src/weight-sparsity.ts',

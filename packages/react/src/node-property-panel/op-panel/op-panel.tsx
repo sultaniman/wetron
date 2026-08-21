@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon, StackIcon } from '@phosphor-icons/react';
 import type { GraphNode, ModelGraph } from '@wetron/common/ir';
-import { opCategory } from '@wetron/core';
+import { opCategory } from '@wetron/core/categories';
 import { CATEGORY_ICON, OP_ICON } from '../../theme.ts';
 import { renderIconEntry, Row, SectionLabel, BackButton } from '../panel-ui.tsx';
 import { AttrRow } from '../attr-row/attr-row.tsx';

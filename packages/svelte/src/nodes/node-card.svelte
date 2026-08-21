@@ -2,7 +2,7 @@
   import type { Snippet } from 'svelte';
   import { Handle, Position } from '@xyflow/svelte';
   import { CaretRightIcon } from 'phosphor-svelte';
-  import type { OpCategory } from '@wetron/core';
+  import type { OpCategory } from '@wetron/core/categories';
   import CategoryIcon from './category-icon.svelte';
   import Tooltip from '../tooltip.svelte';
 

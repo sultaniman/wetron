@@ -31,6 +31,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./categories": {
+      "source": "./src/categories.ts",
+      "types": "./dist/categories.d.ts",
+      "import": "./dist/categories.js"
+    },
     "./detect": {
       "source": "./src/detect.ts",
       "types": "./dist/detect.d.ts",
@@ -70,6 +75,21 @@
       "source": "./src/tensor-slice.ts",
       "types": "./dist/tensor-slice.d.ts",
       "import": "./dist/tensor-slice.js"
+    },
+    "./weight-decoder": {
+      "source": "./src/weight-decoder.ts",
+      "types": "./dist/weight-decoder.d.ts",
+      "import": "./dist/weight-decoder.js"
+    },
+    "./weight-stats": {
+      "source": "./src/weight-stats.ts",
+      "types": "./dist/weight-stats.d.ts",
+      "import": "./dist/weight-stats.js"
+    },
+    "./weight-inspection": {
+      "source": "./src/weight-inspection.ts",
+      "types": "./dist/weight-inspection.d.ts",
+      "import": "./dist/weight-inspection.js"
     },
     "./weight-distribution": {
       "source": "./src/weight-distribution.ts",

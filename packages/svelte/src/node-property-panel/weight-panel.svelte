@@ -1,7 +1,9 @@
 <script lang="ts">
   import { untrack, type Snippet } from 'svelte';
-  import type { ModelGraph, WeightInspectionData } from '@wetron/core';
-  import { computeStats, decodeWeight, elementSize, numericView } from '@wetron/core';
+  import type { ModelGraph } from '@wetron/common/ir';
+  import type { WeightInspectionData } from '@wetron/core/weight-inspection';
+  import { computeStats } from '@wetron/core/weight-stats';
+  import { decodeWeight, elementSize, numericView } from '@wetron/core/weight-decoder';
   import { formatVal } from '@wetron/core/format-val';
   import { defaultInspector, weightStatsHint } from '@wetron/core/inspector-hints';
   import Hint from './hint.svelte';

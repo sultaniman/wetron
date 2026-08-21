@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ArrowCircleDownIcon, ArrowCircleUpIcon, SlidersHorizontalIcon } from 'phosphor-svelte';
   import type { GraphNode } from '@wetron/common/ir';
-  import { opCategory } from '@wetron/core';
+  import { opCategory } from '@wetron/core/categories';
   import CategoryIcon from '../nodes/category-icon.svelte';
   import Row from './row.svelte';
   import AttrRow from './attr-row.svelte';

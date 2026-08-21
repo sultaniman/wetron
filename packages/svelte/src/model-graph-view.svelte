@@ -6,7 +6,7 @@
   import type { ExportHelpers } from './export-helper.ts';
   import '@xyflow/svelte/dist/style.css';
   import { untrack } from 'svelte';
-  import { modelGraphToFlow, filterGraph } from '@wetron/core';
+  import { modelGraphToFlow, filterGraph } from '@wetron/core/transform';
   import type { FlowEdge, FlowNode } from '@wetron/core/transform';
   import type { ModelGraph, ParseWarning } from '@wetron/common/ir';
   import GraphNodeComponent from './nodes/graph-node.svelte';

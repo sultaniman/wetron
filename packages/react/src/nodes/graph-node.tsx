@@ -1,7 +1,7 @@
 import type { Node, NodeProps } from '@xyflow/react';
 import type { GraphFlowNode } from '@wetron/core/transform';
 import { WEIGHT_ROW_LIMIT } from '@wetron/core/transform';
-import { opCategory } from '@wetron/core';
+import { opCategory } from '@wetron/core/categories';
 import { opIcon } from '../theme.ts';
 import { NodeCard } from './node-card/node-card.tsx';
 import css from './node-card/node-card.module.css';

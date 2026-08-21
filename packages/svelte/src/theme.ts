@@ -1,4 +1,4 @@
-import type { OpCategory } from '@wetron/core';
+import type { OpCategory } from '@wetron/core/categories';
 import { CATEGORY_THEME as CATEGORY_COLORS } from '@wetron/tokens';
 
 export type { OpCategory };
