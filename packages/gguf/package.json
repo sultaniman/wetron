@@ -1,6 +1,6 @@
 {
   "name": "@wetron/gguf",
-  "version": "0.0.35",
+  "version": "0.1.0",
   "description": "GGUF model parser - extracts metadata, tensor descriptors, and weight payloads",
   "keywords": [
     "gguf",

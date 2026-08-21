@@ -1,6 +1,6 @@
 {
   "name": "@wetron/common",
-  "version": "0.0.35",
+  "version": "0.1.0",
   "description": "Shared kit for wetron parsers - IR types, dtype readers, flatbuffer helpers",
   "keywords": [
     "graph",
