@@ -1,3 +1,8 @@
 packages:
   - 'packages/*'
   - 'apps/*'
+
+# esbuild <0.28.1 has a dev-server file-read advisory; tsup pins ^0.27.0 and cannot
+# reach the fix on its own. Lives here because pnpm 11 ignores package.json "pnpm".
+overrides:
+  esbuild: ^0.28.2
