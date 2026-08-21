@@ -79,12 +79,21 @@
     </span>
   </div>
   {#if scopeName}
-    <div class="scope-row">
-      <Tooltip text={scopeName} onlyIfOverflow>
-        <span class="scope-name">{scopeName}</span>
-      </Tooltip>
-      <CaretRightIcon size={12} weight="bold" />
-    </div>
+    {#if onOpenScope}
+      <button type="button" class="scope-row" onclick={onOpenScope} aria-label="Open {scopeName} sub-graph">
+        <Tooltip text={scopeName} onlyIfOverflow>
+          <span class="scope-name">{scopeName}</span>
+        </Tooltip>
+        <CaretRightIcon size={12} weight="bold" />
+      </button>
+    {:else}
+      <div class="scope-row">
+        <Tooltip text={scopeName} onlyIfOverflow>
+          <span class="scope-name">{scopeName}</span>
+        </Tooltip>
+        <CaretRightIcon size={12} weight="bold" />
+      </div>
+    {/if}
   {:else if subtitle}
     <Tooltip text={subtitle} onlyIfOverflow>
       <div class="subtitle">{subtitle}</div>

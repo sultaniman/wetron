@@ -42,7 +42,11 @@
   }: Props = $props();
   let rootElement = $state<HTMLDivElement | null>(null);
 
-  let navStack = $state<ModelGraph[]>(untrack(() => [graph]));
+  // $state.raw: the IR is immutable and every write below replaces the whole array,
+  // so deep reactivity only costs proxies. Deep $state here proxied the entire
+  // ModelGraph, those proxies reached flow node data, and @xyflow/svelte's
+  // structuredClone check then warned about deeply-reactive nodes.
+  let navStack = $state.raw<ModelGraph[]>(untrack(() => [graph]));
   $effect.pre(() => {
     // reset stack whenever a different root graph is provided
     navStack = [graph];
