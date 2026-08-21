@@ -20,25 +20,10 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: [
-        'react',
-        'react/jsx-runtime',
-        'react-dom',
-        '@xyflow/react',
-        '@phosphor-icons/react',
-        '@base-ui/react',
-        '@base-ui/react/tooltip',
-        '@base-ui/react/collapsible',
-        '@base-ui/react/scroll-area',
-        '@base-ui/react/tabs',
-        '@wetron/common',
-        '@wetron/common/ir',
-        '@wetron/core',
-        '@wetron/core/transform',
-        '@wetron/core/edge-path',
-        '@wetron/core/panel-utils',
-        '@wetron/tokens',
-      ],
+      // Predicate rather than a list: every peer and every @wetron/* subpath must
+      // stay external, and a hardcoded array silently bundles new deep imports.
+      external: (id: string) =>
+        /^(?:react$|react\/|react-dom$|@xyflow\/|@phosphor-icons\/|@base-ui\/|@tanstack\/|@wetron\/)/.test(id),
     },
     sourcemap: true,
     cssCodeSplit: false,
