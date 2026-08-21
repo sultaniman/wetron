@@ -21,7 +21,7 @@ export default defineConfig({
       },
       {
         extends: true,
-        plugins: [svelte()],
+        plugins: [svelte({ configFile: false })],
         resolve: { conditions: ['browser'] },
         ssr: { noExternal: ['@xyflow/svelte'] },
         test: {

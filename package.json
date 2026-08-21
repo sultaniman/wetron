@@ -1,6 +1,7 @@
 {
   "name": "wetron",
   "private": true,
+  "type": "module",
   "author": "Sultan Iman",
   "scripts": {
     "build": "pnpm run build:core:libs && pnpm run build:parsers && pnpm run build:core:index && pnpm run build:ui",
