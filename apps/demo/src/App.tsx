@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { getViewportForBounds } from '@xyflow/react';
 import { toPng } from 'html-to-image';
-import { parseModel, parseModelFromUrl } from '@wetron/core';
 import { ModelGraphView, NodePropertyPanel } from '@wetron/react';
 import type { ModelGraphViewHandle } from '@wetron/react';
 import type { ModelGraph } from '@wetron/core';
@@ -59,6 +58,7 @@ export default function App() {
     setWeightsDialogOpen(false);
     try {
       const buf = await file.arrayBuffer();
+      const { parseModel } = await import('@wetron/core');
       const graph = await parseModel(new Uint8Array(buf), file.name);
       setState({ status: 'ready', graph, name: file.name });
       if (graph.nodes[0]?.opType.startsWith('GGUF')) setSelected(graph.nodes[0]);
@@ -86,6 +86,7 @@ export default function App() {
     setSearchQuery('');
     setWeightsDialogOpen(false);
     try {
+      const { parseModelFromUrl } = await import('@wetron/core');
       const graph = await parseModelFromUrl(url);
       setState({ status: 'ready', graph, name });
       if (graph.nodes[0]?.opType.startsWith('GGUF')) setSelected(graph.nodes[0]);

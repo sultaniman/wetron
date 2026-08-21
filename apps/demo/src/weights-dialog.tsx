@@ -1,11 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { XIcon, PlusIcon, TrashIcon } from '@phosphor-icons/react';
-import {
-  loadSavedModelWeights,
-  loadSavedModelWeightsFromUrls,
-  attachCheckpointToGraph,
-  type ModelGraph,
-} from '@wetron/core';
+import type { ModelGraph } from '@wetron/core';
 import css from './weights-dialog.module.css';
 
 type LoadState = { status: 'idle' } | { status: 'loading' } | { status: 'error'; message: string };
@@ -39,6 +34,7 @@ export function WeightsDialog({
     if (!indexFile || !dataFile) return;
     setLoad({ status: 'loading' });
     try {
+      const { loadSavedModelWeights, attachCheckpointToGraph } = await import('@wetron/core');
       const loaded = await loadSavedModelWeights(indexFile, dataFile);
       onLoaded(attachCheckpointToGraph(graph, loaded));
       onClose();
@@ -52,6 +48,7 @@ export function WeightsDialog({
     if (!indexUrl.trim() || filled.length === 0) return;
     setLoad({ status: 'loading' });
     try {
+      const { loadSavedModelWeightsFromUrls, attachCheckpointToGraph } = await import('@wetron/core');
       const loaded = await loadSavedModelWeightsFromUrls(indexUrl.trim(), ...filled);
       onLoaded(attachCheckpointToGraph(graph, loaded));
       onClose();
