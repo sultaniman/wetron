@@ -1,20 +1,20 @@
 ---
-title: 'React'
-description: 'ModelGraphView and NodePropertyPanel React components for Wetron - built on @xyflow/react with full TypeScript types and CSS custom property theming.'
-lead: 'Drop-in components built on @xyflow/react.'
+title: "React"
+description: "ModelGraphView and NodePropertyPanel React components for Wetron - built on @xyflow/react with full TypeScript types and CSS custom property theming."
+lead: "Drop-in components built on @xyflow/react."
 weight: 10
 ---
 
 Import the stylesheet once in your entry point:
 
 ```ts
-import '@wetron/react/styles.css';
+import "@wetron/react/styles.css";
 ```
 
 ## ModelGraphView
 
 ```tsx
-import { ModelGraphView } from '@wetron/react';
+import { ModelGraphView } from "@wetron/react";
 
 <ModelGraphView
   graph={graph} // ModelGraph - required
@@ -44,7 +44,7 @@ Renders the full interactive graph. Nodes are coloured by operator category. Cli
 ## NodePropertyPanel
 
 ```tsx
-import { NodePropertyPanel } from '@wetron/react';
+import { NodePropertyPanel } from "@wetron/react";
 
 <NodePropertyPanel
   target={selected} // PanelTarget | null - null renders nothing
@@ -82,16 +82,16 @@ The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally.
 
 Below the summary block, `DefaultWeightInspectors` renders a view picker and the selected inspector. Which views are offered depends on the tensor's rank and dtype:
 
-| View               | `WeightInspectorName` | Offered when         | Shows                                                                             |
-| ------------------ | --------------------- | -------------------- | --------------------------------------------------------------------------------- |
-| matrix             | `matrix`              | rank ≥ 2             | Heatmap of a 2-D slice. Cells are block means, not individual weights.            |
-| distribution       | `distribution`        | always               | Histogram of every decoded value, with percentiles and non-finite counts.         |
-| per-axis profile   | `axis`                | rank ≥ 1             | One metric per index along an axis: mean, std, L1, L2, max-abs, or zero-ratio.    |
-| sparsity           | `sparsity`            | always               | Where the zeros are. Structured blocks are prunable; scattered zeros are not.     |
-| kernel gallery     | `kernel`              | rank 4, all dims > 0 | Each output filter's spatial kernel at one input channel, under a chosen layout.  |
-| quantization       | `quantization`        | dtype `Q4_0`         | How the encoded blocks use their code space, before dequantization.               |
-| diagnostics        | `diagnostics`         | rank ≥ 1             | Automated checks for non-finite, constant, and outlier slices.                    |
-| values             | `values`              | always               | Raw decoded values in flattened memory order.                                     |
+| View             | `WeightInspectorName` | Offered when         | Shows                                                                            |
+| ---------------- | --------------------- | -------------------- | -------------------------------------------------------------------------------- |
+| matrix           | `matrix`              | rank ≥ 2             | Heatmap of a 2-D slice. Cells are block means, not individual weights.           |
+| distribution     | `distribution`        | always               | Histogram of every decoded value, with percentiles and non-finite counts.        |
+| per-axis profile | `axis`                | rank ≥ 1             | One metric per index along an axis: mean, std, L1, L2, max-abs, or zero-ratio.   |
+| sparsity         | `sparsity`            | always               | Where the zeros are. Structured blocks are prunable; scattered zeros are not.    |
+| kernel gallery   | `kernel`              | rank 4, all dims > 0 | Each output filter's spatial kernel at one input channel, under a chosen layout. |
+| quantization     | `quantization`        | dtype `Q4_0`         | How the encoded blocks use their code space, before dequantization.              |
+| diagnostics      | `diagnostics`         | rank ≥ 1             | Automated checks for non-finite, constant, and outlier slices.                   |
+| values           | `values`              | always               | Raw decoded values in flattened memory order.                                    |
 
 Tensors of rank ≥ 2 open on `matrix`; everything else opens on `distribution`.
 
@@ -112,12 +112,61 @@ Each inspector is also exported on its own (`MatrixInspector`, `DistributionInsp
 {{< themed-img light="images/property-panel-diagnostics-light.png" dark="images/property-panel-diagnostics-dark.png" alt="Weight panel - diagnostics inspector listing norm outlier and constant slice findings" >}}
 {{< /themed-img-row >}}
 
+### Composing the panel
+
+`NodePropertyPanel` renders `WeightPanel` for you. Render `WeightPanel` directly to choose which inspectors appear:
+
+```tsx
+import { WeightPanel, MatrixInspector, SparsityInspector } from "@wetron/react";
+
+<WeightPanel target={{ name: "conv1.weight", shape: [64, 3, 7, 7], dtype: "float32" }} graph={graph}>
+  <MatrixInspector />
+  <SparsityInspector />
+  <RowNorms />
+</WeightPanel>;
+```
+
+`children` replace `DefaultWeightInspectors`, and the view picker goes with them. The summary block above the picker is not part of `children` and stays either way. Omit `children` for the stock picker and all eight views.
+
+| Prop       | Type                                                                        | Description                                                      |
+| ---------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `target`   | `{ name: string; shape: readonly number[] \| null; dtype: string \| null }` | Required. The tensor to decode.                                  |
+| `graph`    | `ModelGraph`                                                                | Required. Supplies the weight bytes and the tensor memory order. |
+| `onBack`   | `() => void`                                                                | Shows a back arrow when provided.                                |
+| `isDark`   | `boolean`                                                                   | Theme for inspector colours. Default `false`.                    |
+| `children` | `ReactNode`                                                                 | Replaces `DefaultWeightInspectors`.                              |
+
+`DefaultWeightInspectors` takes `selected` and `onSelected` to drive the picker from your own state. Without them it keeps its own selection.
+
+### Writing an inspector
+
+`useWeightInspection()` returns the decoded tensor of the enclosing `WeightPanel`. It throws outside one.
+
+```tsx
+import { useWeightInspection } from "@wetron/react";
+
+function RowNorms() {
+  const inspection = useWeightInspection();
+  if (inspection.status !== "ready") return null;
+  const { tensor, numeric, stats, isDark } = inspection;
+  return (
+    <p style={{ color: isDark ? "#eee" : "#111" }}>
+      {tensor.name}: {numeric.length} values, max {stats.max}
+    </p>
+  );
+}
+```
+
+Check `status` before reading the tensor. `values`, `numeric`, and `stats` are `null` in every state except `"ready"`, and each other state means the panel is already showing its own placeholder: `deferred` (the "Show weights" toggle is off), `external` (the checkpoint or external data file has not been attached), `unsupported` (the dtype has no decoder), `unavailable` (no bytes under that name). Returning `null` is the right response to all four.
+
+The context value is [`WeightInspectionData`](../api/weights/#weightinspectiondata) plus `isDark`. Every stock inspector reads it the same way and takes no props, so a stock inspector and your own can sit side by side and share the one decode.
+
 ## PanelTarget type
 
 ```ts
 type PanelTarget =
   | GraphNode
-  | { graphValue: GraphValue; direction: 'input' | 'output' }
+  | { graphValue: GraphValue; direction: "input" | "output" }
   | {
       edge: {
         tensorName: string;

@@ -137,6 +137,7 @@ The docs site is not a workspace package and needs a flat `node_modules` for Hug
 - [Formats](docs/content/docs/formats/) - ONNX, TFLite, Keras, GGUF, TorchScript, ExecuTorch
 - [Rendering](docs/content/docs/rendering/) - React, Svelte, theming tokens
 - [Contributing](docs/content/docs/contributing/) - adding a new parser
+- [Changelog](docs/content/docs/changelog/) - release notes per version
 
 ## Constraints
 

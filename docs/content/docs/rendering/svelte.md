@@ -1,7 +1,7 @@
 ---
-title: 'Svelte'
-description: 'ModelGraphView and NodePropertyPanel Svelte 5 components for Wetron - built on @xyflow/svelte with runes and CSS custom property theming.'
-lead: 'Drop-in components built on @xyflow/svelte.'
+title: "Svelte"
+description: "ModelGraphView and NodePropertyPanel Svelte 5 components for Wetron - built on @xyflow/svelte with runes and CSS custom property theming."
+lead: "Drop-in components built on @xyflow/svelte."
 weight: 20
 ---
 
@@ -62,12 +62,68 @@ type ExportHelpers = {
 | `onBack`        | `() => void`                            | Shows a back arrow when provided.                             |
 | `onClose`       | `() => void`                            | Shows a close button when provided.                           |
 
+## WeightPanel
+
+`NodePropertyPanel` renders `WeightPanel` when `target` names an initializer and `graph` is supplied. The inspector set, the rank and dtype rules that decide which views are offered, and the summary block are the same as [React](react/#weight-inspectors) - matrix, distribution, per-axis profile, sparsity, kernel gallery, quantization, diagnostics, and a virtualized values grid.
+
+Render `WeightPanel` directly to choose which inspectors appear:
+
+```svelte
+<script>
+  import { WeightPanel, MatrixInspector, SparsityInspector } from '@wetron/svelte';
+  import RowNorms from './row-norms.svelte';
+</script>
+
+<WeightPanel target={{ name: 'conv1.weight', shape: [64, 3, 7, 7], dtype: 'float32' }} {graph}>
+  <MatrixInspector />
+  <SparsityInspector />
+  <RowNorms />
+</WeightPanel>
+```
+
+The children snippet replaces `DefaultWeightInspectors`, and the view picker goes with it. The summary block above the picker stays either way. Omit the snippet for the stock picker and all eight views.
+
+### Props
+
+| Prop       | Type                                                                        | Description                                                      |
+| ---------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `target`   | `{ name: string; shape: readonly number[] \| null; dtype: string \| null }` | Required. The tensor to decode.                                  |
+| `graph`    | `ModelGraph`                                                                | Required. Supplies the weight bytes and the tensor memory order. |
+| `onBack`   | `() => void`                                                                | Shows a back arrow when provided.                                |
+| `isDark`   | `boolean`                                                                   | Theme for inspector colours. Default `false`.                    |
+| `children` | `Snippet`                                                                   | Replaces `DefaultWeightInspectors`.                              |
+
+`DefaultWeightInspectors` exposes `bind:selected` to drive the picker from your own state.
+
+### Writing an inspector
+
+`getWeightInspection()` returns the decoded tensor of the enclosing `WeightPanel`. Call it during component initialization, like any other Svelte context read; it throws outside a `WeightPanel`.
+
+```svelte
+<script lang="ts">
+  import { getWeightInspection } from '@wetron/svelte';
+
+  const context = getWeightInspection();
+  const ready = $derived(context.current.status === 'ready' ? context.current : null);
+</script>
+
+{#if ready}
+  <p>{ready.tensor.name}: {ready.numeric.length} values, max {ready.stats.max}</p>
+{/if}
+```
+
+`context.current` and `context.isDark` are getters, so read them inside `$derived` to track changes as the reader switches tensors or themes.
+
+Check `status` before reading the tensor. `values`, `numeric`, and `stats` are `null` in every state except `"ready"`, and each other state means the panel is already showing its own placeholder: `deferred` (the "Show weights" toggle is off), `external` (the checkpoint or external data file has not been attached), `unsupported` (the dtype has no decoder), `unavailable` (no bytes under that name). Rendering nothing is the right response to all four.
+
+`context.current` is [`WeightInspectionData`](../api/weights/#weightinspectiondata). Every stock inspector reads it the same way and takes no props.
+
 ## PanelTarget type
 
 ```ts
 type PanelTarget =
   | GraphNode
-  | { graphValue: GraphValue; direction: 'input' | 'output' }
+  | { graphValue: GraphValue; direction: "input" | "output" }
   | {
       edge: {
         tensorName: string;
@@ -90,4 +146,4 @@ type PanelTarget =
 - `colorMode="system"` reads `prefers-color-scheme` via a media query listener.
 - Layout is computed once on mount via Dagre; re-computed when `graph` changes.
 - Theme colours for node categories come from `@wetron/tokens`.
-- Initializer tensors use the same weight-inspection flow as React: lazy decoding, summary statistics, and the full [inspector set](react/#weight-inspectors) - matrix, distribution, per-axis profile, sparsity, kernel gallery, quantization, diagnostics, and a virtualized values grid. Pass `graph` to `NodePropertyPanel` so it can distinguish initializers from live tensors.
+- Pass `graph` to `NodePropertyPanel` so it can tell initializers from live tensors and open the [weight panel](#weightpanel).

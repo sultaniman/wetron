@@ -1,13 +1,13 @@
 ---
-title: 'Weights'
-description: 'Weight inspection API - WeightSource on ModelGraph, scalar and GGUF Q4_0 decoding, summary statistics, and TF2 checkpoint loading.'
-lead: 'Lazily decode initializer bytes into typed arrays and summary statistics.'
+title: "Weights"
+description: "Weight inspection API - WeightSource on ModelGraph, scalar and GGUF Q4_0 decoding, summary statistics, and TF2 checkpoint loading."
+lead: "Lazily decode initializer bytes into typed arrays and summary statistics."
 weight: 30
 ---
 
 ```ts
-import { decodeWeight, decodeFirstN, numericView, computeStats } from '@wetron/core';
-import type { WeightSource, WeightStats } from '@wetron/core';
+import { decodeWeight, decodeFirstN, numericView, computeStats } from "@wetron/core";
+import type { WeightSource, WeightStats } from "@wetron/core";
 ```
 
 {{< themed-img light="images/property-panel-matrix-light.png" dark="images/property-panel-matrix-dark.png" alt="Weight panel showing the summary statistics block above the matrix inspector" class="themed-img--narrow" >}}
@@ -18,8 +18,8 @@ import type { WeightSource, WeightStats } from '@wetron/core';
 
 ```ts
 type ModelWeights =
-  | { readonly kind: 'available'; readonly source: WeightSource }
-  | { readonly kind: 'external'; readonly format: 'savedmodel' | 'onnx' };
+  | { readonly kind: "available"; readonly source: WeightSource }
+  | { readonly kind: "external"; readonly format: "savedmodel" | "onnx" };
 ```
 
 ## WeightSource
@@ -102,11 +102,51 @@ The histogram has 12 bins between `min` and `max`. When `min === max`, the entir
 
 {{< themed-img light="images/property-panel-distribution-light.png" dark="images/property-panel-distribution-dark.png" alt="Weight panel showing the distribution inspector with a 12-bin histogram and percentiles" class="themed-img--narrow" >}}
 
+## WeightInspectionData
+
+The renderer packages decode a tensor once per selection and hand the result to every inspector through context - `useWeightInspection()` in `@wetron/react`, `getWeightInspection()` in `@wetron/svelte`. Both return this shape.
+
+```ts
+type WeightInspectionData = {
+  readonly tensor: {
+    readonly name: string;
+    readonly shape: readonly number[] | null;
+    readonly dtype: string | null;
+    readonly order?: TensorOrder;
+  };
+} & (
+  | {
+      readonly status: "deferred" | "external" | "unavailable";
+      readonly bytes: null;
+      readonly values: null;
+      readonly stats: null;
+    }
+  | { readonly status: "unsupported"; readonly bytes: Uint8Array; readonly values: null; readonly stats: null }
+  | {
+      readonly status: "ready";
+      readonly bytes: Uint8Array;
+      readonly values: DecodedWeight;
+      readonly numeric: NumericWeight;
+      readonly stats: WeightStats;
+    }
+);
+```
+
+| `status`      | Meaning                                                             |
+| ------------- | ------------------------------------------------------------------- |
+| `deferred`    | The "Show weights" toggle is off. Models over 20 MB start this way. |
+| `external`    | The checkpoint or external data file is not attached yet.           |
+| `unavailable` | No bytes are registered under this tensor name.                     |
+| `unsupported` | Bytes exist, but `decodeWeight` has no decoder for the dtype.       |
+| `ready`       | Decoded. `values`, `numeric`, and `stats` are populated.            |
+
+`values` holds the decoded array as `decodeWeight` returned it; `numeric` is the `numericView()` of the same data, widened to `Float64Array` for bigint dtypes. `order` is `"col-major"` for GGUF payloads and absent for row-major formats - inspectors that slice along an axis have to honour it.
+
 ## TF2 SavedModel checkpoint loader
 
 ```ts
-import { loadSavedModelWeights, loadSavedModelWeightsFromUrls, attachCheckpointToGraph } from '@wetron/savedmodel';
-import type { LoadedCheckpoint } from '@wetron/savedmodel';
+import { loadSavedModelWeights, loadSavedModelWeightsFromUrls, attachCheckpointToGraph } from "@wetron/savedmodel";
+import type { LoadedCheckpoint } from "@wetron/savedmodel";
 
 async function loadSavedModelWeights(indexFile: File, dataFile: File): Promise<LoadedCheckpoint>;
 
@@ -140,7 +180,7 @@ function attachCheckpointToGraph(graph: ModelGraph, loaded: LoadedCheckpoint): M
 ## ONNX external data loader
 
 ```ts
-import { loadOnnxExternalWeightsFromUrl } from '@wetron/onnx';
+import { loadOnnxExternalWeightsFromUrl } from "@wetron/onnx";
 
 async function loadOnnxExternalWeightsFromUrl(modelBytes: Uint8Array, baseUrl: string): Promise<WeightSource>;
 ```
@@ -154,13 +194,13 @@ Returns an empty `WeightSource` (`totalBytes: 0`, `get()` always `undefined`) if
 ## Example
 
 ```ts
-import { parseModel } from '@wetron/core';
-import { decodeFirstN, computeStats } from '@wetron/core';
+import { parseModel } from "@wetron/core";
+import { decodeFirstN, computeStats } from "@wetron/core";
 
 const graph = await parseModel(bytes, file.name);
-const weightBytes = graph.weights?.kind === 'available' ? graph.weights.source.get('conv1.weight') : undefined;
+const weightBytes = graph.weights?.kind === "available" ? graph.weights.source.get("conv1.weight") : undefined;
 if (weightBytes) {
-  const preview = decodeFirstN(weightBytes, 'float32', 4096);
+  const preview = decodeFirstN(weightBytes, "float32", 4096);
   if (preview && preview instanceof Float64Array) {
     const stats = computeStats(numericView(preview));
     console.log(stats.min, stats.max, stats.mean, stats.std);
