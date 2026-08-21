@@ -4,6 +4,13 @@
   --dz-faint: #9aa0ac;
   --dz-drag-bg: rgba(26, 115, 232, 0.06);
   --dz-drag-outline: rgba(26, 115, 232, 0.55);
+  --dz-accent: #1a73e8;
+  --dz-rule: #e3e6ec;
+  --dz-sample-bg: #ffffff;
+  --dz-sample-border: #dfe2e8;
+  --dz-ring: rgba(26, 115, 232, 0.18);
+  --dz-chip-bg: rgba(26, 115, 232, 0.1);
+  --dz-chip-fg: #1557b0;
 
   position: relative;
   display: flex;
@@ -23,6 +30,12 @@
   --dz-sub: #9ea0aa;
   --dz-faint: #6b6e78;
   --dz-drag-bg: rgba(26, 115, 232, 0.12);
+  --dz-rule: #2c2f37;
+  --dz-sample-bg: rgba(255, 255, 255, 0.02);
+  --dz-sample-border: #33363f;
+  --dz-ring: rgba(26, 115, 232, 0.3);
+  --dz-chip-bg: rgba(26, 115, 232, 0.22);
+  --dz-chip-fg: #8ab4f8;
 }
 
 .dragging {
@@ -59,4 +72,103 @@
   font-size: 14px;
   font-weight: 500;
   box-shadow: 0 1px 2px rgba(26, 115, 232, 0.25);
+}
+
+.samples {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+  margin-top: 10px;
+}
+
+/* Hairline rule marks the boundary between bringing your own file and using ours. */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--dz-rule);
+}
+
+.dividerLabel {
+  color: var(--dz-sub);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sampleRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.sampleButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 152px;
+  padding: 10px 14px 11px;
+  background: var(--dz-sample-bg);
+  border: 1px solid var(--dz-sample-border);
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.sampleButton:hover {
+  border-color: var(--dz-accent);
+  box-shadow: 0 0 0 4px var(--dz-ring);
+}
+
+.sampleButton:focus-visible {
+  outline: 2px solid var(--dz-accent);
+  outline-offset: 2px;
+}
+
+.sampleFormat {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--dz-chip-bg);
+  color: var(--dz-chip-fg);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.sampleButton:hover .sampleFormat {
+  background: var(--dz-accent);
+  color: #fff;
+}
+
+.sampleName {
+  color: var(--dz-headline);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sampleMeta {
+  color: var(--dz-faint);
+  font-size: 11px;
 }

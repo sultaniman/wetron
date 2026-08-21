@@ -98,6 +98,15 @@ export default function App() {
     }
   }, []);
 
+  // parseModelFromUrl derives the name with `new URL(url)`, which throws on a bare
+  // path, so samples need an absolute URL.
+  const loadSample = useCallback(
+    (file: string) => {
+      loadUrl(`${window.location.origin}/models/${file}`);
+    },
+    [loadUrl],
+  );
+
   const onWeightsLoaded = useCallback((nextGraph: ModelGraph) => {
     setState((prev) => (prev.status === 'ready' ? { ...prev, graph: nextGraph } : prev));
   }, []);
@@ -284,6 +293,7 @@ export default function App() {
             }}
             onDragLeave={() => setDragging(false)}
             onOpen={() => setOpenDialogOpen(true)}
+            onSample={loadSample}
           />
         )}
         {state.status === 'loading' && <div className={css.placeholder}>Parsing {state.name}...</div>}
