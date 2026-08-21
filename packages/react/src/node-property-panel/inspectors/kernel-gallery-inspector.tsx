@@ -2,26 +2,38 @@ import { useMemo, useState } from 'react';
 import { KERNEL_LAYOUTS, computeKernelL2, kernelSlicePage, type KernelLayoutPreset } from '@wetron/core/weight-kernel';
 import { sampleTensorSlice } from '@wetron/core/tensor-slice';
 import { colorForCell, pickColormap } from '@wetron/core/heatmap-color';
-import { kernelInputHint, kernelL2Hint, kernelLayoutHint } from '@wetron/core/inspector-hints';
+import { kernelInputHint, kernelL2Hint, kernelLayoutHint, kernelPageLabel } from '@wetron/core/inspector-hints';
 import { useWeightInspection } from '../weight-inspection-context.tsx';
 import { Hint } from './hint.tsx';
 import css from './inspectors.module.css';
+
+const KERNEL_PAGE_SIZE = 32;
 
 export function KernelGalleryInspector() {
   const inspection = useWeightInspection();
   const shape = inspection.tensor.shape;
   const [layout, setLayout] = useState<KernelLayoutPreset | ''>('');
   const [input, setInput] = useState(0);
+  const [outputStart, setOutputStart] = useState(0);
   const supported = shape?.length === 4 && shape.every((dimension) => Number.isSafeInteger(dimension) && dimension > 0);
   const mapping = layout ? KERNEL_LAYOUTS[layout] : null;
   const filters = shape && mapping ? shape[mapping.output] : 0;
-  const slices = useMemo(
-    () =>
-      inspection.status === 'ready' && shape && supported && mapping
-        ? kernelSlicePage(shape, mapping, 0, filters, Math.min(input, shape[mapping.input] - 1))
-        : [],
-    [inspection, shape, supported, mapping, filters, input],
-  );
+  // Page the gallery: a 512-filter conv would otherwise emit ~33k DOM nodes and
+  // re-run sampleTensorSlice/computeKernelL2 for every filter on every render.
+  const start = Math.min(outputStart, Math.max(0, filters - 1));
+  const tiles = useMemo(() => {
+    if (inspection.status !== 'ready' || !shape || !supported || !mapping) return [];
+    const page = kernelSlicePage(shape, mapping, start, KERNEL_PAGE_SIZE, Math.min(input, shape[mapping.input] - 1));
+    return page.map((slice) => {
+      const sample = sampleTensorSlice(inspection.numeric, shape, slice.selection, 8, 8, inspection.tensor.order);
+      return {
+        slice,
+        sample,
+        color: pickColormap(sample.min, sample.max),
+        l2: computeKernelL2(inspection.numeric, shape, slice.selection, inspection.tensor.order),
+      };
+    });
+  }, [inspection, shape, supported, mapping, input, start]);
   if (inspection.status !== 'ready' || !shape) return null;
   if (!supported) {
     return (
@@ -44,6 +56,7 @@ export function KernelGalleryInspector() {
             onChange={(event) => {
               setLayout(event.target.value as KernelLayoutPreset | '');
               setInput(0);
+              setOutputStart(0);
             }}
           >
             <option value="">Choose layout</option>
@@ -78,11 +91,36 @@ export function KernelGalleryInspector() {
         <div className={css.note}>Choose a confirmed kernel layout. Shape alone does not identify semantic axes.</div>
       ) : (
         <>
+          {filters > KERNEL_PAGE_SIZE && (
+            <div className={css.controls}>
+              <div className={css.control}>
+                <span className={css.caption}>filters</span>
+                <div className={css.pager}>
+                  <button
+                    type="button"
+                    className={css.field}
+                    aria-label="Previous filters"
+                    disabled={start === 0}
+                    onClick={() => setOutputStart(Math.max(0, start - KERNEL_PAGE_SIZE))}
+                  >
+                    ‹
+                  </button>
+                  <span className={css.pagerLabel}>{kernelPageLabel(start, KERNEL_PAGE_SIZE, filters)}</span>
+                  <button
+                    type="button"
+                    className={css.field}
+                    aria-label="Next filters"
+                    disabled={start + KERNEL_PAGE_SIZE >= filters}
+                    onClick={() => setOutputStart(Math.min(filters - 1, start + KERNEL_PAGE_SIZE))}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className={css.gallery} data-testid="kernel-gallery">
-            {slices.map((slice) => {
-              const sample = sampleTensorSlice(inspection.numeric, shape, slice.selection, 8, 8);
-              const color = pickColormap(sample.min, sample.max);
-              const l2 = computeKernelL2(inspection.numeric, shape, slice.selection);
+            {tiles.map(({ slice, sample, color, l2 }) => {
               return (
                 <div
                   className={css.kernel}

@@ -27,7 +27,7 @@ function ReadyMatrixInspector({
   );
   const selection: TensorSliceSelection = { rowAxis, colAxis, fixed };
   const sample = useMemo(
-    () => sampleTensorSlice(inspection.numeric, shape, selection, 16, 24),
+    () => sampleTensorSlice(inspection.numeric, shape, selection, 16, 24, inspection.tensor.order),
     [inspection.numeric, shape, rowAxis, colAxis, fixed],
   );
   const colormap = pickColormap(sample.min, sample.max);

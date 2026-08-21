@@ -17,13 +17,16 @@ export function AxisProfileInspector() {
   const result = useMemo(
     () =>
       inspection.status === 'ready' && shape?.length
-        ? computeAxisStats(inspection.numeric, shape, Math.min(axis, shape.length - 1))
+        ? computeAxisStats(inspection.numeric, shape, Math.min(axis, shape.length - 1), inspection.tensor.order)
         : null,
     [inspection, shape, axis],
   );
   if (!result || inspection.status !== 'ready' || !shape) return null;
   const values = result.metrics[metric];
-  const max = Math.max(...values.map(Math.abs), 1e-12);
+  // Reduce rather than spread: values is one entry per axis index and blows the
+  // argument limit on large axes (vocab, hidden dims).
+  let max = 1e-12;
+  for (const value of values) max = Math.max(max, Math.abs(value));
   const signed = metric === 'mean';
   const virtual = values.length > 128;
   const visible = virtual ? values.slice(start, Math.min(values.length, start + 20)) : values;

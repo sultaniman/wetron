@@ -22,17 +22,35 @@
   let fixed = $state<Record<number, number>>(
     untrack(() => Object.fromEntries((shape ?? []).map((_, axis) => [axis, 0]))),
   );
-  const effective = $derived(near ? threshold : 0);
+  // bind:value yields null when the number input is cleared, and min="0" does not
+  // stop a typed negative - both make computeWeightSparsity throw. Clamp like React does.
+  const effective = $derived(near ? Math.max(0, Number(threshold) || 0) : 0);
   const blockRows = $derived(shape && shape.length >= 2 ? Math.max(1, Math.ceil(shape[rowAxis] / 4)) : 1);
   const blockCols = $derived(shape && shape.length >= 2 ? Math.max(1, Math.ceil(shape[colAxis] / 4)) : 1);
+  // Blocks are emitted row-major, so the grid must use the real column count.
+  const blockGridCols = $derived(shape && shape.length >= 2 ? Math.max(1, Math.ceil(shape[colAxis] / blockCols)) : 1);
   const result = $derived(
     ready && shape
-      ? computeWeightSparsity(ready.values, shape, shape.length ? Math.min(rowAxis, shape.length - 1) : 0, effective)
+      ? computeWeightSparsity(
+          ready.values,
+          shape,
+          shape.length ? Math.min(rowAxis, shape.length - 1) : 0,
+          effective,
+          ready.tensor.order,
+        )
       : null,
   );
   const blocks = $derived(
     ready && shape && shape.length >= 2
-      ? computeSparsityBlocks(ready.values, shape, { rowAxis, colAxis, fixed }, blockRows, blockCols, effective)
+      ? computeSparsityBlocks(
+          ready.values,
+          shape,
+          { rowAxis, colAxis, fixed },
+          blockRows,
+          blockCols,
+          effective,
+          ready.tensor.order,
+        )
       : [],
   );
   function setAxis(kind: 'row' | 'col', axis: number) {
@@ -114,7 +132,7 @@
         >
       </div>
     </div>
-    {#if shape.length >= 2}<div class="inspector-block-map">
+    {#if shape.length >= 2}<div class="inspector-block-map" style="grid-template-columns: repeat({blockGridCols}, 1fr)">
         {#each blocks as block}{@const state =
             block.occupied === 0 ? 'empty' : block.empty === 0 ? 'full' : 'partial'}<span
             aria-label="{state} block"

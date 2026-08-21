@@ -64,9 +64,11 @@
   const isLarge = $derived(graph.fileSizeBytes > SIZE_THRESHOLD);
 
   const inspection = $derived.by((): WeightInspectionData => {
+    // GGUF payloads are col-major; every other format is row-major.
+    const tensor = { ...target, order: graph.initializers.get(target.name)?.order };
     const empty = (status: 'deferred' | 'external' | 'unavailable'): WeightInspectionData => ({
       status,
-      tensor: target,
+      tensor,
       bytes: null,
       values: null,
       stats: null,
@@ -81,10 +83,10 @@
     const decodedDtype = target.dtype ?? 'float32';
     const decodedShape = target.shape ?? [bytes.byteLength / (elementSize(decodedDtype) || 1)];
     const values = decodeWeight(bytes, decodedDtype, decodedShape);
-    if (!values) return { status: 'unsupported', tensor: target, bytes, values: null, stats: null };
+    if (!values) return { status: 'unsupported', tensor, bytes, values: null, stats: null };
 
     const numeric = numericView(values);
-    return { status: 'ready', tensor: target, bytes, values, numeric, stats: computeStats(numeric) };
+    return { status: 'ready', tensor, bytes, values, numeric, stats: computeStats(numeric) };
   });
 
   provideWeightInspection({

@@ -31,12 +31,16 @@ export function SparsityInspector() {
             shape,
             shape.length ? Math.min(rowAxis, shape.length - 1) : 0,
             effectiveThreshold,
+            inspection.tensor.order,
           )
         : null,
     [inspection, shape, rowAxis, effectiveThreshold],
   );
   const blockRows = shape && shape.length >= 2 ? Math.max(1, Math.ceil(shape[rowAxis] / 4)) : 1;
   const blockCols = shape && shape.length >= 2 ? Math.max(1, Math.ceil(shape[colAxis] / 4)) : 1;
+  // Blocks are emitted row-major, so the grid must use the real column count -
+  // ceil(cols / blockCols) is only 4 when the dimensions happen to divide evenly.
+  const blockGridCols = shape && shape.length >= 2 ? Math.max(1, Math.ceil(shape[colAxis] / blockCols)) : 1;
   const blocks = useMemo(
     () =>
       inspection.status === 'ready' && shape && shape.length >= 2
@@ -47,6 +51,7 @@ export function SparsityInspector() {
             blockRows,
             blockCols,
             effectiveThreshold,
+            inspection.tensor.order,
           )
         : [],
     [inspection, shape, rowAxis, colAxis, fixed, effectiveThreshold, blockRows, blockCols],
@@ -170,7 +175,7 @@ export function SparsityInspector() {
       </div>
       {shape.length >= 2 && (
         <>
-          <div className={css.blockMap}>
+          <div className={css.blockMap} style={{ gridTemplateColumns: `repeat(${blockGridCols}, 1fr)` }}>
             {blocks.map((block, index) => {
               const total = block.occupied + block.empty;
               const state = block.occupied === 0 ? 'empty' : block.empty === 0 ? 'full' : 'partial';

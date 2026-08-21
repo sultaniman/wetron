@@ -14,10 +14,18 @@
   let metric = $state<AxisMetric>('mean');
   let start = $state(0);
   const result = $derived(
-    ready && shape?.length ? computeAxisStats(ready.numeric, shape, Math.min(axis, shape.length - 1)) : null,
+    ready && shape?.length
+      ? computeAxisStats(ready.numeric, shape, Math.min(axis, shape.length - 1), ready.tensor.order)
+      : null,
   );
   const values = $derived(result ? result.metrics[metric] : []);
-  const maximum = $derived(Math.max(...values.map(Math.abs), 1e-12));
+  // Reduce rather than spread: values is one entry per axis index and blows the
+  // argument limit on large axes (vocab, hidden dims).
+  const maximum = $derived.by(() => {
+    let max = 1e-12;
+    for (const value of values) max = Math.max(max, Math.abs(value));
+    return max;
+  });
   const signed = $derived(metric === 'mean');
   const virtual = $derived(values.length > 128);
   const visible = $derived(virtual ? values.slice(start, Math.min(values.length, start + 20)) : values);

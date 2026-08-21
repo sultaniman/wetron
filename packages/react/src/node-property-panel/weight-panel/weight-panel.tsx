@@ -28,9 +28,11 @@ type WeightTarget = {
 
 function useWeightInspectionData(target: WeightTarget, graph: ModelGraph, showWeights: boolean): WeightInspectionData {
   return useMemo((): WeightInspectionData => {
+    // GGUF payloads are col-major; every other format is row-major.
+    const tensor = { ...target, order: graph.initializers.get(target.name)?.order };
     const empty = (status: 'deferred' | 'external' | 'unavailable'): WeightInspectionData => ({
       status,
-      tensor: target,
+      tensor,
       bytes: null,
       values: null,
       stats: null,
@@ -45,18 +47,18 @@ function useWeightInspectionData(target: WeightTarget, graph: ModelGraph, showWe
     const dtype = target.dtype ?? 'float32';
     const shape = target.shape ?? [bytes.byteLength / (elementSize(dtype) || 1)];
     const values = decodeWeight(bytes, dtype, shape);
-    if (!values) return { status: 'unsupported', tensor: target, bytes, values: null, stats: null };
+    if (!values) return { status: 'unsupported', tensor, bytes, values: null, stats: null };
 
     const numeric = numericView(values);
     return {
       status: 'ready',
-      tensor: target,
+      tensor,
       bytes,
       values,
       numeric,
       stats: computeStats(numeric),
     };
-  }, [graph.weights, showWeights, target]);
+  }, [graph.weights, graph.initializers, showWeights, target]);
 }
 
 export function WeightPanel({

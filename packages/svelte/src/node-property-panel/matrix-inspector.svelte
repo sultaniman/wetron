@@ -17,7 +17,7 @@
   );
   const sample = $derived(
     ready && shape && shape.length >= 2
-      ? sampleTensorSlice(ready.numeric, shape, { rowAxis, colAxis, fixed }, 16, 24)
+      ? sampleTensorSlice(ready.numeric, shape, { rowAxis, colAxis, fixed }, 16, 24, ready.tensor.order)
       : null,
   );
   const colormap = $derived(sample ? pickColormap(sample.min, sample.max) : 'sequential');

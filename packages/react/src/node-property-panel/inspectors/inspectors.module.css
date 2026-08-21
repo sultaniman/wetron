@@ -352,7 +352,6 @@
 
 .blockMap {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: 4px;
 }
 
@@ -567,4 +566,17 @@
   color: var(--inspector-muted);
   font-size: 9px;
   line-height: 1.45;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagerLabel {
+  color: var(--inspector-label);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }

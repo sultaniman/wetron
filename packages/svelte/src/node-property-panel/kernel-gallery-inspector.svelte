@@ -7,10 +7,12 @@
   } from '@wetron/core/weight-kernel';
   import { sampleTensorSlice } from '@wetron/core/tensor-slice';
   import { colorForCell, pickColormap } from '@wetron/core/heatmap-color';
-  import { kernelInputHint, kernelL2Hint, kernelLayoutHint } from '@wetron/core/inspector-hints';
+  import { kernelInputHint, kernelL2Hint, kernelLayoutHint, kernelPageLabel } from '@wetron/core/inspector-hints';
   import { getWeightInspection } from './weight-inspection-context.ts';
   import Hint from './hint.svelte';
   import './inspectors.css';
+
+  const KERNEL_PAGE_SIZE = 32;
 
   const context = getWeightInspection();
   const ready = $derived(context.current.status === 'ready' ? context.current : null);
@@ -20,13 +22,25 @@
   );
   let layout = $state<KernelLayoutPreset | ''>('');
   let input = $state(0);
+  let outputStart = $state(0);
   const mapping = $derived(layout ? KERNEL_LAYOUTS[layout] : null);
   const filters = $derived(shape && mapping ? shape[mapping.output] : 0);
-  const slices = $derived(
-    ready && shape && supported && mapping
-      ? kernelSlicePage(shape, mapping, 0, filters, Math.min(input, shape[mapping.input] - 1))
-      : [],
-  );
+  const start = $derived(Math.min(outputStart, Math.max(0, filters - 1)));
+  // Page the gallery: a 512-filter conv would otherwise emit ~33k DOM nodes and
+  // re-run sampleTensorSlice/computeKernelL2 for every filter on every update.
+  const tiles = $derived.by(() => {
+    if (!ready || !shape || !supported || !mapping) return [];
+    const page = kernelSlicePage(shape, mapping, start, KERNEL_PAGE_SIZE, Math.min(input, shape[mapping.input] - 1));
+    return page.map((slice) => {
+      const sample = sampleTensorSlice(ready.numeric, shape, slice.selection, 8, 8, ready.tensor.order);
+      return {
+        slice,
+        sample,
+        color: pickColormap(sample.min, sample.max),
+        l2: computeKernelL2(ready.numeric, shape, slice.selection, ready.tensor.order),
+      };
+    });
+  });
 </script>
 
 {#if ready && shape}
@@ -45,6 +59,7 @@
             value={layout}
             onchange={(event) => {
               layout = event.currentTarget.value as KernelLayoutPreset | '';
+              outputStart = 0;
               input = 0;
             }}
           >
@@ -74,11 +89,32 @@
       {#if !mapping}
         <div class="inspector-note">Choose a confirmed kernel layout. Shape alone does not identify semantic axes.</div>
       {:else}
+        {#if filters > KERNEL_PAGE_SIZE}
+          <div class="inspector-controls">
+            <div class="inspector-control">
+              <span class="inspector-caption">filters</span>
+              <div class="inspector-pager">
+                <button
+                  type="button"
+                  class="inspector-field"
+                  aria-label="Previous filters"
+                  disabled={start === 0}
+                  onclick={() => (outputStart = Math.max(0, start - KERNEL_PAGE_SIZE))}>‹</button
+                >
+                <span class="inspector-pager-label">{kernelPageLabel(start, KERNEL_PAGE_SIZE, filters)}</span>
+                <button
+                  type="button"
+                  class="inspector-field"
+                  aria-label="Next filters"
+                  disabled={start + KERNEL_PAGE_SIZE >= filters}
+                  onclick={() => (outputStart = Math.min(filters - 1, start + KERNEL_PAGE_SIZE))}>›</button
+                >
+              </div>
+            </div>
+          </div>
+        {/if}
         <div class="inspector-gallery" data-testid="kernel-gallery">
-          {#each slices as slice}
-            {@const sample = sampleTensorSlice(ready.numeric, shape, slice.selection, 8, 8)}
-            {@const color = pickColormap(sample.min, sample.max)}
-            {@const l2 = computeKernelL2(ready.numeric, shape, slice.selection)}
+          {#each tiles as { slice, sample, color, l2 }}
             <div
               class="inspector-kernel"
               title="output axis {mapping.output}={slice.output}, input axis {mapping.input}={slice.input}, height axis {mapping.height}, width axis {mapping.width}"

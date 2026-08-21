@@ -38,6 +38,8 @@
           shape,
           Math.min(axis, shape.length - 1),
           ready.tensor.dtype?.toLowerCase().includes('float') ? 1e-8 : 0,
+          6,
+          ready.tensor.order,
         )
       : [],
   );

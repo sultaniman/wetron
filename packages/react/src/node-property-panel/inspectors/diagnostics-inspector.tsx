@@ -42,6 +42,8 @@ export function DiagnosticsInspector() {
             shape,
             Math.min(axis, shape.length - 1),
             inspection.tensor.dtype?.toLowerCase().includes('float') ? 1e-8 : 0,
+            6,
+            inspection.tensor.order,
           )
         : [],
     [inspection, shape, axis],
