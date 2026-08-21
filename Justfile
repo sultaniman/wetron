@@ -15,6 +15,7 @@ build:
     cd packages/executorch  && pnpm exec tsup
     cd packages/torchscript && pnpm exec tsup
     cd packages/savedmodel  && pnpm exec tsup
+    cd packages/gguf        && pnpm exec tsup
     cd packages/core        && pnpm exec tsup
     cd packages/core        && pnpm exec tsup --config tsup.index.config.ts
     cd packages/tokens      && pnpm exec tsup
@@ -43,6 +44,7 @@ publish:
     cd packages/executorch  && pnpm publish --access public --no-git-checks
     cd packages/torchscript && pnpm publish --access public --no-git-checks
     cd packages/savedmodel  && pnpm publish --access public --no-git-checks
+    cd packages/gguf        && pnpm publish --access public --no-git-checks
     cd packages/core        && pnpm publish --access public --no-git-checks
     cd packages/react       && pnpm publish --access public --no-git-checks
     cd packages/svelte      && pnpm publish --access public --no-git-checks
@@ -57,6 +59,7 @@ preview:
     cd packages/executorch  && pnpm publish --dry-run --access public --no-git-checks
     cd packages/torchscript && pnpm publish --dry-run --access public --no-git-checks
     cd packages/savedmodel  && pnpm publish --dry-run --access public --no-git-checks
+    cd packages/gguf        && pnpm publish --dry-run --access public --no-git-checks
     cd packages/core        && pnpm publish --dry-run --access public --no-git-checks
     cd packages/react       && pnpm publish --dry-run --access public --no-git-checks
     cd packages/svelte      && pnpm publish --dry-run --access public --no-git-checks

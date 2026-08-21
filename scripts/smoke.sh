@@ -7,8 +7,8 @@ set -euo pipefail
 SMOKE_DIR=/tmp/wetron-smoke
 PKGS=$SMOKE_DIR/pkgs
 APP=$SMOKE_DIR/app
-ALL_PKGS=(common onnx tflite keras executorch torchscript savedmodel core tokens react svelte)
-HEADLESS_PKGS=(common onnx tflite keras executorch torchscript savedmodel core tokens)
+ALL_PKGS=(common onnx tflite keras executorch torchscript savedmodel gguf core tokens react svelte)
+HEADLESS_PKGS=(common onnx tflite keras executorch torchscript savedmodel gguf core tokens)
 
 echo "==> Resetting $SMOKE_DIR"
 rm -rf "$SMOKE_DIR"
@@ -51,9 +51,9 @@ echo
 echo "==> Headless import checks (Node ESM strict)"
 (cd "$APP" && node --input-type=module -e '
     const start = Date.now();
-    const { parseModel, parseOnnx, parseTflite, parseKeras, parseSavedModel, parseExecutorch, parseTorchscript, loadSavedModelWeights, attachCheckpointToGraph, ParseError, detectFormat } = await import("@wetron/core");
+    const { parseModel, parseOnnx, parseTflite, parseKeras, parseSavedModel, parseExecutorch, parseTorchscript, parseGguf, loadSavedModelWeights, attachCheckpointToGraph, ParseError, detectFormat } = await import("@wetron/core");
     const { ParseError: CommonParseError } = await import("@wetron/common");
-    const checks = { parseModel, parseOnnx, parseTflite, parseKeras, parseSavedModel, parseExecutorch, parseTorchscript, loadSavedModelWeights, attachCheckpointToGraph, detectFormat };
+    const checks = { parseModel, parseOnnx, parseTflite, parseKeras, parseSavedModel, parseExecutorch, parseTorchscript, parseGguf, loadSavedModelWeights, attachCheckpointToGraph, detectFormat };
     let failed = 0;
     for (const [k, v] of Object.entries(checks)) {
         const ok = typeof v === "function";

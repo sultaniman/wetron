@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 const version = process.argv[2];
 if (!version) {
@@ -6,19 +6,13 @@ if (!version) {
   process.exit(1);
 }
 
-const packages = [
-  'packages/common',
-  'packages/core',
-  'packages/tokens',
-  'packages/onnx',
-  'packages/tflite',
-  'packages/keras',
-  'packages/executorch',
-  'packages/torchscript',
-  'packages/savedmodel',
-  'packages/react',
-  'packages/svelte',
-];
+// Discovered, not hardcoded: a hand-maintained list silently skipped @wetron/gguf,
+// which would have published a core that depends on a version that never existed.
+const packages = readdirSync('packages', { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => `packages/${entry.name}`)
+  .filter((dir) => existsSync(`${dir}/package.json`))
+  .sort();
 
 for (const dir of packages) {
   const path = `${dir}/package.json`;
