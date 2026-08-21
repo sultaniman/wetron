@@ -3,6 +3,7 @@ import {
   coordinateToOffsetInLayout,
   describeTensorSlice,
   tensorLayout,
+  type TensorOrder,
   type TensorSliceSelection,
 } from './tensor-index.ts';
 
@@ -32,9 +33,10 @@ export function sampleTensorSlice(
   selection: TensorSliceSelection,
   maxRows: number,
   maxCols: number,
+  order: TensorOrder = 'row-major',
 ): TensorSliceSample {
   const descriptor = describeTensorSlice(shape, selection);
-  const layout = tensorLayout(shape);
+  const layout = tensorLayout(shape, order);
   if (!Number.isSafeInteger(maxRows) || maxRows < 1 || !Number.isSafeInteger(maxCols) || maxCols < 1) {
     throw new RangeError('sample dimensions must be positive integers');
   }

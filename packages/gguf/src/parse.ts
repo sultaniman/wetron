@@ -1,4 +1,4 @@
-import type { AttributeValue, GraphNode, ModelGraph } from '@wetron/common/ir';
+import type { AttributeValue, GraphNode, ModelGraph, TensorOrder } from '@wetron/common/ir';
 import { ParseError } from '@wetron/common/ir';
 
 const VALUE_TYPE = {
@@ -490,7 +490,7 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
       metadata.set(key, attributeValue(reader.value(type, `metadata value for ${key}`)));
     }
 
-    const initializers = new Map<string, { shape: readonly number[]; dtype: string }>();
+    const initializers = new Map<string, { shape: readonly number[]; dtype: string; order: TensorOrder }>();
     const tensorInfos: TensorInfo[] = [];
     for (let i = 0; i < tensorCount; i++) {
       const name = reader.string(`tensor ${i} name`);
@@ -505,7 +505,9 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
       const type = reader.uint32(`tensor ${name} type`);
       const offset = reader.safeUint64(`tensor ${name} offset`);
       if (initializers.has(name)) throw new ParseError('gguf', `Duplicate tensor name ${name}`);
-      initializers.set(name, { shape, dtype: GGML_TYPES[type] ?? `GGML_TYPE_${type}` });
+      // ggml stores ne[0] as the contiguous dimension, so the payload is
+      // col-major relative to the shape reported here.
+      initializers.set(name, { shape, dtype: GGML_TYPES[type] ?? `GGML_TYPE_${type}`, order: 'col-major' });
       tensorInfos.push({ name, shape, type, offset });
     }
 
@@ -552,7 +554,8 @@ export function parseGguf(bytes: Uint8Array): ModelGraph {
     const modelName = metadata.get('general.name');
     const name = typeof modelName === 'string' ? modelName : typeof architecture === 'string' ? architecture : 'GGUF';
     const tensorNames = [...initializers.keys()];
-    const tensorShapes = new Map(initializers);
+    // tensorShapes describes shape/dtype only; memory order belongs to the weight payload.
+    const tensorShapes = new Map([...initializers].map(([key, { shape, dtype }]) => [key, { shape, dtype }]));
     const attributes = Object.fromEntries(metadata);
     const fileType = metadata.get('general.file_type');
     if (typeof fileType === 'number' && FILE_TYPES[fileType]) {

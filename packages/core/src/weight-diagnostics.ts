@@ -1,6 +1,6 @@
 import { numericView, type DecodedWeight } from './weight-decoder.ts';
 import { computeAxisStats } from './weight-axis-stats.ts';
-import { offsetToCoordinateInLayout, tensorLayout } from './tensor-index.ts';
+import { offsetToCoordinateInLayout, tensorLayout, type TensorOrder } from './tensor-index.ts';
 
 export type DiagnosticSeverity = 'error' | 'warning' | 'info';
 
@@ -34,10 +34,11 @@ export function inspectWeightDiagnostics(
   axis: number,
   tolerance = 0,
   outlierMultiple = 6,
+  order: TensorOrder = 'row-major',
 ): readonly WeightDiagnosticFinding[] {
   if (!Number.isFinite(tolerance) || tolerance < 0)
     throw new RangeError('diagnostic tolerance must be finite and non-negative');
-  const layout = tensorLayout(shape);
+  const layout = tensorLayout(shape, order);
   const { count } = layout;
   const nonFinite = new Map<WeightDiagnosticFinding['code'], { count: number; coordinates: Array<readonly number[]> }>([
     ['nan', { count: 0, coordinates: [] }],
@@ -69,7 +70,7 @@ export function inspectWeightDiagnostics(
         count: finding.count,
         coordinates: finding.coordinates,
       });
-  const axisStats = computeAxisStats(numeric, shape, axis);
+  const axisStats = computeAxisStats(numeric, shape, axis, order);
   const norms = axisStats.metrics.l2;
   const normMedian = median(norms);
   const mad = median(norms.map((norm) => Math.abs(norm - normMedian)));
@@ -91,29 +92,38 @@ export function inspectWeightDiagnostics(
         outlier,
       });
   }
-  for (let position = 0; position < shape[axis]; position++) {
-    let first: number | undefined;
-    let constant = true;
-    for (let offset = 0; offset < count; offset++) {
-      if (Math.floor(offset / layout.strides[axis]) % shape[axis] !== position) continue;
-      const value = numeric[offset];
-      if (!Number.isFinite(value)) continue;
-      if (first === undefined) first = value;
-      else if (Math.abs(value - first) > tolerance) {
-        constant = false;
-        break;
-      }
+  // Single pass: the previous version rescanned every offset once per position,
+  // which is O(count x shape[axis]) and blocks for seconds on large tensors.
+  const sliceFirst = new Float64Array(shape[axis]);
+  const sliceSeen = new Uint8Array(shape[axis]);
+  const sliceConstant = new Uint8Array(shape[axis]).fill(1);
+  for (let offset = 0; offset < count; offset++) {
+    const position = Math.floor(offset / layout.strides[axis]) % shape[axis];
+    if (!sliceConstant[position]) continue;
+
+    const value = numeric[offset];
+    if (!Number.isFinite(value)) continue;
+
+    if (!sliceSeen[position]) {
+      sliceFirst[position] = value;
+      sliceSeen[position] = 1;
+    } else if (Math.abs(value - sliceFirst[position]) > tolerance) {
+      sliceConstant[position] = 0;
     }
-    if (constant && first !== undefined)
+  }
+  for (let position = 0; position < shape[axis]; position++) {
+    if (sliceConstant[position] && sliceSeen[position])
       findings.push({
         code: 'constant-slice',
         severity: 'info',
         count: 1,
         coordinates: [[position]],
         position,
-        value: first,
+        value: sliceFirst[position],
       });
   }
-  const order: Record<DiagnosticSeverity, number> = { error: 0, warning: 1, info: 2 };
-  return findings.sort((a, b) => order[a.severity] - order[b.severity] || (a.position ?? 0) - (b.position ?? 0));
+  const severityRank: Record<DiagnosticSeverity, number> = { error: 0, warning: 1, info: 2 };
+  return findings.sort(
+    (a, b) => severityRank[a.severity] - severityRank[b.severity] || (a.position ?? 0) - (b.position ?? 0),
+  );
 }

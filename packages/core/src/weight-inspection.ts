@@ -1,3 +1,4 @@
+import type { TensorOrder } from '@wetron/common/ir';
 import type { DecodedWeight, NumericWeight } from './weight-decoder.ts';
 import type { WeightStats } from './weight-stats.ts';
 
@@ -8,6 +9,8 @@ interface WeightInspectionBase {
     readonly name: string;
     readonly shape: readonly number[] | null;
     readonly dtype: string | null;
+    /** Memory order of the payload. Absent means row-major. */
+    readonly order?: TensorOrder;
   };
 }
 

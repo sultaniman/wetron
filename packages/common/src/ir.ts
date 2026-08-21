@@ -17,6 +17,10 @@ export interface GraphNode {
   readonly subGraph?: ModelGraph;
 }
 
+/** Which axis is contiguous in memory. Row-major (C order) has the last axis
+ *  fastest; col-major (GGUF/ggml `ne`) has the first axis fastest. */
+export type TensorOrder = 'row-major' | 'col-major';
+
 export interface ModelGraph {
   readonly name: string;
   readonly inputs: readonly GraphValue[];
@@ -27,6 +31,8 @@ export interface ModelGraph {
     {
       readonly shape: readonly number[];
       readonly dtype: string;
+      /** Memory order of this tensor's weight payload. Absent means row-major. */
+      readonly order?: TensorOrder;
     }
   >;
   /** Shape + dtype for every named tensor in the model, including intermediate activations. */

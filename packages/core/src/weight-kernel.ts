@@ -1,4 +1,4 @@
-import type { TensorSliceSelection } from './tensor-index.ts';
+import type { TensorOrder, TensorSliceSelection } from './tensor-index.ts';
 import { numericView, type DecodedWeight } from './weight-decoder.ts';
 import { coordinateToOffsetInLayout, describeTensorSlice, tensorLayout } from './tensor-index.ts';
 
@@ -75,9 +75,10 @@ export function computeKernelL2(
   values: DecodedWeight,
   shape: readonly number[],
   selection: TensorSliceSelection,
+  order: TensorOrder = 'row-major',
 ): number {
   const slice = describeTensorSlice(shape, selection);
-  const layout = tensorLayout(shape);
+  const layout = tensorLayout(shape, order);
   const numeric = numericView(values);
   let sumSquares = 0;
   for (let row = 0; row < slice.rows; row++)

@@ -60,3 +60,16 @@ test('samples direct and downsampled rank-4 slices with source ranges', () => {
   expect(sample.cells[0].coordinateEnd).toEqual([1, 0, 1, 1]);
   expect(sample.cells[0].min).toBeLessThan(sample.cells[0].max);
 });
+
+test('col-major strides make the first axis contiguous', () => {
+  // GGUF/ggml ne[0] is the contiguous dimension, so [288, 32000] is 32000 rows
+  // of 288 contiguous values - strides [1, 288], not the row-major [32000, 1].
+  expect(tensorStrides([288, 32000])).toEqual([32000, 1]);
+  expect(tensorStrides([288, 32000], 'col-major')).toEqual([1, 288]);
+
+  const layout = tensorLayout([2, 3], 'col-major');
+  expect(layout.order).toBe('col-major');
+  // element (row=1, col=2) sits at offset 1 + 2*2 = 5
+  expect(coordinateToOffsetInLayout([1, 2], layout)).toBe(5);
+  expect(offsetToCoordinateInLayout(5, layout)).toEqual([1, 2]);
+});

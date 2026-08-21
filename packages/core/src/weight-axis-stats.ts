@@ -1,5 +1,5 @@
 import { numericView, type DecodedWeight } from './weight-decoder.ts';
-import { tensorLayout } from './tensor-index.ts';
+import { tensorLayout, type TensorOrder } from './tensor-index.ts';
 
 export type AxisMetric = 'mean' | 'std' | 'l1' | 'l2' | 'max-abs' | 'zero-ratio';
 
@@ -11,8 +11,13 @@ export interface AxisStats {
   readonly max: number;
 }
 
-export function computeAxisStats(values: DecodedWeight, shape: readonly number[], axis: number): AxisStats {
-  const layout = tensorLayout(shape);
+export function computeAxisStats(
+  values: DecodedWeight,
+  shape: readonly number[],
+  axis: number,
+  order: TensorOrder = 'row-major',
+): AxisStats {
+  const layout = tensorLayout(shape, order);
   const { count } = layout;
   if (values.length < count) throw new RangeError('decoded values are shorter than tensor shape');
   if (!Number.isSafeInteger(axis) || axis < 0 || axis >= shape.length) throw new RangeError('axis is out of range');
@@ -53,12 +58,15 @@ export function computeAxisStats(values: DecodedWeight, shape: readonly number[]
     'max-abs': Array.from(maxAbs),
     'zero-ratio': Array.from(zeros, (value, index) => (totals[index] ? value / totals[index] : 0)),
   } satisfies Record<AxisMetric, readonly number[]>;
-  const all = Object.values(metrics).flat();
-  return {
-    axis,
-    metrics,
-    excluded: Array.from(excluded),
-    min: Math.min(...all, 0),
-    max: Math.max(...all, 0),
-  };
+  // Reduce rather than spread: `all` is 6 x shape[axis] long and blows the
+  // argument limit (RangeError) past roughly 20k elements per axis.
+  let min = 0;
+  let max = 0;
+  for (const series of Object.values(metrics)) {
+    for (const value of series) {
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
+  }
+  return { axis, metrics, excluded: Array.from(excluded), min, max };
 }

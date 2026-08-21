@@ -3,6 +3,7 @@ import {
   coordinateToOffsetInLayout,
   describeTensorSlice,
   tensorLayout,
+  type TensorOrder,
   type TensorSliceSelection,
 } from './tensor-index.ts';
 
@@ -32,10 +33,11 @@ export function computeWeightSparsity(
   shape: readonly number[],
   axis: number,
   threshold = 0,
+  order: TensorOrder = 'row-major',
 ): SparsitySummary {
   if (!Number.isFinite(threshold) || threshold < 0)
     throw new RangeError('sparsity threshold must be finite and non-negative');
-  const layout = tensorLayout(shape);
+  const layout = tensorLayout(shape, order);
   const numeric = numericView(values);
   const { count } = layout;
   if (shape.length === 0) {
@@ -78,13 +80,14 @@ export function computeSparsityBlocks(
   blockRows: number,
   blockCols: number,
   threshold = 0,
+  order: TensorOrder = 'row-major',
 ): readonly SparsityBlock[] {
   if (!Number.isFinite(threshold) || threshold < 0)
     throw new RangeError('sparsity threshold must be finite and non-negative');
   if (!Number.isSafeInteger(blockRows) || blockRows < 1 || !Number.isSafeInteger(blockCols) || blockCols < 1)
     throw new RangeError('block sizes must be positive integers');
   const slice = describeTensorSlice(shape, selection);
-  const layout = tensorLayout(shape);
+  const layout = tensorLayout(shape, order);
   const numeric = numericView(values);
   const blocks: SparsityBlock[] = [];
   for (let row = 0; row < slice.rows; row += blockRows) {

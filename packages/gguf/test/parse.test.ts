@@ -172,7 +172,11 @@ test('parses GGUF metadata and tensor descriptors', () => {
   expect(graph.nodes[0].attributes['tokenizer.ggml.tokens']).toEqual(['<s>', '</s>']);
   expect(graph.nodes[0].attributes['general.file_type']).toBe(15);
   expect(graph.nodes[0].attributes['general.file_type_name']).toBe('MOSTLY_Q4_K_M');
-  expect(graph.initializers.get('token_embd.weight')).toEqual({ shape: [256, 1], dtype: 'Q4_K' });
+  expect(graph.initializers.get('token_embd.weight')).toEqual({
+    shape: [256, 1],
+    dtype: 'Q4_K',
+    order: 'col-major',
+  });
   expect(graph.tensorShapes.get('output_norm.weight')).toEqual({ shape: [8], dtype: 'F32' });
   expect(graph.fileSizeBytes).toBe(fixture().byteLength);
   const weights = availableWeights(graph);

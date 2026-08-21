@@ -29,7 +29,7 @@ export {
   tensorLayout,
   tensorStrides,
 } from './tensor-index.ts';
-export type { TensorLayout, TensorSliceDescriptor, TensorSliceSelection } from './tensor-index.ts';
+export type { TensorLayout, TensorOrder, TensorSliceDescriptor, TensorSliceSelection } from './tensor-index.ts';
 export { sampleTensorSlice } from './tensor-slice.ts';
 export type { TensorSliceCell, TensorSliceSample } from './tensor-slice.ts';
 export { computeWeightDistribution } from './weight-distribution.ts';

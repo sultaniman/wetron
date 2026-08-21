@@ -1,3 +1,5 @@
+export type { TensorOrder } from '@wetron/common/ir';
+import type { TensorOrder } from '@wetron/common/ir';
 export interface TensorSliceSelection {
   readonly rowAxis: number;
   readonly colAxis: number;
@@ -14,6 +16,7 @@ export interface TensorLayout {
   readonly shape: readonly number[];
   readonly strides: readonly number[];
   readonly count: number;
+  readonly order: TensorOrder;
 }
 
 export function tensorElementCount(shape: readonly number[]): number {
@@ -28,15 +31,19 @@ export function tensorElementCount(shape: readonly number[]): number {
   return count;
 }
 
-export function tensorStrides(shape: readonly number[]): readonly number[] {
-  return tensorLayout(shape).strides;
+export function tensorStrides(shape: readonly number[], order: TensorOrder = 'row-major'): readonly number[] {
+  return tensorLayout(shape, order).strides;
 }
 
-export function tensorLayout(shape: readonly number[]): TensorLayout {
+export function tensorLayout(shape: readonly number[], order: TensorOrder = 'row-major'): TensorLayout {
   const count = tensorElementCount(shape);
   const strides = Array.from({ length: shape.length }, () => 1);
-  for (let i = shape.length - 2; i >= 0; i--) strides[i] = strides[i + 1] * shape[i + 1];
-  return { shape, strides, count };
+  if (order === 'col-major') {
+    for (let i = 1; i < shape.length; i++) strides[i] = strides[i - 1] * shape[i - 1];
+  } else {
+    for (let i = shape.length - 2; i >= 0; i--) strides[i] = strides[i + 1] * shape[i + 1];
+  }
+  return { shape, strides, count, order };
 }
 
 export function coordinateToOffsetInLayout(coordinate: readonly number[], layout: TensorLayout): number {
