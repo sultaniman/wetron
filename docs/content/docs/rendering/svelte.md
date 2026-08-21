@@ -90,4 +90,4 @@ type PanelTarget =
 - `colorMode="system"` reads `prefers-color-scheme` via a media query listener.
 - Layout is computed once on mount via Dagre; re-computed when `graph` changes.
 - Theme colours for node categories come from `@wetron/tokens`.
-- Initializer tensors use the same weight-inspection flow as React: lazy decoding, statistics, histogram/heatmap views, and a virtualized values grid. Pass `graph` to `NodePropertyPanel` so it can distinguish initializers from live tensors.
+- Initializer tensors use the same weight-inspection flow as React: lazy decoding, summary statistics, and the full [inspector set](../react/#weight-inspectors) - matrix, distribution, per-axis profile, sparsity, kernel gallery, quantization, diagnostics, and a virtualized values grid. Pass `graph` to `NodePropertyPanel` so it can distinguish initializers from live tensors.

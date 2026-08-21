@@ -76,11 +76,40 @@ import { NodePropertyPanel } from '@wetron/react';
 
 When `target` resolves to an initializer tensor (a name present in `graph.initializers`) and `graph` is supplied, the panel switches to the weight panel. It auto-enables decoding for models where `fileSizeBytes <= 20MB` and `graph.weights.kind === "available"`, and offers an explicit "Show weights" toggle for larger files. The toggle is disabled for `weights.kind === "external"`; the panel identifies whether SavedModel checkpoint files or ONNX external data are required.
 
-The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally; the histogram and heatmap visualisations come from the same `WeightStats.histogram` (12 bins) and `WeightStats.heatmap` (16 × 8 grid) documented in [Weights](../api/weights/).
+The panel uses `decodeWeight` and `computeStats` from `@wetron/core` internally. The summary block above the view picker - `min`, `max`, `μ ± σ`, `zeros` - is computed over every decoded value and does not change when you switch views. See [Weights](../api/weights/) for the underlying `WeightStats`.
+
+### Weight inspectors
+
+Below the summary block, `DefaultWeightInspectors` renders a view picker and the selected inspector. Which views are offered depends on the tensor's rank and dtype:
+
+| View               | `WeightInspectorName` | Offered when         | Shows                                                                             |
+| ------------------ | --------------------- | -------------------- | --------------------------------------------------------------------------------- |
+| matrix             | `matrix`              | rank ≥ 2             | Heatmap of a 2-D slice. Cells are block means, not individual weights.            |
+| distribution       | `distribution`        | always               | Histogram of every decoded value, with percentiles and non-finite counts.         |
+| per-axis profile   | `axis`                | rank ≥ 1             | One metric per index along an axis: mean, std, L1, L2, max-abs, or zero-ratio.    |
+| sparsity           | `sparsity`            | always               | Where the zeros are. Structured blocks are prunable; scattered zeros are not.     |
+| kernel gallery     | `kernel`              | rank 4, all dims > 0 | Each output filter's spatial kernel at one input channel, under a chosen layout.  |
+| quantization       | `quantization`        | dtype `Q4_0`         | How the encoded blocks use their code space, before dequantization.               |
+| diagnostics        | `diagnostics`         | rank ≥ 1             | Automated checks for non-finite, constant, and outlier slices.                    |
+| values             | `values`              | always               | Raw decoded values in flattened memory order.                                     |
+
+Tensors of rank ≥ 2 open on `matrix`; everything else opens on `distribution`.
+
+Each inspector is also exported on its own (`MatrixInspector`, `DistributionInspector`, `AxisProfileInspector`, `SparsityInspector`, `KernelGalleryInspector`, `QuantizationInspector`, `DiagnosticsInspector`, `ValuesInspector`) and reads the decoded tensor from the surrounding weight-inspection context.
 
 {{< themed-img-row >}}
-{{< themed-img light="images/property-panel-heatmap-light.png" dark="images/property-panel-heatmap-dark.png" alt="NodePropertyPanel weight panel - heatmap view" >}}
-{{< themed-img light="images/property-panel-bar-plot-light.png" dark="images/property-panel-bar-plot-dark.png" alt="NodePropertyPanel weight panel - histogram view" >}}
+{{< themed-img light="images/property-panel-matrix-light.png" dark="images/property-panel-matrix-dark.png" alt="Weight panel - matrix inspector, a downsampled 2-D heatmap with row and column axis pickers" >}}
+{{< themed-img light="images/property-panel-distribution-light.png" dark="images/property-panel-distribution-dark.png" alt="Weight panel - distribution inspector, a histogram with linear/log count and percentile readouts" >}}
+{{< /themed-img-row >}}
+
+{{< themed-img-row >}}
+{{< themed-img light="images/property-panel-axis-profile-light.png" dark="images/property-panel-axis-profile-dark.png" alt="Weight panel - per-axis profile inspector, one bar per index along the selected axis" >}}
+{{< themed-img light="images/property-panel-sparsity-light.png" dark="images/property-panel-sparsity-dark.png" alt="Weight panel - sparsity inspector, zero ratio, dead slice count, and a block occupancy map" >}}
+{{< /themed-img-row >}}
+
+{{< themed-img-row >}}
+{{< themed-img light="images/property-panel-kernel-gallery-light.png" dark="images/property-panel-kernel-gallery-dark.png" alt="Weight panel - kernel gallery inspector, per-filter 3x3 kernels with L2 norms under an OIHW layout" >}}
+{{< themed-img light="images/property-panel-diagnostics-light.png" dark="images/property-panel-diagnostics-dark.png" alt="Weight panel - diagnostics inspector listing norm outlier and constant slice findings" >}}
 {{< /themed-img-row >}}
 
 ## PanelTarget type

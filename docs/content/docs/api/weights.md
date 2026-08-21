@@ -10,7 +10,7 @@ import { decodeWeight, decodeFirstN, numericView, computeStats } from '@wetron/c
 import type { WeightSource, WeightStats } from '@wetron/core';
 ```
 
-{{< themed-img light="images/property-panel-heatmap-light.png" dark="images/property-panel-heatmap-dark.png" alt="Property panel rendering a weight heatmap from WeightStats" class="themed-img--narrow" >}}
+{{< themed-img light="images/property-panel-matrix-light.png" dark="images/property-panel-matrix-dark.png" alt="Weight panel showing the summary statistics block above the matrix inspector" class="themed-img--narrow" >}}
 
 ## ModelWeights
 
@@ -100,7 +100,7 @@ interface WeightStats {
 
 The histogram has 12 bins between `min` and `max`. When `min === max`, the entire count lands in the middle bin. The heatmap is `16 × 8 = 128` cells; each cell averages `chunkSize = max(1, floor(count / 128))` consecutive values.
 
-{{< themed-img light="images/property-panel-bar-plot-light.png" dark="images/property-panel-bar-plot-dark.png" alt="Property panel rendering a 12-bin histogram from WeightStats" class="themed-img--narrow" >}}
+{{< themed-img light="images/property-panel-distribution-light.png" dark="images/property-panel-distribution-dark.png" alt="Weight panel showing the distribution inspector with a 12-bin histogram and percentiles" class="themed-img--narrow" >}}
 
 ## TF2 SavedModel checkpoint loader
 
