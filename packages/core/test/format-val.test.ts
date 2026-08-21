@@ -53,3 +53,14 @@ describe('formatVal', () => {
     expect(formatVal(-Infinity, 'float32')).toBe('-Inf');
   });
 });
+
+test('treats GGML scalar integer names as integers', () => {
+  for (const dtype of ['I8', 'I16', 'I32', 'I64']) {
+    expect(isIntegerDtype(dtype)).toBe(true);
+    expect(formatVal(5, dtype)).toBe('5');
+  }
+
+  // float GGML names must stay on the float path
+  expect(isIntegerDtype('F32')).toBe(false);
+  expect(isIntegerDtype('IQ4_NL')).toBe(false);
+});

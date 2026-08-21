@@ -1,7 +1,10 @@
 const INTEGER_PREFIXES = ['int', 'uint'] as const;
+/** GGML scalar integer names, as surfaced by the GGUF parser. */
+const GGML_INTEGER = /^I(?:8|16|32|64)$/;
 
 export function isIntegerDtype(dtype: string): boolean {
   if (dtype === 'bool') return true;
+  if (GGML_INTEGER.test(dtype)) return true;
   return INTEGER_PREFIXES.some((p) => dtype.startsWith(p));
 }
 

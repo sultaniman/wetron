@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { AttributeValue } from '@wetron/common/ir';
   import Chip from './chip.svelte';
-  import { attrChipLabel, formatAttr, formatAttrBrief } from '@wetron/core/panel-utils';
+  import { attrChipLabel, attrNeedsExpand, formatAttr, formatAttrBrief } from '@wetron/core/panel-utils';
 
   let { name, value }: { name: string; value: AttributeValue } = $props();
 
   let expanded = $state(false);
   const brief = $derived(formatAttrBrief(value));
-  const needsExpand = $derived(Array.isArray(value) ? value.length > 4 : String(value).length > 26);
+  const needsExpand = $derived(attrNeedsExpand(value));
   const full = $derived(expanded ? formatAttr(value) : '');
 </script>
 

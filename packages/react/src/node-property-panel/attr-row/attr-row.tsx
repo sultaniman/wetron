@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { AttributeValue } from '@wetron/common/ir';
-import { formatAttrBrief } from '@wetron/core/panel-utils';
+import { attrNeedsExpand, formatAttrBrief } from '@wetron/core/panel-utils';
 import { attrChipLabel, formatAttr, Chip } from '../panel-ui.tsx';
 import propertyPanelCss from '../node-property-panel.module.css';
 import attrRowCss from './attr-row.module.css';
@@ -8,7 +8,7 @@ import attrRowCss from './attr-row.module.css';
 export function AttrRow({ name, value }: { name: string; value: AttributeValue }) {
   const [expanded, setExpanded] = useState(false);
   const brief = formatAttrBrief(value);
-  const needsExpand = Array.isArray(value) ? value.length > 4 : String(value).length > 26;
+  const needsExpand = attrNeedsExpand(value);
   const full = expanded ? formatAttr(value) : null;
 
   return (
