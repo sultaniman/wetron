@@ -2,6 +2,7 @@
   "name": "wetron-docs",
   "private": true,
   "scripts": {
+    "setup": "pnpm install --ignore-workspace",
     "dev": "hugo server --disableFastRender --noHTTPCache",
     "build": "hugo --minify --gc"
   },

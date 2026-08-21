@@ -2,6 +2,13 @@
 
 **[wetron.app](https://wetron.app)** - Browser-native inspector for neural network models and GGUF LLM files. Open a model file and explore its computation graph, metadata, tensor shapes, and weight statistics - fully in the browser, no upload, no server, no telemetry.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/images/graph-with-heatmap-dark.png">
+    <img src="docs/assets/images/graph-with-heatmap-light.png" alt="Wetron showing a SavedModel graph with the weight panel open on a conv kernel">
+  </picture>
+</p>
+
 ## Why
 
 Existing model inspection tools either run as native desktop apps (Netron) or push files through hosted services. Neither is acceptable when the model itself is the sensitive artefact - proprietary weights, medical models, audited systems under the EU AI Act, or research code that can't leave a network.
@@ -51,20 +58,41 @@ Peer dependencies for `@wetron/react`: `react >=18`, `@xyflow/react >=12`, `@pho
 ## Usage
 
 ```ts
-import { parseModel } from '@wetron/core';
+import { parseModel } from "@wetron/core";
 
 const bytes = new Uint8Array(await file.arrayBuffer());
 const graph = await parseModel(bytes, file.name); // auto-detects format from magic bytes
 ```
 
 ```tsx
-import { ModelGraphView } from '@wetron/react';
-import '@wetron/react/styles.css';
+import { ModelGraphView } from "@wetron/react";
+import "@wetron/react/styles.css";
 
 <ModelGraphView graph={graph} colorMode="system" />;
 ```
 
 See the [docs](docs/) for the full API reference, Svelte examples, and theming tokens.
+
+## Weight inspectors
+
+Select an initializer tensor and the property panel decodes its bytes on demand, then offers the views that fit the tensor: matrix, distribution, per-axis profile, sparsity, kernel gallery, quantization (GGUF `Q4_0`), diagnostics, and raw values.
+
+<table>
+<tr>
+<td align="center"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/images/property-panel-matrix-dark.png">
+  <img src="docs/assets/images/property-panel-matrix-light.png" alt="Matrix inspector - 2-D slice heatmap" width="260">
+</picture><br>matrix</td>
+<td align="center"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/images/property-panel-kernel-gallery-dark.png">
+  <img src="docs/assets/images/property-panel-kernel-gallery-light.png" alt="Kernel gallery inspector - per-filter spatial kernels" width="260">
+</picture><br>kernel gallery</td>
+<td align="center"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/images/property-panel-diagnostics-dark.png">
+  <img src="docs/assets/images/property-panel-diagnostics-light.png" alt="Diagnostics inspector - outlier and constant slice findings" width="260">
+</picture><br>diagnostics</td>
+</tr>
+</table>
 
 ## Development
 
@@ -97,8 +125,10 @@ cd apps/demo-svelte && pnpm dev   # Svelte
 ### Docs
 
 ```sh
-cd docs && pnpm install && pnpm run dev   # Hugo site at localhost:1313
+cd docs && pnpm run setup && pnpm run dev   # Hugo site at localhost:1313
 ```
+
+The docs site is not a workspace package and needs a flat `node_modules` for Hugo's module mounts and Sass import paths, so install it with `pnpm run setup` (`pnpm install --ignore-workspace`) rather than a plain `pnpm install`.
 
 ## Documentation
 

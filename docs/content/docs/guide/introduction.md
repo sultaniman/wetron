@@ -5,13 +5,13 @@ lead: 'Wetron is a browser-native library for parsing and visualising ML model g
 weight: 10
 ---
 
-{{< themed-img light="images/graph-with-heatmap-light.png" dark="images/graph-with-heatmap-dark.png" alt="Loaded model graph with the property panel showing a weight heatmap" >}}
+{{< themed-img light="images/graph-with-heatmap-light.png" dark="images/graph-with-heatmap-dark.png" alt="Loaded model graph with the property panel showing a weight tensor as a heatmap" >}}
 
 ## What it does
 
 Wetron reads neural network model files and produces a structured graph of operators, inputs, and outputs. That graph can then be rendered as an interactive diagram using the React or Svelte renderer packages.
 
-ONNX, TFLite, and GGUF expose initializer bytes through `ModelGraph.weights`, so the property panel can decode supported tensor types and show histograms and heatmaps. TF2 SavedModel models load weights from the external checkpoint pair via `loadSavedModelWeights`.
+ONNX, TFLite, and GGUF expose initializer bytes through `ModelGraph.weights`, so the property panel can decode supported tensor types and open them in a [weight inspector](../rendering/react/#weight-inspectors) - heatmap, distribution, per-axis profile, sparsity, kernel gallery, quantization, or diagnostics. TF2 SavedModel models load weights from the external checkpoint pair via `loadSavedModelWeights`.
 
 All parsing runs in the browser via native Web APIs - `ArrayBuffer`, `DataView`, `TextDecoder`, `DecompressionStream`. No model data leaves the device.
 
