@@ -11,8 +11,8 @@
     inspection.bytes ? inspectWeightQuantization(inspection.bytes, inspection.tensor.dtype ?? '') : null,
   );
   let blockIndex = $state(0);
-  const index = $derived(result ? Math.min(blockIndex, Math.max(0, result.blocks.length - 1)) : 0);
-  const block = $derived(result?.blocks[index] ?? null);
+  const index = $derived(result ? Math.min(blockIndex, Math.max(0, result.blockCount - 1)) : 0);
+  const block = $derived(result?.blockAt(index) ?? null);
   const maximum = $derived(result ? Math.max(...result.frequencies, 1) : 1);
 </script>
 
@@ -28,12 +28,12 @@
             aria-label="Quantization block"
             type="number"
             min="0"
-            max={Math.max(0, result.blocks.length - 1)}
+            max={Math.max(0, result.blockCount - 1)}
             value={index}
             oninput={(event) =>
-              (blockIndex = Math.max(0, Math.min(result.blocks.length - 1, Number(event.currentTarget.value))))}
+              (blockIndex = Math.max(0, Math.min(result.blockCount - 1, Number(event.currentTarget.value))))}
           /><span class="inspector-bound" data-testid="quantization-block"
-            >of {(result.blocks.length - 1).toLocaleString()}</span
+            >of {(result.blockCount - 1).toLocaleString()}</span
           ></span
         >
       </div>

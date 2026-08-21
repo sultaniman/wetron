@@ -13,9 +13,11 @@ test('inspects known Q4_0 blocks and trailing bytes', () => {
   bytes.set(block(0x3c00, 0), 0);
   bytes.set(block(0xbc00, 15), 18);
   const result = inspectWeightQuantization(bytes, 'Q4_0')!;
-  expect(result.blocks).toHaveLength(2);
-  expect(result.blocks[0].scale).toBe(1);
-  expect(result.blocks[1].scale).toBe(-1);
+  expect(result.blockCount).toBe(2);
+  expect(result.blockAt(0)?.scale).toBe(1);
+  expect(result.blockAt(1)?.scale).toBe(-1);
+  expect(result.blockAt(2)).toBeNull();
+  expect(result.blockAt(-1)).toBeNull();
   expect(result.frequencies[0]).toBe(32);
   expect(result.frequencies[15]).toBe(32);
   expect(result.trailingBytes).toBe(2);

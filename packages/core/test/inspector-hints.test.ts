@@ -231,10 +231,10 @@ test('quantization hints resolve against the inspection result', () => {
   expect(quantizationHint('blockSize', result, null)).toContain('32');
   expect(quantizationHint('trailingBytes', result, null)).toContain('misread');
   expect(quantizationHint('histogram', result, null)).toContain('whole tensor');
-  expect(quantizationHint('saturation', result, result.blocks[0])).toContain(
-    `${result.blocks[0].saturation} of the 32`,
+  expect(quantizationHint('saturation', result, result.blockAt(0)!)).toContain(
+    `${result.blockAt(0)!.saturation} of the 32`,
   );
-  expect(quantizationHint('scale', result, result.blocks[0])).toContain(String(result.blocks[0].scale));
+  expect(quantizationHint('scale', result, result.blockAt(0)!)).toContain(String(result.blockAt(0)!.scale));
   expect(quantizationHint('zeroCode', result, null)).toContain('code 8');
 });
 

@@ -220,7 +220,7 @@ export function quantizationHint(
 ): string {
   switch (field) {
     case 'block':
-      return `${result.dtype} packs ${result.valuesPerBlock} weights per ${result.blockBytes}-byte block with one fp16 scale. This tensor has ${count(result.blocks.length)} blocks.`;
+      return `${result.dtype} packs ${result.valuesPerBlock} weights per ${result.blockBytes}-byte block with one fp16 scale. This tensor has ${count(result.blockCount)} blocks.`;
     case 'format':
       return `${result.dtype}: 4-bit codes, one fp16 scale per ${result.valuesPerBlock} weights, no zero point.`;
     case 'levels':

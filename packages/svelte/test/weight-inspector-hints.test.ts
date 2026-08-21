@@ -167,9 +167,9 @@ test('quantization selects a block by number and renders values readably', async
   expect(text(element, 'quantization-block')).toBe('of 1');
   expect(text(element, 'quantization-scale')).toBe('.333');
   expect(text(element, 'quantization-saturation')).toBe('0 / 32');
-  expect(hints(element)).toContain(quantizationHint('block', result, result.blocks[0]));
+  expect(hints(element)).toContain(quantizationHint('block', result, result.blockAt(0)!));
   await set(element, 'Quantization block', '1');
-  expect(hints(element)).toContain(quantizationHint('saturation', result, result.blocks[1]));
+  expect(hints(element)).toContain(quantizationHint('saturation', result, result.blockAt(1)!));
 });
 
 test('diagnostics states the outlier rule and trims norm precision', async () => {

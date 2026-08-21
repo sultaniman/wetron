@@ -21,8 +21,8 @@ export function QuantizationInspector() {
         </div>
       </div>
     );
-  const index = Math.min(blockIndex, Math.max(0, result.blocks.length - 1));
-  const block = result.blocks[index] ?? null;
+  const index = Math.min(blockIndex, Math.max(0, result.blockCount - 1));
+  const block = result.blockAt(index);
   const max = Math.max(...result.frequencies, 1);
   const stat = (label: string, value: string, field: Parameters<typeof quantizationHint>[0]) => (
     <span className={css.stat} key={label}>
@@ -47,14 +47,14 @@ export function QuantizationInspector() {
               aria-label="Quantization block"
               type="number"
               min={0}
-              max={Math.max(0, result.blocks.length - 1)}
+              max={Math.max(0, result.blockCount - 1)}
               value={index}
               onChange={(event) =>
-                setBlockIndex(Math.max(0, Math.min(result.blocks.length - 1, Number(event.target.value))))
+                setBlockIndex(Math.max(0, Math.min(result.blockCount - 1, Number(event.target.value))))
               }
             />
             <span className={css.bound} data-testid="quantization-block">
-              of {(result.blocks.length - 1).toLocaleString()}
+              of {(result.blockCount - 1).toLocaleString()}
             </span>
           </span>
         </div>

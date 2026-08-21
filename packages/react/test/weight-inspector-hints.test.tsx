@@ -141,10 +141,10 @@ test('quantization steps through blocks instead of listing them', () => {
   expect(block.value).toBe('0');
   expect(block.max).toBe('1');
   expect(screen.getByTestId('quantization-block').textContent).toBe('of 1');
-  expect(hints()).toContain(quantizationHint('block', result, result.blocks[0]));
-  expect(hints()).toContain(quantizationHint('histogram', result, result.blocks[0]));
+  expect(hints()).toContain(quantizationHint('block', result, result.blockAt(0)!));
+  expect(hints()).toContain(quantizationHint('histogram', result, result.blockAt(0)!));
   fireEvent.change(block, { target: { value: '1' } });
-  expect(hints()).toContain(quantizationHint('saturation', result, result.blocks[1]));
+  expect(hints()).toContain(quantizationHint('saturation', result, result.blockAt(1)!));
 });
 
 test('quantization renders the scale and saturation readably', () => {
