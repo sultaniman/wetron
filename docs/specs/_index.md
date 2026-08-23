@@ -5,6 +5,7 @@ follow the no-date filename convention (e.g. `<topic>-design.md`).
 
 ## Active
 
+- [headless-react-composition-design.md](headless-react-composition-design.md) - Single-model React provider with headless loading, selection, and weight-inspection hooks. Status: proposed.
 - [docs-sweep-design.md](docs-sweep-design.md) - Capability sweep across published docs and `docs/specs` / `docs/plans` reorg into a single tree with this index. Status: in-progress.
 - [embed-design.md](embed-design.md) - `@wetron/embed`: self-contained IIFE bundle for `<script>`-tag use on static pages (Svelte renderer, data-attribute auto-mount). Status: proposed.
 - [model-diff-design.md](model-diff-design.md) - Visual diff between two model checkpoints (added/removed/changed nodes). Status: proposed.
