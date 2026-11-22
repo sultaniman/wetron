@@ -41,7 +41,7 @@
     "@wetron/tokens": "workspace:*"
   },
   "devDependencies": {
-    "@tanstack/react-virtual": "^3.14.10",
+    "@tanstack/react-virtual": "^3.14.26",
     "@wetron/onnx": "workspace:*"
   },
   "peerDependencies": {

@@ -76,8 +76,8 @@ type Props = {
   rankdir?: LayoutDirection;
 };
 
-const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>(function Inner(
-  { graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, colorMode, rankdir },
+const Inner = forwardRef<ModelGraphViewHandle, Props>(function Inner(
+  { graph, onTargetClick, onWarnings, selectedEdgeTensorName, searchQuery, rankdir },
   ref,
 ) {
   const isDark = useColorMode() === 'dark';
@@ -149,7 +149,6 @@ const Inner = forwardRef<ModelGraphViewHandle, Props & { colorMode: ColorMode }>
       >
         <ScopeChrome />
         <ReactFlow
-          colorMode={colorMode}
           nodes={nodes}
           onNodesChange={onNodesChange}
           edges={edges}
@@ -197,7 +196,7 @@ export const ModelGraphView = forwardRef<ModelGraphViewHandle, Props>(function M
   return (
     <ColorModeContext.Provider value={colorMode}>
       <ReactFlowProvider>
-        <Inner {...rest} colorMode={colorMode} ref={ref} />
+        <Inner {...rest} ref={ref} />
       </ReactFlowProvider>
     </ColorModeContext.Provider>
   );

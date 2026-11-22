@@ -19,6 +19,18 @@ beforeEach(() => {
       return 260;
     },
   });
+  Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+    configurable: true,
+    get() {
+      return 320;
+    },
+  });
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+    configurable: true,
+    get() {
+      return 260;
+    },
+  });
 });
 
 afterEach(cleanup);
